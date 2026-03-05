@@ -474,6 +474,7 @@
         let dailyMarketData = null, myInventory = {}, myShards = 0, myPoints = 0, marketPurchases = {};
         let isFeaturedRevealed = false, myLastSpriteCatch = "", myLastDate = "", myFlexActive = false, oppData = {};
         let gachaPity = 0; // 保底計數器
+        let isSpriteForced = false;
 
         // ===== 🛠️ 工具函數 =====
         const getLocalDateStr = d => d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
@@ -707,6 +708,8 @@
         setInterval(()=>{ updateCountdown(); checkSprite(); renderOppStatus(); }, 1000);
 
         function checkSprite() {
+            if (isSpriteForced) return;
+
             const now=new Date(), h=now.getHours(), hs=getLocalDateStr(now)+'-'+h;
             const rng=mulberry32(parseInt(getLocalDateStr(now).replace(/-/g,''))*100+h), c=document.getElementById('sprite-container'), o=document.getElementById('sprite-orb');
             if(rng()<0.3 && myLastSpriteCatch!==hs){ 
@@ -715,16 +718,29 @@
         }
         
         function catchSprite() {
-            const h=new Date().getHours(); document.getElementById('sprite-container').style.display='none'; 
-            db.ref('users/'+ME+'/last_sprite_catch').set(getLocalDateStr(new Date())+'-'+h);
-            if(h>=2&&h<8){ showModalMsg("🤫 噓...", "精靈在睡覺補充能量...\n你也快去睡吧！明天早上再來找我喔！Zzz", true); return; }
-            let r=Math.random(), msg="";
-            if(r<0.01){ db.ref('economy/'+ME).transaction(c=>(c||0)+50); msg="💎 爆擊！精靈大方地給了你 50 點！"; } 
-            else if(r<0.1){ const pl=['c_crystal','lucky_clover','c_gummy'], i=pl[Math.floor(Math.random()*pl.length)]; db.ref('users/'+ME+'/items/'+i).transaction(c=>(c||0)+1); msg=`🎁 精靈偷偷塞給你【${ITEMS[i].n}】x1！`; } 
-            else if(r<0.4){ db.ref('users/'+ME+'/shards').transaction(c=>(c||0)+1); msg="🔹 精靈留下了一塊【水晶碎片】！"; } 
-            else { const pts=Math.floor(Math.random()*3)+3; db.ref('economy/'+ME).transaction(c=>(c||0)+pts); msg=`💰 精靈給了你 ${pts} 點零用錢！`; }
-            playSound('success'); confetti({particleCount:60, spread:60, origin:{y:0.85, x:0.8}}); showModalMsg("✨ 抓到魔法精靈了！", msg, true);
-        }
+    const h=new Date().getHours(); 
+    document.getElementById('sprite-container').style.display='none'; 
+    
+    // ✨ 如果不是誘餌叫出來的，且在半夜 2~8 點，精靈在睡覺不能抓
+    if(!isSpriteForced && h>=2 && h<8){ 
+        showModalMsg("🤫 噓...", "精靈在睡覺補充能量...\n你也快去睡吧！明天早上再來找我喔！Zzz", true); 
+        return; 
+    }
+
+    // ✨ 如果是自然出現的精靈，才記錄冷卻時間 (誘餌叫出來的不影響原本每小時的自然出現機率)
+    if(!isSpriteForced) {
+        db.ref('users/'+ME+'/last_sprite_catch').set(getLocalDateStr(new Date())+'-'+h);
+    }
+    
+    isSpriteForced = false; // ✨ 重置誘餌標記
+
+    let r=Math.random(), msg="";
+    if(r<0.01){ db.ref('economy/'+ME).transaction(c=>(c||0)+50); msg="💎 爆擊！精靈大方地給了你 50 點！"; } 
+    else if(r<0.1){ const pl=['c_crystal','lucky_clover','c_gummy'], i=pl[Math.floor(Math.random()*pl.length)]; db.ref('users/'+ME+'/items/'+i).transaction(c=>(c||0)+1); msg=`🎁 精靈偷偷塞給你【${ITEMS[i].n}】x1！`; } 
+    else if(r<0.4){ db.ref('users/'+ME+'/shards').transaction(c=>(c||0)+1); msg="🔹 精靈留下了一塊【水晶碎片】！"; } 
+    else { const pts=Math.floor(Math.random()*3)+3; db.ref('economy/'+ME).transaction(c=>(c||0)+pts); msg=`💰 精靈給了你 ${pts} 點零用錢！`; }
+    playSound('success'); confetti({particleCount:60, spread:60, origin:{y:0.85, x:0.8}}); showModalMsg("✨ 抓到魔法精靈了！", msg, true);
+}
         
         function renderInventory() {
             let html=""; let has=false;
@@ -1015,6 +1031,7 @@
                 }
                 
                 if(k === 'sprite_bait') {
+                    isSpriteForced = true;
                     document.getElementById('sprite-container').style.display='block'; document.getElementById('sprite-orb').classList.remove('asleep'); playSound('success'); showToast("🧚‍♂️ 精靈被誘餌吸引過來了！快點擊它！", "success"); return;
                 }
                 
