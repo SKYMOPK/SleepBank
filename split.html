@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>宿舍帳本</title>
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
+    <style>
+        :root {
+            --bg: #0C0E16;
+            --card: #161A28;
+            --text: #EEEEF8;
+            --muted: #8890A8;
+            --border: rgba(255,255,255,0.09);
+            --orange: #FFB340;
+            --green: #4ADE80;
+            --red: #F87171;
+            --blue: #7B9CFF;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 3px; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            background: radial-gradient(ellipse at top left, #1a1f35 0%, #0C0E16 60%);
+            background-attachment: fixed;
+            color: var(--text);
+            min-height: 100vh;
+            padding-bottom: 40px;
+        }
+
+        .page-wrapper { max-width: 560px; margin: 0 auto; }
+
+        /* ===== Header ===== */
+        .header {
+            background: rgba(20, 24, 42, 0.82);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border-bottom: 1px solid rgba(255,255,255,0.07);
+            padding: 20px;
+            text-align: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .header-title { font-size: 18px; font-weight: 800; letter-spacing: 2px; color: var(--orange); }
+        .header-back {
+            position: absolute; left: 20px; top: 50%; transform: translateY(-50%);
+            color: var(--muted); text-decoration: none; font-size: 14px; font-weight: bold;
+            transition: color 0.2s;
+        }
+        .header-back:hover { color: var(--text); }
+        .header-right {
+            position: absolute; right: 20px; top: 50%; transform: translateY(-50%);
+        }
+
+        /* ===== View 切換 ===== */
+        .view { display: none; }
+        .view.active { display: block; animation: fadeInUp 0.35s ease-out; }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* ===== 淨額大字 ===== */
+        .balance-card {
+            margin: 20px 16px 0;
+            background: rgba(22, 26, 42, 0.65);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 24px;
+            padding: 30px 20px;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+            position: relative;
+            overflow: hidden;
+            transition: box-shadow 0.3s;
+        }
+        .balance-card::before {
+            content: '';
+            position: absolute; top: 0; left: 0; right: 0; height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255,179,64,0.35), transparent);
+        }
+        .balance-label { font-size: 12px; color: var(--muted); letter-spacing: 1.5px; margin-bottom: 12px; text-transform: uppercase; }
+        .balance-amount { font-size: 56px; font-weight: 900; line-height: 1; transition: color 0.4s; }
+        .balance-desc { font-size: 14px; font-weight: 600; margin-top: 12px; transition: color 0.4s; opacity: 0.85; }
+        .balance-amount.owe { color: var(--red); filter: drop-shadow(0 4px 12px rgba(248,113,113,0.3)); }
+        .balance-amount.owed { color: var(--orange); filter: drop-shadow(0 4px 12px rgba(255,179,64,0.3)); }
+        .balance-amount.zero { color: var(--green); filter: drop-shadow(0 4px 12px rgba(74,222,128,0.25)); }
+
+        /* ===== 輸入卡 ===== */
+        .input-card {
+            margin: 14px 16px 0;
+            background: rgba(22, 26, 42, 0.55);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.09);
+            border-radius: 24px;
+            padding: 24px 20px;
+        }
+        .input-card-title { font-size: 12px; font-weight: bold; color: var(--muted); letter-spacing: 1.5px; margin-bottom: 16px; text-transform: uppercase; }
+        .amount-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+        .amount-group label { font-size: 12px; color: var(--muted); font-weight: bold; display: block; margin-bottom: 6px; letter-spacing: 0.5px; }
+        .amount-input {
+            width: 100%; background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 12px; padding: 14px 12px; color: var(--text);
+            font-size: 20px; font-weight: bold; text-align: center;
+            outline: none; transition: border-color 0.2s, box-shadow 0.2s; -webkit-appearance: none;
+        }
+        .amount-input:focus { border-color: rgba(255,179,64,0.5); box-shadow: 0 0 0 3px rgba(255,179,64,0.08); }
+        .amount-input::placeholder { color: rgba(255,255,255,0.18); font-size: 16px; font-weight: normal; }
+        .note-input {
+            width: 100%; background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 12px; padding: 12px 14px; color: var(--text);
+            font-size: 15px; outline: none; margin-bottom: 14px; transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .note-input:focus { border-color: rgba(255,179,64,0.5); box-shadow: 0 0 0 3px rgba(255,179,64,0.08); }
+        .note-input::placeholder { color: rgba(255,255,255,0.2); }
+        .payer-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+        .payer-btn {
+            padding: 14px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.08);
+            background: rgba(255,255,255,0.03); color: var(--muted);
+            font-size: 14px; font-weight: bold; cursor: pointer; transition: all 0.25s; text-align: center;
+        }
+        .payer-btn:hover { background: rgba(255,255,255,0.06); color: var(--text); }
+        .payer-btn.selected {
+            border-color: rgba(255,179,64,0.45); background: rgba(255,179,64,0.1);
+            color: var(--orange); box-shadow: 0 0 18px rgba(255,179,64,0.15);
+        }
+        .preview-text { text-align: center; font-size: 13px; color: var(--muted); margin-bottom: 14px; min-height: 18px; font-weight: 600; transition: color 0.2s; }
+        .preview-text.has-value { color: var(--orange); }
+        .submit-btn {
+            width: 100%; padding: 16px; border-radius: 16px;
+            border: 1px solid rgba(255,179,64,0.35); background: rgba(255,179,64,0.12);
+            color: var(--orange); font-size: 16px; font-weight: bold; cursor: pointer;
+            transition: all 0.25s; display: flex; align-items: center; justify-content: center; gap: 8px;
+        }
+        .submit-btn:hover { background: rgba(255,179,64,0.18); box-shadow: 0 4px 20px rgba(255,179,64,0.15); }
+        .submit-btn:active { transform: scale(0.97); }
+
+        /* ===== 查看帳目按鈕 ===== */
+        .view-records-btn {
+            display: flex; align-items: center; justify-content: space-between;
+            margin: 12px 16px 0; padding: 16px 20px; border-radius: 16px;
+            border: 1px solid rgba(255,255,255,0.07); background: rgba(255,255,255,0.025);
+            color: var(--muted); cursor: pointer; font-size: 15px; font-weight: bold;
+            transition: all 0.2s; backdrop-filter: blur(10px);
+        }
+        .view-records-btn:hover { background: rgba(255,255,255,0.05); color: var(--text); }
+        .view-records-btn:active { background: rgba(255,255,255,0.07); }
+        .view-records-badge {
+            background: var(--red); color: white; font-size: 11px; font-weight: bold;
+            padding: 2px 8px; border-radius: 10px; display: none; opacity: 0.85;
+        }
+
+        /* ===== 紀錄 View ===== */
+        .balance-mini {
+            margin: 20px 16px 0;
+            background: rgba(22, 26, 42, 0.65); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.09);
+            border-radius: 18px; padding: 18px 20px;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .balance-mini-label { font-size: 13px; color: var(--muted); font-weight: bold; }
+        .balance-mini-amount { font-size: 22px; font-weight: 900; }
+        .balance-mini-amount.owed { color: var(--orange); }
+        .balance-mini-amount.owe { color: var(--red); }
+        .balance-mini-amount.zero { color: var(--green); }
+        .balance-mini-desc { font-size: 12px; color: var(--muted); margin-top: 2px; text-align: right; }
+
+        .settle-card { margin: 12px 16px 0; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .settle-btn {
+            padding: 14px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.07);
+            background: rgba(255,255,255,0.025); color: var(--muted);
+            font-size: 13px; font-weight: bold; cursor: pointer; transition: all 0.2s; text-align: center;
+        }
+        .settle-btn.primary { background: rgba(74,222,128,0.08); border-color: rgba(74,222,128,0.25); color: var(--green); }
+        .settle-btn.primary:hover { background: rgba(74,222,128,0.14); box-shadow: 0 4px 16px rgba(74,222,128,0.12); }
+        .settle-btn.secondary { background: rgba(123,156,255,0.08); border-color: rgba(123,156,255,0.22); color: var(--blue); }
+        .settle-btn.secondary:hover { background: rgba(123,156,255,0.14); }
+        .settle-btn:active { transform: scale(0.97); }
+
+        .list-section { margin: 14px 16px 0; }
+        .tab-row { display: flex; gap: 8px; margin-bottom: 14px; }
+        .tab-btn {
+            flex: 1; padding: 11px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.07);
+            background: rgba(255,255,255,0.025); color: var(--muted);
+            font-size: 13px; font-weight: bold; cursor: pointer; transition: all 0.2s; text-align: center;
+            display: flex; align-items: center; justify-content: center; gap: 6px;
+        }
+        .tab-btn.active { background: rgba(255,179,64,0.1); border-color: rgba(255,179,64,0.3); color: var(--orange); }
+        .tab-badge {
+            background: rgba(248,113,113,0.8); color: white; font-size: 10px; font-weight: bold;
+            padding: 1px 6px; border-radius: 8px; min-width: 18px; text-align: center;
+        }
+
+        /* ===== 紀錄卡片 ===== */
+        .record-card {
+            background: rgba(22, 26, 42, 0.55);
+            backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 18px; padding: 16px; margin-bottom: 10px;
+            display: flex; align-items: flex-start; gap: 14px;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .record-card:hover { border-color: rgba(255,255,255,0.13); box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
+        .record-card.settled { opacity: 0.4; }
+        .record-checkbox {
+            width: 22px; height: 22px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.15);
+            background: rgba(255,255,255,0.03); cursor: pointer; flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center; margin-top: 2px; transition: all 0.2s;
+        }
+        .record-checkbox.checked { background: var(--blue); border-color: var(--blue); }
+        .record-checkbox.checked::after { content: '✓'; color: white; font-size: 13px; font-weight: bold; }
+        .record-body { flex: 1; min-width: 0; }
+        .record-note { font-weight: bold; font-size: 15px; margin-bottom: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .record-amounts { font-size: 12px; color: var(--muted); margin-bottom: 5px; }
+        .record-payer-tag {
+            display: inline-block; font-size: 11px; font-weight: bold; padding: 2px 8px;
+            border-radius: 6px; background: rgba(255,179,64,0.1); color: var(--orange);
+            border: 1px solid rgba(255,179,64,0.22); margin-bottom: 4px;
+        }
+        .record-result { font-size: 14px; font-weight: bold; color: var(--orange); }
+        .record-result.zero { color: var(--green); }
+        .record-time { font-size: 11px; color: rgba(255,255,255,0.25); text-align: right; white-space: nowrap; flex-shrink: 0; padding-top: 3px; }
+        .empty-state { text-align: center; color: rgba(255,255,255,0.2); padding: 40px 20px; font-size: 14px; line-height: 2; }
+
+        /* ===== Toast ===== */
+        #toast {
+            position: fixed; top: 80px; left: 50%;
+            transform: translateX(-50%) translateY(-20px);
+            background: rgba(20, 24, 38, 0.95); border: 1px solid rgba(255,255,255,0.1);
+            border-left: 4px solid var(--green); color: var(--text);
+            padding: 14px 24px; border-radius: 12px; font-size: 14px; font-weight: bold;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.6); opacity: 0; transition: all 0.3s;
+            pointer-events: none; white-space: nowrap; z-index: 9999;
+            backdrop-filter: blur(10px);
+        }
+        #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+        @media (max-width: 480px) { .balance-amount { font-size: 44px; } }
+    </style>
+</head>
+<body>
+
+<div id="toast"></div>
+
+<header class="header">
+    <span class="header-back" onclick="handleBack()" style="cursor:pointer;">← 返回</span>
+    <div class="header-title" id="headerTitle">📒 宿舍帳本</div>
+</header>
+
+<!-- ===== VIEW 1：輸入頁 ===== -->
+<div class="view active" id="view-input">
+<div class="page-wrapper">
+
+    <div class="balance-card">
+        <div class="balance-label">目前欠款</div>
+        <div class="balance-amount zero" id="balanceAmount">$0</div>
+        <div class="balance-desc zero" id="balanceDesc">互不相欠 ✓</div>
+    </div>
+
+    <div class="input-card">
+        <div class="input-card-title">＋ 新增帳目</div>
+        <div class="amount-row">
+            <div class="amount-group">
+                <label>至凱買了</label>
+                <input class="amount-input" id="inp_p1" type="number" inputmode="numeric" placeholder="$0" min="0" oninput="updatePreview()">
+            </div>
+            <div class="amount-group">
+                <label>柏致買了</label>
+                <input class="amount-input" id="inp_p2" type="number" inputmode="numeric" placeholder="$0" min="0" oninput="updatePreview()">
+            </div>
+        </div>
+        <input class="note-input" id="inp_note" type="text" placeholder="備註（店名、說明…）" maxlength="30">
+        <div style="font-size:12px; color:var(--muted); font-weight:bold; margin-bottom:8px;">誰代付？</div>
+        <div class="payer-row">
+            <div class="payer-btn" id="btn_p1" onclick="selectPayer('p1')">👦🏻 至凱付</div>
+            <div class="payer-btn" id="btn_p2" onclick="selectPayer('p2')">👦🏼 柏致付</div>
+        </div>
+        <div class="preview-text" id="previewText">請輸入金額並選擇付款人</div>
+        <button class="submit-btn" onclick="addRecord()">＋ 新增這筆</button>
+    </div>
+
+    <div class="view-records-btn" onclick="switchView('unsettled')">
+        <span>📋 未結清帳目</span>
+        <span>
+            <span class="view-records-badge" id="unsettled-badge">0</span>
+            <span style="color:var(--muted); margin-left:4px;">→</span>
+        </span>
+    </div>
+
+    <div class="view-records-btn" onclick="switchView('settled')" style="margin-top:8px; border-color:rgba(255,255,255,0.05);">
+        <span style="color:rgba(255,255,255,0.35);">🗂️ 已結清紀錄</span>
+        <span style="color:var(--muted);">→</span>
+    </div>
+
+</div>
+</div>
+
+<!-- ===== VIEW 2：未結清頁 ===== -->
+<div class="view" id="view-unsettled">
+<div class="page-wrapper">
+
+    <div class="balance-mini">
+        <div class="balance-mini-label">目前欠款</div>
+        <div style="text-align:right;">
+            <div class="balance-mini-amount zero" id="balanceAmountMini">$0</div>
+            <div class="balance-mini-desc" id="balanceDescMini">互不相欠 ✓</div>
+        </div>
+    </div>
+
+    <div class="settle-card">
+        <button class="settle-btn primary" onclick="settleAll()">✅ 一鍵全部結清</button>
+        <button class="settle-btn secondary" onclick="settleSelected()">☑️ 結清選取</button>
+    </div>
+
+    <div class="list-section">
+        <div id="record-list-unsettled"><div class="empty-state">📭 目前沒有未結清的帳目</div></div>
+    </div>
+
+</div>
+</div>
+
+<!-- ===== VIEW 3：已結清頁 ===== -->
+<div class="view" id="view-settled">
+<div class="page-wrapper">
+
+    <div style="margin: 20px 16px 0;">
+        <button class="settle-btn" style="width:100%; color:var(--red); background:rgba(255,69,58,0.08); border-color:rgba(255,69,58,0.25); padding:14px;" onclick="deleteSettled()">🗑️ 清空所有已結清紀錄</button>
+    </div>
+
+    <div class="list-section">
+        <div id="record-list-settled"><div class="empty-state">📭 沒有已結清的紀錄</div></div>
+    </div>
+
+</div>
+</div>
+
+<script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyB567-hOy8kSYC3KNTomBty0oZmFRHN8ng",
+        authDomain: "accounting-system-53ed3.firebaseapp.com",
+        databaseURL: "https://accounting-system-53ed3-default-rtdb.firebaseio.com",
+        projectId: "accounting-system-53ed3",
+        storageBucket: "accounting-system-53ed3.firebasestorage.app",
+        messagingSenderId: "76627672581",
+        appId: "1:76627672581:web:5e1ead01e77cade980e66c"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    let currentBalance = 0;
+    let currentPayer = null;
+    let currentTab = 'unsettled';
+    let allRecords = {};
+    let selectedKeys = new Set();
+    let currentView = 'input';
+
+    // ===== View 切換 =====
+    function handleBack() {
+        if (currentView === 'unsettled' || currentView === 'settled') switchView('input');
+        else window.location.href = 'index.html';
+    }
+
+    const viewTitles = { input: '📒 帳本', unsettled: '📋 未結清', settled: '🗂️ 已結清' };
+
+    function switchView(v) {
+        currentView = v;
+        ['input', 'unsettled', 'settled'].forEach(id => {
+            const el = document.getElementById('view-' + id);
+            if (el) el.classList.toggle('active', v === id);
+        });
+        document.getElementById('headerTitle').innerText = viewTitles[v] || '📒 帳本';
+        if (v === 'unsettled' || v === 'settled') renderList();
+        window.scrollTo(0, 0);
+    }
+
+    // ===== 工具 =====
+    function showToast(msg, color = 'var(--green)') {
+        const el = document.getElementById('toast');
+        el.innerText = msg;
+        el.style.borderLeftColor = color;
+        el.classList.add('show');
+        setTimeout(() => el.classList.remove('show'), 2500);
+    }
+
+    function formatTime(ts) {
+        const d = new Date(ts);
+        const mo = d.getMonth() + 1, da = d.getDate();
+        const hh = String(d.getHours()).padStart(2,'0'), mm = String(d.getMinutes()).padStart(2,'0');
+        return `${mo}/${da} ${hh}:${mm}`;
+    }
+
+    function getDelta(r) {
+        return r.payer === 'p1' ? (r.p2_bought || 0) : -(r.p1_bought || 0);
+    }
+
+    function getResultText(r) {
+        const delta = getDelta(r);
+        if (delta > 0) return `柏致還至凱 $${delta}`;
+        if (delta < 0) return `至凱還柏致 $${Math.abs(delta)}`;
+        return '不產生欠款';
+    }
+
+    // ===== 輸入頁 =====
+    function selectPayer(id) {
+        currentPayer = id;
+        document.getElementById('btn_p1').classList.toggle('selected', id === 'p1');
+        document.getElementById('btn_p2').classList.toggle('selected', id === 'p2');
+        updatePreview();
+    }
+
+    function updatePreview() {
+        const p1 = Number(document.getElementById('inp_p1').value) || 0;
+        const p2 = Number(document.getElementById('inp_p2').value) || 0;
+        const el = document.getElementById('previewText');
+        if (!currentPayer || (p1 === 0 && p2 === 0)) {
+            el.className = 'preview-text';
+            el.innerText = currentPayer ? '（金額皆為 0，不產生欠款）' : '請輸入金額並選擇付款人';
+            return;
+        }
+        const owe = currentPayer === 'p1' ? p2 : p1;
+        const delta = currentPayer === 'p1' ? owe : -owe;
+        const newBal = currentBalance + delta;
+        let msg = '';
+        if (owe === 0) { msg = '此筆不產生欠款'; }
+        else if (delta > 0) { msg = `新增後：柏致共欠至凱 $${newBal > 0 ? newBal : Math.abs(newBal)}`; }
+        else { msg = `新增後：至凱共欠柏致 $${newBal < 0 ? Math.abs(newBal) : newBal}`; }
+        el.className = 'preview-text has-value';
+        el.innerText = msg;
+    }
+
+    function addRecord() {
+        const p1 = Number(document.getElementById('inp_p1').value) || 0;
+        const p2 = Number(document.getElementById('inp_p2').value) || 0;
+        const note = document.getElementById('inp_note').value.trim() || '（未填備註）';
+        if (!currentPayer) return showToast('請選擇付款人', 'var(--red)');
+        if (p1 === 0 && p2 === 0) return showToast('請輸入金額', 'var(--red)');
+        const record = { p1_bought: p1, p2_bought: p2, payer: currentPayer, note, timestamp: Date.now(), settled: false };
+        db.ref('split/records').push(record);
+        db.ref('split/balance').transaction(b => (b || 0) + getDelta(record));
+        document.getElementById('inp_p1').value = '';
+        document.getElementById('inp_p2').value = '';
+        document.getElementById('inp_note').value = '';
+        currentPayer = null;
+        document.getElementById('btn_p1').classList.remove('selected');
+        document.getElementById('btn_p2').classList.remove('selected');
+        document.getElementById('previewText').className = 'preview-text';
+        document.getElementById('previewText').innerText = '請輸入金額並選擇付款人';
+        showToast('✅ 已新增！');
+    }
+
+    // ===== 紀錄頁 =====
+    function settleAll() {
+        const unsettled = Object.entries(allRecords).filter(([,r]) => !r.settled);
+        if (unsettled.length === 0) return showToast('沒有未結清的帳目', 'var(--muted)');
+        if (!confirm(`確定要將全部 ${unsettled.length} 筆標為已結清？`)) return;
+        const updates = {};
+        unsettled.forEach(([k]) => { updates[k + '/settled'] = true; });
+        db.ref('split/records').update(updates);
+        db.ref('split/balance').set(0);
+        selectedKeys.clear();
+        showToast('🎉 已全部結清！');
+    }
+
+    function settleSelected() {
+        if (selectedKeys.size === 0) return showToast('請先勾選要結清的帳目', 'var(--muted)');
+        if (!confirm(`確定要結清選取的 ${selectedKeys.size} 筆？`)) return;
+        let deltaSub = 0;
+        const updates = {};
+        selectedKeys.forEach(k => {
+            const r = allRecords[k];
+            if (r && !r.settled) { updates[k + '/settled'] = true; deltaSub += getDelta(r); }
+        });
+        db.ref('split/records').update(updates);
+        db.ref('split/balance').transaction(b => (b || 0) - deltaSub);
+        selectedKeys.clear();
+        showToast('☑️ 已結清選取帳目！');
+    }
+
+    function deleteSettled() {
+        const settled = Object.entries(allRecords).filter(([,r]) => r.settled);
+        if (settled.length === 0) return showToast('沒有已結清的紀錄', 'var(--muted)');
+        if (!confirm(`確定要永久刪除全部 ${settled.length} 筆已結清紀錄？`)) return;
+        const updates = {};
+        settled.forEach(([k]) => { updates[k] = null; });
+        db.ref('split/records').update(updates);
+        showToast('🗑️ 已刪除所有已結清紀錄');
+    }
+
+    function renderList() {
+        const makeCard = (k, r) => {
+            const delta = getDelta(r);
+            const payerName = r.payer === 'p1' ? '至凱' : '柏致';
+            const isChecked = selectedKeys.has(k);
+            const amountsText = [r.p1_bought ? `至凱 $${r.p1_bought}` : '', r.p2_bought ? `柏致 $${r.p2_bought}` : ''].filter(Boolean).join('　');
+            return `
+            <div class="record-card">
+                ${!r.settled ? `<div class="record-checkbox${isChecked ? ' checked' : ''}" onclick="toggleSelect('${k}', this)"></div>` : '<div style="width:22px;flex-shrink:0;"></div>'}
+                <div class="record-body">
+                    <div class="record-note">${r.note}</div>
+                    <div class="record-amounts">${amountsText}</div>
+                    <div><span class="record-payer-tag">💳 ${payerName}付</span></div>
+                    <div class="record-result${delta === 0 ? ' zero' : ''}">${getResultText(r)}</div>
+                </div>
+                <div class="record-time">${formatTime(r.timestamp)}</div>
+            </div>`;
+        };
+
+        const unsettledEntries = Object.entries(allRecords).filter(([,r]) => !r.settled).sort((a,b) => b[1].timestamp - a[1].timestamp);
+        const settledEntries   = Object.entries(allRecords).filter(([,r]) =>  r.settled).sort((a,b) => b[1].timestamp - a[1].timestamp);
+
+        const uList = document.getElementById('record-list-unsettled');
+        if (uList) uList.innerHTML = unsettledEntries.length ? unsettledEntries.map(([k,r]) => makeCard(k,r)).join('') : '<div class="empty-state">📭 目前沒有未結清的帳目</div>';
+
+        const sList = document.getElementById('record-list-settled');
+        if (sList) sList.innerHTML = settledEntries.length ? settledEntries.map(([k,r]) => makeCard(k,r)).join('') : '<div class="empty-state">📭 沒有已結清的紀錄</div>';
+    }
+
+    function toggleSelect(key, el) {
+        if (selectedKeys.has(key)) { selectedKeys.delete(key); el.classList.remove('checked'); }
+        else { selectedKeys.add(key); el.classList.add('checked'); }
+    }
+
+    // ===== Firebase 監聽 =====
+    function updateBalanceUI(bal) {
+        // 輸入頁大字
+        const amountEl = document.getElementById('balanceAmount');
+        const descEl = document.getElementById('balanceDesc');
+        // 紀錄頁小卡
+        const miniEl = document.getElementById('balanceAmountMini');
+        const miniDesc = document.getElementById('balanceDescMini');
+        // badge
+        const badge = document.getElementById('unsettled-badge');
+
+        if (bal > 0) {
+            amountEl.className = 'balance-amount owed'; amountEl.innerText = `$${bal}`;
+            descEl.className = 'balance-desc owed'; descEl.innerText = '柏致欠至凱';
+            miniEl.className = 'balance-mini-amount owed'; miniEl.innerText = `$${bal}`;
+            miniDesc.innerText = '柏致欠至凱';
+        } else if (bal < 0) {
+            amountEl.className = 'balance-amount owe'; amountEl.innerText = `$${Math.abs(bal)}`;
+            descEl.className = 'balance-desc owe'; descEl.innerText = '至凱欠柏致';
+            miniEl.className = 'balance-mini-amount owe'; miniEl.innerText = `$${Math.abs(bal)}`;
+            miniDesc.innerText = '至凱欠柏致';
+        } else {
+            amountEl.className = 'balance-amount zero'; amountEl.innerText = '$0';
+            descEl.className = 'balance-desc zero'; descEl.innerText = '互不相欠 ✓';
+            miniEl.className = 'balance-mini-amount zero'; miniEl.innerText = '$0';
+            miniDesc.innerText = '互不相欠 ✓';
+        }
+        updatePreview();
+    }
+
+    db.ref('split/balance').on('value', snap => {
+        currentBalance = snap.val() || 0;
+        updateBalanceUI(currentBalance);
+    });
+
+    db.ref('split/records').on('value', snap => {
+        allRecords = snap.val() || {};
+        const unsettledCount = Object.values(allRecords).filter(r => !r.settled).length;
+        const badge = document.getElementById('unsettled-badge');
+        badge.innerText = unsettledCount;
+        badge.style.display = unsettledCount > 0 ? 'inline-block' : 'none';
+        if (currentView === 'unsettled' || currentView === 'settled') renderList();
+    });
+</script>
+
+</body>
+</html>

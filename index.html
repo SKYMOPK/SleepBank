@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>睡眠金庫 - 登入大廳</title>
+    <title>宿舍系統</title>
     <style>
         :root {
             --bg: #121212;
@@ -113,6 +113,14 @@
             color: var(--p2-color);
         }
 
+        /* 宿舍帳本按鈕 */
+        .btn-split {
+            background: rgba(255, 159, 10, 0.08);
+            border: 1px solid rgba(255, 159, 10, 0.4);
+            color: #FF9F0A;
+            margin-top: 8px;
+        }
+
         /* 即時時鐘設計 */
         .time-display {
             margin-top: 25px;
@@ -145,18 +153,23 @@
 <body>
 
     <div class="login-card">
-        <div class="icon-wrapper">🌙</div>
-        <h1>睡眠金庫系統</h1>
+        <div class="icon-wrapper">🏠</div>
+        <h1>宿舍系統</h1>
         <div class="subtitle">請選擇您的專屬身分登入<br>每日 00:00 - 02:00 準時打卡</div>
 
         <!-- 至凱的入口 -->
         <a href="player.html?player=p1" class="btn btn-p1">
-            <span style="font-size: 22px;">👦🏻</span> 進入 至凱 (P1) 專屬金庫
+            <span style="font-size: 22px;">👦🏻</span> 至凱 的睡眠金庫
         </a>
 
         <!-- 柏致的入口 -->
         <a href="player.html?player=p2" class="btn btn-p2">
-            <span style="font-size: 22px;">👦🏼</span> 進入 柏致 (P2) 專屬金庫
+            <span style="font-size: 22px;">👦🏼</span> 柏致 的睡眠金庫
+        </a>
+
+        <!-- 帳本入口 -->
+        <a href="split.html" class="btn btn-split">
+            <span style="font-size: 22px;">📒</span> 帳本
         </a>
 
         <!-- 即時時鐘 -->
