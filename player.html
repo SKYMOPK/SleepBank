@@ -256,6 +256,57 @@
         @keyframes lotteryPulse { 0%, 100% { box-shadow: 0 0 20px rgba(255,214,10,0.2), 0 0 0 0 rgba(255,214,10,0.3); } 50% { box-shadow: 0 0 35px rgba(255,214,10,0.45), 0 0 0 8px rgba(255,214,10,0); } }
         #mainLotteryBtn { animation: lotteryPulse 2s ease-in-out infinite; }
 
+        /* ===== 10連抽 Modal ===== */
+        .ten-pull-content { max-width: 520px; width: 95%; max-height: 90vh; overflow-y: auto; }
+        .ten-pull-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin: 16px 0; }
+
+        /* 卡片入場：從下方彈上來 */
+        @keyframes tpcEnter { from { opacity:0; transform:translateY(22px) scale(0.8); } to { opacity:1; transform:translateY(0) scale(1); } }
+        /* 浮動（套在 wrap 上，不干擾 inner 的翻牌 transform） */
+        @keyframes tpcFloat { 0%,100%{transform:translateY(0) rotate(0deg)} 35%{transform:translateY(-7px) rotate(-1deg)} 70%{transform:translateY(-4px) rotate(0.8deg)} }
+        /* ❓ 左右搖擺 */
+        @keyframes tpcQSway { 0%,100%{transform:scale(1) rotate(-12deg);opacity:0.6} 25%{transform:scale(1.15) rotate(0deg);opacity:1} 50%{transform:scale(1) rotate(12deg);opacity:0.6} 75%{transform:scale(0.92) rotate(0deg);opacity:0.85} }
+        /* 物品彈出 */
+        @keyframes tpcItemPop { 0%{opacity:0;transform:scale(0.35) translateY(6px)} 55%{opacity:1;transform:scale(1.22) translateY(-3px)} 80%{transform:scale(0.95) translateY(1px)} 100%{opacity:1;transform:scale(1) translateY(0)} }
+        /* 神話出金：全螢幕金色閃光 */
+        @keyframes tpcScreenFlash { 0%{opacity:0} 18%{opacity:1} 100%{opacity:0} }
+        /* 神話卡片放大浮動 */
+        @keyframes mythicCardFloat { 0%,100%{transform:scale(1.18) translateY(0) rotate(0deg)} 40%{transform:scale(1.2) translateY(-10px) rotate(-1.5deg)} 70%{transform:scale(1.18) translateY(-5px) rotate(1deg)} }
+        .tpc-screen-flash { position:fixed; inset:0; pointer-events:none; z-index:9999; background:radial-gradient(ellipse at center, rgba(255,220,50,0.55) 0%, rgba(255,150,0,0.22) 45%, transparent 75%); animation:tpcScreenFlash 1.4s ease-out forwards; }
+        .tpc-inner.mythic-flip { transition: transform 1.1s cubic-bezier(0.2,1.1,0.5,1) !important; }
+        .tpc-wrap.mythic-float { animation: mythicCardFloat 2s ease-in-out infinite !important; transform-origin: center bottom; }
+
+        .tpc-wrap { perspective: 700px; animation: tpcEnter 0.4s cubic-bezier(0.34,1.35,0.64,1) calc(var(--enter-d,0s)) both; }
+        .tpc-wrap.floating { animation: tpcFloat var(--float-dur,2s) ease-in-out calc(var(--float-d,0s)) infinite; }
+        .tpc-inner { position: relative; width: 100%; padding-top: 133%; transform-style: preserve-3d; transition: transform 0.55s cubic-bezier(0.34,1.4,0.64,1); }
+        .tpc-inner.flipped { transform: rotateY(180deg); }
+        .tpc-front, .tpc-back { position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden; border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; overflow: hidden; }
+        .tpc-front { background: rgba(255,255,255,0.06); border: 1px solid var(--border); }
+        .tpc-front-q { font-size: 22px; display: inline-block; animation: tpcQSway 2s ease-in-out infinite calc(var(--float-d,0s)); }
+        .tpc-back { transform: rotateY(180deg); border-width: 1px; border-style: solid; padding: 4px; }
+        .tpc-rarity-badge { font-size: 9px; font-weight: 900; padding: 2px 5px; border-radius: 6px; background: rgba(0,0,0,0.35); letter-spacing: 0.4px; white-space: nowrap; }
+        .tpc-item { display: flex; flex-direction: column; align-items: center; gap: 2px; opacity: 0; }
+        .tpc-item.visible { animation: tpcItemPop 0.45s cubic-bezier(0.34,1.56,0.64,1) forwards; }
+        .tpc-icon { font-size: 20px; }
+        .tpc-label { font-size: 9px; font-weight: bold; text-align: center; line-height: 1.2; padding: 0 2px; }
+        @keyframes glowTenPull { 0%,100%{box-shadow:0 0 8px var(--glow-c)} 50%{box-shadow:0 0 26px var(--glow-c), 0 0 50px var(--glow-c)} }
+        .tpc-back.glow-M { --glow-c: rgba(255,214,10,0.75); animation: glowTenPull 1.8s ease-in-out infinite; }
+        .tpc-back.glow-E { --glow-c: rgba(191,90,242,0.7); animation: glowTenPull 2.3s ease-in-out infinite; }
+        .tpc-back.glow-R { --glow-c: rgba(123,156,255,0.6); animation: glowTenPull 2.8s ease-in-out infinite; }
+        .ten-pull-summary { font-size: 13px; color: var(--gold); text-align: center; margin-bottom: 12px; font-weight: bold; }
+
+        /* ===== 賣出勾選卡片 ===== */
+        .sell-check-card { user-select: none; }
+        .sell-check-card.sell-selected { background: rgba(255,214,10,0.07) !important; }
+
+        /* ===== 數量選擇器 ===== */
+        .qty-stepper { display: flex; align-items: center; justify-content: center; gap: 16px; background: rgba(255,255,255,0.04); border: 1px solid var(--border); border-radius: 14px; padding: 12px 20px; margin-bottom: 18px; }
+        .qty-btn { width: 36px; height: 36px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.15); background: rgba(255,255,255,0.07); color: var(--text); font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; line-height: 1; transition: background 0.15s; }
+        .qty-btn:hover { background: rgba(255,255,255,0.14); }
+        .qty-btn:disabled { opacity: 0.3; cursor: default; }
+        .qty-val { font-size: 28px; font-weight: 900; color: var(--gold); min-width: 48px; text-align: center; }
+        .qty-label { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
         /* ===== UI 升級：底部導航列（手機版）===== */
         .bottom-nav { display: none; position: fixed; bottom: 0; left: 0; right: 0; background: rgba(12,14,22,0.94); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); border-top: 1px solid rgba(255,255,255,0.07); z-index: 300; padding: 8px 0 env(safe-area-inset-bottom, 8px); box-shadow: 0 -4px 24px rgba(0,0,0,0.4); }
         .bottom-nav-inner { display: flex; justify-content: space-around; align-items: center; }
@@ -383,6 +434,7 @@
                         </div>
                         <div class="pity-bar-bg"><div class="pity-bar-fill" id="pity_bar"></div></div>
                     </div>
+                    <button class="btn" id="tenPullBtn" style="width:100%; max-width:320px; margin:14px auto 0; padding:14px; font-size:16px; background:rgba(191,90,242,0.15); color:#C084FC; border:1.5px solid rgba(191,90,242,0.4);" onclick="handleTenPull()">🎰 10連抽 (100點)</button>
                 </div>
 
                 <!-- 本月統計 -->
@@ -482,7 +534,47 @@
 
     <div id="msgModal" class="modal-overlay"><div class="modal-content"><h3 id="msgTitle" style="margin-top:0; font-size:22px;">提示</h3><p id="msgBody" style="white-space: pre-wrap; line-height: 1.6; font-size:15px; margin-bottom:30px; color:rgba(255,255,255,0.8);"></p><button class="btn" style="background: rgba(255,255,255,0.1);" onclick="closeModal()">確定</button></div></div>
     
-    <div id="itemUseModal" class="modal-overlay"><div class="modal-content"><div id="itemUseIcon" style="font-size:72px; margin-bottom:15px; text-shadow: 0 10px 20px rgba(0,0,0,0.5);">🎁</div><h3 id="itemUseTitle" style="color:var(--primary); margin-top:0; font-size:22px;">名稱</h3><p id="itemUseDesc" style="font-size:15px; color:var(--muted); line-height:1.6; margin-bottom:30px;">說明</p><button class="btn btn-primary" id="itemUseConfirmBtn" style="margin-bottom:15px;">確定使用</button><button class="btn" style="background:transparent; color:var(--muted);" onclick="closeModal()">取消關閉</button></div></div>
+    <div id="itemUseModal" class="modal-overlay"><div class="modal-content">
+        <div id="itemUseIcon" style="font-size:72px; margin-bottom:15px; text-shadow: 0 10px 20px rgba(0,0,0,0.5);">🎁</div>
+        <h3 id="itemUseTitle" style="color:var(--primary); margin-top:0; font-size:22px;">名稱</h3>
+        <p id="itemUseDesc" style="font-size:15px; color:var(--muted); line-height:1.6; margin-bottom:20px;">說明</p>
+        <div id="itemUseQtyRow" style="display:none;">
+            <div class="qty-stepper">
+                <button class="qty-btn" id="itemUseQtyMinus" onclick="adjustItemUseQty(-1)">－</button>
+                <div><div class="qty-val" id="itemUseQtyVal">1</div><div class="qty-label">使用數量</div></div>
+                <button class="qty-btn" id="itemUseQtyPlus" onclick="adjustItemUseQty(1)">＋</button>
+            </div>
+        </div>
+        <button class="btn btn-primary" id="itemUseConfirmBtn" style="margin-bottom:15px;">確定使用</button>
+        <button class="btn" style="background:transparent; color:var(--muted);" onclick="closeModal()">取消關閉</button>
+    </div></div>
+
+    <!-- 🎟️ 白嫖券選擇 Modal -->
+    <div id="ticketChoiceModal" class="modal-overlay" style="display:none;">
+        <div class="modal-content">
+            <div style="font-size:52px; margin-bottom:12px;">🎟️</div>
+            <h3 style="color:var(--gold); margin-top:0; font-size:20px;">背包有白嫖券！</h3>
+            <p id="ticketChoiceCount" style="color:var(--muted); font-size:13px; margin-bottom:24px;"></p>
+            <button class="btn btn-primary" style="margin-bottom:12px;" onclick="useTicketAndDraw()">🎟️ 使用白嫖券（免費）</button>
+            <button class="btn" style="background:rgba(255,214,10,0.15); color:var(--gold); border-color:rgba(255,214,10,0.3); margin-bottom:12px;" onclick="closeModal(); openConfirmModal('🎰 確認抽獎','確定要花費 <strong style=\'color:var(--gold)\'>10 點</strong> 進行抽獎嗎？', ()=>executeLottery(\'paid\'));">💰 花費 10 點</button>
+            <button class="btn" style="background:transparent; color:var(--muted);" onclick="closeModal()">取消</button>
+        </div>
+    </div>
+
+    <!-- 💰 批量售出 Modal -->
+    <div id="sellQtyModal" class="modal-overlay"><div class="modal-content">
+        <div id="sellQtyIcon" style="font-size:56px; margin-bottom:10px;">💰</div>
+        <h3 id="sellQtyTitle" style="margin-top:0; font-size:20px; color:var(--gold);">批量售出</h3>
+        <p id="sellQtyDesc" style="font-size:13px; color:var(--muted); margin-bottom:16px;"></p>
+        <div class="qty-stepper">
+            <button class="qty-btn" id="sellQtyMinus" onclick="adjustSellQty(-1)">－</button>
+            <div><div class="qty-val" id="sellQtyVal">1</div><div class="qty-label">售出數量</div></div>
+            <button class="qty-btn" id="sellQtyPlus" onclick="adjustSellQty(1)">＋</button>
+        </div>
+        <div id="sellQtyTotal" style="font-size:15px; color:var(--gold); font-weight:bold; margin-bottom:20px; text-align:center;"></div>
+        <button class="btn" style="background:rgba(255,214,10,0.15); color:var(--gold); border-color:rgba(255,214,10,0.3); margin-bottom:12px;" onclick="doSellQty()">確認售出</button>
+        <button class="btn" style="background:transparent; color:var(--muted);" onclick="closeModal()">取消</button>
+    </div></div>
     
     <div id="spendModal" class="modal-overlay"><div class="modal-content"><h3 style="color:var(--red); margin-top:0; font-size:22px;">🥤 現實支出</h3><input type="number" id="spendAmt" class="modal-input" placeholder="輸入花費點數" min="1"><button class="btn" style="background: rgba(255,69,58,0.15); border-color:rgba(255,69,58,0.3); color:var(--red); margin-bottom:15px;" onclick="doSpendFlexible()">確認扣款</button><button class="btn" style="background:transparent;" onclick="closeModal()">取消</button></div></div>
     
@@ -490,6 +582,16 @@
     
     <div id="giftModal" class="modal-overlay"><div class="modal-content"><h3 style="color:var(--gold); margin-top:0; font-size:22px;">🎁 序號兌換</h3><input type="text" id="giftCode" class="modal-input" placeholder="輸入神祕序號"><button class="btn" style="background: rgba(255,214,10,0.15); border-color:rgba(255,214,10,0.3); color:var(--gold); margin-bottom:15px;" onclick="doRedeem()">兌換</button><button class="btn" style="background:transparent;" onclick="closeModal()">取消</button></div></div>
     
+    <!-- 🎰 10連抽結果 Modal -->
+    <div id="tenPullModal" class="modal-overlay" style="display:none;">
+        <div class="modal-content ten-pull-content">
+            <h3 style="margin-top:0; font-size:20px; color:var(--gold);">🎰 10連抽結果</h3>
+            <div class="ten-pull-grid" id="ten-pull-grid"></div>
+            <div class="ten-pull-summary" id="ten-pull-summary" style="display:none;"></div>
+            <button class="btn" id="ten-pull-confirm" style="display:none; background:rgba(255,255,255,0.08);" onclick="closeModal()">確認</button>
+        </div>
+    </div>
+
     <div id="mailboxModal" class="modal-overlay"><div class="modal-content" style="width: 90%; max-width: 500px; max-height: 80vh; display:flex; flex-direction:column; padding:0; overflow:hidden;"><div style="padding:20px; background:rgba(255,255,255,0.05); border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;"><h3 style="margin:0; font-size:18px;">📬 支援信箱</h3><div style="display:flex; gap:10px;"><button class="btn" style="width:auto; padding:8px 12px; font-size:13px; background:rgba(255,69,58,0.15); color:var(--red); border-color:rgba(255,69,58,0.3);" onclick="clearClaimedMails()">🗑️ 清空</button><button class="btn" style="width:auto; padding:8px 12px; font-size:13px; background:rgba(255,255,255,0.1);" onclick="closeModal()">❌</button></div></div><div id="mail-list" style="padding:20px; overflow-y:auto; flex:1; display:flex; flex-direction:column; gap:12px;"></div></div></div>
 
     <!-- 🎁 圖鑑界面 -->
@@ -725,15 +827,19 @@
         };
 
         function logGachaResult(rarity, label, icon) {
-            db.ref('gacha_log/' + ME).push({ timestamp: Date.now(), rarity, label, icon });
+            db.ref('gacha_log/' + ME).push({ timestamp: Date.now(), rarity, label, icon })
+              .catch(err => console.error('❌ 抽獎紀錄寫入失敗:', err));
         }
 
         function loadGachaHistory() {
             const oneMonthAgo = Date.now() - 30 * 24 * 60 * 60 * 1000;
-            db.ref('gacha_log/' + ME).orderByChild('timestamp').startAt(oneMonthAgo).once('value', snap => {
+            db.ref('gacha_log/' + ME).once('value', snap => {
                 const records = [];
-                snap.forEach(c => records.push(c.val()));
-                records.reverse();
+                snap.forEach(c => {
+                    const v = c.val();
+                    if (v.timestamp >= oneMonthAgo) records.push(v);
+                });
+                records.sort((a, b) => b.timestamp - a.timestamp);
                 renderGachaStats(records);
                 renderGachaHistory(records);
             });
@@ -1153,35 +1259,186 @@
                 else{ sHtml+=`<div class="market-card ${by?'sold':''}" data-rarity="${rarity}"><div class="tag-container">${tg}</div><div class="item-icon" style="margin:20px 0 15px;">${it.i}</div><div style="font-weight:bold; font-size:15px; margin-bottom:5px;">${it.n}</div><div style="font-size:11px; color:rgba(255,255,255,0.4);">定價 ${it.b} 點</div>${stg}<div style="width:100%; margin-top:15px;">${bHtml}</div></div>`; } 
             }); 
             document.getElementById('market-shop-list').innerHTML=sHtml;
-            let hHtml=""; 
-            Object.keys(myInventory).forEach(k=>{ 
-                if(myInventory[k]>0 && ITEMS[k] && ITEMS[k].t==='g'){ 
-                    let it=ITEMS[k], sp=dailyMarketData.sellPrices[k], r=Math.round(sp/it.b*100), rc=r>=100?"var(--green)":"var(--red)", rarity=it.r||'U'; 
-                    hHtml+=`<div class="item-card" data-rarity="${rarity}" onclick="sellMarketItem('${k}',${sp})"><div class="item-icon" style="width:50px;height:50px;font-size:24px;">${it.i}</div><div style="flex:1; text-align:left;"><div style="font-weight:bold; font-size:15px;">${it.n} <span style="font-size:12px;color:var(--muted);margin-left:5px;">x${myInventory[k]}</span></div><div style="font-size:11px; color:rgba(255,255,255,0.5); margin-top:6px;">定價: ${it.b} <span style="margin:0 5px;color:rgba(255,255,255,0.2);">|</span> 行情: <span style="color:${rc}; font-weight:bold;">${r}%</span></div></div><div class="btn" style="width:auto; padding:10px 15px; font-size:14px; background:rgba(255,214,10,0.15); color:var(--gold); border-color:rgba(255,214,10,0.3);">得 ${sp} 點</div></div>`; 
-                } 
-            }); 
-            document.getElementById('market-sell-list').innerHTML = hHtml || "<div style='grid-column:1/-1; text-align:center; padding:30px; color:var(--muted); border:1px dashed var(--border); border-radius:20px;'>背包內沒有可以賣的虛寶</div>";
+            // ── 賣出區：勾選模式 ──
+            let sellItems = [];
+            Object.keys(myInventory).forEach(k => {
+                if (myInventory[k] > 0 && ITEMS[k] && ITEMS[k].t === 'g') {
+                    sellItems.push(k);
+                }
+            });
+
+            if (sellItems.length === 0) {
+                document.getElementById('market-sell-list').innerHTML = "<div style='grid-column:1/-1; text-align:center; padding:30px; color:var(--muted); border:1px dashed var(--border); border-radius:20px;'>背包內沒有可以賣的虛寶</div>";
+            } else {
+                const rarityOrder = { M:0, E:1, R:2, C:3 };
+                sellItems.sort((a,b) => (rarityOrder[ITEMS[a].r]||9) - (rarityOrder[ITEMS[b].r]||9));
+
+                let hHtml = `<div id="sell-toolbar" style="grid-column:1/-1; display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-bottom:4px;">
+                    <span style="font-size:12px; color:var(--muted); margin-right:4px;">快選：</span>
+                    <button class="btn" style="width:auto;padding:6px 12px;font-size:12px;background:rgba(255,214,10,0.12);color:var(--gold);border-color:rgba(255,214,10,0.3);" onclick="sellSelectByRarity('M')">🏆 全選神話</button>
+                    <button class="btn" style="width:auto;padding:6px 12px;font-size:12px;background:rgba(191,90,242,0.12);color:#C084FC;border-color:rgba(191,90,242,0.3);" onclick="sellSelectByRarity('E')">✨ 全選史詩</button>
+                    <button class="btn" style="width:auto;padding:6px 12px;font-size:12px;background:rgba(123,156,255,0.12);color:#7B9CFF;border-color:rgba(123,156,255,0.3);" onclick="sellSelectByRarity('R')">💎 全選稀有</button>
+                    <button class="btn" style="width:auto;padding:6px 12px;font-size:12px;background:rgba(160,160,165,0.1);color:#A0A0A5;border-color:rgba(160,160,165,0.3);" onclick="sellSelectByRarity('C')">📦 全選普通</button>
+                    <button class="btn" style="width:auto;padding:6px 12px;font-size:12px;" onclick="sellSelectAll()">全選</button>
+                    <button class="btn" style="width:auto;padding:6px 12px;font-size:12px;" onclick="sellDeselectAll()">取消</button>
+                    <div id="sell-selected-hint" style="margin-left:auto; font-size:12px; color:var(--gold); font-weight:bold;"></div>
+                </div>`;
+
+                sellItems.forEach(k => {
+                    let it = ITEMS[k], sp = dailyMarketData.sellPrices[k];
+                    let r = Math.round(sp/it.b*100), rc = r>=100 ? "var(--green)" : "var(--red)", rarity = it.r||'U';
+                    hHtml += `<div class="item-card sell-check-card" id="sc-${k}" data-key="${k}" data-qty="${myInventory[k]}" data-sp="${sp}" data-rarity="${rarity}" style="transition: outline 0.15s;">
+                        <div class="sell-check-box" id="scb-${k}" onclick="toggleSellCard('${k}')" style="width:24px;height:24px;border-radius:7px;border:1.5px solid rgba(255,255,255,0.25);background:rgba(255,255,255,0.04);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:14px;margin-right:10px;cursor:pointer;"></div>
+                        <div class="item-icon" style="width:44px;height:44px;font-size:22px;">${it.i}</div>
+                        <div style="flex:1;text-align:left;margin-left:10px;">
+                            <div style="font-weight:bold;font-size:14px;">${it.n} <span style="font-size:11px;color:var(--muted);">x${myInventory[k]}</span></div>
+                            <div style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:4px;">行情: <span style="color:${rc};font-weight:bold;">${r}%</span> · <span style="color:var(--gold);font-weight:bold;">${sp} 點</span>/個</div>
+                        </div>
+                        <button class="btn" onclick="sellMarketItem('${k}',${sp})" style="width:auto;padding:8px 13px;font-size:13px;background:rgba(255,214,10,0.15);color:var(--gold);border-color:rgba(255,214,10,0.3);flex-shrink:0;">得 ${sp} 點</button>
+                    </div>`;
+                });
+
+                hHtml += `<div style="grid-column:1/-1; margin-top:4px;">
+                    <button class="btn" id="sell-confirm-btn" onclick="doSellSelected()" style="display:none; width:100%; background:rgba(255,214,10,0.18); color:var(--gold); border-color:rgba(255,214,10,0.4); font-size:15px; padding:14px;">💰 確認售出</button>
+                </div>`;
+
+                document.getElementById('market-sell-list').innerHTML = hHtml;
+                updateSellHint();
+            }
         }
 
         db.ref('market_purchases/'+getLocalDateStr(new Date())).on('value', s => { marketPurchases = s.val()||{}; if(document.getElementById('page-market').classList.contains('active')) renderMarket(); });
 
-        function buyMarketItem(i, k, p) { 
-            db.ref('economy/'+ME).once('value').then(s=>{ 
-                if((s.val()||0)<p) return showToast("❌ 點數不足！", 'error'); 
-                db.ref('market_purchases/'+getLocalDateStr(new Date())+'/'+i).transaction(c=>c?undefined:ME, (e,com,sn)=>{ 
-                    if(com&&sn.val()===ME){ db.ref('economy/'+ME).set((s.val()||0)-p); db.ref('users/'+ME+'/items/'+k).transaction(c=>(c||0)+1); playSound('coin'); showToast(`🛍️ 花了 ${p} 點買下【${ITEMS[k].n}】！`); }
-                    else { showToast("❌ 手腳太慢，夥伴已經買走啦！", 'error'); } 
-                }); 
-            }); 
+        function buyMarketItem(i, k, p) {
+            db.ref('market_purchases/'+getLocalDateStr(new Date())+'/'+i).transaction(c=>c?undefined:ME, (e,com,sn)=>{
+                if(com&&sn.val()===ME){
+                    db.ref('economy/'+ME).transaction(v => {
+                        if((v||0) < p) return undefined;
+                        return (v||0) - p;
+                    }, (err, committed) => {
+                        if(committed){ db.ref('users/'+ME+'/items/'+k).transaction(c=>(c||0)+1); playSound('coin'); showToast(`🛍️ 花了 ${p} 點買下【${ITEMS[k].n}】！`); }
+                        else { db.ref('market_purchases/'+getLocalDateStr(new Date())+'/'+i).remove(); showToast("❌ 點數不足！", 'error'); }
+                    });
+                } else { showToast("❌ 手腳太慢，夥伴已經買走啦！", 'error'); }
+            });
         }
 
-        function sellMarketItem(k, p) { 
-            if(!myInventory[k]||myInventory[k]<=0)return; 
-            openConfirmModal("💰 確認售出", `確定要以 <strong style="color:var(--gold)">${p} 點</strong> 售出【${ITEMS[k].n}】嗎？`, ()=>{ 
-                db.ref('users/'+ME+'/items/'+k).transaction(c=>(c&&c>0)?c-1:undefined, (e,com)=>{ 
-                    if(com){ db.ref('economy/'+ME).transaction(v=>(v||0)+p); playSound('coin'); showToast(`💸 成功賣出，獲得 ${p} 點！`); } 
-                }); 
-            }); 
+        // ── 賣出區勾選邏輯 ──
+        function toggleSellCard(k) {
+            const card = document.getElementById('sc-' + k);
+            const box  = document.getElementById('scb-' + k);
+            if (!card) return;
+            const sel = card.classList.toggle('sell-selected');
+            box.innerText  = sel ? '✓' : '';
+            box.style.background    = sel ? 'rgba(255,214,10,0.3)' : 'rgba(255,255,255,0.04)';
+            box.style.borderColor   = sel ? 'rgba(255,214,10,0.8)' : 'rgba(255,255,255,0.25)';
+            card.style.outline      = sel ? '2px solid rgba(255,214,10,0.5)' : 'none';
+            updateSellHint();
+        }
+
+        function sellSelectByRarity(r) {
+            document.querySelectorAll('.sell-check-card').forEach(card => {
+                if (card.dataset.rarity === r) {
+                    if (!card.classList.contains('sell-selected')) toggleSellCard(card.dataset.key);
+                }
+            });
+        }
+
+        function sellSelectAll() {
+            document.querySelectorAll('.sell-check-card').forEach(card => {
+                if (!card.classList.contains('sell-selected')) toggleSellCard(card.dataset.key);
+            });
+        }
+
+        function sellDeselectAll() {
+            document.querySelectorAll('.sell-check-card.sell-selected').forEach(card => {
+                toggleSellCard(card.dataset.key);
+            });
+        }
+
+        function updateSellHint() {
+            const selected = document.querySelectorAll('.sell-check-card.sell-selected');
+            const btn = document.getElementById('sell-confirm-btn');
+            const hint = document.getElementById('sell-selected-hint');
+            if (!btn || !hint) return;
+            if (selected.length === 0) {
+                hint.innerText = '';
+                btn.style.display = 'none';
+            } else {
+                let totalPts = 0, totalItems = 0;
+                selected.forEach(card => {
+                    totalPts  += parseInt(card.dataset.sp) * parseInt(card.dataset.qty);
+                    totalItems += parseInt(card.dataset.qty);
+                });
+                hint.innerText = `已選 ${selected.length} 種 (共 ${totalItems} 個) · 合計 ${totalPts} 點`;
+                btn.innerText  = `💰 確認售出 · 得 ${totalPts} 點`;
+                btn.style.display = '';
+            }
+        }
+
+        function doSellSelected() {
+            const selected = document.querySelectorAll('.sell-check-card.sell-selected');
+            if (selected.length === 0) return;
+            let totalPts = 0, items = [];
+            selected.forEach(card => {
+                const qty = parseInt(card.dataset.qty);
+                totalPts += parseInt(card.dataset.sp) * qty;
+                items.push({ k: card.dataset.key, qty, sp: parseInt(card.dataset.sp) });
+            });
+            openConfirmModal('💰 確認批量售出',
+                `確定要賣出 <strong style="color:var(--gold)">${items.length} 種虛寶</strong>，共獲得 <strong style="color:var(--gold)">${totalPts} 點</strong> 嗎？`,
+                () => {
+                    items.forEach(({ k, qty }) => {
+                        db.ref('users/'+ME+'/items/'+k).transaction(c => {
+                            if (!c || c < qty) return undefined;
+                            return c - qty;
+                        });
+                    });
+                    db.ref('economy/'+ME).transaction(v => (v||0) + totalPts);
+                    playSound('coin');
+                    showToast(`💸 成功售出 ${items.length} 種虛寶，獲得 ${totalPts} 點！`);
+                }
+            );
+        }
+
+        let sellQtyKey = '', sellQtyPrice = 0, sellQtyCurrent = 1;
+
+        function adjustSellQty(delta) {
+            const max = myInventory[sellQtyKey] || 1;
+            sellQtyCurrent = Math.max(1, Math.min(max, sellQtyCurrent + delta));
+            document.getElementById('sellQtyVal').innerText = sellQtyCurrent;
+            document.getElementById('sellQtyMinus').disabled = sellQtyCurrent <= 1;
+            document.getElementById('sellQtyPlus').disabled = sellQtyCurrent >= max;
+            document.getElementById('sellQtyTotal').innerText = `合計：${sellQtyCurrent * sellQtyPrice} 點`;
+        }
+
+        function sellMarketItem(k, p) {
+            if(!myInventory[k]||myInventory[k]<=0) return;
+            const it = ITEMS[k];
+            sellQtyKey = k; sellQtyPrice = p; sellQtyCurrent = 1;
+            const max = myInventory[k];
+            document.getElementById('sellQtyIcon').innerText = it.i;
+            document.getElementById('sellQtyTitle').innerText = `💰 出售 ${it.n}`;
+            document.getElementById('sellQtyDesc').innerText = `黑市行情 ${p} 點／個　擁有 ${max} 個`;
+            document.getElementById('sellQtyVal').innerText = 1;
+            document.getElementById('sellQtyTotal').innerText = `合計：${p} 點`;
+            document.getElementById('sellQtyMinus').disabled = true;
+            document.getElementById('sellQtyPlus').disabled = max <= 1;
+            openModal('sellQtyModal');
+        }
+
+        function doSellQty() {
+            const qty = sellQtyCurrent, k = sellQtyKey, p = sellQtyPrice;
+            closeModal();
+            db.ref('users/'+ME+'/items/'+k).transaction(c => {
+                if (!c || c < qty) return undefined;
+                return c - qty;
+            }, (err, committed) => {
+                if (!committed) return showToast('❌ 道具數量不足', 'error');
+                db.ref('economy/'+ME).transaction(v=>(v||0)+(qty*p));
+                playSound('coin');
+                showToast(`💸 成功賣出 ${ITEMS[k].n} x${qty}，獲得 ${qty*p} 點！`);
+            });
         }
 
         // ==========================================
@@ -1208,13 +1465,237 @@
             return poolArray[poolArray.length - 1];
         }
 
-        function handleLottery() { 
-            const m = document.getElementById('mainLotteryBtn').dataset.mode; 
-            let title = "🎰 確認抽獎";
-            let desc = m === "free" ? "確定要使用今日的【免費首抽】嗎？" : 
-                       m === "ticket" ? "確定要消耗 1 張【白嫖抽獎券】進行免費抽獎嗎？" : 
+        function handleLottery() {
+            const m = document.getElementById('mainLotteryBtn').dataset.mode;
+            // 付費模式且背包有白嫖券 → 先問要用券還是花點
+            if (m === 'paid' && (myInventory['free_gacha_ticket'] || 0) > 0) {
+                openTicketChoiceModal();
+                return;
+            }
+            let desc = m === "free" ? "確定要使用今日的【免費首抽】嗎？" :
+                       m === "ticket" ? "確定要消耗 1 張【白嫖抽獎券】進行免費抽獎嗎？" :
                        "確定要花費 <strong style='color:var(--gold)'>10 點</strong> 進行抽獎嗎？";
-            openConfirmModal(title, desc, () => executeLottery(m));
+            openConfirmModal("🎰 確認抽獎", desc, () => executeLottery(m));
+        }
+
+        function openTicketChoiceModal() {
+            const cnt = myInventory['free_gacha_ticket'] || 0;
+            document.getElementById('ticketChoiceCount').innerText = `目前持有 ${cnt} 張`;
+            openModal('ticketChoiceModal');
+        }
+
+        function useTicketAndDraw() {
+            closeModal();
+            db.ref('users/'+ME+'/items/free_gacha_ticket').transaction(c => (c&&c>0) ? c-1 : undefined, (e, com) => {
+                if (!com) return showToast('❌ 道具不足', 'error');
+                executeLottery('ticket');
+            });
+        }
+
+        function handleTenPull() {
+            openConfirmModal('🎰 10連抽確認',
+                "確定要花費 <strong style='color:var(--gold)'>100 點</strong> 進行 10 連抽嗎？<br><small style='color:var(--muted);'>（必觸發一次保底，獲得【白嫖抽獎券】x1）</small>",
+                executeTenPull);
+        }
+
+        // 單次抽獎邏輯（不含 Firebase 寫入），供 10連抽使用
+        function rollOnce() {
+            let luck = Math.random() * 100;
+            let getPool = (r, t='g') => Object.keys(ITEMS).filter(k => ITEMS[k].r === r && ITEMS[k].t === t);
+            if (luck <= 1) {
+                let pool = [...getPool('M'), '100_pts'];
+                let won = getWeightedItem(pool);
+                if (won === '100_pts') return { rarity:'M', label:'100 點頭獎', icon:'🏆', type:'pts', amount:100 };
+                return { rarity:'M', label:ITEMS[won].n, icon:ITEMS[won].i, type:'item', itemKey:won };
+            } else if (luck <= 3) {
+                let won = getWeightedItem(getPool('E'));
+                return { rarity:'E', label:ITEMS[won].n, icon:ITEMS[won].i, type:'item', itemKey:won };
+            } else if (luck <= 10) {
+                let won = getWeightedItem(getPool('R'));
+                return { rarity:'R', label:ITEMS[won].n, icon:ITEMS[won].i, type:'item', itemKey:won };
+            } else if (luck <= 20) {
+                let won = getWeightedItem(Object.keys(ITEMS).filter(k => ITEMS[k].t === 'u'));
+                return { rarity:'U', label:ITEMS[won].n, icon:ITEMS[won].i, type:'item', itemKey:won };
+            } else if (luck <= 35) {
+                let won = getWeightedItem(getPool('C'));
+                return { rarity:'C', label:ITEMS[won].n, icon:ITEMS[won].i, type:'item', itemKey:won };
+            } else if (luck <= 40) {
+                let p = Math.floor(Math.random()*5)+16;
+                return { rarity:'pts', label:`${p} 點`, icon:'💰', type:'pts', amount:p };
+            } else if (luck <= 50) {
+                let p = Math.floor(Math.random()*10)+6;
+                return { rarity:'pts', label:`${p} 點`, icon:'🪙', type:'pts', amount:p };
+            } else if (luck <= 70) {
+                let p = Math.floor(Math.random()*5)+1;
+                return { rarity:'pts', label:`${p} 點`, icon:'🍬', type:'pts', amount:p };
+            } else if (luck <= 85) {
+                let amt = Math.random() < 0.5 ? 1 : 2;
+                return { rarity:'shard', label:`碎片 x${amt}`, icon:'🔹', type:'shard', amount:amt };
+            } else {
+                return { rarity:'miss', label:'槓龜', icon:'💀', type:'miss' };
+            }
+        }
+
+        function executeTenPull() {
+            db.ref('economy/'+ME).once('value').then(ps => {
+                let pts = ps.val() || 0;
+                if (pts < 100) { playSound('error'); return showToast('❌ 點數不足 100 點！', 'error'); }
+
+                db.ref('users/'+ME).once('value').then(s => {
+                    let d = s.val() || {};
+
+                    // 計算 pity（10 次付費抽，必觸發一次保底）
+                    let pity = d.gacha_pity || 0;
+                    let ticketsEarned = 0;
+                    for (let i = 0; i < 10; i++) { pity++; if (pity >= 10) { pity = 0; ticketsEarned++; } }
+
+                    // 抽 10 次
+                    let results = [];
+                    for (let i = 0; i < 10; i++) results.push(rollOnce());
+
+                    // 累積獎勵
+                    let totalPts = 0, totalShards = 0, itemCounts = {};
+                    results.forEach(r => {
+                        if (r.type === 'pts') totalPts += r.amount;
+                        else if (r.type === 'shard') totalShards += r.amount;
+                        else if (r.type === 'item') itemCounts[r.itemKey] = (itemCounts[r.itemKey] || 0) + 1;
+                    });
+
+                    // 建立 flatUpdates 寫入 users/ME
+                    let flatUpdates = { gacha_pity: pity };
+                    flatUpdates['items/free_gacha_ticket'] = ((d.items && d.items['free_gacha_ticket']) || 0) + ticketsEarned;
+                    Object.entries(itemCounts).forEach(([k, cnt]) => {
+                        flatUpdates[`items/${k}`] = ((d.items && d.items[k]) || 0) + cnt;
+                    });
+                    db.ref('users/'+ME).update(flatUpdates);
+
+                    // 點數：transaction（扣 100，加回抽中的點數）
+                    const netPts = totalPts - 100;
+                    db.ref('economy/'+ME).transaction(c => (c||0) + netPts);
+                    if (totalShards > 0) db.ref('users/'+ME+'/shards').transaction(c => (c||0) + totalShards);
+
+                    // 紀錄 gacha_log
+                    results.forEach(r => logGachaResult(r.rarity, r.label, r.icon));
+
+                    // 更新 pity bar
+                    gachaPity = pity;
+                    document.getElementById('pity_text').innerText = `${gachaPity}/10`;
+                    document.getElementById('pity_bar').style.width = `${(gachaPity/10)*100}%`;
+
+                    playSound('coin');
+                    showTenPullResult(results, ticketsEarned);
+                });
+            });
+        }
+
+        function showTenPullResult(results, ticketsEarned) {
+            const RS = {
+                M:     { bg:'rgba(255,214,10,0.18)',  border:'rgba(255,214,10,0.65)',  text:'#F0C040', badge:'🏆 神話' },
+                E:     { bg:'rgba(191,90,242,0.18)',  border:'rgba(191,90,242,0.65)',  text:'#C084FC', badge:'✨ 史詩' },
+                R:     { bg:'rgba(123,156,255,0.15)', border:'rgba(123,156,255,0.55)', text:'#7B9CFF', badge:'💎 稀有' },
+                U:     { bg:'rgba(74,222,128,0.12)',  border:'rgba(74,222,128,0.45)',  text:'#4ADE80', badge:'🎒 道具' },
+                C:     { bg:'rgba(160,160,165,0.1)',  border:'rgba(160,160,165,0.38)', text:'#A0A0A5', badge:'📦 普通' },
+                pts:   { bg:'rgba(255,179,64,0.12)',  border:'rgba(255,179,64,0.45)',  text:'#FFB340', badge:'💰 點數' },
+                shard: { bg:'rgba(96,165,250,0.12)',  border:'rgba(96,165,250,0.45)',  text:'#60A5FA', badge:'🔹 碎片' },
+                miss:  { bg:'rgba(248,113,113,0.1)',  border:'rgba(248,113,113,0.38)', text:'#F87171', badge:'💀 槓龜' },
+            };
+
+            const grid = document.getElementById('ten-pull-grid');
+            const confirmBtn = document.getElementById('ten-pull-confirm');
+            confirmBtn.style.display = 'none';
+            document.getElementById('ten-pull-summary').style.display = 'none';
+
+            // 每張卡有獨立的浮動偏移，讓整體有錯落感
+            const floatDurs  = [2.1, 2.4, 1.9, 2.6, 2.2, 2.5, 2.0, 2.3, 1.8, 2.4];
+            const floatDelay = [0, 0.3, 0.6, 0.1, 0.5, 0.2, 0.7, 0.4, 0.8, 0.0];
+
+            grid.innerHTML = results.map((r, i) => {
+                const s = RS[r.rarity] || RS.miss;
+                const glowClass = (r.rarity==='M'||r.rarity==='E'||r.rarity==='R') ? `glow-${r.rarity}` : '';
+                const enterDelay = `${i * 0.06}s`;
+                const floatD = `${floatDelay[i]}s`;
+                const floatDur = `${floatDurs[i]}s`;
+                return `<div class="tpc-wrap" style="--enter-d:${enterDelay}; --float-d:${floatD}; --float-dur:${floatDur};">
+                    <div class="tpc-inner" id="tpc-${i}">
+                        <div class="tpc-front"><div class="tpc-front-q" style="--float-d:${floatD};">❓</div></div>
+                        <div class="tpc-back ${glowClass}" style="background:${s.bg};border-color:${s.border};color:${s.text};">
+                            <div class="tpc-rarity-badge" style="color:${s.text};">${s.badge}</div>
+                            <div class="tpc-item" id="tpc-item-${i}">
+                                <div class="tpc-icon">${r.icon}</div>
+                                <div class="tpc-label">${r.label}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+            }).join('');
+
+            openModal('tenPullModal');
+
+            // 神話牌翻牌時暫停後續，給足時間演出
+            const MYTHIC_PAUSE = 2400;
+            let delays = [], cum = 0;
+            results.forEach(r => {
+                delays.push(cum);
+                cum += 260;
+                if (r.rarity === 'M') cum += MYTHIC_PAUSE;
+            });
+
+            const showSummary = () => {
+                const summary = document.getElementById('ten-pull-summary');
+                if (ticketsEarned > 0) {
+                    summary.textContent = `🎉 保底觸發！獲得【白嫖抽獎券】x${ticketsEarned}`;
+                    summary.style.display = '';
+                }
+                confirmBtn.style.display = '';
+                loadGachaHistory();
+            };
+
+            results.forEach((r, i) => {
+                const isLast = i === results.length - 1;
+                setTimeout(() => {
+                    const wrap  = grid.children[i];
+                    const inner = document.getElementById(`tpc-${i}`);
+
+                    if (r.rarity === 'M') {
+                        // ── 神話特效流程 ──
+                        // 1. 全螢幕金色閃光
+                        const flash = document.createElement('div');
+                        flash.className = 'tpc-screen-flash';
+                        document.body.appendChild(flash);
+                        setTimeout(() => flash.remove(), 1500);
+
+                        // 2. 慢速翻牌（1.1s）
+                        if (inner) inner.classList.add('mythic-flip', 'flipped');
+                        playSound('coin');
+
+                        // 3. 翻牌完成後：放大浮動 + 三波 confetti
+                        setTimeout(() => {
+                            const item = document.getElementById(`tpc-item-${i}`);
+                            if (item) item.classList.add('visible');
+                            if (wrap) wrap.classList.add('mythic-float');
+                            confetti({ particleCount:160, spread:130, origin:{y:0.45} });
+                            setTimeout(() => confetti({ particleCount:90, spread:75, origin:{y:0.5}, angle:60 }), 380);
+                            setTimeout(() => confetti({ particleCount:90, spread:75, origin:{y:0.5}, angle:120 }), 760);
+                            if (isLast) setTimeout(showSummary, 1200);
+                        }, 1150);
+
+                    } else {
+                        // ── 一般翻牌流程 ──
+                        if (inner) inner.classList.add('flipped');
+
+                        if (r.rarity === 'E') { playSound('success'); confetti({ particleCount:45, spread:65, origin:{y:0.5} }); }
+                        else if (r.rarity === 'R' || r.rarity === 'U') { playSound('success'); }
+                        else if (r.type === 'pts') { playSound('coin'); }
+
+                        setTimeout(() => {
+                            const item = document.getElementById(`tpc-item-${i}`);
+                            if (item) item.classList.add('visible');
+                            if (wrap) wrap.classList.add('floating');
+                            if (isLast) setTimeout(showSummary, 300);
+                        }, 520);
+                    }
+                }, delays[i]);
+            });
         }
 
         function executeLottery(m) {
@@ -1329,30 +1810,98 @@
                         playSound('error');
                         showModalMsg("💀 槓龜", "什麼都沒有，點數被系統沒收了。"+tail+(pityTriggered?"\n\n🎉 滿10抽保底：獲得【白嫖抽獎券】x1":""), false);
                     } 
-                    setTimeout(loadGachaHistory, 500);
+                    setTimeout(() => {
+                        loadGachaHistory();
+                        const histBody = document.getElementById('gacha-history-body');
+                        if (histBody && !histBody.classList.contains('open')) {
+                            histBody.classList.add('open');
+                            const ch = histBody.previousElementSibling.querySelector('.prob-chevron');
+                            if (ch) ch.classList.add('open');
+                        }
+                    }, 500);
                 });
             });
         }
 
         // ===== 🎁 物品使用 =====
-        function openItemUse(k) { 
-            let it=ITEMS[k], b=document.getElementById('itemUseConfirmBtn'); 
-            document.getElementById('itemUseIcon').innerText=it.i; 
-            document.getElementById('itemUseTitle').innerText=it.n; 
-            if(it.t==='u'){ 
-                document.getElementById('itemUseDesc').innerText=it.d; 
-                b.style.display='block'; 
-                b.onclick=()=>doUseItem(k); 
-            }else{ 
-                document.getElementById('itemUseDesc').innerHTML=it.d+"<br><br><span style='color:var(--red); font-weight:bold;'>⚠️ 這是收藏用虛寶，無法直接使用。<br>請至黑市高價出售換取點數！</span>"; 
-                b.style.display='none'; 
+        const BATCH_ITEMS = ['piggy_bank', 'mystery_box', 'shard_jar'];
+        let itemUseQty = 1, itemUseKey = '';
+
+        function adjustItemUseQty(delta) {
+            const max = myInventory[itemUseKey] || 1;
+            itemUseQty = Math.max(1, Math.min(max, itemUseQty + delta));
+            document.getElementById('itemUseQtyVal').innerText = itemUseQty;
+            document.getElementById('itemUseQtyMinus').disabled = itemUseQty <= 1;
+            document.getElementById('itemUseQtyPlus').disabled = itemUseQty >= max;
+        }
+
+        function openItemUse(k) {
+            let it=ITEMS[k], b=document.getElementById('itemUseConfirmBtn');
+            itemUseKey = k; itemUseQty = 1;
+            document.getElementById('itemUseIcon').innerText=it.i;
+            document.getElementById('itemUseTitle').innerText=it.n;
+            const qtyRow = document.getElementById('itemUseQtyRow');
+            if(it.t==='u'){
+                document.getElementById('itemUseDesc').innerText=it.d;
+                b.style.display='block';
+                b.onclick=()=>doUseItem(k);
+                const isBatch = BATCH_ITEMS.includes(k) && (myInventory[k] || 0) > 1;
+                qtyRow.style.display = isBatch ? 'block' : 'none';
+                if (isBatch) {
+                    document.getElementById('itemUseQtyVal').innerText = 1;
+                    document.getElementById('itemUseQtyMinus').disabled = true;
+                    document.getElementById('itemUseQtyPlus').disabled = (myInventory[k] || 0) <= 1;
+                }
+            }else{
+                document.getElementById('itemUseDesc').innerHTML=it.d+"<br><br><span style='color:var(--red); font-weight:bold;'>⚠️ 這是收藏用虛寶，無法直接使用。<br>請至黑市高價出售換取點數！</span>";
+                b.style.display='none';
+                qtyRow.style.display = 'none';
             } 
             openModal('itemUseModal'); 
         }
         
-        function doUseItem(k) { 
-            closeModal(); 
-            
+        function doUseItem(k) {
+            const qty = BATCH_ITEMS.includes(k) ? itemUseQty : 1;
+            closeModal();
+
+            // 批量使用（piggy_bank / mystery_box / shard_jar）
+            if (qty > 1) {
+                db.ref('users/'+ME+'/items/'+k).transaction(c => {
+                    if (!c || c < qty) return undefined;
+                    return c - qty;
+                }, (err, committed) => {
+                    if (!committed) return showToast('❌ 道具數量不足', 'error');
+                    if (k === 'piggy_bank') {
+                        let total = 0;
+                        for (let i = 0; i < qty; i++) total += Math.floor(Math.random()*26)+5;
+                        db.ref('economy/'+ME).transaction(v=>(v||0)+total);
+                        playSound('coin');
+                        showModalMsg(`🐷 打破 ${qty} 個撲滿！`, `嘩啦啦！總共獲得 <strong style="color:var(--gold)">${total} 點</strong>！`, true);
+                    } else if (k === 'shard_jar') {
+                        let total = 0;
+                        for (let i = 0; i < qty; i++) total += Math.random()<0.5?2:3;
+                        db.ref('users/'+ME+'/shards').transaction(v=>(v||0)+total);
+                        playSound('success');
+                        showToast(`💎 瓶子全部破裂！獲得 ${total} 個水晶碎片！`);
+                    } else if (k === 'mystery_box') {
+                        let rewards = {}, lines = '';
+                        for (let i = 0; i < qty; i++) {
+                            let isC = Math.random()<0.8;
+                            let pool = Object.keys(ITEMS).filter(key => ITEMS[key].r===(isC?'C':'R') && ITEMS[key].t==='g');
+                            let rwd = pool[Math.floor(Math.random()*pool.length)];
+                            rewards[rwd] = (rewards[rwd]||0)+1;
+                        }
+                        Object.keys(rewards).forEach(rwd => {
+                            db.ref('users/'+ME+'/items/'+rwd).transaction(v=>(v||0)+rewards[rwd]);
+                            lines += `<span style="font-size:20px;">${ITEMS[rwd].i}</span> ${ITEMS[rwd].n} x${rewards[rwd]}<br>`;
+                        });
+                        playSound('success');
+                        showModalMsg(`📦 開了 ${qty} 個箱子！`, lines, true);
+                    }
+                });
+                return;
+            }
+
             if(k === 'rewind_watch') {
                 db.ref('users/'+ME).once('value').then(snap => {
                     let d = snap.val() || {}; let now = new Date();
@@ -1397,7 +1946,7 @@
 
                 if(k === 'sync_dream') {
                     db.ref('economy/'+ME).transaction(v=>(v||0)+25);
-                    db.ref('mailbox/'+OPP).push({ title:"🎁 收到【共鳴發財夢】的祝福！", msg:`${CFG.myName}剛剛使用了共鳴發財夢，與你分享這份好運！快收下這 25 點吧！`, amount:25, claimed:false, timestamp:Date.now() });
+                    db.ref('mailbox/'+OPP).push({ title:"🎁 收到【共鳴發財夢】的祝福！", msg:`${CFG.myName}剛剛使用了共鳴發財夢，與你分享這份好運！快收下這 25 點吧！`, points:25, claimed:false, timestamp:Date.now() });
                     playSound('coin'); showModalMsg("🎉 共鳴成功", `你獲得了 <strong style='color:var(--gold)'>25 點</strong>！\n禮物信件也已經同步發送給${CFG.oppName}囉！`, true); return;
                 }
             }); 
@@ -1428,7 +1977,7 @@
                 else { showToast("❌ 餘額不足", 'error'); }
             } else {
                 let it = ITEMS[selectedTransferType];
-                if(myInventory[selectedTransferType] >= a) { openConfirmModal("💌 支援道具", `確定要送出 <strong style="color:var(--primary)">${it.n} x${a}</strong> 給${CFG.oppName}嗎？`, ()=>{ db.ref('users/'+ME+'/items/'+selectedTransferType).transaction(v => v - a); db.ref('mailbox/'+OPP).push({ title:"🎁 收到夥伴道具支援！", msg:`${senderName} 派精靈送來了急救物資，快點收下吧！`, amount:0, item: { key: selectedTransferType, qty: a }, claimed:false, timestamp:Date.now() }); playSound('success'); showToast(`💌 支援成功！已送出 ${it.n} x${a}`); }); }
+                if(myInventory[selectedTransferType] >= a) { openConfirmModal("💌 支援道具", `確定要送出 <strong style="color:var(--primary)">${it.n} x${a}</strong> 給${CFG.oppName}嗎？`, ()=>{ db.ref('users/'+ME+'/items/'+selectedTransferType).transaction(v => (v||0) - a); db.ref('mailbox/'+OPP).push({ title:"🎁 收到夥伴道具支援！", msg:`${senderName} 派精靈送來了急救物資，快點收下吧！`, amount:0, item: { key: selectedTransferType, qty: a }, claimed:false, timestamp:Date.now() }); playSound('success'); showToast(`💌 支援成功！已送出 ${it.n} x${a}`); }); }
                 else { showToast("❌ 道具數量不足", 'error'); }
             }
         }
@@ -1440,19 +1989,27 @@
                 if(!s.exists()) return showModalMsg("失敗","無效的序號！",false); 
                 db.ref('redeemed/'+ME+'/'+c).once('value').then(r=>{ 
                     if(r.exists()) return showModalMsg("失敗","這個序號你已經領過囉！",false); 
-                    const raw=s.val(); db.ref('redeemed/'+ME+'/'+c).set(true);
-                    // 支援新格式 { reward:{...}, max_uses, ... } 和舊格式（直接是數字或 reward object）
-                    const rw = (raw && typeof raw==='object' && raw.reward) ? raw.reward : raw;
-                    let mt="";
-                    if(typeof rw==='number'){ db.ref('economy/'+ME).transaction(v=>(v||0)+rw); mt+=`💰 獲得 ${rw} 點！<br>`; }
-                    else if(rw && typeof rw==='object'){
-                        if(rw.points){ db.ref('economy/'+ME).transaction(v=>(v||0)+rw.points); mt+=`💰 獲得 ${rw.points} 點<br>`; }
-                        if(rw.items){ Object.keys(rw.items).forEach(k=>{ let q=rw.items[k]; db.ref('users/'+ME+'/items/'+k).transaction(v=>(v||0)+q); mt+=`🎁 獲得【${ITEMS[k]?ITEMS[k].n:k}】x${q}<br>`; }); }
-                        if(rw.shards){ db.ref('users/'+ME+'/shards').transaction(v=>(v||0)+rw.shards); mt+=`🔹 獲得【水晶碎片】x${rw.shards}<br>`; }
-                    } 
-                    playSound('success'); confetti({particleCount:150, spread:80, origin:{y:0.6}}); showModalMsg("🎉 兌換成功", mt, true); 
-                }); 
-            }); 
+                    const raw=s.val();
+                    // 原子性增加 used_count，若已達上限則 abort
+                    db.ref('gift_codes/'+c+'/used_count').transaction(count => {
+                        if(raw.max_uses > 0 && (count||0) >= raw.max_uses) return undefined;
+                        return (count||0) + 1;
+                    }, (err, committed) => {
+                        if(!committed) return showModalMsg("失敗","此序號已達使用次數上限！",false);
+                        db.ref('redeemed/'+ME+'/'+c).set(true);
+                        // 支援新格式 { reward:{...}, max_uses, ... } 和舊格式（直接是數字或 reward object）
+                        const rw = (raw && typeof raw==='object' && raw.reward) ? raw.reward : raw;
+                        let mt="";
+                        if(typeof rw==='number'){ db.ref('economy/'+ME).transaction(v=>(v||0)+rw); mt+=`💰 獲得 ${rw} 點！<br>`; }
+                        else if(rw && typeof rw==='object'){
+                            if(rw.points){ db.ref('economy/'+ME).transaction(v=>(v||0)+rw.points); mt+=`💰 獲得 ${rw.points} 點<br>`; }
+                            if(rw.items){ Object.keys(rw.items).forEach(k=>{ let q=rw.items[k]; db.ref('users/'+ME+'/items/'+k).transaction(v=>(v||0)+q); mt+=`🎁 獲得【${ITEMS[k]?ITEMS[k].n:k}】x${q}<br>`; }); }
+                            if(rw.shards){ db.ref('users/'+ME+'/shards').transaction(v=>(v||0)+rw.shards); mt+=`🔹 獲得【水晶碎片】x${rw.shards}<br>`; }
+                        }
+                        playSound('success'); confetti({particleCount:150, spread:80, origin:{y:0.6}}); showModalMsg("🎉 兌換成功", mt, true);
+                    });
+                });
+            });
         }
 
         // ===== ✨ 合成系統 =====
