@@ -891,12 +891,16 @@
                 html = "<div style='text-align:center; color:rgba(255,255,255,0.3); margin-top:50px;'>📭 信箱空空如也</div>";
             } else {
                 sKeys.forEach(k => {
-                    let m=mails[k], d=new Date(m.timestamp); 
+                    let m=mails[k], d=new Date(m.timestamp);
                     if(!m.claimed) { hasUnclaimed=true; unreadCount++; }
-                    let isItem = m.item ? true : false;
-                    let rewardText = isItem ? `<span style="color:var(--primary)">${ITEMS[m.item.key].i} ${ITEMS[m.item.key].n} x${m.item.qty}</span>` : `${m.amount} 點`;
-                    let btnAction = isItem ? `claimMail('${k}', 0, '${m.item.key}', ${m.item.qty})` : `claimMail('${k}', ${m.amount})`;
-                    let btnHtml = m.claimed ? `<button class="btn disabled" style="width:auto; padding:6px 16px; margin:0; font-size:12px; background:transparent; color:var(--muted); border:1px solid var(--border);">已領取</button>` : `<button class="btn btn-primary" style="width:auto; padding:6px 16px; margin:0; font-size:12px; background:rgba(50,215,75,0.15); color:var(--green); border-color:rgba(50,215,75,0.3);" onclick="${btnAction}">領取</button>`;
+                    // Build reward display: supports new format (points/items) and old format (amount/item)
+                    let rwParts = [];
+                    const pts = m.points || m.amount || 0;
+                    if (pts > 0) rwParts.push(`${pts} 點`);
+                    if (m.items) Object.entries(m.items).forEach(([ik, qty]) => { const it = ITEMS[ik]; if(it) rwParts.push(`${it.i} ${it.n} x${qty}`); });
+                    if (m.item && ITEMS[m.item.key]) rwParts.push(`${ITEMS[m.item.key].i} ${ITEMS[m.item.key].n} x${m.item.qty}`);
+                    let rewardText = rwParts.length ? `<span style="color:var(--primary)">${rwParts.join('、')}</span>` : `<span style="color:var(--muted)">無獎勵</span>`;
+                    let btnHtml = m.claimed ? `<button class="btn disabled" style="width:auto; padding:6px 16px; margin:0; font-size:12px; background:transparent; color:var(--muted); border:1px solid var(--border);">已領取</button>` : `<button class="btn btn-primary" style="width:auto; padding:6px 16px; margin:0; font-size:12px; background:rgba(50,215,75,0.15); color:var(--green); border-color:rgba(50,215,75,0.3);" onclick="claimMail('${k}')">領取</button>`;
                     html += `<div class="item-card" style="flex-direction:column; align-items:flex-start; gap:10px; cursor:default; ${m.claimed?'opacity:0.5;':''}"><div style="display:flex; justify-content:space-between; width:100%;"><div style="font-weight:bold; color:var(--gold);">${m.title}</div><div style="font-size:11px; color:var(--muted);">${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}</div></div><div style="font-size:13px; color:rgba(255,255,255,0.8); line-height:1.5;">${m.msg}</div><div style="display:flex; justify-content:space-between; width:100%; align-items:center; margin-top:5px;"><div style="font-weight:bold; font-size:16px;">${rewardText}</div>${btnHtml}</div></div>`;
                 });
             }
@@ -907,19 +911,26 @@
             if (bottomBadge) bottomBadge.style.display = unreadCount > 0 ? 'block' : 'none';
         });
 
-        function claimMail(id, amt, itemKey = null, itemQty = 0) { 
-            db.ref('mailbox/'+ME+'/'+id+'/claimed').transaction(c=>c===true?undefined:true, (e,c)=>{ 
-                if(c){ 
-                    if(itemKey) {
-                        db.ref('users/'+ME+'/items/'+itemKey).transaction(v=>(v||0)+itemQty);
-                        showToast(`🎁 領取成功！獲得 ${ITEMS[itemKey].n} x${itemQty}`, 'success'); 
-                    } else {
-                        db.ref('economy/'+ME).transaction(v=>(v||0)+amt); 
-                        showToast(`💰 領取成功！已存入 ${amt} 點`, 'success'); 
-                    }
-                    playSound('coin'); confetti({particleCount:80, spread:60, origin:{y:0.6}}); 
-                } 
-            }); 
+        function claimMail(id) {
+            db.ref('mailbox/'+ME+'/'+id+'/claimed').transaction(c => c === true ? undefined : true, (e, committed) => {
+                if (!committed) return;
+                db.ref('mailbox/'+ME+'/'+id).once('value', snap => {
+                    const m = snap.val(); if (!m) return;
+                    const pts = m.points || m.amount || 0;
+                    if (pts > 0) db.ref('economy/'+ME).transaction(v => (v||0)+pts);
+                    // new multi-item format
+                    if (m.items) Object.entries(m.items).forEach(([k, qty]) => db.ref('users/'+ME+'/items/'+k).transaction(v=>(v||0)+qty));
+                    // old single-item format
+                    if (m.item) db.ref('users/'+ME+'/items/'+m.item.key).transaction(v=>(v||0)+m.item.qty);
+                    // toast
+                    const rwParts = [];
+                    if (pts > 0) rwParts.push(`${pts} 點`);
+                    if (m.items) Object.entries(m.items).forEach(([k,qty])=>{const it=ITEMS[k];if(it)rwParts.push(`${it.n} x${qty}`);});
+                    if (m.item && ITEMS[m.item.key]) rwParts.push(`${ITEMS[m.item.key].n} x${m.item.qty}`);
+                    showToast(`🎁 領取成功！${rwParts.length ? '獲得 '+rwParts.join('、') : ''}`, 'success');
+                    playSound('coin'); confetti({particleCount:80, spread:60, origin:{y:0.6}});
+                });
+            });
         }
         
         function clearClaimedMails() { 
@@ -1429,12 +1440,15 @@
                 if(!s.exists()) return showModalMsg("失敗","無效的序號！",false); 
                 db.ref('redeemed/'+ME+'/'+c).once('value').then(r=>{ 
                     if(r.exists()) return showModalMsg("失敗","這個序號你已經領過囉！",false); 
-                    let rw=s.val(), mt=""; db.ref('redeemed/'+ME+'/'+c).set(true); 
+                    const raw=s.val(); db.ref('redeemed/'+ME+'/'+c).set(true);
+                    // 支援新格式 { reward:{...}, max_uses, ... } 和舊格式（直接是數字或 reward object）
+                    const rw = (raw && typeof raw==='object' && raw.reward) ? raw.reward : raw;
+                    let mt="";
                     if(typeof rw==='number'){ db.ref('economy/'+ME).transaction(v=>(v||0)+rw); mt+=`💰 獲得 ${rw} 點！<br>`; }
-                    else if(typeof rw==='object'){ 
-                        if(rw.points){ db.ref('economy/'+ME).transaction(v=>(v||0)+rw.points); mt+=`💰 獲得 ${rw.points} 點<br>`; } 
-                        if(rw.items){ Object.keys(rw.items).forEach(k=>{ let q=rw.items[k]; db.ref('users/'+ME+'/items/'+k).transaction(v=>(v||0)+q); mt+=`🎁 獲得【${ITEMS[k]?ITEMS[k].n:k}】x${q}<br>`; }); } 
-                        if(rw.shards){ db.ref('users/'+ME+'/shards').transaction(v=>(v||0)+rw.shards); mt+=`🔹 獲得【水晶碎片】x${rw.shards}<br>`; } 
+                    else if(rw && typeof rw==='object'){
+                        if(rw.points){ db.ref('economy/'+ME).transaction(v=>(v||0)+rw.points); mt+=`💰 獲得 ${rw.points} 點<br>`; }
+                        if(rw.items){ Object.keys(rw.items).forEach(k=>{ let q=rw.items[k]; db.ref('users/'+ME+'/items/'+k).transaction(v=>(v||0)+q); mt+=`🎁 獲得【${ITEMS[k]?ITEMS[k].n:k}】x${q}<br>`; }); }
+                        if(rw.shards){ db.ref('users/'+ME+'/shards').transaction(v=>(v||0)+rw.shards); mt+=`🔹 獲得【水晶碎片】x${rw.shards}<br>`; }
                     } 
                     playSound('success'); confetti({particleCount:150, spread:80, origin:{y:0.6}}); showModalMsg("🎉 兌換成功", mt, true); 
                 }); 

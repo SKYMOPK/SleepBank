@@ -144,6 +144,19 @@
         .code-row { display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: end; }
         .reward-row { display: grid; grid-template-columns: 1fr 80px; gap: 8px; }
 
+        /* ===== 購物車 ===== */
+        .cart-list { display: flex; flex-direction: column; gap: 6px; min-height: 36px; }
+        .cart-empty { font-size: 12px; color: var(--muted); text-align: center; padding: 8px 0; }
+        .cart-item { display: flex; align-items: center; gap: 8px; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.07); border-radius: 10px; padding: 8px 10px; }
+        .cart-item-icon { font-size: 18px; flex-shrink: 0; }
+        .cart-item-name { flex: 1; font-size: 12px; font-weight: bold; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .cart-qty-btn { width: 24px; height: 24px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.12); background: rgba(255,255,255,0.06); color: var(--text); font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .cart-qty-btn:hover { background: rgba(255,255,255,0.12); }
+        .cart-qty-val { min-width: 24px; text-align: center; font-size: 13px; font-weight: bold; }
+        .cart-remove { background: rgba(248,113,113,0.08); border: 1px solid rgba(248,113,113,0.3); color: var(--red); padding: 4px 8px; border-radius: 6px; font-size: 11px; cursor: pointer; flex-shrink: 0; }
+        .cart-remove:hover { background: rgba(248,113,113,0.18); }
+        .item-option.in-cart { border-color: rgba(74,222,128,0.4); background: rgba(74,222,128,0.08); }
+
         /* ===== Button ===== */
         .btn {
             width: 100%; padding: 14px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.1);
@@ -240,73 +253,46 @@
         </div>
     </div>
 
-    <!-- ===== 發放點數 ===== -->
+    <!-- ===== 發放獎勵 ===== -->
     <div class="section-card">
-        <div class="section-header" onclick="toggleSection('points')">
-            <span class="section-header-icon">💰</span>
-            <span class="section-header-title">發放點數</span>
-            <span class="section-chevron" id="chevron-points">▼</span>
-        </div>
-        <div class="section-body collapsed" id="body-points">
-            <div>
-                <label>對象</label>
-                <div class="target-row">
-                    <div class="target-btn selected" data-target="p1" onclick="selectTarget('points', this)">👦🏻 至凱</div>
-                    <div class="target-btn" data-target="p2" onclick="selectTarget('points', this)">👦🏼 柏致</div>
-                    <div class="target-btn" data-target="both" onclick="selectTarget('points', this)">👥 兩人</div>
-                </div>
-            </div>
-            <div>
-                <label>點數</label>
-                <input type="number" id="points-amount" placeholder="輸入點數" min="1" max="9999">
-            </div>
-            <div>
-                <label>信件說明（選填）</label>
-                <input type="text" id="points-note" placeholder="例：活動獎勵" maxlength="30">
-            </div>
-            <button class="btn btn-gold" onclick="sendPoints()">💰 發送至信箱</button>
-        </div>
-    </div>
-
-    <!-- ===== 發放道具／虛寶 ===== -->
-    <div class="section-card">
-        <div class="section-header" onclick="toggleSection('items')">
+        <div class="section-header" onclick="toggleSection('reward')">
             <span class="section-header-icon">🎁</span>
-            <span class="section-header-title">發放道具／虛寶</span>
-            <span class="section-chevron" id="chevron-items">▼</span>
+            <span class="section-header-title">發放獎勵</span>
+            <span class="section-chevron" id="chevron-reward">▼</span>
         </div>
-        <div class="section-body collapsed" id="body-items">
+        <div class="section-body collapsed" id="body-reward">
             <div>
                 <label>對象</label>
                 <div class="target-row">
-                    <div class="target-btn selected" data-target="p1" onclick="selectTarget('items', this)">👦🏻 至凱</div>
-                    <div class="target-btn" data-target="p2" onclick="selectTarget('items', this)">👦🏼 柏致</div>
-                    <div class="target-btn" data-target="both" onclick="selectTarget('items', this)">👥 兩人</div>
+                    <div class="target-btn selected" data-target="p1" onclick="selectTarget('reward', this)">👦🏻 至凱</div>
+                    <div class="target-btn" data-target="p2" onclick="selectTarget('reward', this)">👦🏼 柏致</div>
+                    <div class="target-btn" data-target="both" onclick="selectTarget('reward', this)">👥 兩人</div>
                 </div>
             </div>
             <div>
-                <label>類別</label>
-                <div class="item-cat-row">
-                    <div class="item-cat-btn sel-U selected" data-cat="U" onclick="selectItemCat(this)">🔧 道具</div>
-                    <div class="item-cat-btn" data-cat="C" onclick="selectItemCat(this)">⚪ C</div>
-                    <div class="item-cat-btn" data-cat="R" onclick="selectItemCat(this)">🔵 R</div>
-                    <div class="item-cat-btn" data-cat="E" onclick="selectItemCat(this)">🟣 E</div>
-                    <div class="item-cat-btn" data-cat="M" onclick="selectItemCat(this)">🟡 M</div>
+                <label>💰 點數（選填，0 = 不含點數）</label>
+                <input type="number" id="reward-points" placeholder="0" min="0" max="9999" value="0">
+            </div>
+            <div>
+                <label>🎁 道具（點擊加入清單，可多選）</label>
+                <div class="item-cat-row" id="mail-cat-row">
+                    <div class="item-cat-btn sel-U selected" data-cat="U" onclick="selectMailItemCat(this)">🔧 道具</div>
+                    <div class="item-cat-btn" data-cat="C" onclick="selectMailItemCat(this)">⚪ C</div>
+                    <div class="item-cat-btn" data-cat="R" onclick="selectMailItemCat(this)">🔵 R</div>
+                    <div class="item-cat-btn" data-cat="E" onclick="selectMailItemCat(this)">🟣 E</div>
+                    <div class="item-cat-btn" data-cat="M" onclick="selectMailItemCat(this)">🟡 M</div>
                 </div>
+                <div class="item-grid" id="mail-item-grid" style="margin-top:8px;"></div>
             </div>
             <div>
-                <label>選擇道具</label>
-                <div class="item-grid" id="item-grid"></div>
-            </div>
-            <div>
-                <label>數量</label>
-                <input type="number" id="item-qty" placeholder="數量" min="1" max="99" value="1">
+                <label>已選道具清單</label>
+                <div class="cart-list" id="mail-cart"><div class="cart-empty">尚未選擇任何道具</div></div>
             </div>
             <div>
                 <label>信件說明（選填）</label>
-                <input type="text" id="item-note" placeholder="例：活動獎勵" maxlength="30">
+                <input type="text" id="reward-note" placeholder="例：活動獎勵" maxlength="30">
             </div>
-            <button class="btn btn-green" onclick="sendItem()">🎁 發送至信箱</button>
+            <button class="btn btn-gold" onclick="sendReward()">📨 發送至信箱</button>
         </div>
     </div>
 
@@ -326,35 +312,21 @@
                 </div>
             </div>
             <div>
-                <label>獎勵類型</label>
-                <div class="type-row" style="margin-bottom:10px;">
-                    <div class="type-btn selected" data-rtype="points" onclick="selectRewardType(this)">💰 點數</div>
-                    <div class="type-btn" data-rtype="item" onclick="selectRewardType(this)">🎁 道具</div>
-                </div>
+                <label>💰 點數（選填，0 或空白 = 不含點數）</label>
+                <input type="number" id="code-points" placeholder="0" min="0" max="9999" value="0">
             </div>
-            <div id="code-reward-points">
-                <label>點數</label>
-                <input type="number" id="code-points" placeholder="點數" min="1" max="9999">
-            </div>
-            <div id="code-reward-item" style="display:none; flex-direction:column; gap:10px;">
-                <div>
-                    <label>道具類別</label>
-                    <div class="item-cat-row">
-                        <div class="item-cat-btn sel-U selected" data-cat="U" onclick="selectCodeItemCat(this)">🔧 道具</div>
-                        <div class="item-cat-btn" data-cat="C" onclick="selectCodeItemCat(this)">⚪ C</div>
-                        <div class="item-cat-btn" data-cat="R" onclick="selectCodeItemCat(this)">🔵 R</div>
-                        <div class="item-cat-btn" data-cat="E" onclick="selectCodeItemCat(this)">🟣 E</div>
-                        <div class="item-cat-btn" data-cat="M" onclick="selectCodeItemCat(this)">🟡 M</div>
-                    </div>
+            <div style="display:flex; flex-direction:column; gap:10px;">
+                <label>🎁 道具（選填，點擊加入清單，可多選）</label>
+                <div class="item-cat-row" id="code-cat-row">
+                    <div class="item-cat-btn sel-U selected" data-cat="U" onclick="selectCodeItemCat(this)">🔧 道具</div>
+                    <div class="item-cat-btn" data-cat="C" onclick="selectCodeItemCat(this)">⚪ C</div>
+                    <div class="item-cat-btn" data-cat="R" onclick="selectCodeItemCat(this)">🔵 R</div>
+                    <div class="item-cat-btn" data-cat="E" onclick="selectCodeItemCat(this)">🟣 E</div>
+                    <div class="item-cat-btn" data-cat="M" onclick="selectCodeItemCat(this)">🟡 M</div>
                 </div>
-                <div>
-                    <label>選擇道具</label>
-                    <div class="item-grid" id="code-item-grid"></div>
-                </div>
-                <div>
-                    <label>數量</label>
-                    <input type="number" id="code-item-qty" placeholder="數量" min="1" max="99" value="1">
-                </div>
+                <div class="item-grid" id="code-item-grid"></div>
+                <label>已選道具清單</label>
+                <div class="cart-list" id="code-cart"><div class="cart-empty">尚未選擇任何道具</div></div>
             </div>
             <div>
                 <label>使用次數上限（0 = 無限）</label>
@@ -498,96 +470,113 @@
     });
 
     // ===== 對象選擇 =====
-    const targetState = { points: 'p1', items: 'p1' };
+    const targetState = { reward: 'p1' };
     function selectTarget(section, el) {
         el.closest('.target-row').querySelectorAll('.target-btn').forEach(b => b.classList.remove('selected'));
         el.classList.add('selected');
         targetState[section] = el.dataset.target;
     }
 
-    // ===== 點數 =====
-    function sendPoints() {
-        const amount = parseInt(document.getElementById('points-amount').value);
-        const note = document.getElementById('points-note').value.trim() || '管理員發放';
-        if (!amount || amount < 1) return showToast('請輸入點數', 'var(--red)');
-        const targets = targetState.points === 'both' ? ['p1', 'p2'] : [targetState.points];
-        const now = Date.now();
-        targets.forEach(p => {
-            db.ref('mailbox/' + p).push({ amount, title: note, msg: `管理員發放 ${amount} 點`, timestamp: now, claimed: false });
-        });
-        showToast(`✅ 已發送 ${amount} 點！`);
-        document.getElementById('points-amount').value = '';
-        document.getElementById('points-note').value = '';
+    // ===== 購物車 =====
+    const carts = { mail: {}, code: {} };
+
+    function addToCart(type, key) {
+        carts[type][key] = (carts[type][key] || 0) + 1;
+        renderCart(type);
+        renderItemGridCart(type === 'mail' ? 'mail-item-grid' : 'code-item-grid', type);
     }
 
-    // ===== 道具 =====
-    let selectedItemKey = null;
-    let currentItemCat = 'U';
+    function removeFromCart(type, key) {
+        delete carts[type][key];
+        renderCart(type);
+        renderItemGridCart(type === 'mail' ? 'mail-item-grid' : 'code-item-grid', type);
+    }
 
-    function selectItemCat(el) {
+    function adjustCartQty(type, key, delta) {
+        carts[type][key] = (carts[type][key] || 0) + delta;
+        const removed = carts[type][key] <= 0;
+        if (removed) delete carts[type][key];
+        renderCart(type);
+        if (removed) renderItemGridCart(type === 'mail' ? 'mail-item-grid' : 'code-item-grid', type);
+    }
+
+    function renderCart(type) {
+        const el = document.getElementById(type === 'mail' ? 'mail-cart' : 'code-cart');
+        const entries = Object.entries(carts[type]);
+        if (!entries.length) { el.innerHTML = '<div class="cart-empty">尚未選擇任何道具</div>'; return; }
+        el.innerHTML = entries.map(([k, qty]) => {
+            const it = ITEMS[k];
+            return `<div class="cart-item">
+                <span class="cart-item-icon">${it.i}</span>
+                <span class="cart-item-name">${it.n}</span>
+                <button class="cart-qty-btn" onclick="adjustCartQty('${type}','${k}',-1)">−</button>
+                <span class="cart-qty-val">${qty}</span>
+                <button class="cart-qty-btn" onclick="adjustCartQty('${type}','${k}',1)">+</button>
+                <button class="cart-remove" onclick="removeFromCart('${type}','${k}')">✕</button>
+            </div>`;
+        }).join('');
+    }
+
+    // ===== 道具網格（購物車模式）=====
+    const currentCat = { mail: 'U', code: 'U' };
+
+    function renderItemGridCart(gridId, cartType) {
+        const cat = currentCat[cartType];
+        const grid = document.getElementById(gridId);
+        const filtered = Object.entries(ITEMS).filter(([, v]) => v.r === cat);
+        grid.innerHTML = filtered.map(([k, v]) => `
+            <div class="item-option ${carts[cartType][k] ? 'in-cart' : ''}" onclick="addToCart('${cartType}', '${k}')">
+                <span class="item-icon">${v.i}</span>
+                <span class="item-name">${v.n}</span>
+                <span class="item-rarity">${v.r} · ${v.b}pt${carts[cartType][k] ? ' ✓' : ''}</span>
+            </div>`).join('');
+    }
+
+    function selectMailItemCat(el) {
         el.closest('.item-cat-row').querySelectorAll('.item-cat-btn').forEach(b => {
             b.classList.remove('selected', 'sel-U', 'sel-C', 'sel-R', 'sel-E', 'sel-M');
         });
         el.classList.add('selected', 'sel-' + el.dataset.cat);
-        currentItemCat = el.dataset.cat;
-        selectedItemKey = null;
-        renderItemGrid('item-grid', currentItemCat);
+        currentCat.mail = el.dataset.cat;
+        renderItemGridCart('mail-item-grid', 'mail');
     }
 
-    function renderItemGrid(gridId, cat) {
-        const grid = document.getElementById(gridId);
-        const filtered = Object.entries(ITEMS).filter(([, v]) => v.r === cat);
-        grid.innerHTML = filtered.map(([k, v]) => `
-            <div class="item-option ${selectedItemKey === k ? 'selected' : ''}" onclick="selectItem('${k}', '${gridId}', this)">
-                <span class="item-icon">${v.i}</span>
-                <span class="item-name">${v.n}</span>
-                <span class="item-rarity">${v.r} · ${v.b}pt</span>
-            </div>`).join('');
+    // ===== 發放獎勵 =====
+    function buildRewardMsg(pts, items) {
+        const parts = [];
+        if (pts > 0) parts.push(`${pts} 點`);
+        Object.entries(items).forEach(([k, qty]) => { const it = ITEMS[k]; if (it) parts.push(`${it.i}${it.n} x${qty}`); });
+        return '管理員發放：' + (parts.join('、') || '（空）');
     }
 
-    function selectItem(key, gridId, el) {
-        document.getElementById(gridId).querySelectorAll('.item-option').forEach(b => b.classList.remove('selected'));
-        el.classList.add('selected');
-        if (gridId === 'item-grid') selectedItemKey = key;
-        else selectedCodeItemKey = key;
-    }
-
-    function sendItem() {
-        if (!selectedItemKey) return showToast('請選擇道具', 'var(--red)');
-        const qty = parseInt(document.getElementById('item-qty').value) || 1;
-        const note = document.getElementById('item-note').value.trim() || '管理員發放';
-        const targets = targetState.items === 'both' ? ['p1', 'p2'] : [targetState.items];
-        const item = ITEMS[selectedItemKey];
+    function sendReward() {
+        const pts = parseInt(document.getElementById('reward-points').value) || 0;
+        const note = document.getElementById('reward-note').value.trim() || '管理員發放';
+        const hasItems = Object.keys(carts.mail).length > 0;
+        if (pts === 0 && !hasItems) return showToast('請填入點數或選擇道具', 'var(--red)');
+        const targets = targetState.reward === 'both' ? ['p1', 'p2'] : [targetState.reward];
         const now = Date.now();
-        targets.forEach(p => {
-            db.ref('mailbox/' + p).push({ title: note, msg: `管理員發放 ${item.i} ${item.n} x${qty}`, timestamp: now, claimed: false, item: { key: selectedItemKey, qty } });
-        });
-        showToast(`✅ 已發送 ${item.i} ${item.n} x${qty}！`);
-        document.getElementById('item-qty').value = '1';
-        document.getElementById('item-note').value = '';
+        const mailData = { title: note, msg: buildRewardMsg(pts, carts.mail), timestamp: now, claimed: false };
+        if (pts > 0) mailData.points = pts;
+        if (hasItems) mailData.items = { ...carts.mail };
+        targets.forEach(p => { db.ref('mailbox/' + p).push(mailData); });
+        const summary = buildRewardMsg(pts, carts.mail).replace('管理員發放：', '');
+        showToast(`✅ 已發送：${summary}`);
+        carts.mail = {};
+        renderCart('mail');
+        renderItemGridCart('mail-item-grid', 'mail');
+        document.getElementById('reward-points').value = '0';
+        document.getElementById('reward-note').value = '';
     }
 
     // ===== 序號 =====
-    let codeRewardType = 'points';
-    let selectedCodeItemKey = null;
-    let currentCodeItemCat = 'U';
-
-    function selectRewardType(el) {
-        document.querySelectorAll('#body-codes .type-row .type-btn').forEach(b => b.classList.remove('selected'));
-        el.classList.add('selected');
-        codeRewardType = el.dataset.rtype;
-        document.getElementById('code-reward-points').style.display = codeRewardType === 'points' ? 'block' : 'none';
-        document.getElementById('code-reward-item').style.display = codeRewardType === 'item' ? 'flex' : 'none';
-    }
-
     function selectCodeItemCat(el) {
         el.closest('.item-cat-row').querySelectorAll('.item-cat-btn').forEach(b => {
             b.classList.remove('selected', 'sel-U', 'sel-C', 'sel-R', 'sel-E', 'sel-M');
         });
         el.classList.add('selected', 'sel-' + el.dataset.cat);
-        currentCodeItemCat = el.dataset.cat;
-        selectedCodeItemKey = null;
-        renderItemGrid('code-item-grid', currentCodeItemCat);
+        currentCat.code = el.dataset.cat;
+        renderItemGridCart('code-item-grid', 'code');
     }
 
     function genCode() {
@@ -601,19 +590,19 @@
         const key = document.getElementById('code-key').value.trim().toUpperCase();
         if (!key) return showToast('請輸入序號', 'var(--red)');
         const maxUses = parseInt(document.getElementById('code-max-uses').value) || 0;
-        let reward = {};
-        if (codeRewardType === 'points') {
-            const pts = parseInt(document.getElementById('code-points').value);
-            if (!pts || pts < 1) return showToast('請輸入點數', 'var(--red)');
-            reward = { type: 'points', amount: pts };
-        } else {
-            if (!selectedCodeItemKey) return showToast('請選擇道具', 'var(--red)');
-            const qty = parseInt(document.getElementById('code-item-qty').value) || 1;
-            reward = { type: 'item', key: selectedCodeItemKey, qty };
-        }
+        const pts = parseInt(document.getElementById('code-points').value) || 0;
+        const hasItems = Object.keys(carts.code).length > 0;
+        if (pts === 0 && !hasItems) return showToast('請至少填入點數或選擇道具', 'var(--red)');
+        const reward = {};
+        if (pts > 0) reward.points = pts;
+        if (hasItems) reward.items = { ...carts.code };
         db.ref('gift_codes/' + key).set({ reward, max_uses: maxUses, used_count: 0, created: Date.now() });
         showToast(`✅ 序號 ${key} 已建立！`);
         document.getElementById('code-key').value = '';
+        document.getElementById('code-points').value = '0';
+        carts.code = {};
+        renderCart('code');
+        renderItemGridCart('code-item-grid', 'code');
     }
 
     function deleteCode(key) {
@@ -629,9 +618,14 @@
         if (!entries.length) { list.innerHTML = '<div style="color:var(--muted); font-size:13px; text-align:center;">目前沒有序號</div>'; return; }
         list.innerHTML = entries.map(([k, v]) => {
             const isUsed = v.max_uses > 0 && v.used_count >= v.max_uses;
-            const rewardText = v.reward.type === 'points'
-                ? `💰 ${v.reward.amount} 點`
-                : `${ITEMS[v.reward.key]?.i || '?'} ${ITEMS[v.reward.key]?.n || v.reward.key} x${v.reward.qty}`;
+            const rw = v.reward || {};
+            const parts = [];
+            if (rw.points) parts.push(`💰 ${rw.points} 點`);
+            if (rw.items) Object.entries(rw.items).forEach(([ik, qty]) => { const it = ITEMS[ik]; parts.push(it ? `${it.i}${it.n} x${qty}` : `? x${qty}`); });
+            // backward compat for old format
+            if (!parts.length && rw.amount) parts.push(`💰 ${rw.amount} 點`);
+            if (!parts.length && rw.key) { const it = ITEMS[rw.key]; parts.push(it ? `${it.i}${it.n} x${rw.qty||1}` : `? x${rw.qty||1}`); }
+            const rewardText = parts.join('＋') || '未知獎勵';
             const usageText = v.max_uses === 0 ? '無限次' : `${v.used_count}/${v.max_uses}`;
             return `<div class="code-item ${isUsed ? 'code-used' : ''}">
                 <div>
@@ -669,7 +663,11 @@
             list.innerHTML = entries.map(([k, m]) => {
                 const d = new Date(m.timestamp);
                 const timeStr = `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
-                const rewardText = m.item ? `${ITEMS[m.item.key]?.i || '?'} ${ITEMS[m.item.key]?.n || m.item.key} x${m.item.qty}` : `💰 ${m.amount} 點`;
+                const rwParts = [];
+                if (m.points || m.amount) rwParts.push(`💰 ${m.points || m.amount} 點`);
+                if (m.items) Object.entries(m.items).forEach(([ik, qty]) => { const it = ITEMS[ik]; rwParts.push(it ? `${it.i}${it.n} x${qty}` : `? x${qty}`); });
+                if (m.item) { const it = ITEMS[m.item.key]; rwParts.push(it ? `${it.i}${it.n} x${m.item.qty}` : `? x${m.item.qty}`); }
+                const rewardText = rwParts.join('＋') || '未知獎勵';
                 const statusColor = m.claimed ? 'var(--muted)' : 'var(--green)';
                 const statusLabel = m.claimed ? '已領取' : '未領取';
                 return `<div class="code-item ${m.claimed ? 'code-used' : ''}">
@@ -698,8 +696,8 @@
     };
 
     // 初始化
-    renderItemGrid('item-grid', 'U');
-    renderItemGrid('code-item-grid', 'U');
+    renderItemGridCart('mail-item-grid', 'mail');
+    renderItemGridCart('code-item-grid', 'code');
 </script>
 </body>
 </html>
