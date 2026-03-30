@@ -240,11 +240,42 @@
         #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
         @media (max-width: 480px) { .balance-amount { font-size: 44px; } }
+
+        /* ===== 確認 Modal ===== */
+        .confirm-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.72); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); z-index: 500; align-items: center; justify-content: center; padding: 20px; }
+        .confirm-overlay.show { display: flex; }
+        .confirm-box { background: rgba(18, 22, 36, 0.96); border: 1px solid rgba(255,255,255,0.12); border-radius: 24px; padding: 32px 24px; width: 100%; max-width: 360px; text-align: center; animation: fadeInUp 0.25s ease-out; backdrop-filter: blur(20px); }
+        .confirm-title { font-size: 18px; font-weight: 800; margin-bottom: 12px; }
+        .confirm-body { font-size: 14px; color: var(--muted); line-height: 1.8; margin-bottom: 24px; }
+        .confirm-body strong { color: var(--text); }
+        .confirm-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .confirm-cancel { padding: 14px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.04); color: var(--muted); font-size: 15px; font-weight: bold; cursor: pointer; transition: all 0.2s; }
+        .confirm-cancel:hover { background: rgba(255,255,255,0.08); color: var(--text); }
+        .confirm-ok { padding: 14px; border-radius: 14px; border: 1px solid rgba(255,179,64,0.4); background: rgba(255,179,64,0.12); color: var(--orange); font-size: 15px; font-weight: bold; cursor: pointer; transition: all 0.2s; }
+        .confirm-ok:hover { background: rgba(255,179,64,0.2); }
+        .confirm-ok.danger { border-color: rgba(248,113,113,0.4); background: rgba(248,113,113,0.1); color: var(--red); }
+        .confirm-ok.danger:hover { background: rgba(248,113,113,0.2); }
+
+        /* ===== 逐筆刪除按鈕 ===== */
+        .record-delete-btn { flex-shrink: 0; width: 32px; height: 32px; border-radius: 10px; border: 1px solid rgba(248,113,113,0.18); background: rgba(248,113,113,0.05); color: rgba(248,113,113,0.4); font-size: 15px; cursor: pointer; transition: all 0.2s; align-self: center; display: flex; align-items: center; justify-content: center; }
+        .record-delete-btn:hover { background: rgba(248,113,113,0.15); border-color: rgba(248,113,113,0.4); color: var(--red); }
     </style>
 </head>
 <body>
 
 <div id="toast"></div>
+
+<!-- ===== 確認 Modal ===== -->
+<div class="confirm-overlay" id="confirmOverlay">
+    <div class="confirm-box">
+        <div class="confirm-title" id="confirmTitle">確認</div>
+        <div class="confirm-body" id="confirmBody"></div>
+        <div class="confirm-btns">
+            <button class="confirm-cancel" onclick="closeConfirm()">取消</button>
+            <button class="confirm-ok" id="confirmOkBtn">確認</button>
+        </div>
+    </div>
+</div>
 
 <header class="header">
     <span class="header-back" onclick="handleBack()" style="cursor:pointer;">← 返回</span>
@@ -426,8 +457,9 @@
         const newBal = currentBalance + delta;
         let msg = '';
         if (owe === 0) { msg = '此筆不產生欠款'; }
-        else if (delta > 0) { msg = `新增後：柏致共欠至凱 $${newBal > 0 ? newBal : Math.abs(newBal)}`; }
-        else { msg = `新增後：至凱共欠柏致 $${newBal < 0 ? Math.abs(newBal) : newBal}`; }
+        else if (newBal > 0) { msg = `新增後：柏致共欠至凱 $${newBal}`; }
+        else if (newBal < 0) { msg = `新增後：至凱共欠柏致 $${Math.abs(newBal)}`; }
+        else { msg = '新增後：互不相欠 ✓'; }
         el.className = 'preview-text has-value';
         el.innerText = msg;
     }
@@ -438,18 +470,61 @@
         const note = document.getElementById('inp_note').value.trim() || '（未填備註）';
         if (!currentPayer) return showToast('請選擇付款人', 'var(--red)');
         if (p1 === 0 && p2 === 0) return showToast('請輸入金額', 'var(--red)');
+        const payerName = currentPayer === 'p1' ? '至凱' : '柏致';
         const record = { p1_bought: p1, p2_bought: p2, payer: currentPayer, note, timestamp: Date.now(), settled: false };
-        db.ref('split/records').push(record);
-        db.ref('split/balance').transaction(b => (b || 0) + getDelta(record));
-        document.getElementById('inp_p1').value = '';
-        document.getElementById('inp_p2').value = '';
-        document.getElementById('inp_note').value = '';
-        currentPayer = null;
-        document.getElementById('btn_p1').classList.remove('selected');
-        document.getElementById('btn_p2').classList.remove('selected');
-        document.getElementById('previewText').className = 'preview-text';
-        document.getElementById('previewText').innerText = '請輸入金額並選擇付款人';
-        showToast('✅ 已新增！');
+        const preview = document.getElementById('previewText').innerText;
+        const amountsLine = [p1 ? `至凱 $${p1}` : '', p2 ? `柏致 $${p2}` : ''].filter(Boolean).join('、');
+        showConfirm(
+            '確認新增',
+            `<strong>${note}</strong><br>${amountsLine}<br>由 ${payerName} 代付<br><br>${preview}`,
+            () => {
+                db.ref('split/records').push(record);
+                db.ref('split/balance').transaction(b => (b || 0) + getDelta(record));
+                document.getElementById('inp_p1').value = '';
+                document.getElementById('inp_p2').value = '';
+                document.getElementById('inp_note').value = '';
+                currentPayer = null;
+                document.getElementById('btn_p1').classList.remove('selected');
+                document.getElementById('btn_p2').classList.remove('selected');
+                document.getElementById('previewText').className = 'preview-text';
+                document.getElementById('previewText').innerText = '請輸入金額並選擇付款人';
+                showToast('✅ 已新增！');
+            }
+        );
+    }
+
+    // ===== Confirm Modal =====
+    let pendingAction = null;
+    function showConfirm(title, body, onOk, danger = false) {
+        document.getElementById('confirmTitle').innerText = title;
+        document.getElementById('confirmBody').innerHTML = body;
+        const okBtn = document.getElementById('confirmOkBtn');
+        okBtn.className = 'confirm-ok' + (danger ? ' danger' : '');
+        okBtn.innerText = danger ? '刪除' : '確認';
+        okBtn.onclick = () => { closeConfirm(); onOk(); };
+        document.getElementById('confirmOverlay').classList.add('show');
+    }
+    function closeConfirm() {
+        document.getElementById('confirmOverlay').classList.remove('show');
+    }
+
+    // ===== 逐筆刪除（未結清）=====
+    function confirmDeleteRecord(key) {
+        const r = allRecords[key];
+        if (!r) return;
+        const delta = getDelta(r);
+        const payerName = r.payer === 'p1' ? '至凱' : '柏致';
+        showConfirm(
+            '刪除這筆帳目',
+            `<strong>${r.note}</strong><br>${payerName}付<br><br>此筆對帳務的影響將一併撤銷，<br>無法復原。`,
+            () => {
+                db.ref('split/records/' + key).remove();
+                db.ref('split/balance').transaction(b => (b || 0) - delta);
+                selectedKeys.delete(key);
+                showToast('🗑️ 已刪除', 'var(--red)');
+            },
+            true
+        );
     }
 
     // ===== 紀錄頁 =====
@@ -496,6 +571,7 @@
             const payerName = r.payer === 'p1' ? '至凱' : '柏致';
             const isChecked = selectedKeys.has(k);
             const amountsText = [r.p1_bought ? `至凱 $${r.p1_bought}` : '', r.p2_bought ? `柏致 $${r.p2_bought}` : ''].filter(Boolean).join('　');
+            const deleteBtn = !r.settled ? `<button class="record-delete-btn" onclick="confirmDeleteRecord('${k}')" title="刪除此筆">✕</button>` : '';
             return `
             <div class="record-card">
                 ${!r.settled ? `<div class="record-checkbox${isChecked ? ' checked' : ''}" onclick="toggleSelect('${k}', this)"></div>` : '<div style="width:22px;flex-shrink:0;"></div>'}
@@ -505,7 +581,10 @@
                     <div><span class="record-payer-tag">💳 ${payerName}付</span></div>
                     <div class="record-result${delta === 0 ? ' zero' : ''}">${getResultText(r)}</div>
                 </div>
-                <div class="record-time">${formatTime(r.timestamp)}</div>
+                <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px;flex-shrink:0;">
+                    <div class="record-time">${formatTime(r.timestamp)}</div>
+                    ${deleteBtn}
+                </div>
             </div>`;
         };
 
