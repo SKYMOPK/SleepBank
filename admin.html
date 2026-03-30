@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>管理員後台</title>
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
+    <style>
+        :root {
+            --bg: #0C0E16;
+            --card: #161A28;
+            --text: #EEEEF8;
+            --muted: #8890A8;
+            --border: rgba(255,255,255,0.09);
+            --primary: #7B9CFF;
+            --green: #4ADE80;
+            --red: #F87171;
+            --gold: #F0C040;
+            --orange: #FFB340;
+            --purple: #C084FC;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 3px; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            background: radial-gradient(ellipse at top left, #1a1f35 0%, #0C0E16 60%);
+            background-attachment: fixed;
+            color: var(--text);
+            min-height: 100vh;
+            padding-bottom: 60px;
+        }
+
+        .header {
+            background: rgba(20, 24, 42, 0.88);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border-bottom: 1px solid rgba(255,255,255,0.07);
+            padding: 18px 20px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .header-back { color: var(--muted); text-decoration: none; font-size: 14px; font-weight: bold; transition: color 0.2s; }
+        .header-back:hover { color: var(--text); }
+        .header-title { font-size: 17px; font-weight: 800; letter-spacing: 1.5px; color: var(--primary); }
+        .header-sub { font-size: 12px; color: var(--muted); margin-left: auto; }
+
+        .page-wrapper { max-width: 600px; margin: 0 auto; padding: 20px 16px; display: flex; flex-direction: column; gap: 16px; }
+
+        /* ===== Section Card ===== */
+        .section-card {
+            background: rgba(22, 26, 42, 0.65);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.09);
+            border-radius: 20px;
+            overflow: hidden;
+        }
+        .section-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.07);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            user-select: none;
+        }
+        .section-header-icon { font-size: 20px; }
+        .section-header-title { font-size: 15px; font-weight: 800; flex: 1; }
+        .section-chevron { color: var(--muted); font-size: 12px; transition: transform 0.3s; transform: rotate(-90deg); }
+        .section-body { padding: 20px; display: flex; flex-direction: column; gap: 14px; }
+        .section-body.collapsed { display: none; }
+
+        /* ===== Form Elements ===== */
+        label { font-size: 12px; color: var(--muted); font-weight: bold; letter-spacing: 1px; display: block; margin-bottom: 6px; }
+        input[type="text"], input[type="number"], textarea, select {
+            width: 100%; background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 12px; padding: 12px 14px; color: var(--text);
+            font-size: 14px; outline: none; transition: border-color 0.2s, box-shadow 0.2s;
+            font-family: inherit; -webkit-appearance: none; appearance: none;
+        }
+        input:focus, textarea:focus, select:focus {
+            border-color: rgba(123,156,255,0.5);
+            box-shadow: 0 0 0 3px rgba(123,156,255,0.08);
+        }
+        textarea { resize: none; height: 80px; }
+        select option { background: #1C2030; }
+
+        /* ===== Type Selector ===== */
+        .type-row { display: flex; gap: 8px; flex-wrap: wrap; }
+        .type-btn {
+            padding: 8px 14px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.08);
+            background: rgba(255,255,255,0.03); color: var(--muted);
+            font-size: 13px; font-weight: bold; cursor: pointer; transition: all 0.2s;
+        }
+        .type-btn:hover { background: rgba(255,255,255,0.07); color: var(--text); }
+        .type-btn.selected { border-color: rgba(123,156,255,0.4); background: rgba(123,156,255,0.12); color: var(--primary); }
+        .type-btn.sel-event { border-color: rgba(240,192,64,0.4); background: rgba(240,192,64,0.1); color: var(--gold); }
+        .type-btn.sel-update { border-color: rgba(74,222,128,0.4); background: rgba(74,222,128,0.1); color: var(--green); }
+
+        /* ===== Target Selector ===== */
+        .target-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+        .target-btn {
+            padding: 12px 8px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.08);
+            background: rgba(255,255,255,0.03); color: var(--muted);
+            font-size: 13px; font-weight: bold; cursor: pointer; transition: all 0.2s; text-align: center;
+        }
+        .target-btn:hover { background: rgba(255,255,255,0.07); color: var(--text); }
+        .target-btn.selected { border-color: rgba(123,156,255,0.4); background: rgba(123,156,255,0.12); color: var(--primary); }
+
+        /* ===== 道具選擇器 ===== */
+        .item-cat-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin-bottom: 4px; }
+        .item-cat-btn {
+            padding: 8px 4px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.08);
+            background: rgba(255,255,255,0.03); color: var(--muted);
+            font-size: 12px; font-weight: bold; cursor: pointer; transition: all 0.2s; text-align: center;
+        }
+        .item-cat-btn:hover { background: rgba(255,255,255,0.07); }
+        .item-cat-btn.sel-U { border-color: rgba(123,156,255,0.4); background: rgba(123,156,255,0.1); color: var(--primary); }
+        .item-cat-btn.sel-C { border-color: rgba(160,160,165,0.4); background: rgba(160,160,165,0.08); color: #A0A0A5; }
+        .item-cat-btn.sel-R { border-color: rgba(123,156,255,0.4); background: rgba(123,156,255,0.1); color: var(--primary); }
+        .item-cat-btn.sel-E { border-color: rgba(192,132,252,0.4); background: rgba(192,132,252,0.1); color: var(--purple); }
+        .item-cat-btn.sel-M { border-color: rgba(240,192,64,0.4); background: rgba(240,192,64,0.1); color: var(--gold); }
+
+        .item-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 8px; max-height: 280px; overflow-y: auto; padding: 2px; }
+        .item-option {
+            padding: 10px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.07);
+            background: rgba(255,255,255,0.02); cursor: pointer; transition: all 0.2s;
+            display: flex; flex-direction: column; align-items: center; gap: 4px; text-align: center;
+        }
+        .item-option:hover { background: rgba(255,255,255,0.06); }
+        .item-option.selected { border-color: rgba(123,156,255,0.45); background: rgba(123,156,255,0.1); }
+        .item-option .item-icon { font-size: 24px; }
+        .item-option .item-name { font-size: 11px; font-weight: bold; color: var(--text); line-height: 1.3; }
+        .item-option .item-rarity { font-size: 10px; color: var(--muted); }
+
+        /* ===== 序號區 ===== */
+        .code-row { display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: end; }
+        .reward-row { display: grid; grid-template-columns: 1fr 80px; gap: 8px; }
+
+        /* ===== Button ===== */
+        .btn {
+            width: 100%; padding: 14px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(255,255,255,0.04); color: var(--text);
+            font-size: 15px; font-weight: bold; cursor: pointer; transition: all 0.2s;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+        }
+        .btn-primary { background: rgba(123,156,255,0.12); border-color: rgba(123,156,255,0.35); color: var(--primary); }
+        .btn-primary:hover { background: rgba(123,156,255,0.2); }
+        .btn-green { background: rgba(74,222,128,0.1); border-color: rgba(74,222,128,0.3); color: var(--green); }
+        .btn-green:hover { background: rgba(74,222,128,0.18); }
+        .btn-red { background: rgba(248,113,113,0.08); border-color: rgba(248,113,113,0.3); color: var(--red); }
+        .btn-red:hover { background: rgba(248,113,113,0.15); }
+        .btn-gold { background: rgba(240,192,64,0.1); border-color: rgba(240,192,64,0.3); color: var(--gold); }
+        .btn-gold:hover { background: rgba(240,192,64,0.18); }
+        .btn-sm { width: auto; padding: 10px 16px; font-size: 13px; border-radius: 10px; }
+        .btn:active { transform: scale(0.97); }
+
+        /* ===== Toast ===== */
+        #toast {
+            position: fixed; top: 80px; left: 50%;
+            transform: translateX(-50%) translateY(-20px);
+            background: rgba(20,24,38,0.97); border: 1px solid rgba(255,255,255,0.1);
+            border-left: 4px solid var(--green); color: var(--text);
+            padding: 14px 24px; border-radius: 12px; font-size: 14px; font-weight: bold;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.6); opacity: 0; transition: all 0.3s;
+            pointer-events: none; white-space: nowrap; z-index: 9999; backdrop-filter: blur(10px);
+        }
+        #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+        /* ===== Divider ===== */
+        .divider { height: 1px; background: rgba(255,255,255,0.06); }
+
+        /* ===== 序號列表 ===== */
+        .code-list { display: flex; flex-direction: column; gap: 8px; max-height: 200px; overflow-y: auto; }
+        .code-item {
+            display: flex; align-items: center; justify-content: space-between;
+            background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 10px; padding: 10px 14px; gap: 10px;
+        }
+        .code-key { font-family: monospace; font-size: 13px; font-weight: bold; color: var(--gold); letter-spacing: 1px; }
+        .code-reward { font-size: 12px; color: var(--muted); }
+        .code-used { opacity: 0.4; }
+
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .section-card { animation: fadeInUp 0.35s ease-out both; }
+        .section-card:nth-child(2) { animation-delay: 0.05s; }
+        .section-card:nth-child(3) { animation-delay: 0.1s; }
+        .section-card:nth-child(4) { animation-delay: 0.15s; }
+    </style>
+</head>
+<body>
+
+<div id="toast"></div>
+
+<header class="header">
+    <a href="player.html?player=p1" class="header-back">← 返回</a>
+    <div class="header-title">🛠️ 管理員後台</div>
+    <div class="header-sub">至凱專屬</div>
+</header>
+
+<div class="page-wrapper">
+
+    <!-- ===== 公告管理 ===== -->
+    <div class="section-card">
+        <div class="section-header" onclick="toggleSection('anno')">
+            <span class="section-header-icon">📢</span>
+            <span class="section-header-title">公告管理</span>
+            <span class="section-chevron" id="chevron-anno">▼</span>
+        </div>
+        <div class="section-body collapsed" id="body-anno">
+            <div>
+                <label>標題</label>
+                <input type="text" id="anno-title" placeholder="公告標題" maxlength="30">
+            </div>
+            <div>
+                <label>內容</label>
+                <textarea id="anno-text" placeholder="公告內容..." maxlength="150"></textarea>
+            </div>
+            <div>
+                <label>類型</label>
+                <div class="type-row">
+                    <div class="type-btn selected" data-type="normal" onclick="selectAnnoType(this)">📢 一般</div>
+                    <div class="type-btn" data-type="event" onclick="selectAnnoType(this)">🔥 活動</div>
+                    <div class="type-btn" data-type="update" onclick="selectAnnoType(this)">✨ 更新</div>
+                </div>
+            </div>
+            <div class="divider"></div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+                <button class="btn btn-primary" onclick="publishAnnouncement()">📤 發佈公告</button>
+                <button class="btn btn-red" onclick="clearAnnouncement()">🗑️ 撤下公告</button>
+            </div>
+            <div id="anno-current" style="font-size:12px; color:var(--muted); text-align:center;"></div>
+        </div>
+    </div>
+
+    <!-- ===== 發放點數 ===== -->
+    <div class="section-card">
+        <div class="section-header" onclick="toggleSection('points')">
+            <span class="section-header-icon">💰</span>
+            <span class="section-header-title">發放點數</span>
+            <span class="section-chevron" id="chevron-points">▼</span>
+        </div>
+        <div class="section-body collapsed" id="body-points">
+            <div>
+                <label>對象</label>
+                <div class="target-row">
+                    <div class="target-btn selected" data-target="p1" onclick="selectTarget('points', this)">👦🏻 至凱</div>
+                    <div class="target-btn" data-target="p2" onclick="selectTarget('points', this)">👦🏼 柏致</div>
+                    <div class="target-btn" data-target="both" onclick="selectTarget('points', this)">👥 兩人</div>
+                </div>
+            </div>
+            <div>
+                <label>點數</label>
+                <input type="number" id="points-amount" placeholder="輸入點數" min="1" max="9999">
+            </div>
+            <div>
+                <label>信件說明（選填）</label>
+                <input type="text" id="points-note" placeholder="例：活動獎勵" maxlength="30">
+            </div>
+            <button class="btn btn-gold" onclick="sendPoints()">💰 發送至信箱</button>
+        </div>
+    </div>
+
+    <!-- ===== 發放道具／虛寶 ===== -->
+    <div class="section-card">
+        <div class="section-header" onclick="toggleSection('items')">
+            <span class="section-header-icon">🎁</span>
+            <span class="section-header-title">發放道具／虛寶</span>
+            <span class="section-chevron" id="chevron-items">▼</span>
+        </div>
+        <div class="section-body collapsed" id="body-items">
+            <div>
+                <label>對象</label>
+                <div class="target-row">
+                    <div class="target-btn selected" data-target="p1" onclick="selectTarget('items', this)">👦🏻 至凱</div>
+                    <div class="target-btn" data-target="p2" onclick="selectTarget('items', this)">👦🏼 柏致</div>
+                    <div class="target-btn" data-target="both" onclick="selectTarget('items', this)">👥 兩人</div>
+                </div>
+            </div>
+            <div>
+                <label>類別</label>
+                <div class="item-cat-row">
+                    <div class="item-cat-btn sel-U selected" data-cat="U" onclick="selectItemCat(this)">🔧 道具</div>
+                    <div class="item-cat-btn" data-cat="C" onclick="selectItemCat(this)">⚪ C</div>
+                    <div class="item-cat-btn" data-cat="R" onclick="selectItemCat(this)">🔵 R</div>
+                    <div class="item-cat-btn" data-cat="E" onclick="selectItemCat(this)">🟣 E</div>
+                    <div class="item-cat-btn" data-cat="M" onclick="selectItemCat(this)">🟡 M</div>
+                </div>
+            </div>
+            <div>
+                <label>選擇道具</label>
+                <div class="item-grid" id="item-grid"></div>
+            </div>
+            <div>
+                <label>數量</label>
+                <input type="number" id="item-qty" placeholder="數量" min="1" max="99" value="1">
+            </div>
+            <div>
+                <label>信件說明（選填）</label>
+                <input type="text" id="item-note" placeholder="例：活動獎勵" maxlength="30">
+            </div>
+            <button class="btn btn-green" onclick="sendItem()">🎁 發送至信箱</button>
+        </div>
+    </div>
+
+    <!-- ===== 序號管理 ===== -->
+    <div class="section-card">
+        <div class="section-header" onclick="toggleSection('codes')">
+            <span class="section-header-icon">🎟️</span>
+            <span class="section-header-title">序號管理</span>
+            <span class="section-chevron" id="chevron-codes">▼</span>
+        </div>
+        <div class="section-body collapsed" id="body-codes">
+            <div>
+                <label>序號</label>
+                <div class="code-row">
+                    <input type="text" id="code-key" placeholder="例：SLEEP2025" maxlength="20" style="text-transform:uppercase;">
+                    <button class="btn btn-sm" onclick="genCode()" style="white-space:nowrap;">🎲 隨機</button>
+                </div>
+            </div>
+            <div>
+                <label>獎勵類型</label>
+                <div class="type-row" style="margin-bottom:10px;">
+                    <div class="type-btn selected" data-rtype="points" onclick="selectRewardType(this)">💰 點數</div>
+                    <div class="type-btn" data-rtype="item" onclick="selectRewardType(this)">🎁 道具</div>
+                </div>
+            </div>
+            <div id="code-reward-points">
+                <label>點數</label>
+                <input type="number" id="code-points" placeholder="點數" min="1" max="9999">
+            </div>
+            <div id="code-reward-item" style="display:none; flex-direction:column; gap:10px;">
+                <div>
+                    <label>道具類別</label>
+                    <div class="item-cat-row">
+                        <div class="item-cat-btn sel-U selected" data-cat="U" onclick="selectCodeItemCat(this)">🔧 道具</div>
+                        <div class="item-cat-btn" data-cat="C" onclick="selectCodeItemCat(this)">⚪ C</div>
+                        <div class="item-cat-btn" data-cat="R" onclick="selectCodeItemCat(this)">🔵 R</div>
+                        <div class="item-cat-btn" data-cat="E" onclick="selectCodeItemCat(this)">🟣 E</div>
+                        <div class="item-cat-btn" data-cat="M" onclick="selectCodeItemCat(this)">🟡 M</div>
+                    </div>
+                </div>
+                <div>
+                    <label>選擇道具</label>
+                    <div class="item-grid" id="code-item-grid"></div>
+                </div>
+                <div>
+                    <label>數量</label>
+                    <input type="number" id="code-item-qty" placeholder="數量" min="1" max="99" value="1">
+                </div>
+            </div>
+            <div>
+                <label>使用次數上限（0 = 無限）</label>
+                <input type="number" id="code-max-uses" placeholder="0" min="0" value="1">
+            </div>
+            <button class="btn btn-primary" onclick="createCode()">➕ 建立序號</button>
+
+            <div class="divider"></div>
+            <label>現有序號</label>
+            <div class="code-list" id="code-list"><div style="color:var(--muted); font-size:13px; text-align:center;">載入中...</div></div>
+        </div>
+    </div>
+
+    <!-- ===== 信件管理（收回）===== -->
+    <div class="section-card">
+        <div class="section-header" onclick="toggleSection('mails')">
+            <span class="section-header-icon">📬</span>
+            <span class="section-header-title">信件管理（收回）</span>
+            <span class="section-chevron" id="chevron-mails">▼</span>
+        </div>
+        <div class="section-body collapsed" id="body-mails">
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:4px;">
+                <div class="target-btn selected" data-mp="p1" onclick="selectMailPlayer(this)">👦🏻 至凱</div>
+                <div class="target-btn" data-mp="p2" onclick="selectMailPlayer(this)">👦🏼 柏致</div>
+            </div>
+            <div class="code-list" id="mail-manage-list"><div style="color:var(--muted); font-size:13px; text-align:center;">載入中...</div></div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    const firebaseConfig = { apiKey: "AIzaSyArUT_yPRn3CR9ejNbp8ycYGjP6gHPPKJA", authDomain: "gymsleep-e99d9.firebaseapp.com", databaseURL: "https://gymsleep-e99d9-default-rtdb.firebaseio.com/", projectId: "gymsleep-e99d9", storageBucket: "gymsleep-e99d9.firebasestorage.app", messagingSenderId: "346919034740", appId: "1:346919034740:web:3399498d40359c10b61621" };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    const ITEMS = {
+        // [U] 實用道具
+        flex_pass: { n: "萬能作息券", i: "🎫", t: "u", r: "U", b: 30 },
+        lucky_clover: { n: "保底幸運草", i: "🍀", t: "u", r: "U", b: 40 },
+        double_pillow: { n: "雙倍好夢枕", i: "🌙", t: "u", r: "U", b: 30 },
+        free_gacha_ticket: { n: "白嫖抽獎券", i: "🎟️", t: "u", r: "U", b: 50 },
+        piggy_bank: { n: "陶瓷小豬撲滿", i: "🐷", t: "u", r: "U", b: 15 },
+        mystery_box: { n: "神祕的快遞箱", i: "📦", t: "u", r: "U", b: 20 },
+        sprite_bait: { n: "精靈誘餌", i: "🧚‍♂️", t: "u", r: "U", b: 20 },
+        shard_jar: { n: "濃縮碎片罐", i: "💎", t: "u", r: "U", b: 15 },
+        rewind_watch: { n: "時光倒流懷錶", i: "⏪", t: "u", r: "U", b: 35 },
+        sync_dream: { n: "共鳴發財夢", i: "🎉", t: "u", r: "U", b: 40 },
+        // [C] 普通級
+        c_gummy: { n: "褪黑激素軟糖", i: "🍬", t: "g", r: "C", b: 3 },
+        c_hourglass: { n: "瞌睡沙漏", i: "⏳", t: "g", r: "C", b: 4 },
+        c_crystal: { n: "夢境水晶", i: "💎", t: "g", r: "C", b: 4 },
+        c_bubble: { n: "打呼泡泡", i: "🫧", t: "g", r: "C", b: 2 },
+        c_sheep: { n: "數羊計數器", i: "🐑", t: "g", r: "C", b: 3 },
+        c_milk: { n: "溫牛奶空罐", i: "🥛", t: "g", r: "C", b: 4 },
+        c_phone: { n: "砸臉上的手機", i: "📱", t: "g", r: "C", b: 3 },
+        c_mosquito: { n: "半夜打死的蚊子", i: "🦟", t: "g", r: "C", b: 1 },
+        c_earbuds: { n: "單耳藍牙耳機", i: "🎧", t: "g", r: "C", b: 4 },
+        c_socks: { n: "臭襪子", i: "🧦", t: "g", r: "C", b: 2 },
+        c_drool: { n: "流口水的枕頭套", i: "💧", t: "g", r: "C", b: 3 },
+        c_alarm: { n: "按掉五次的鬧鐘", i: "⏰", t: "g", r: "C", b: 4 },
+        // [R] 稀有級
+        r_musicbox: { n: "星空八音盒", i: "🎶", t: "g", r: "R", b: 12 },
+        r_moonstone: { n: "靜謐月光石", i: "🌕", t: "g", r: "R", b: 14 },
+        r_dreamcatcher: { n: "捕夢網殘骸", i: "🕸️", t: "g", r: "R", b: 13 },
+        r_feather: { n: "午睡精靈羽毛", i: "🪶", t: "g", r: "R", b: 15 },
+        r_owl: { n: "深層睡眠貓頭鷹", i: "🦉", t: "g", r: "R", b: 15 },
+        r_bear: { n: "守護泰迪熊", i: "🧸", t: "g", r: "R", b: 12 },
+        r_cat: { n: "壓胸口的胖橘貓", i: "🐈", t: "g", r: "R", b: 14 },
+        r_wine: { n: "微醺的熱紅酒", i: "🍷", t: "g", r: "R", b: 10 },
+        r_blanket: { n: "重力被", i: "🛌", t: "g", r: "R", b: 15 },
+        r_rain: { n: "白噪音雨滴", i: "🌧️", t: "g", r: "R", b: 11 },
+        r_massage: { n: "筋膜槍馬達", i: "💆", t: "g", r: "R", b: 9 },
+        r_incense: { n: "奇楠沉香", i: "🌿", t: "g", r: "R", b: 13 },
+        r_diary: { n: "上鎖的夢境日記", i: "📓", t: "g", r: "R", b: 8 },
+        r_star: { n: "安眠流星", i: "🌟", t: "g", r: "R", b: 15 },
+        // [E] 史詩級
+        e_bottle: { n: "極光琉璃瓶", i: "🧪", t: "g", r: "E", b: 35 },
+        e_gem: { n: "織夢彩寶", i: "🔮", t: "g", r: "E", b: 40 },
+        e_scale: { n: "沉睡巨龍鱗片", i: "🐉", t: "g", r: "E", b: 45 },
+        e_projector: { n: "銀河投影燈", i: "✨", t: "g", r: "E", b: 38 },
+        e_cloud: { n: "雷雨雲碎片", i: "🌩️", t: "g", r: "E", b: 35 },
+        e_baku: { n: "食夢貘木雕", i: "🐘", t: "g", r: "E", b: 45 },
+        e_sand: { n: "被遺忘的沙漏", i: "⌛", t: "g", r: "E", b: 30 },
+        e_key: { n: "潛意識黃金鑰匙", i: "🗝️", t: "g", r: "E", b: 40 },
+        e_score: { n: "人魚安眠曲樂譜", i: "🧜‍♀️", t: "g", r: "E", b: 38 },
+        // [M] 神話級
+        m_diamond: { n: "幻夜星鑽", i: "💠", t: "g", r: "M", b: 200 },
+        m_crown: { n: "黑帝斯王冠", i: "👑", t: "g", r: "M", b: 250 },
+        m_tears: { n: "月神之淚", i: "💧", t: "g", r: "M", b: 220 },
+        m_cap: { n: "全知之眼睡帽", i: "👁️", t: "g", r: "M", b: 180 },
+        m_galaxy: { n: "銀河縮影懷錶", i: "🧭", t: "g", r: "M", b: 250 }
+    };
+
+    // ===== 工具 =====
+    function showToast(msg, color = 'var(--green)') {
+        const el = document.getElementById('toast');
+        el.innerText = msg; el.style.borderLeftColor = color;
+        el.classList.add('show');
+        setTimeout(() => el.classList.remove('show'), 2500);
+    }
+
+    function toggleSection(id) {
+        const body = document.getElementById('body-' + id);
+        const chev = document.getElementById('chevron-' + id);
+        const collapsed = body.classList.toggle('collapsed');
+        chev.style.transform = collapsed ? 'rotate(-90deg)' : 'rotate(0deg)';
+    }
+
+    // ===== 公告 =====
+    let annoType = 'normal';
+    function selectAnnoType(el) {
+        document.querySelectorAll('#body-anno .type-btn').forEach(b => b.classList.remove('selected', 'sel-event', 'sel-update'));
+        el.classList.add('selected');
+        annoType = el.dataset.type;
+    }
+
+    function publishAnnouncement() {
+        const title = document.getElementById('anno-title').value.trim();
+        const text = document.getElementById('anno-text').value.trim();
+        if (!title) return showToast('請填寫標題', 'var(--red)');
+        if (!text) return showToast('請填寫內容', 'var(--red)');
+        const now = new Date();
+        const dateStr = `${now.getMonth()+1}/${now.getDate()} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+        db.ref('system/announcement').set({ is_active: true, title, text, type: annoType, date: dateStr });
+        showToast('📢 公告已發佈！');
+        document.getElementById('anno-current').innerText = `目前公告：${title}`;
+    }
+
+    function clearAnnouncement() {
+        db.ref('system/announcement/is_active').set(false);
+        showToast('公告已撤下', 'var(--muted)');
+        document.getElementById('anno-current').innerText = '目前沒有公告';
+    }
+
+    db.ref('system/announcement').once('value', snap => {
+        const d = snap.val();
+        const el = document.getElementById('anno-current');
+        if (d && d.is_active) el.innerText = `目前公告：${d.title}`;
+        else el.innerText = '目前沒有公告';
+    });
+
+    // ===== 對象選擇 =====
+    const targetState = { points: 'p1', items: 'p1' };
+    function selectTarget(section, el) {
+        el.closest('.target-row').querySelectorAll('.target-btn').forEach(b => b.classList.remove('selected'));
+        el.classList.add('selected');
+        targetState[section] = el.dataset.target;
+    }
+
+    // ===== 點數 =====
+    function sendPoints() {
+        const amount = parseInt(document.getElementById('points-amount').value);
+        const note = document.getElementById('points-note').value.trim() || '管理員發放';
+        if (!amount || amount < 1) return showToast('請輸入點數', 'var(--red)');
+        const targets = targetState.points === 'both' ? ['p1', 'p2'] : [targetState.points];
+        const now = Date.now();
+        targets.forEach(p => {
+            db.ref('mailbox/' + p).push({ amount, title: note, msg: `管理員發放 ${amount} 點`, timestamp: now, claimed: false });
+        });
+        showToast(`✅ 已發送 ${amount} 點！`);
+        document.getElementById('points-amount').value = '';
+        document.getElementById('points-note').value = '';
+    }
+
+    // ===== 道具 =====
+    let selectedItemKey = null;
+    let currentItemCat = 'U';
+
+    function selectItemCat(el) {
+        el.closest('.item-cat-row').querySelectorAll('.item-cat-btn').forEach(b => {
+            b.classList.remove('selected', 'sel-U', 'sel-C', 'sel-R', 'sel-E', 'sel-M');
+        });
+        el.classList.add('selected', 'sel-' + el.dataset.cat);
+        currentItemCat = el.dataset.cat;
+        selectedItemKey = null;
+        renderItemGrid('item-grid', currentItemCat);
+    }
+
+    function renderItemGrid(gridId, cat) {
+        const grid = document.getElementById(gridId);
+        const filtered = Object.entries(ITEMS).filter(([, v]) => v.r === cat);
+        grid.innerHTML = filtered.map(([k, v]) => `
+            <div class="item-option ${selectedItemKey === k ? 'selected' : ''}" onclick="selectItem('${k}', '${gridId}', this)">
+                <span class="item-icon">${v.i}</span>
+                <span class="item-name">${v.n}</span>
+                <span class="item-rarity">${v.r} · ${v.b}pt</span>
+            </div>`).join('');
+    }
+
+    function selectItem(key, gridId, el) {
+        document.getElementById(gridId).querySelectorAll('.item-option').forEach(b => b.classList.remove('selected'));
+        el.classList.add('selected');
+        if (gridId === 'item-grid') selectedItemKey = key;
+        else selectedCodeItemKey = key;
+    }
+
+    function sendItem() {
+        if (!selectedItemKey) return showToast('請選擇道具', 'var(--red)');
+        const qty = parseInt(document.getElementById('item-qty').value) || 1;
+        const note = document.getElementById('item-note').value.trim() || '管理員發放';
+        const targets = targetState.items === 'both' ? ['p1', 'p2'] : [targetState.items];
+        const item = ITEMS[selectedItemKey];
+        const now = Date.now();
+        targets.forEach(p => {
+            db.ref('mailbox/' + p).push({ title: note, msg: `管理員發放 ${item.i} ${item.n} x${qty}`, timestamp: now, claimed: false, item: { key: selectedItemKey, qty } });
+        });
+        showToast(`✅ 已發送 ${item.i} ${item.n} x${qty}！`);
+        document.getElementById('item-qty').value = '1';
+        document.getElementById('item-note').value = '';
+    }
+
+    // ===== 序號 =====
+    let codeRewardType = 'points';
+    let selectedCodeItemKey = null;
+    let currentCodeItemCat = 'U';
+
+    function selectRewardType(el) {
+        document.querySelectorAll('#body-codes .type-row .type-btn').forEach(b => b.classList.remove('selected'));
+        el.classList.add('selected');
+        codeRewardType = el.dataset.rtype;
+        document.getElementById('code-reward-points').style.display = codeRewardType === 'points' ? 'block' : 'none';
+        document.getElementById('code-reward-item').style.display = codeRewardType === 'item' ? 'flex' : 'none';
+    }
+
+    function selectCodeItemCat(el) {
+        el.closest('.item-cat-row').querySelectorAll('.item-cat-btn').forEach(b => {
+            b.classList.remove('selected', 'sel-U', 'sel-C', 'sel-R', 'sel-E', 'sel-M');
+        });
+        el.classList.add('selected', 'sel-' + el.dataset.cat);
+        currentCodeItemCat = el.dataset.cat;
+        selectedCodeItemKey = null;
+        renderItemGrid('code-item-grid', currentCodeItemCat);
+    }
+
+    function genCode() {
+        const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+        let code = '';
+        for (let i = 0; i < 8; i++) code += chars[Math.floor(Math.random() * chars.length)];
+        document.getElementById('code-key').value = code;
+    }
+
+    function createCode() {
+        const key = document.getElementById('code-key').value.trim().toUpperCase();
+        if (!key) return showToast('請輸入序號', 'var(--red)');
+        const maxUses = parseInt(document.getElementById('code-max-uses').value) || 0;
+        let reward = {};
+        if (codeRewardType === 'points') {
+            const pts = parseInt(document.getElementById('code-points').value);
+            if (!pts || pts < 1) return showToast('請輸入點數', 'var(--red)');
+            reward = { type: 'points', amount: pts };
+        } else {
+            if (!selectedCodeItemKey) return showToast('請選擇道具', 'var(--red)');
+            const qty = parseInt(document.getElementById('code-item-qty').value) || 1;
+            reward = { type: 'item', key: selectedCodeItemKey, qty };
+        }
+        db.ref('gift_codes/' + key).set({ reward, max_uses: maxUses, used_count: 0, created: Date.now() });
+        showToast(`✅ 序號 ${key} 已建立！`);
+        document.getElementById('code-key').value = '';
+    }
+
+    function deleteCode(key) {
+        if (!confirm(`確定刪除序號 ${key}？`)) return;
+        db.ref('gift_codes/' + key).remove();
+        showToast('🗑️ 序號已刪除', 'var(--muted)');
+    }
+
+    db.ref('gift_codes').on('value', snap => {
+        const data = snap.val() || {};
+        const list = document.getElementById('code-list');
+        const entries = Object.entries(data).sort((a, b) => (b[1].created || 0) - (a[1].created || 0));
+        if (!entries.length) { list.innerHTML = '<div style="color:var(--muted); font-size:13px; text-align:center;">目前沒有序號</div>'; return; }
+        list.innerHTML = entries.map(([k, v]) => {
+            const isUsed = v.max_uses > 0 && v.used_count >= v.max_uses;
+            const rewardText = v.reward.type === 'points'
+                ? `💰 ${v.reward.amount} 點`
+                : `${ITEMS[v.reward.key]?.i || '?'} ${ITEMS[v.reward.key]?.n || v.reward.key} x${v.reward.qty}`;
+            const usageText = v.max_uses === 0 ? '無限次' : `${v.used_count}/${v.max_uses}`;
+            return `<div class="code-item ${isUsed ? 'code-used' : ''}">
+                <div>
+                    <div class="code-key">${k}</div>
+                    <div class="code-reward">${rewardText} · ${usageText}</div>
+                </div>
+                <button class="btn btn-sm btn-red" onclick="deleteCode('${k}')" style="padding:6px 10px; font-size:12px;">🗑️</button>
+            </div>`;
+        }).join('');
+    });
+
+    // ===== 信件管理 =====
+    let currentMailPlayer = 'p1';
+    let mailListenerRef = null;
+    let mailListenerCb = null;
+
+    function selectMailPlayer(el) {
+        document.querySelectorAll('#body-mails .target-btn').forEach(b => b.classList.remove('selected'));
+        el.classList.add('selected');
+        currentMailPlayer = el.dataset.mp;
+        loadMails();
+    }
+
+    function loadMails() {
+        if (mailListenerRef && mailListenerCb) {
+            mailListenerRef.off('value', mailListenerCb);
+        }
+        const list = document.getElementById('mail-manage-list');
+        list.innerHTML = '<div style="color:var(--muted); font-size:13px; text-align:center;">載入中...</div>';
+        mailListenerRef = db.ref('mailbox/' + currentMailPlayer);
+        mailListenerCb = mailListenerRef.on('value', snap => {
+            const data = snap.val() || {};
+            const entries = Object.entries(data).sort((a, b) => (b[1].timestamp || 0) - (a[1].timestamp || 0));
+            if (!entries.length) { list.innerHTML = '<div style="color:var(--muted); font-size:13px; text-align:center;">信箱是空的</div>'; return; }
+            list.innerHTML = entries.map(([k, m]) => {
+                const d = new Date(m.timestamp);
+                const timeStr = `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+                const rewardText = m.item ? `${ITEMS[m.item.key]?.i || '?'} ${ITEMS[m.item.key]?.n || m.item.key} x${m.item.qty}` : `💰 ${m.amount} 點`;
+                const statusColor = m.claimed ? 'var(--muted)' : 'var(--green)';
+                const statusLabel = m.claimed ? '已領取' : '未領取';
+                return `<div class="code-item ${m.claimed ? 'code-used' : ''}">
+                    <div style="flex:1; min-width:0;">
+                        <div style="font-size:13px; font-weight:bold; color:var(--text);">${m.title || '（無標題）'}</div>
+                        <div class="code-reward">${rewardText} · ${timeStr} · <span style="color:${statusColor}">${statusLabel}</span></div>
+                    </div>
+                    ${!m.claimed ? `<button class="btn btn-sm btn-red" onclick="recallMail('${k}')" style="padding:6px 10px; font-size:12px; flex-shrink:0;">收回</button>` : ''}
+                </div>`;
+            }).join('');
+        });
+    }
+
+    function recallMail(key) {
+        db.ref('mailbox/' + currentMailPlayer + '/' + key).remove();
+        showToast('📭 信件已收回', 'var(--muted)');
+    }
+
+    // 展開信件管理時自動載入
+    const origToggle = toggleSection;
+    toggleSection = function(id) {
+        origToggle(id);
+        if (id === 'mails' && !document.getElementById('body-mails').classList.contains('collapsed')) {
+            loadMails();
+        }
+    };
+
+    // 初始化
+    renderItemGrid('item-grid', 'U');
+    renderItemGrid('code-item-grid', 'U');
+</script>
+</body>
+</html>

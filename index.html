@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>宿舍系統</title>
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
     <style>
         :root {
             --bg: #121212;
@@ -36,12 +38,11 @@
             background: var(--card);
             border: 1px solid #2C2C2E;
             border-radius: 24px;
-            padding: 40px 25px;
+            padding: 28px 22px 24px;
             width: 100%;
             max-width: 360px;
             text-align: center;
             box-shadow: 0 20px 40px rgba(0,0,0,0.6);
-            /* 進場動畫 */
             animation: slideUp 0.8s ease-out;
         }
 
@@ -52,8 +53,8 @@
 
         /* 浮動的月亮圖示 */
         .icon-wrapper {
-            font-size: 64px;
-            margin-bottom: 15px;
+            font-size: 48px;
+            margin-bottom: 10px;
             animation: float 3s ease-in-out infinite;
         }
 
@@ -72,9 +73,9 @@
 
         .subtitle {
             color: var(--muted);
-            font-size: 14px;
-            margin-bottom: 35px;
-            line-height: 1.6;
+            font-size: 13px;
+            margin-bottom: 20px;
+            line-height: 1.5;
         }
 
         /* 大按鈕設計 */
@@ -84,20 +85,19 @@
             justify-content: center;
             gap: 12px;
             width: 100%;
-            padding: 18px;
-            border-radius: 16px;
+            padding: 15px;
+            border-radius: 14px;
             text-decoration: none;
-            font-size: 16px;
+            font-size: 15px;
             font-weight: bold;
-            margin-bottom: 16px;
+            margin-bottom: 10px;
             transition: all 0.2s ease;
             position: relative;
             overflow: hidden;
         }
 
-        .btn:active {
-            transform: scale(0.96); /* 點擊時內縮 */
-        }
+        .btn:hover { transform: translateY(-3px); filter: brightness(1.18); }
+        .btn:active { transform: scale(0.96) translateY(0); }
 
         /* 至凱專屬按鈕 */
         .btn-p1 {
@@ -105,6 +105,7 @@
             border: 1px solid rgba(0, 255, 136, 0.4);
             color: var(--p1-color);
         }
+        .btn-p1:hover { box-shadow: 0 8px 24px rgba(0, 255, 136, 0.18); border-color: rgba(0,255,136,0.65); }
 
         /* 柏致專屬按鈕 */
         .btn-p2 {
@@ -112,6 +113,7 @@
             border: 1px solid rgba(0, 229, 255, 0.4);
             color: var(--p2-color);
         }
+        .btn-p2:hover { box-shadow: 0 8px 24px rgba(0, 229, 255, 0.18); border-color: rgba(0,229,255,0.65); }
 
         /* 宿舍帳本按鈕 */
         .btn-split {
@@ -120,10 +122,11 @@
             color: #FF9F0A;
             margin-top: 8px;
         }
+        .btn-split:hover { box-shadow: 0 8px 24px rgba(255, 159, 10, 0.18); border-color: rgba(255,159,10,0.65); }
 
         /* 即時時鐘設計 */
         .time-display {
-            margin-top: 25px;
+            margin-top: 16px;
             font-size: 14px;
             font-weight: 600;
             color: var(--muted);
@@ -148,9 +151,92 @@
             from { opacity: 1; box-shadow: 0 0 8px var(--p1-color); }
             to { opacity: 0.2; box-shadow: none; }
         }
+
+        /* 公告條 */
+        .anno-card {
+            display: none;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+            max-width: 360px;
+            padding: 11px 14px 11px 18px;
+            border-radius: 14px;
+            background: rgba(14, 16, 26, 0.72);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(123,156,255,0.25);
+            margin-bottom: 12px;
+            animation: slideUp 0.5s ease-out;
+            position: relative;
+            overflow: hidden;
+        }
+        .anno-card::before {
+            content: '';
+            position: absolute;
+            left: 0; top: 0; bottom: 0;
+            width: 3px;
+            background: var(--anno-accent, #7B9CFF);
+            border-radius: 0 2px 2px 0;
+        }
+        .anno-signal {
+            display: flex;
+            gap: 3px;
+            align-items: center;
+            flex-shrink: 0;
+        }
+        .anno-signal span {
+            display: block;
+            width: 5px; height: 5px;
+            border-radius: 50%;
+            background: var(--anno-accent, #7B9CFF);
+            animation: pulse-dot 1.4s ease-in-out infinite;
+        }
+        .anno-signal span:nth-child(2) { animation-delay: 0.2s; opacity: 0.55; width: 4px; height: 4px; }
+        .anno-signal span:nth-child(3) { animation-delay: 0.4s; opacity: 0.3;  width: 3px; height: 3px; }
+        @keyframes pulse-dot {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.2; }
+        }
+        .anno-icon { font-size: 18px; flex-shrink: 0; }
+        .anno-content { flex: 1; min-width: 0; text-align: left; }
+        .anno-title {
+            font-weight: 700;
+            font-size: 13px;
+            color: #EEEEF8;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .anno-text {
+            font-size: 11px;
+            color: rgba(238,238,248,0.55);
+            line-height: 1.4;
+            margin-top: 2px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .anno-date {
+            font-size: 10px;
+            color: var(--muted);
+            flex-shrink: 0;
+            align-self: flex-start;
+        }
     </style>
 </head>
 <body>
+
+    <!-- 公告條 -->
+    <div class="anno-card" id="anno-card">
+        <div class="anno-signal"><span></span><span></span><span></span></div>
+        <div class="anno-icon" id="anno-icon">📢</div>
+        <div class="anno-content">
+            <div class="anno-title" id="anno-title"></div>
+            <div class="anno-text" id="anno-text"></div>
+        </div>
+        <div class="anno-date" id="anno-date"></div>
+    </div>
 
     <div class="login-card">
         <div class="icon-wrapper">🏠</div>
@@ -180,6 +266,34 @@
     </div>
 
     <script>
+        // Firebase 公告監聽
+        const firebaseConfig = { apiKey: "AIzaSyArUT_yPRn3CR9ejNbp8ycYGjP6gHPPKJA", authDomain: "gymsleep-e99d9.firebaseapp.com", databaseURL: "https://gymsleep-e99d9-default-rtdb.firebaseio.com/", projectId: "gymsleep-e99d9", storageBucket: "gymsleep-e99d9.firebasestorage.app", messagingSenderId: "346919034740", appId: "1:346919034740:web:3399498d40359c10b61621" };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        db.ref('system/announcement').on('value', snap => {
+            const d = snap.val();
+            const card = document.getElementById('anno-card');
+            if (d && d.is_active) {
+                document.getElementById('anno-title').innerText = d.title || '';
+                document.getElementById('anno-text').innerText = d.text || '';
+                document.getElementById('anno-date').innerText = d.date || '';
+                let icon, accent;
+                if (d.type === 'event') {
+                    icon = '🔥'; accent = '#F0C040';
+                } else if (d.type === 'update') {
+                    icon = '✨'; accent = '#4ADE80';
+                } else {
+                    icon = '📢'; accent = '#7B9CFF';
+                }
+                document.getElementById('anno-icon').innerText = icon;
+                card.style.setProperty('--anno-accent', accent);
+                card.style.display = 'flex';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+
         // 即時時鐘的 JavaScript
         function updateClock() {
             const now = new Date();

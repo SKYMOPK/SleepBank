@@ -136,8 +136,8 @@
             color: var(--orange); font-size: 16px; font-weight: bold; cursor: pointer;
             transition: all 0.25s; display: flex; align-items: center; justify-content: center; gap: 8px;
         }
-        .submit-btn:hover { background: rgba(255,179,64,0.18); box-shadow: 0 4px 20px rgba(255,179,64,0.15); }
-        .submit-btn:active { transform: scale(0.97); }
+        .submit-btn:hover { background: rgba(255,179,64,0.2); box-shadow: 0 6px 22px rgba(255,179,64,0.2); transform: translateY(-2px); }
+        .submit-btn:active { transform: scale(0.97) translateY(0); }
 
         /* ===== 查看帳目按鈕 ===== */
         .view-records-btn {
@@ -176,10 +176,10 @@
             font-size: 13px; font-weight: bold; cursor: pointer; transition: all 0.2s; text-align: center;
         }
         .settle-btn.primary { background: rgba(74,222,128,0.08); border-color: rgba(74,222,128,0.25); color: var(--green); }
-        .settle-btn.primary:hover { background: rgba(74,222,128,0.14); box-shadow: 0 4px 16px rgba(74,222,128,0.12); }
+        .settle-btn.primary:hover  { background: rgba(74,222,128,0.16); box-shadow: 0 6px 18px rgba(74,222,128,0.15); transform: translateY(-2px); }
         .settle-btn.secondary { background: rgba(123,156,255,0.08); border-color: rgba(123,156,255,0.22); color: var(--blue); }
-        .settle-btn.secondary:hover { background: rgba(123,156,255,0.14); }
-        .settle-btn:active { transform: scale(0.97); }
+        .settle-btn.secondary:hover { background: rgba(123,156,255,0.16); transform: translateY(-2px); }
+        .settle-btn:active { transform: scale(0.97) translateY(0); }
 
         .list-section { margin: 14px 16px 0; }
         .tab-row { display: flex; gap: 8px; margin-bottom: 14px; }
@@ -409,7 +409,37 @@
     }
 
     // ===== 工具 =====
+    // ===== 🔊 音效引擎 =====
+    const _ac = new (window.AudioContext || window.webkitAudioContext)();
+    function _tone(freq, vol, delay, dur) {
+        if (_ac.state === 'suspended') _ac.resume();
+        const osc = _ac.createOscillator(), gain = _ac.createGain();
+        osc.connect(gain); gain.connect(_ac.destination);
+        osc.type = 'sine'; osc.frequency.value = freq;
+        const t = _ac.currentTime + delay;
+        gain.gain.setValueAtTime(0, t);
+        gain.gain.linearRampToValueAtTime(vol, t + 0.018);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + dur);
+        osc.start(t); osc.stop(t + dur + 0.05);
+    }
+    function playSound(type) {
+        if (type === 'click')   { _tone(380, 0.045, 0, 0.07); }
+        else if (type === 'open')    { _tone(440, 0.07, 0, 0.20); _tone(554, 0.05, 0.10, 0.28); }
+        else if (type === 'close')   { _tone(554, 0.06, 0, 0.14); _tone(415, 0.04, 0.09, 0.22); }
+        else if (type === 'add')     { _tone(659, 0.09, 0, 0.25); _tone(784, 0.07, 0.12, 0.32); }
+        else if (type === 'success') { _tone(523, 0.11, 0, 0.40); _tone(659, 0.09, 0.13, 0.45); _tone(784, 0.07, 0.26, 0.55); }
+        else if (type === 'remove')  { _tone(320, 0.07, 0, 0.22); }
+        else if (type === 'error')   { _tone(260, 0.09, 0, 0.18); _tone(210, 0.07, 0.15, 0.26); }
+    }
+
+    // 全域按鈕點擊音
+    document.addEventListener('click', e => {
+        if (e.target.closest('.submit-btn, .settle-btn, .tab-btn, .payer-btn, .view-records-btn, .confirm-cancel, .header-back'))
+            playSound('click');
+    });
+
     function showToast(msg, color = 'var(--green)') {
+        if (color === 'var(--red)') playSound('error');
         const el = document.getElementById('toast');
         el.innerText = msg;
         el.style.borderLeftColor = color;
@@ -488,6 +518,7 @@
                 document.getElementById('btn_p2').classList.remove('selected');
                 document.getElementById('previewText').className = 'preview-text';
                 document.getElementById('previewText').innerText = '請輸入金額並選擇付款人';
+                playSound('add');
                 showToast('✅ 已新增！');
             }
         );
@@ -502,9 +533,11 @@
         okBtn.className = 'confirm-ok' + (danger ? ' danger' : '');
         okBtn.innerText = danger ? '刪除' : '確認';
         okBtn.onclick = () => { closeConfirm(); onOk(); };
+        playSound('open');
         document.getElementById('confirmOverlay').classList.add('show');
     }
     function closeConfirm() {
+        playSound('close');
         document.getElementById('confirmOverlay').classList.remove('show');
     }
 
@@ -521,6 +554,7 @@
                 db.ref('split/records/' + key).remove();
                 db.ref('split/balance').transaction(b => (b || 0) - delta);
                 selectedKeys.delete(key);
+                playSound('remove');
                 showToast('🗑️ 已刪除', 'var(--red)');
             },
             true
@@ -531,38 +565,44 @@
     function settleAll() {
         const unsettled = Object.entries(allRecords).filter(([,r]) => !r.settled);
         if (unsettled.length === 0) return showToast('沒有未結清的帳目', 'var(--muted)');
-        if (!confirm(`確定要將全部 ${unsettled.length} 筆標為已結清？`)) return;
-        const updates = {};
-        unsettled.forEach(([k]) => { updates[k + '/settled'] = true; });
-        db.ref('split/records').update(updates);
-        db.ref('split/balance').set(0);
-        selectedKeys.clear();
-        showToast('🎉 已全部結清！');
+        showConfirm('全部結清', `確定要將全部 <strong>${unsettled.length} 筆</strong>標為已結清並歸零帳務嗎？`, () => {
+            const updates = {};
+            unsettled.forEach(([k]) => { updates[k + '/settled'] = true; });
+            db.ref('split/records').update(updates);
+            db.ref('split/balance').set(0);
+            selectedKeys.clear();
+            playSound('success');
+            showToast('🎉 已全部結清！');
+        });
     }
 
     function settleSelected() {
         if (selectedKeys.size === 0) return showToast('請先勾選要結清的帳目', 'var(--muted)');
-        if (!confirm(`確定要結清選取的 ${selectedKeys.size} 筆？`)) return;
-        let deltaSub = 0;
-        const updates = {};
-        selectedKeys.forEach(k => {
-            const r = allRecords[k];
-            if (r && !r.settled) { updates[k + '/settled'] = true; deltaSub += getDelta(r); }
+        showConfirm('結清選取', `確定要結清選取的 <strong>${selectedKeys.size} 筆</strong>嗎？`, () => {
+            let deltaSub = 0;
+            const updates = {};
+            selectedKeys.forEach(k => {
+                const r = allRecords[k];
+                if (r && !r.settled) { updates[k + '/settled'] = true; deltaSub += getDelta(r); }
+            });
+            db.ref('split/records').update(updates);
+            db.ref('split/balance').transaction(b => (b || 0) - deltaSub);
+            selectedKeys.clear();
+            playSound('success');
+            showToast('☑️ 已結清選取帳目！');
         });
-        db.ref('split/records').update(updates);
-        db.ref('split/balance').transaction(b => (b || 0) - deltaSub);
-        selectedKeys.clear();
-        showToast('☑️ 已結清選取帳目！');
     }
 
     function deleteSettled() {
         const settled = Object.entries(allRecords).filter(([,r]) => r.settled);
         if (settled.length === 0) return showToast('沒有已結清的紀錄', 'var(--muted)');
-        if (!confirm(`確定要永久刪除全部 ${settled.length} 筆已結清紀錄？`)) return;
-        const updates = {};
-        settled.forEach(([k]) => { updates[k] = null; });
-        db.ref('split/records').update(updates);
-        showToast('🗑️ 已刪除所有已結清紀錄');
+        showConfirm('刪除已結清紀錄', `確定要永久刪除全部 <strong>${settled.length} 筆</strong>已結清紀錄？此操作無法復原。`, () => {
+            const updates = {};
+            settled.forEach(([k]) => { updates[k] = null; });
+            db.ref('split/records').update(updates);
+            playSound('remove');
+            showToast('🗑️ 已刪除所有已結清紀錄');
+        }, true);
     }
 
     function renderList() {
