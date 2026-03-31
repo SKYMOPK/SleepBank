@@ -559,7 +559,7 @@
                 <span>📈 歷史價格走勢（48小時）</span>
                 <span class="prob-chevron">▼</span>
             </div>
-            <div class="prob-body" id="price-chart-body">
+            <div class="prob-body" id="price-chart-body" style="max-height:0;">
                 <div style="margin:10px 0 12px; display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
                     <!-- 物品選擇器觸發按鈕 -->
                     <button id="pcs-trigger" onclick="openPriceItemPicker()" style="display:flex; align-items:center; gap:8px; background:rgba(255,255,255,0.05); border:1px solid var(--border); color:var(--text); border-radius:12px; padding:8px 14px; font-size:13px; cursor:pointer; flex:1; max-width:280px; transition:border-color 0.2s;">
@@ -571,7 +571,7 @@
                 </div>
                 <div id="price-chart-wrap" style="width:100%; overflow-x:auto;">
                     <div id="price-chart-placeholder" style="text-align:center; color:var(--muted); font-size:13px; padding:30px;">選擇物品後顯示走勢圖</div>
-                    <svg id="price-chart-svg" style="display:none; width:100%; min-width:300px;" viewBox="0 0 600 180" preserveAspectRatio="none"></svg>
+                    <svg id="price-chart-svg" style="display:none; width:100%; height:160px; min-width:280px;" viewBox="0 0 600 180" preserveAspectRatio="xMidYMid meet"></svg>
                 </div>
                 <div id="price-chart-legend" style="display:flex; gap:16px; justify-content:center; margin-top:8px; font-size:11px; color:var(--muted); flex-wrap:wrap;"></div>
             </div>
@@ -1783,8 +1783,8 @@
             const chevron = toggleEl.querySelector('.prob-chevron');
             const isOpen = body.classList.toggle('open');
             chevron.classList.toggle('open');
+            body.style.maxHeight = isOpen ? '400px' : '0';
             if (isOpen) {
-                // 開啟時：填充下拉選單並嘗試渲染
                 populatePriceChartSelect();
                 renderPriceChart();
             }
