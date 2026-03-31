@@ -1411,67 +1411,88 @@
             });
         }
 
-        function calcTrendPrice(key, rarity, histArr) {
+        // ===== 全域價格引擎：動態引力波段算法 =====
+        function calcGlobalPrice(key, lastHourPrices, prevHourPrices) {
             const base = ITEMS[key].b;
-            const band = rarity === 'C' ? 0.30 : rarity === 'R' ? 0.50 : 0.80;
-            const floor = Math.max(1, Math.round(base * (1 - band)));
-            const ceil  = Math.round(base * (1 + band));
+            const rarity = ITEMS[key].r || 'U'; // U 道具視同 R
+            const maxChange = rarity === 'C' ? 0.15 : rarity === 'E' ? 0.50 : 0.30;
+            const changePct = 0.01 + Math.random() * (maxChange - 0.01);
 
-            if (histArr.length < 1 || !histArr[histArr.length-1].prices || !histArr[histArr.length-1].prices[key]) {
-                return Math.max(floor, Math.min(ceil, Math.round(base * (1 + (Math.random()*2-1) * band * 0.5))));
-            }
+            const currentPrice = (lastHourPrices && lastHourPrices[key] != null)
+                ? lastHourPrices[key] : base;
 
-            const lastPrice = histArr[histArr.length-1].prices[key];
             let lastDir = 0;
-            if (histArr.length >= 2 && histArr[histArr.length-2].prices && histArr[histArr.length-2].prices[key]) {
-                const prevPrice = histArr[histArr.length-2].prices[key];
-                lastDir = lastPrice >= prevPrice ? 1 : -1;
+            if (prevHourPrices?.[key] != null && lastHourPrices?.[key] != null)
+                lastDir = lastHourPrices[key] >= prevHourPrices[key] ? 1 : -1;
+
+            const ratio = currentPrice / base;
+            let pUp;
+            if      (ratio > 3.0) pUp = 0.10;  // 極端狂熱
+            else if (ratio > 2.0) pUp = 0.30;  // 過熱
+            else if (ratio < 0.5) pUp = 0.60;  // 超跌（繼續跌機率 40%）
+            else pUp = lastDir === 1 ? 0.65 : lastDir === -1 ? 0.35 : 0.50; // 正常
+
+            const dir = Math.random() < pUp ? 1 : -1;
+            return Math.max(1, Math.round(currentPrice * (1 + dir * changePct)));
+        }
+
+        function shuffleArray(arr) {
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
             }
+            return arr;
+        }
 
-            let dir = (Math.random() < 0.65) ? (lastDir || (Math.random()<0.5?1:-1)) : -(lastDir) || (Math.random()<0.5?1:-1);
-            if (lastPrice >= ceil) dir = -1;
-            if (lastPrice <= floor) dir = 1;
-
-            const change = Math.random() * band * 0.4;
-            let newPrice = Math.round(lastPrice * (1 + dir * change));
-            return Math.max(floor, Math.min(ceil, newPrice));
+        function pickUniqueSlots(allNewPrices, count) {
+            const available = {
+                C:  shuffleArray(Object.keys(ITEMS).filter(k => ITEMS[k].r === 'C')),
+                RU: shuffleArray(Object.keys(ITEMS).filter(k => ITEMS[k].r === 'R' || ITEMS[k].t === 'u')),
+                E:  shuffleArray(Object.keys(ITEMS).filter(k => ITEMS[k].r === 'E')),
+            };
+            function drawFrom(...pools) {
+                for (const p of pools)
+                    if (available[p].length > 0) return available[p].pop();
+                return null;
+            }
+            const slots = [];
+            for (let i = 0; i < count; i++) {
+                const r = Math.random();
+                let key, qty;
+                if (r < 0.60) { key = drawFrom('C','RU','E'); qty = Math.floor(Math.random()*10)+1; }
+                else if (r < 0.90) { key = drawFrom('RU','C','E'); qty = Math.floor(Math.random()*5)+1; }
+                else               { key = drawFrom('E','RU','C'); qty = Math.floor(Math.random()*2)+1; }
+                if (!key) continue;
+                slots.push({ key, qty, price: allNewPrices[key] });
+            }
+            return slots;
         }
 
         async function generateAndSaveMarket(hourEpoch) {
-            // 讀取過去 2 小時的歷史（用於趨勢）
+            // A. 讀取最近 2 小時歷史
             const histSnap = await db.ref('market_price_history').orderByKey().limitToLast(2).once('value');
             const histArr = [];
             histSnap.forEach(c => histArr.push(c.val()));
+            const lastHourPrices = histArr.length >= 1 ? (histArr[histArr.length-1].prices || null) : null;
+            const prevHourPrices = histArr.length >= 2 ? (histArr[histArr.length-2].prices || null) : null;
 
-            const candidatesC = Object.keys(ITEMS).filter(k => ITEMS[k].r === 'C');
-            const candidatesR = [
-                ...Object.keys(ITEMS).filter(k => ITEMS[k].r === 'R'),
-                ...Object.keys(ITEMS).filter(k => ITEMS[k].t === 'u')
-            ];
-            const candidatesE = Object.keys(ITEMS).filter(k => ITEMS[k].r === 'E');
+            // B. 對全部可交易物品（非神話）計算全域新價格
+            const tradableKeys = Object.keys(ITEMS).filter(k => ITEMS[k].r !== 'M');
+            const allNewPrices = {};
+            for (const key of tradableKeys)
+                allNewPrices[key] = calcGlobalPrice(key, lastHourPrices, prevHourPrices);
 
-            const slots = [];
-            const newPrices = {};
-            for (let i = 0; i < 20; i++) {
-                const r = Math.random();
-                let rarity, candidates, qty;
-                if (r < 0.60) { rarity='C'; candidates=candidatesC; qty=Math.floor(Math.random()*10)+1; }
-                else if (r < 0.90) { rarity='R'; candidates=candidatesR; qty=Math.floor(Math.random()*5)+1; }
-                else { rarity='E'; candidates=candidatesE; qty=Math.floor(Math.random()*2)+1; }
+            // C. 選出 20 個不重複 slot
+            const slots = pickUniqueSlots(allNewPrices, 20);
 
-                const key = candidates[Math.floor(Math.random()*candidates.length)];
-                const price = calcTrendPrice(key, rarity, histArr);
-                newPrices[key] = price;
-                slots.push({ key, qty, price });
-            }
-
+            // D. 寫入 Firebase
             const updates = {};
             updates['market_current/generatedAt'] = hourEpoch;
-            updates['market_current/items'] = slots;
-            updates[`market_price_history/${hourEpoch}`] = { prices: newPrices };
+            updates['market_current/items']       = slots;
+            updates['market_current/prices']      = allNewPrices;
+            updates[`market_price_history/${hourEpoch}`] = { prices: allNewPrices };
             await db.ref().update(updates);
 
-            // 清理超過 48h 的歷史
             pruneOldMarketHistory(hourEpoch - 48 * 3600000);
         }
 
@@ -1575,11 +1596,9 @@
                         sp = getMythicIndexPrice();
                         priceLabel = `大盤指數 × 2 = ${sp} 點`;
                     } else {
-                        // 從 currentMarket 找當前市場最後一筆該物品的 price，fallback to base
-                        const slot = currentMarket && currentMarket.items
-                            ? currentMarket.items.find(s => s && s.key === k)
-                            : null;
-                        const rawPrice = slot ? slot.price : it.b;
+                        // 從全域價格快取讀取，fallback 到基礎定價
+                        const rawPrice = (currentMarket?.prices?.[k] != null)
+                            ? currentMarket.prices[k] : it.b;
                         sp = Math.floor(rawPrice * 0.95);
                         const ratio = Math.round(sp / it.b * 100);
                         const rc = ratio >= 95 ? 'var(--green)' : 'var(--red)';
@@ -1698,16 +1717,23 @@
             openConfirmModal('💰 確認批量售出',
                 `確定要賣出 <strong style="color:var(--gold)">${items.length} 種虛寶</strong>，共獲得 <strong style="color:var(--gold)">${totalPts} 點</strong> 嗎？`,
                 () => {
-                    items.forEach(({ k, qty }) => {
+                    let successPts = 0;
+                    let done = 0;
+                    items.forEach(({ k, qty, sp }) => {
                         db.ref('users/'+ME+'/items/'+k).transaction(c => {
                             if (!c || c < qty) return undefined;
                             return c - qty;
+                        }, (err, committed) => {
+                            if (committed) successPts += sp * qty;
+                            done++;
+                            if (done === items.length && successPts > 0) {
+                                db.ref('economy/'+ME).transaction(v => (v||0) + successPts);
+                                logPoints(successPts, `💰 黑市批量售出 ${items.length} 種`);
+                                playSound('coin');
+                                showToast(`💸 成功售出，獲得 ${successPts} 點！`);
+                            }
                         });
                     });
-                    db.ref('economy/'+ME).transaction(v => (v||0) + totalPts);
-                    logPoints(totalPts, `💰 黑市批量售出 ${items.length} 種`);
-                    playSound('coin');
-                    showToast(`💸 成功售出 ${items.length} 種虛寶，獲得 ${totalPts} 點！`);
                 }
             );
         }
@@ -2113,7 +2139,13 @@
                         executeLottery('ticket');
                     });
                 } else {
-                    executeLottery('energy');
+                    db.ref('users/'+ME+'/gacha_energy').transaction(c => {
+                        if (!c || c < 200) return undefined;
+                        return c - 200;
+                    }, (e, com) => {
+                        if (!com) return showToast('❌ 能量不足 200 點', 'error');
+                        executeLottery('energy');
+                    });
                 }
             }
         }
@@ -2358,11 +2390,7 @@
                         up.free_gacha_active = false; tail = "<br>(消耗抽獎券)";
                         isPaid = true;
                     } else if(m === "energy") {
-                        // 能量消耗已在 drawChoiceExecute 呼叫前由 transaction 處理，此處直接進行
-                        db.ref('users/'+ME+'/gacha_energy').transaction(c => {
-                            if (!c || c < 200) return undefined;
-                            return c - 200;
-                        }, (eErr, eCom) => { if (!eCom) { playSound('error'); showToast('❌ 能量不足 200 點', 'error'); } });
+                        // 能量已在 drawChoiceExecute 中預先扣除
                         tail = "<br>(消耗 200 能量)";
                         isPaid = true;
                     } else {
