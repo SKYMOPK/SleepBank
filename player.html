@@ -2012,9 +2012,10 @@
                     return `<text x="${xOf(i).toFixed(1)}" y="${H - 4}" text-anchor="middle" fill="rgba(255,255,255,0.35)" font-size="8">${label}</text>`;
                 }).join('');
 
-                // 顏色：最後一點 vs 基礎定價
+                // 顏色：由「最後一小時漲跌」決定（最右側趨勢染色整條圖）
                 const lastPrice = entries[entries.length-1].price;
-                const lineColor = lastPrice >= basePrice ? '#32D74B' : '#FF453A';
+                const prevPrice = entries[entries.length-2].price;
+                const lineColor = lastPrice >= prevPrice ? '#32D74B' : '#FF453A';
 
                 // 漸層填色
                 const gradId = 'pcg_' + itemKey;
@@ -2041,10 +2042,9 @@
                 `;
                 svg.style.display = 'block';
 
-                // 圖例
-                const changeAmt = lastPrice - entries[0].price;
-                const changePct = ((changeAmt / entries[0].price) * 100).toFixed(1);
-                const changeColor = changeAmt >= 0 ? 'var(--green)' : 'var(--red)';
+                // 圖例：漲跌幅以「上一小時 vs 現值」計算，強化方向偏見
+                const changeAmt = lastPrice - prevPrice;
+                const changePct = ((changeAmt / prevPrice) * 100).toFixed(1);
                 const changeSign = changeAmt >= 0 ? '+' : '';
                 rangeEl.innerText = `最近 ${entries.length} 小時`;
                 legend.innerHTML = `
@@ -2052,7 +2052,7 @@
                     <span>最高 <strong>${maxP}</strong></span>
                     <span>現值 <strong style="color:${lineColor}">${lastPrice}</strong></span>
                     <span>基礎 <strong>${basePrice}</strong></span>
-                    <span style="color:${changeColor}">${changeSign}${changeAmt} (${changeSign}${changePct}%)</span>
+                    <span style="color:${lineColor}; font-weight:bold; font-size:13px;">${changeSign}${changeAmt} (${changeSign}${changePct}%)</span>
                 `;
             });
         }
