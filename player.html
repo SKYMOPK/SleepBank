@@ -97,13 +97,19 @@
         /* 語錄文字 */
         .boss-quote-text { font-size: 15px; color: rgba(255,255,255,0.82); font-style: italic; letter-spacing: 0.8px; line-height: 1.8; max-width: 520px; margin: 0 auto; position: relative; z-index: 1; text-shadow: 0 2px 12px rgba(0,0,0,0.6); }
         .market-banner-label { display: none; }
-        .market-card { background: rgba(255,255,255,0.02); border: 1px solid var(--border); padding: 20px; border-radius: 20px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; gap: 10px; transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); position: relative; }
+        #market-shop-list { grid-template-columns: repeat(5, 1fr) !important; gap: 10px !important; }
+        @media (max-width: 600px) { #market-shop-list { grid-template-columns: repeat(3, 1fr) !important; } }
+        .market-card { background: rgba(255,255,255,0.02); border: 1px solid var(--border); padding: 14px 10px; border-radius: 16px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; gap: 6px; transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); position: relative; font-size: 13px; }
         @media (hover: hover) { .market-card:not(.sold):hover { background: rgba(255,255,255,0.04); transform: translateY(-5px); box-shadow: 0 10px 30px rgba(0,0,0,0.4); border-color: rgba(255,255,255,0.15); } }
         .market-card[data-rarity="R"] { border-color: rgba(123, 156, 255, 0.3); background: rgba(123, 156, 255, 0.06); }
         .market-card[data-rarity="E"] { border-color: rgba(191, 90, 242, 0.3); background: rgba(191, 90, 242, 0.05); }
         .market-card[data-rarity="M"] { border-color: rgba(255, 214, 10, 0.4); background: rgba(255, 214, 10, 0.08); box-shadow: 0 0 15px rgba(255, 214, 10, 0.2); }
         .market-card.featured { grid-column: span 2; flex-direction: row; text-align: left; padding: 25px; background: linear-gradient(145deg, rgba(22,26,42,0.7), rgba(10,10,18,0.9)); border: 1px solid rgba(255, 214, 10, 0.2); box-shadow: 0 10px 30px rgba(255, 214, 10, 0.08); }
         .market-card.sold { opacity: 0.4; filter: grayscale(100%); pointer-events: none; }
+        .pcs-item:hover { background: rgba(255,255,255,0.06) !important; }
+        #pcs-list::-webkit-scrollbar { width: 4px; } #pcs-list::-webkit-scrollbar-track { background: transparent; } #pcs-list::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 4px; }
+        #pcs-trigger:hover { border-color: rgba(123,156,255,0.4); background: rgba(255,255,255,0.07); }
+        #pcs-search:focus { border-color: rgba(123,156,255,0.5); }
         @keyframes pulseGlow { 0% { box-shadow: 0 0 10px rgba(255,214,10,0.1); } 50% { box-shadow: 0 0 25px rgba(255,214,10,0.4); } 100% { box-shadow: 0 0 10px rgba(255,214,10,0.1); } }
         .mystery-box { animation: pulseGlow 2s infinite; }
 
@@ -238,6 +244,13 @@
             .main-content { padding-bottom: 80px !important; }
         }
 
+        @media (max-width: 480px) {
+            #sell-toolbar { display: grid !important; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+            #sell-toolbar > span { display: none; }
+            #sell-toolbar .btn { padding: 8px 4px !important; font-size: 11px !important; }
+            #sell-selected-hint { grid-column: 1 / -1; text-align: center; margin-left: 0 !important; }
+        }
+
         /* ===== UI 升級：Modal 退場動畫 ===== */
         @keyframes modalExit { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(20px); } }
         .modal-content.closing { animation: modalExit 0.25s ease-in forwards; }
@@ -255,6 +268,14 @@
         /* ===== UI 升級：轉盤按鈕脈衝 ===== */
         @keyframes lotteryPulse { 0%, 100% { box-shadow: 0 0 20px rgba(255,214,10,0.2), 0 0 0 0 rgba(255,214,10,0.3); } 50% { box-shadow: 0 0 35px rgba(255,214,10,0.45), 0 0 0 8px rgba(255,214,10,0); } }
         #mainLotteryBtn { animation: lotteryPulse 2s ease-in-out infinite; }
+
+        /* ===== Buff 徽章 ===== */
+        @keyframes buffPulse { 0%,100%{box-shadow:0 0 0 0 rgba(74,222,128,0.5)} 50%{box-shadow:0 0 0 8px rgba(74,222,128,0)} }
+        .buff-badge { display:inline-flex; align-items:center; gap:5px; padding:5px 10px; border-radius:20px; font-size:12px; font-weight:bold; border:1px solid; margin:3px 2px; }
+        .buff-badge-green { background:rgba(74,222,128,0.1); border-color:rgba(74,222,128,0.3); color:var(--green); }
+        .buff-badge-purple { background:rgba(191,90,242,0.1); border-color:rgba(191,90,242,0.3); color:var(--purple); }
+        .buff-badge-blue { background:rgba(123,156,255,0.1); border-color:rgba(123,156,255,0.3); color:var(--primary); }
+        .buff-badge-gold { background:rgba(255,214,10,0.1); border-color:rgba(255,214,10,0.3); color:var(--gold); }
 
         /* ===== 10連抽 Modal ===== */
         .ten-pull-content { max-width: 520px; width: 95%; max-height: 90vh; overflow-y: auto; }
@@ -398,6 +419,16 @@
                 </div>
             </div>
 
+            <!-- 📒 點數流水帳 -->
+            <div class="card" style="margin-bottom:20px;">
+                <div class="prob-toggle" onclick="togglePointsLog(this)">
+                    <span>📒 點數流水帳</span><span class="prob-chevron">▼</span>
+                </div>
+                <div class="prob-body" id="points-log-body">
+                    <div id="points-log-list" style="margin-top:8px;"></div>
+                </div>
+            </div>
+
             <!-- 操作按鈕 -->
             <div class="action-grid">
                 <button class="btn btn-primary" id="checkinBtn" onclick="doCheckIn()" style="grid-column: span 4; padding:18px; flex-direction:column; gap:6px;">
@@ -428,13 +459,32 @@
                         <div style="display:flex; justify-content:space-between; align-items:center;">
                             <div>
                                 <div style="color:var(--text); font-weight:bold; font-size:14px;">🎟️ 抽獎保底進度</div>
-                                <div style="color:var(--muted); font-size:11px; margin-top:3px;">累積滿 10 次付費抽獎，必得【白嫖抽獎券】</div>
+                                <div style="color:var(--muted); font-size:11px; margin-top:3px;">累積滿 10 次抽獎（券或能量），必得【抽獎券】</div>
                             </div>
                             <div id="pity_text" style="font-weight:900; color:var(--gold); font-size:20px;">0/10</div>
                         </div>
                         <div class="pity-bar-bg"><div class="pity-bar-fill" id="pity_bar"></div></div>
                     </div>
-                    <button class="btn" id="tenPullBtn" style="width:100%; max-width:320px; margin:14px auto 0; padding:14px; font-size:16px; background:rgba(191,90,242,0.15); color:#C084FC; border:1.5px solid rgba(191,90,242,0.4);" onclick="handleTenPull()">🎰 10連抽 (100點)</button>
+                    <button class="btn" id="tenPullBtn" style="width:100%; max-width:320px; margin:14px auto 0; padding:14px; font-size:16px; background:rgba(191,90,242,0.15); color:#C084FC; border:1.5px solid rgba(191,90,242,0.4);" onclick="handleTenPull()">🎰 10連抽</button>
+                </div>
+
+                <!-- 能量轉換區塊 -->
+                <div class="prob-toggle" onclick="toggleEnergySection(this)">
+                    <span>⚡ 抽獎能量 &nbsp;<span id="gacha-energy-display" style="color:#FFB340; font-weight:900;">0</span> 點</span>
+                    <span class="prob-chevron">▼</span>
+                </div>
+                <div class="prob-body" id="energy-section-body">
+                    <div style="color:var(--muted); font-size:12px; padding:4px 2px 10px;">分解虛寶可獲得能量，累積後可消耗能量進行抽獎（單抽200 / 10連抽2000）</div>
+                    <div style="display:flex; gap:8px; flex-wrap:wrap; font-size:11px; color:var(--muted); margin-bottom:12px; background:rgba(255,255,255,0.03); border-radius:10px; padding:8px 12px;">
+                        <span style="color:#A0A0A5;">📦 普通=2</span>
+                        <span style="color:#7B9CFF;">💎 稀有=10</span>
+                        <span style="color:#C084FC;">✨ 史詩=50</span>
+                        <span style="color:var(--gold);">🏆 神話=250</span>
+                        <span style="color:var(--green);">🎒 道具=5</span>
+                    </div>
+                    <div id="energy-item-list" style="display:flex; flex-direction:column; gap:8px;">
+                        <div style="text-align:center; color:var(--muted); font-size:12px; padding:10px;">（背包空空，先去抽個寶物吧）</div>
+                    </div>
                 </div>
 
                 <!-- 本月統計 -->
@@ -489,18 +539,41 @@
                 <div class="boss-avatar-wrap">🎭</div>
                 <div class="boss-name-tag">— 神秘商人 —</div>
                 <div id="market-quote" class="boss-quote-text">「投資虛擬資產，才是超越柏致的唯一捷徑。」</div>
+                <div id="market-countdown" style="font-size:11px; color:var(--muted); margin-top:6px; letter-spacing:0.5px;">⏳ 計算中...</div>
             </div>
 
             <!-- 買/賣 Tab -->
             <div class="market-tabs">
-                <button class="market-tab active" id="market-tab-buy" onclick="switchMarketTab('buy')">🛒 今日進貨 <span style="font-size:11px; opacity:0.6;">含 20% 代辦費</span></button>
-                <button class="market-tab" id="market-tab-sell" onclick="switchMarketTab('sell')">💰 高價收購 <span style="font-size:11px; opacity:0.6;">點擊售出</span></button>
+                <button class="market-tab active" id="market-tab-buy" onclick="switchMarketTab('buy')">🛒 當前商品 <span style="font-size:11px; opacity:0.6;">含 5% 手續費</span></button>
+                <button class="market-tab" id="market-tab-sell" onclick="switchMarketTab('sell')">💰 高價收購 <span style="font-size:11px; opacity:0.6;">扣5%手續費</span></button>
             </div>
             <div id="market-section-buy" class="market-section active">
                 <div id="market-shop-list" class="data-grid"></div>
             </div>
             <div id="market-section-sell" class="market-section">
                 <div id="market-sell-list" class="data-grid"></div>
+            </div>
+
+            <!-- 📈 價格走勢圖 -->
+            <div class="prob-toggle" style="margin-top:16px;" onclick="togglePriceChart(this)">
+                <span>📈 歷史價格走勢（48小時）</span>
+                <span class="prob-chevron">▼</span>
+            </div>
+            <div class="prob-body" id="price-chart-body">
+                <div style="margin:10px 0 12px; display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+                    <!-- 物品選擇器觸發按鈕 -->
+                    <button id="pcs-trigger" onclick="openPriceItemPicker()" style="display:flex; align-items:center; gap:8px; background:rgba(255,255,255,0.05); border:1px solid var(--border); color:var(--text); border-radius:12px; padding:8px 14px; font-size:13px; cursor:pointer; flex:1; max-width:280px; transition:border-color 0.2s;">
+                        <span id="pcs-trigger-icon" style="font-size:16px; flex-shrink:0;">🔍</span>
+                        <span id="pcs-trigger-label" style="flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:var(--muted); text-align:left;">選擇物品…</span>
+                        <span style="font-size:10px; color:var(--muted); flex-shrink:0;">▼</span>
+                    </button>
+                    <span id="price-chart-range" style="font-size:11px; color:var(--muted); margin-left:auto;"></span>
+                </div>
+                <div id="price-chart-wrap" style="width:100%; overflow-x:auto;">
+                    <div id="price-chart-placeholder" style="text-align:center; color:var(--muted); font-size:13px; padding:30px;">選擇物品後顯示走勢圖</div>
+                    <svg id="price-chart-svg" style="display:none; width:100%; min-width:300px;" viewBox="0 0 600 180" preserveAspectRatio="none"></svg>
+                </div>
+                <div id="price-chart-legend" style="display:flex; gap:16px; justify-content:center; margin-top:8px; font-size:11px; color:var(--muted); flex-wrap:wrap;"></div>
             </div>
         </div>
 
@@ -549,14 +622,26 @@
         <button class="btn" style="background:transparent; color:var(--muted);" onclick="closeModal()">取消關閉</button>
     </div></div>
 
-    <!-- 🎟️ 白嫖券選擇 Modal -->
+    <!-- 🎰 抽獎方式選擇 Modal -->
+    <div id="drawChoiceModal" class="modal-overlay" style="display:none;">
+        <div class="modal-content">
+            <div style="font-size:52px; margin-bottom:12px;">🎰</div>
+            <h3 id="drawChoiceTitle" style="color:var(--gold); margin-top:0; font-size:20px;">選擇抽獎方式</h3>
+            <p id="drawChoiceSubtitle" style="color:var(--muted); font-size:12px; margin-bottom:20px;"></p>
+            <button class="btn btn-primary" id="drawChoiceTicketBtn" style="margin-bottom:12px;" onclick="drawChoiceExecute('ticket')">🎟️ <span id="drawChoiceTicketLabel"></span></button>
+            <button class="btn" id="drawChoiceEnergyBtn" style="background:rgba(255,179,64,0.15); color:#FFB340; border-color:rgba(255,179,64,0.4); margin-bottom:12px;" onclick="drawChoiceExecute('energy')">⚡ <span id="drawChoiceEnergyLabel"></span></button>
+            <button class="btn" style="background:transparent; color:var(--muted);" onclick="closeModal()">取消</button>
+        </div>
+    </div>
+
+    <!-- 🎟️ 抽獎券選擇 Modal -->
     <div id="ticketChoiceModal" class="modal-overlay" style="display:none;">
         <div class="modal-content">
             <div style="font-size:52px; margin-bottom:12px;">🎟️</div>
-            <h3 style="color:var(--gold); margin-top:0; font-size:20px;">背包有白嫖券！</h3>
+            <h3 style="color:var(--gold); margin-top:0; font-size:20px;">背包有抽獎券！</h3>
             <p id="ticketChoiceCount" style="color:var(--muted); font-size:13px; margin-bottom:24px;"></p>
-            <button class="btn btn-primary" style="margin-bottom:12px;" onclick="useTicketAndDraw()">🎟️ 使用白嫖券（免費）</button>
-            <button class="btn" style="background:rgba(255,214,10,0.15); color:var(--gold); border-color:rgba(255,214,10,0.3); margin-bottom:12px;" onclick="closeModal(); openConfirmModal('🎰 確認抽獎','確定要花費 <strong style=\'color:var(--gold)\'>10 點</strong> 進行抽獎嗎？', ()=>executeLottery(\'paid\'));">💰 花費 10 點</button>
+            <button class="btn btn-primary" style="margin-bottom:12px;" onclick="useTicketAndDraw()">🎟️ 使用抽獎券（免費）</button>
+            <button class="btn" style="background:rgba(255,214,10,0.15); color:var(--gold); border-color:rgba(255,214,10,0.3); margin-bottom:12px;" onclick="closeModal(); openDrawChoiceModal('single', true);">⚡ 消耗 200 能量</button>
             <button class="btn" style="background:transparent; color:var(--muted);" onclick="closeModal()">取消</button>
         </div>
     </div>
@@ -595,6 +680,22 @@
     <div id="mailboxModal" class="modal-overlay"><div class="modal-content" style="width: 90%; max-width: 500px; max-height: 80vh; display:flex; flex-direction:column; padding:0; overflow:hidden;"><div style="padding:20px; background:rgba(255,255,255,0.05); border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;"><h3 style="margin:0; font-size:18px;">📬 支援信箱</h3><div style="display:flex; gap:10px;"><button class="btn" style="width:auto; padding:8px 12px; font-size:13px; background:rgba(255,69,58,0.15); color:var(--red); border-color:rgba(255,69,58,0.3);" onclick="clearClaimedMails()">🗑️ 清空</button><button class="btn" style="width:auto; padding:8px 12px; font-size:13px; background:rgba(255,255,255,0.1);" onclick="closeModal()">❌</button></div></div><div id="mail-list" style="padding:20px; overflow-y:auto; flex:1; display:flex; flex-direction:column; gap:12px;"></div></div></div>
 
     <!-- 🎁 圖鑑界面 -->
+    <!-- 📈 物品價格選擇器 Modal -->
+    <div id="pricePickerModal" class="modal-overlay" onclick="if(event.target===this)closeModal()">
+        <div class="modal-content" style="max-width:380px; padding:0; overflow:hidden; border-radius:20px;">
+            <div style="padding:20px 20px 12px; display:flex; align-items:center; gap:12px; border-bottom:1px solid var(--border);">
+                <span style="font-size:18px;">📈</span>
+                <span style="font-weight:bold; font-size:16px; flex:1;">選擇查詢物品</span>
+                <button onclick="closeModal()" style="background:none; border:none; color:var(--muted); font-size:20px; cursor:pointer; padding:0; line-height:1;">×</button>
+            </div>
+            <div style="padding:12px 16px 8px;">
+                <input id="pcs-search" type="text" placeholder="🔍 搜尋物品名稱…" oninput="filterPriceItems()" autocomplete="off"
+                    style="width:100%; box-sizing:border-box; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); color:var(--text); border-radius:12px; padding:10px 14px; font-size:13px; outline:none; transition:border-color 0.2s;">
+            </div>
+            <div id="pcs-list" style="max-height:55vh; overflow-y:auto; padding:4px 10px 16px;"></div>
+        </div>
+    </div>
+
     <div id="galleryModal" class="modal-overlay">
         <div class="modal-content" style="width: 95%; max-width: 1000px; max-height: 90vh; display:flex; flex-direction:column; padding:0; overflow:hidden;">
             <div class="gallery-header">
@@ -671,7 +772,7 @@
             flex_pass: { n: "萬能作息券", i: "🎫", t: "u", b: 30, d: "今日打卡無視時間限制" }, 
             lucky_clover: { n: "保底幸運草", i: "🍀", t: "u", b: 40, d: "下次轉盤絕對不槓龜" }, 
             double_pillow: { n: "雙倍好夢枕", i: "🌙", t: "u", b: 30, d: "下次打卡點數雙倍" }, 
-            free_gacha_ticket: { n: "白嫖抽獎券", i: "🎟️", t: "u", b: 50, d: "下次幸運轉盤免費" }, 
+            free_gacha_ticket: { n: "抽獎券", i: "🎟️", t: "u", b: 10, d: "可於黑市購買，或透過保底獲得" },
             piggy_bank: { n: "陶瓷小豬撲滿", i: "🐷", t: "u", b: 15, d: "打破它！隨機獲得 5~30 點數" },
             mystery_box: { n: "神祕的快遞箱", i: "📦", t: "u", b: 20, d: "打開來看看！有 80% 開出普通垃圾，20% 開出稀有寶物" },
             sprite_bait: { n: "精靈誘餌", i: "🧚‍♂️", t: "u", b: 20, d: "立刻強制召喚出一隻魔法精靈！快點擊捕捉它" },
@@ -728,9 +829,10 @@
             m_galaxy: { n: "銀河縮影懷錶", i: "🧭", t: "g", r: "M", b: 250, d: "這不是用來計時的，裡面裝著整個宇宙的靜謐，看著它就能永眠" }
         };
         
-        let dailyMarketData = null, myInventory = {}, myShards = 0, myPoints = 0, marketPurchases = {};
-        let isFeaturedRevealed = false, myLastSpriteCatch = "", myLastDate = "", myFlexActive = false, oppData = {};
+        let myInventory = {}, myShards = 0, myPoints = 0;
+        let myLastSpriteCatch = "", myLastDate = "", myFlexActive = false, oppData = {};
         let gachaPity = 0; // 保底計數器
+        let myGachaEnergy = 0; // 抽獎能量
         let isSpriteForced = false;
 
         // ===== 🛠️ 工具函數 =====
@@ -831,6 +933,48 @@
               .catch(err => console.error('❌ 抽獎紀錄寫入失敗:', err));
         }
 
+        // ===== 📒 點數流水帳 =====
+        function logPoints(delta, reason) {
+            if (delta === 0) return;
+            db.ref('points_log/' + ME).push({ ts: Date.now(), delta, reason })
+              .catch(err => console.error('❌ 流水帳寫入失敗:', err));
+        }
+
+        function togglePointsLog(toggleEl) {
+            playSound('click');
+            const body = document.getElementById('points-log-body');
+            const chevron = toggleEl.querySelector('.prob-chevron');
+            const isOpen = body.classList.toggle('open');
+            chevron.classList.toggle('open');
+            if (isOpen) loadPointsLog();
+        }
+
+        function loadPointsLog() {
+            const list = document.getElementById('points-log-list');
+            if (!list) return;
+            list.innerHTML = '<div style="text-align:center;color:var(--muted);font-size:12px;padding:10px;">載入中...</div>';
+            db.ref('points_log/' + ME).orderByChild('ts').limitToLast(20).once('value', snap => {
+                const entries = [];
+                snap.forEach(c => entries.push(c.val()));
+                entries.reverse();
+                if (entries.length === 0) {
+                    list.innerHTML = '<div style="text-align:center;color:var(--muted);font-size:12px;padding:10px;">尚無記錄</div>';
+                    return;
+                }
+                list.innerHTML = entries.map(e => {
+                    const d = new Date(e.ts);
+                    const dateStr = `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+                    const isPos = e.delta >= 0;
+                    const deltaColor = isPos ? 'var(--green)' : 'var(--red)';
+                    return `<div style="display:flex;align-items:center;gap:8px;padding:7px 4px;border-bottom:1px solid rgba(255,255,255,0.05);font-size:12px;">
+                        <span style="color:var(--muted);flex-shrink:0;width:82px;">${dateStr}</span>
+                        <span style="flex:1;color:rgba(255,255,255,0.8);">${e.reason||'—'}</span>
+                        <span style="font-weight:bold;color:${deltaColor};flex-shrink:0;">${isPos?'+':''}${e.delta}</span>
+                    </div>`;
+                }).join('');
+            });
+        }
+
         function loadGachaHistory() {
             const oneMonthAgo = Date.now() - 30 * 24 * 60 * 60 * 1000;
             db.ref('gacha_log/' + ME).once('value', snap => {
@@ -915,8 +1059,9 @@
             document.querySelector('.mobile-only-title').innerText = titleText;
             
             el.classList.add('active');
-            if(pId==='market') renderMarket();
+            if(pId==='market') { checkMarketFresh(); renderMarket(); }
             if(pId==='gacha') loadGachaHistory();
+            if(pId==='home') { const lb = document.getElementById('points-log-body'); if(lb && lb.classList.contains('open')) loadPointsLog(); }
             setBottomNav(pId);
         }
         
@@ -1023,7 +1168,7 @@
                 db.ref('mailbox/'+ME+'/'+id).once('value', snap => {
                     const m = snap.val(); if (!m) return;
                     const pts = m.points || m.amount || 0;
-                    if (pts > 0) db.ref('economy/'+ME).transaction(v => (v||0)+pts);
+                    if (pts > 0) { db.ref('economy/'+ME).transaction(v => (v||0)+pts); logPoints(pts, `📬 信箱領取`); }
                     // new multi-item format
                     if (m.items) Object.entries(m.items).forEach(([k, qty]) => db.ref('users/'+ME+'/items/'+k).transaction(v=>(v||0)+qty));
                     // old single-item format
@@ -1064,7 +1209,10 @@
             myLastDate = d.last_date||"";
             myFlexActive = d.flex_active||false;
             gachaPity = d.gacha_pity||0;
-            
+            myGachaEnergy = d.gacha_energy||0;
+            const energyEl = document.getElementById('gacha-energy-display');
+            if (energyEl) energyEl.innerText = myGachaEnergy;
+
             let y = new Date(now); y.setDate(now.getDate()-1); 
             let yStr = getLocalDateStr(y);
             let strk = (myLastDate===tStr || myLastDate===yStr) ? (d.streak||0) : 0;
@@ -1086,29 +1234,36 @@
             document.getElementById('pity_text').innerText = `${gachaPity}/10`;
             document.getElementById('pity_bar').style.width = `${(gachaPity/10)*100}%`;
             
-            let b=""; 
-            if(d.flex_active) b+="<div>● 🎫 萬能作息券生效中</div>"; 
-            if(d.clover_active) b+="<div>● 🍀 保底幸運草發動中 (轉盤無槓龜)</div>"; 
-            if(d.pillow_target && (tStr<d.pillow_target || (tStr===d.pillow_target && now.getHours()<2))) b+="<div>● 🌙 雙倍好夢枕生效中</div>"; 
-            if(d.free_gacha_active) b+="<div>● 🎟️ 白嫖券生效中 (轉盤免費一次)</div>"; 
-            document.getElementById('buff_status').innerHTML = b;
+            let b="";
+            if(d.flex_active) b+=`<span class="buff-badge buff-badge-purple">🎫 萬能作息券</span>`;
+            if(d.clover_active) b+=`<span class="buff-badge buff-badge-green">🍀 保底幸運草</span>`;
+            if(d.pillow_target && (tStr<d.pillow_target || (tStr===d.pillow_target && now.getHours()<2))) b+=`<span class="buff-badge buff-badge-blue">🌙 雙倍好夢枕</span>`;
+            if(d.free_gacha_active) b+=`<span class="buff-badge buff-badge-gold">🎟️ 抽獎券待用</span>`;
+            const buffEl = document.getElementById('buff_status');
+            buffEl.style.cssText += '; display:flex; flex-wrap:wrap; gap:2px;';
+            buffEl.innerHTML = b;
             
             const btn = document.getElementById('mainLotteryBtn');
-            if(d.last_free_lottery!==tStr) { 
-                btn.innerHTML="🆓 每日首抽 (免費)"; 
-                btn.dataset.mode="free"; 
-            } else if(d.free_gacha_active) { 
-                btn.innerHTML="🎟️ 白嫖抽獎 (免費)"; 
-                btn.dataset.mode="ticket"; 
-            } else { 
-                btn.innerHTML="🎰 花費 10 點抽獎"; 
-                btn.dataset.mode="paid"; 
+            if(d.last_free_lottery!==tStr) {
+                btn.innerHTML="🆓 每日首抽 (免費)";
+                btn.dataset.mode="free";
+                btn.style.animation='lotteryPulse 2s ease-in-out infinite, buffPulse 1.5s ease-in-out infinite';
+            } else {
+                btn.innerHTML="🎰 幸運抽獎";
+                btn.dataset.mode="normal";
+                const hasTicket = (d.items && d.items['free_gacha_ticket'] > 0);
+                const hasEnergy = (d.gacha_energy || 0) >= 200;
+                btn.style.animation = (hasTicket || hasEnergy)
+                    ? 'lotteryPulse 2s ease-in-out infinite, buffPulse 1.5s ease-in-out infinite'
+                    : 'lotteryPulse 2s ease-in-out infinite';
             }
             
-            myInventory = d.items||{}; myShards = d.shards||0; 
-            document.getElementById('shard_ui').innerText=`碎片: ${myShards}/5`; 
+            myInventory = d.items||{}; myShards = d.shards||0;
+            document.getElementById('shard_ui').innerText=`碎片: ${myShards}/5`;
             document.getElementById('btn_synth').style.display=myShards>=5?'block':'none';
-            renderInventory(); 
+            renderInventory();
+            const energyBody = document.getElementById('energy-section-body');
+            if (energyBody && energyBody.classList.contains('open')) renderEnergyItems();
             if(document.getElementById('page-market').classList.contains('active')) renderMarket();
             myLastSpriteCatch = d.last_sprite_catch||""; 
             checkSprite(); updateCountdown();
@@ -1137,7 +1292,21 @@
             }
         }
         
-        setInterval(()=>{ updateCountdown(); checkSprite(); renderOppStatus(); }, 1000);
+        function updateMarketCountdown() {
+            const now = new Date();
+            const nextHour = new Date(now);
+            nextHour.setMinutes(60, 0, 0); // 下一整點
+            const ms = nextHour - now;
+            const m = Math.floor(ms/60000), s = Math.floor((ms%60000)/1000);
+            const el = document.getElementById('market-countdown');
+            if (el) el.innerText = `⏳ 商品刷新倒計時 ${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+            // 整點自動觸發刷新
+            if (m === 0 && s === 0) checkMarketFresh();
+        }
+
+        setInterval(()=>{ updateCountdown(); checkSprite(); renderOppStatus(); updateMarketCountdown(); }, 1000);
+        updateMarketCountdown();
+        checkMarketFresh(); // 初始載入時檢查市場是否需要刷新
 
         function checkSprite() {
             if (isSpriteForced) return;
@@ -1167,10 +1336,10 @@
     isSpriteForced = false; // ✨ 重置誘餌標記
 
     let r=Math.random(), msg="";
-    if(r<0.01){ db.ref('economy/'+ME).transaction(c=>(c||0)+50); msg="💎 爆擊！精靈大方地給了你 50 點！"; } 
+    if(r<0.01){ db.ref('economy/'+ME).transaction(c=>(c||0)+50); logPoints(50, '✨ 精靈爆擊'); msg="💎 爆擊！精靈大方地給了你 50 點！"; }
     else if(r<0.1){ const pl=['c_crystal','lucky_clover','c_gummy'], i=pl[Math.floor(Math.random()*pl.length)]; db.ref('users/'+ME+'/items/'+i).transaction(c=>(c||0)+1); msg=`🎁 精靈偷偷塞給你【${ITEMS[i].n}】x1！`; } 
     else if(r<0.4){ db.ref('users/'+ME+'/shards').transaction(c=>(c||0)+1); msg="🔹 精靈留下了一塊【水晶碎片】！"; } 
-    else { const pts=Math.floor(Math.random()*3)+3; db.ref('economy/'+ME).transaction(c=>(c||0)+pts); msg=`💰 精靈給了你 ${pts} 點零用錢！`; }
+    else { const pts=Math.floor(Math.random()*3)+3; db.ref('economy/'+ME).transaction(c=>(c||0)+pts); logPoints(pts, '✨ 精靈掉落'); msg=`💰 精靈給了你 ${pts} 點零用錢！`; }
     playSound('success'); confetti({particleCount:60, spread:60, origin:{y:0.85, x:0.8}}); showModalMsg("✨ 抓到魔法精靈了！", msg, true);
 }
         
@@ -1224,41 +1393,156 @@
             document.getElementById('galleryList').innerHTML = html;
         }
 
-        function generateDailyMarket(dStr) { 
-            let s=parseInt(dStr.replace(/-/g,'')), rng=mulberry32(s), bp={}, sp={}; 
-            Object.keys(ITEMS).forEach(k=>{ 
-                let sl=rng()<0.05, ml=sl?(0.4+rng()*0.5):(1.0+rng()*0.5), v=Math.max(1,Math.round(ITEMS[k].b*ml)); 
-                sp[k]=v; bp[k]=Math.ceil(v*1.2); 
-            }); 
-            let gG=r=>{ let p=Object.keys(ITEMS).filter(k=>ITEMS[k].r===r); return p[Math.floor(rng()*p.length)]; };
-            let gU=()=>{ let p=Object.keys(ITEMS).filter(k=>ITEMS[k].t==='u'); return p[Math.floor(rng()*p.length)]; };
-            return { shop:[gU(), gG('C'), gG('R'), rng()<0.5?gG('R'):gG('C'), rng()<0.1?gG('M'):gG('E')], buyPrices:bp, sellPrices:sp }; 
+        // ===== 🏪 黑市新架構：每小時整點刷新，共用庫存 =====
+        let currentMarket = null; // { generatedAt, items:[{key,qty,price}×20] }
+
+        function getHourStart() {
+            const d = new Date(); d.setMinutes(0, 0, 0); return d.getTime();
         }
+
+        function checkMarketFresh() {
+            const currentHour = getHourStart();
+            db.ref('market_current/generatedAt').transaction(cur => {
+                if (!cur || cur < currentHour) return currentHour;
+                return undefined; // 已是最新
+            }, (err, committed) => {
+                if (committed) generateAndSaveMarket(currentHour);
+                // 不論是否刷新，監聽器會自動拿到最新資料
+            });
+        }
+
+        function calcTrendPrice(key, rarity, histArr) {
+            const base = ITEMS[key].b;
+            const band = rarity === 'C' ? 0.30 : rarity === 'R' ? 0.50 : 0.80;
+            const floor = Math.max(1, Math.round(base * (1 - band)));
+            const ceil  = Math.round(base * (1 + band));
+
+            if (histArr.length < 1 || !histArr[histArr.length-1].prices || !histArr[histArr.length-1].prices[key]) {
+                return Math.max(floor, Math.min(ceil, Math.round(base * (1 + (Math.random()*2-1) * band * 0.5))));
+            }
+
+            const lastPrice = histArr[histArr.length-1].prices[key];
+            let lastDir = 0;
+            if (histArr.length >= 2 && histArr[histArr.length-2].prices && histArr[histArr.length-2].prices[key]) {
+                const prevPrice = histArr[histArr.length-2].prices[key];
+                lastDir = lastPrice >= prevPrice ? 1 : -1;
+            }
+
+            let dir = (Math.random() < 0.65) ? (lastDir || (Math.random()<0.5?1:-1)) : -(lastDir) || (Math.random()<0.5?1:-1);
+            if (lastPrice >= ceil) dir = -1;
+            if (lastPrice <= floor) dir = 1;
+
+            const change = Math.random() * band * 0.4;
+            let newPrice = Math.round(lastPrice * (1 + dir * change));
+            return Math.max(floor, Math.min(ceil, newPrice));
+        }
+
+        async function generateAndSaveMarket(hourEpoch) {
+            // 讀取過去 2 小時的歷史（用於趨勢）
+            const histSnap = await db.ref('market_price_history').orderByKey().limitToLast(2).once('value');
+            const histArr = [];
+            histSnap.forEach(c => histArr.push(c.val()));
+
+            const candidatesC = Object.keys(ITEMS).filter(k => ITEMS[k].r === 'C');
+            const candidatesR = [
+                ...Object.keys(ITEMS).filter(k => ITEMS[k].r === 'R'),
+                ...Object.keys(ITEMS).filter(k => ITEMS[k].t === 'u')
+            ];
+            const candidatesE = Object.keys(ITEMS).filter(k => ITEMS[k].r === 'E');
+
+            const slots = [];
+            const newPrices = {};
+            for (let i = 0; i < 20; i++) {
+                const r = Math.random();
+                let rarity, candidates, qty;
+                if (r < 0.60) { rarity='C'; candidates=candidatesC; qty=Math.floor(Math.random()*10)+1; }
+                else if (r < 0.90) { rarity='R'; candidates=candidatesR; qty=Math.floor(Math.random()*5)+1; }
+                else { rarity='E'; candidates=candidatesE; qty=Math.floor(Math.random()*2)+1; }
+
+                const key = candidates[Math.floor(Math.random()*candidates.length)];
+                const price = calcTrendPrice(key, rarity, histArr);
+                newPrices[key] = price;
+                slots.push({ key, qty, price });
+            }
+
+            const updates = {};
+            updates['market_current/generatedAt'] = hourEpoch;
+            updates['market_current/items'] = slots;
+            updates[`market_price_history/${hourEpoch}`] = { prices: newPrices };
+            await db.ref().update(updates);
+
+            // 清理超過 48h 的歷史
+            pruneOldMarketHistory(hourEpoch - 48 * 3600000);
+        }
+
+        function pruneOldMarketHistory(cutoff) {
+            db.ref('market_price_history').orderByKey().endAt(String(cutoff)).once('value', snap => {
+                const updates = {};
+                snap.forEach(c => { updates[`market_price_history/${c.key}`] = null; });
+                if (Object.keys(updates).length > 0) db.ref().update(updates);
+            });
+        }
+
+        function getMythicIndexPrice() {
+            if (!currentMarket || !currentMarket.items) return 0;
+            const sum = currentMarket.items.reduce((acc, s) => acc + (s.price||0), 0);
+            return Math.floor(sum * 2 * 0.95);
+        }
+
+        // 監聽黑市即時資料（取代舊 market_purchases listener）
+        db.ref('market_current').on('value', snap => {
+            currentMarket = snap.val();
+            if (document.getElementById('page-market').classList.contains('active')) renderMarket();
+        });
         
         function renderMarket() {
-            if(!dailyMarketData) {
-                dailyMarketData=generateDailyMarket(getLocalDateStr(new Date()));
-                const bossQuotes = [
-                    ...CFG.bossQuotesPersonal,
-                    "「點數放著不會生利息，買個好夢枕犒賞自己吧。」",
-                    "「這黑市的行情瞬息萬變，看到破盤特價還不出手嗎？」"
-                ];
-                document.getElementById('market-quote').innerText = bossQuotes[Math.floor(Math.random() * bossQuotes.length)];
+            // 更新商人語錄（每次渲染隨機）
+            const bossQuotes = [
+                ...CFG.bossQuotesPersonal,
+                "「點數放著不會生利息，買個好夢枕犒賞自己吧。」",
+                "「這黑市的行情瞬息萬變，看到破盤特價還不出手嗎？」",
+                "「能量可以慢慢積累，但機會只有一小時。」"
+            ];
+            const quoteEl = document.getElementById('market-quote');
+            if (quoteEl && !quoteEl._locked) {
+                quoteEl.innerText = bossQuotes[Math.floor(Math.random() * bossQuotes.length)];
+                quoteEl._locked = true;
             }
-            let sHtml=""; 
-            dailyMarketData.shop.forEach((k,i)=>{ 
-                let it=ITEMS[k], bp=dailyMarketData.buyPrices[k], isS=dailyMarketData.sellPrices[k]<it.b, by=marketPurchases[i], f=(i===4), rarity=it.r||'U'; 
-                if(f && !isFeaturedRevealed && !by){ 
-                    sHtml+=`<div class="market-card featured mystery-box" data-rarity="${rarity}" style="position:relative;" onclick="isFeaturedRevealed=true;playSound('success');confetti({particleCount:80,spread:70,origin:{y:0.6},colors:['#FFD60A','#BF5AF2','#FFF']});renderMarket();"><div style="position:absolute; top:10px; right:10px; background:var(--gold); color:#000; font-size:11px; font-weight:bold; padding:4px 12px; border-radius:10px; transform:rotate(10deg); box-shadow:0 4px 10px rgba(255,214,10,0.4); z-index:10;">✨ 今日壓軸</div><div style="font-size:54px; margin-bottom:15px; text-shadow:0 0 20px rgba(255,214,10,0.5);">🎁</div><div style="font-weight:bold; color:var(--gold); font-size:18px; letter-spacing:2px; margin-bottom:5px;">點擊揭曉盲盒</div><div style="font-size:12px; color:rgba(255,255,255,0.5);">有機會開出史詩/神話級虛寶</div></div>`; 
-                    return; 
-                } 
-                let bHtml=by?`<button class="btn disabled" style="background:transparent; color:var(--muted); border:1px dashed rgba(255,255,255,0.2);">❌ 已售出</button>`:`<button class="btn btn-primary" onclick="openConfirmModal('🛍️ 確認購買', '確定要花費 <strong style=\\'color:var(--primary)\\'>${bp} 點</strong> 買入【${it.n}】嗎？', ()=>buyMarketItem(${i},'${k}',${bp}))">💰 ${bp} 買入</button>`; 
-                let tg=it.t==='g'?`<span class="tag tag-${it.r}" style="background:rgba(0,0,0,0.5);">${it.r} 級</span>`:`<span class="tag" style="background:rgba(10,132,255,0.2);color:var(--primary);">實用</span>`; 
-                let stg=isS?`<div style="color:var(--red); font-size:11px; font-weight:bold; margin-top:5px;">🔥 破盤特價</div>`:""; 
-                if(f){ sHtml+=`<div class="market-card featured ${by?'sold':''}" data-rarity="${rarity}" style="position:relative;"><div style="position:absolute; top:10px; right:10px; background:var(--red); color:white; font-size:11px; font-weight:bold; padding:4px 12px; border-radius:10px; transform:rotate(10deg); box-shadow:0 4px 10px rgba(255,69,58,0.3); z-index:10;">✨ 壓軸</div><div class="item-icon" style="width:70px; height:70px; font-size:36px; margin-right:20px;">${it.i}</div><div style="flex:1; text-align:left;"><div style="margin-bottom:8px;">${tg}</div><div style="font-weight:bold; font-size:16px;">${it.n}</div><div style="font-size:12px; color:rgba(255,255,255,0.4); margin-top:4px;">定價 ${it.b} 點</div>${stg}</div><div style="width:110px;">${bHtml}</div></div>`; }
-                else{ sHtml+=`<div class="market-card ${by?'sold':''}" data-rarity="${rarity}"><div class="tag-container">${tg}</div><div class="item-icon" style="margin:20px 0 15px;">${it.i}</div><div style="font-weight:bold; font-size:15px; margin-bottom:5px;">${it.n}</div><div style="font-size:11px; color:rgba(255,255,255,0.4);">定價 ${it.b} 點</div>${stg}<div style="width:100%; margin-top:15px;">${bHtml}</div></div>`; } 
-            }); 
-            document.getElementById('market-shop-list').innerHTML=sHtml;
+
+            if (!currentMarket || !currentMarket.items) {
+                document.getElementById('market-shop-list').innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:40px; color:var(--muted);">⏳ 市場載入中...</div>`;
+            } else {
+                const rarityColors = { M:'var(--gold)', E:'#C084FC', R:'#7B9CFF', C:'#A0A0A5', U:'var(--green)' };
+                const rarityTagStyle = {
+                    M: 'background:rgba(255,214,10,0.2); color:var(--gold);',
+                    E: 'background:rgba(191,90,242,0.2); color:#C084FC;',
+                    R: 'background:rgba(123,156,255,0.2); color:#7B9CFF;',
+                    C: 'background:rgba(160,160,165,0.12); color:#A0A0A5;',
+                    U: 'background:rgba(50,215,75,0.15); color:var(--green);',
+                };
+                let sHtml = '';
+                currentMarket.items.forEach((slot, i) => {
+                    if (!slot || !ITEMS[slot.key]) return;
+                    const it = ITEMS[slot.key];
+                    const rarity = it.r || 'U';
+                    const buyPrice = Math.ceil(slot.price * 1.05);
+                    const sold = slot.qty <= 0;
+                    const tagStyle = rarityTagStyle[rarity] || rarityTagStyle.C;
+                    const rarityLabel = rarity === 'U' ? '實用' : `${rarity} 級`;
+                    sHtml += `<div class="market-card ${sold ? 'sold' : ''}" data-rarity="${rarity}" style="${sold ? 'opacity:0.5;' : ''}">
+                        <div class="tag-container"><span class="tag" style="${tagStyle}">${rarityLabel}</span></div>
+                        <div class="item-icon" style="margin:14px 0 10px;">${it.i}</div>
+                        <div style="font-weight:bold; font-size:14px; margin-bottom:3px;">${it.n}</div>
+                        <div style="font-size:11px; color:var(--muted); margin-bottom:2px;">市場 ${slot.price} 點</div>
+                        <div style="font-size:11px; color:var(--muted); margin-bottom:10px;">庫存 ${slot.qty} 個</div>
+                        ${sold
+                            ? `<button class="btn disabled" style="background:transparent; color:var(--muted); border:1px dashed rgba(255,255,255,0.2); font-size:12px;">售完</button>`
+                            : `<button class="btn btn-primary" onclick="openConfirmModal('🛍️ 確認購買', '確定要花費 <strong style=\\'color:var(--primary)\\'>${buyPrice} 點</strong>（含5%手續費）買入【${it.n}】嗎？', ()=>buyMarketItem(${i},'${slot.key}',${slot.price}))" style="font-size:12px; padding:8px;">💰 ${buyPrice} 買入</button>`
+                        }
+                    </div>`;
+                });
+                document.getElementById('market-shop-list').innerHTML = sHtml || `<div style="grid-column:1/-1; text-align:center; padding:40px; color:var(--muted);">暫無商品</div>`;
+            }
             // ── 賣出區：勾選模式 ──
             let sellItems = [];
             Object.keys(myInventory).forEach(k => {
@@ -1285,14 +1569,28 @@
                 </div>`;
 
                 sellItems.forEach(k => {
-                    let it = ITEMS[k], sp = dailyMarketData.sellPrices[k];
-                    let r = Math.round(sp/it.b*100), rc = r>=100 ? "var(--green)" : "var(--red)", rarity = it.r||'U';
+                    const it = ITEMS[k], rarity = it.r || 'U';
+                    let sp, priceLabel;
+                    if (rarity === 'M') {
+                        sp = getMythicIndexPrice();
+                        priceLabel = `大盤指數 × 2 = ${sp} 點`;
+                    } else {
+                        // 從 currentMarket 找當前市場最後一筆該物品的 price，fallback to base
+                        const slot = currentMarket && currentMarket.items
+                            ? currentMarket.items.find(s => s && s.key === k)
+                            : null;
+                        const rawPrice = slot ? slot.price : it.b;
+                        sp = Math.floor(rawPrice * 0.95);
+                        const ratio = Math.round(sp / it.b * 100);
+                        const rc = ratio >= 95 ? 'var(--green)' : 'var(--red)';
+                        priceLabel = `行情 <span style="color:${rc};font-weight:bold;">${ratio}%</span> · 實收 <span style="color:var(--gold);font-weight:bold;">${sp}</span> 點`;
+                    }
                     hHtml += `<div class="item-card sell-check-card" id="sc-${k}" data-key="${k}" data-qty="${myInventory[k]}" data-sp="${sp}" data-rarity="${rarity}" style="transition: outline 0.15s;">
                         <div class="sell-check-box" id="scb-${k}" onclick="toggleSellCard('${k}')" style="width:24px;height:24px;border-radius:7px;border:1.5px solid rgba(255,255,255,0.25);background:rgba(255,255,255,0.04);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:14px;margin-right:10px;cursor:pointer;"></div>
                         <div class="item-icon" style="width:44px;height:44px;font-size:22px;">${it.i}</div>
                         <div style="flex:1;text-align:left;margin-left:10px;">
                             <div style="font-weight:bold;font-size:14px;">${it.n} <span style="font-size:11px;color:var(--muted);">x${myInventory[k]}</span></div>
-                            <div style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:4px;">行情: <span style="color:${rc};font-weight:bold;">${r}%</span> · <span style="color:var(--gold);font-weight:bold;">${sp} 點</span>/個</div>
+                            <div style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:4px;">${priceLabel}</div>
                         </div>
                         <button class="btn" onclick="sellMarketItem('${k}',${sp})" style="width:auto;padding:8px 13px;font-size:13px;background:rgba(255,214,10,0.15);color:var(--gold);border-color:rgba(255,214,10,0.3);flex-shrink:0;">得 ${sp} 點</button>
                     </div>`;
@@ -1307,19 +1605,31 @@
             }
         }
 
-        db.ref('market_purchases/'+getLocalDateStr(new Date())).on('value', s => { marketPurchases = s.val()||{}; if(document.getElementById('page-market').classList.contains('active')) renderMarket(); });
+        // 舊 market_purchases 已由 market_current 取代
 
-        function buyMarketItem(i, k, p) {
-            db.ref('market_purchases/'+getLocalDateStr(new Date())+'/'+i).transaction(c=>c?undefined:ME, (e,com,sn)=>{
-                if(com&&sn.val()===ME){
-                    db.ref('economy/'+ME).transaction(v => {
-                        if((v||0) < p) return undefined;
-                        return (v||0) - p;
-                    }, (err, committed) => {
-                        if(committed){ db.ref('users/'+ME+'/items/'+k).transaction(c=>(c||0)+1); playSound('coin'); showToast(`🛍️ 花了 ${p} 點買下【${ITEMS[k].n}】！`); }
-                        else { db.ref('market_purchases/'+getLocalDateStr(new Date())+'/'+i).remove(); showToast("❌ 點數不足！", 'error'); }
-                    });
-                } else { showToast("❌ 手腳太慢，夥伴已經買走啦！", 'error'); }
+        function buyMarketItem(slotIdx, k, marketPrice) {
+            const buyPrice = Math.ceil(marketPrice * 1.05);
+            // Step 1: 樂觀鎖 — 扣減庫存 qty
+            db.ref(`market_current/items/${slotIdx}/qty`).transaction(c => {
+                if (!c || c <= 0) return undefined; // 售完
+                return c - 1;
+            }, (err, committed) => {
+                if (!committed) return showToast('❌ 商品已售完！', 'error');
+                // Step 2: 扣款
+                db.ref('economy/'+ME).transaction(v => {
+                    if ((v||0) < buyPrice) return undefined;
+                    return (v||0) - buyPrice;
+                }, (err2, committed2) => {
+                    if (!committed2) {
+                        // 還庫存
+                        db.ref(`market_current/items/${slotIdx}/qty`).transaction(c => (c||0) + 1);
+                        return showToast('❌ 點數不足！', 'error');
+                    }
+                    db.ref('users/'+ME+'/items/'+k).transaction(c=>(c||0)+1);
+                    logPoints(-buyPrice, `🛍️ 黑市購入 ${ITEMS[k].n}`);
+                    playSound('coin');
+                    showToast(`🛍️ 花了 ${buyPrice} 點（含5%手續費）買下【${ITEMS[k].n}】！`);
+                });
             });
         }
 
@@ -1395,6 +1705,7 @@
                         });
                     });
                     db.ref('economy/'+ME).transaction(v => (v||0) + totalPts);
+                    logPoints(totalPts, `💰 黑市批量售出 ${items.length} 種`);
                     playSound('coin');
                     showToast(`💸 成功售出 ${items.length} 種虛寶，獲得 ${totalPts} 點！`);
                 }
@@ -1436,6 +1747,7 @@
             }, (err, committed) => {
                 if (!committed) return showToast('❌ 道具數量不足', 'error');
                 db.ref('economy/'+ME).transaction(v=>(v||0)+(qty*p));
+                logPoints(qty*p, `💰 黑市賣出 ${ITEMS[k].n} x${qty}`);
                 playSound('coin');
                 showToast(`💸 成功賣出 ${ITEMS[k].n} x${qty}，獲得 ${qty*p} 點！`);
             });
@@ -1465,24 +1777,348 @@
             return poolArray[poolArray.length - 1];
         }
 
-        function handleLottery() {
-            const m = document.getElementById('mainLotteryBtn').dataset.mode;
-            // 付費模式且背包有白嫖券 → 先問要用券還是花點
-            if (m === 'paid' && (myInventory['free_gacha_ticket'] || 0) > 0) {
-                openTicketChoiceModal();
-                return;
+        // ===== 📈 黑市歷史價格走勢圖 =====
+        function togglePriceChart(toggleEl) {
+            const body = document.getElementById('price-chart-body');
+            const chevron = toggleEl.querySelector('.prob-chevron');
+            const isOpen = body.classList.toggle('open');
+            chevron.classList.toggle('open');
+            if (isOpen) {
+                // 開啟時：填充下拉選單並嘗試渲染
+                populatePriceChartSelect();
+                renderPriceChart();
             }
-            let desc = m === "free" ? "確定要使用今日的【免費首抽】嗎？" :
-                       m === "ticket" ? "確定要消耗 1 張【白嫖抽獎券】進行免費抽獎嗎？" :
-                       "確定要花費 <strong style='color:var(--gold)'>10 點</strong> 進行抽獎嗎？";
-            openConfirmModal("🎰 確認抽獎", desc, () => executeLottery(m));
         }
 
-        function openTicketChoiceModal() {
-            const cnt = myInventory['free_gacha_ticket'] || 0;
-            document.getElementById('ticketChoiceCount').innerText = `目前持有 ${cnt} 張`;
-            openModal('ticketChoiceModal');
+        // ── 自訂下拉選單 ──
+        let _pcsItems = []; // [{key, it}]
+        let _pcsSelected = ''; // 當前選中的 key
+
+        function populatePriceChartSelect() {
+            if (_pcsItems.length > 0) return; // 已填充
+            const candidates = Object.keys(ITEMS).filter(k => {
+                const it = ITEMS[k];
+                return (it.t === 'g' || it.t === 'u') && it.r !== 'M';
+            });
+            const rarityOrder = { E:0, R:1, U:2, C:3 };
+            candidates.sort((a, b) => {
+                const ra = ITEMS[a].r || 'U', rb = ITEMS[b].r || 'U';
+                return (rarityOrder[ra]||9) - (rarityOrder[rb]||9);
+            });
+            _pcsItems = candidates.map(k => ({ key:k, it:ITEMS[k] }));
+            _renderPcsList('');
         }
+
+        function _renderPcsList(query) {
+            const rarityMeta = {
+                E: { label:'✨ 史詩', color:'#C084FC' },
+                R: { label:'💎 稀有', color:'#7B9CFF' },
+                U: { label:'🔧 實用', color:'#4ADE80' },
+                C: { label:'📦 普通', color:'#8890A8' },
+            };
+            const q = query.trim().toLowerCase();
+            const filtered = q ? _pcsItems.filter(({key, it}) => it.n.toLowerCase().includes(q) || key.includes(q)) : _pcsItems;
+
+            // 分組
+            const groups = {};
+            filtered.forEach(({key, it}) => {
+                const r = it.r || 'U';
+                if (!groups[r]) groups[r] = [];
+                groups[r].push({key, it});
+            });
+
+            let html = '';
+            if (filtered.length === 0) {
+                html = `<div style="text-align:center; color:var(--muted); padding:16px; font-size:12px;">找不到「${q}」</div>`;
+            } else {
+                ['E','R','U','C'].forEach(r => {
+                    if (!groups[r]) return;
+                    const meta = rarityMeta[r];
+                    html += `<div style="font-size:10px; font-weight:bold; color:${meta.color}; padding:6px 8px 3px; letter-spacing:0.5px;">${meta.label}</div>`;
+                    groups[r].forEach(({key, it}) => {
+                        const isSelected = key === _pcsSelected;
+                        html += `<div class="pcs-item" onclick="selectPriceItem('${key}')" data-key="${key}"
+                            style="display:flex; align-items:center; gap:9px; padding:7px 10px; border-radius:9px; cursor:pointer; font-size:13px;
+                            background:${isSelected ? 'rgba(123,156,255,0.15)' : 'transparent'};
+                            color:${isSelected ? 'var(--primary)' : 'var(--text)'};
+                            transition:background 0.15s;">
+                            <span style="font-size:18px; flex-shrink:0;">${it.i}</span>
+                            <span style="flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${it.n}</span>
+                            ${isSelected ? '<span style="font-size:10px; color:var(--primary);">✓</span>' : ''}
+                        </div>`;
+                    });
+                });
+            }
+            document.getElementById('pcs-list').innerHTML = html;
+        }
+
+        function openPriceItemPicker() {
+            populatePriceChartSelect();
+            document.getElementById('pcs-search').value = '';
+            _renderPcsList('');
+            openModal('pricePickerModal');
+            setTimeout(() => document.getElementById('pcs-search').focus(), 100);
+        }
+
+        function filterPriceItems() {
+            const q = document.getElementById('pcs-search').value;
+            _renderPcsList(q);
+        }
+
+        function selectPriceItem(key) {
+            _pcsSelected = key;
+            const it = ITEMS[key];
+            document.getElementById('pcs-trigger-icon').innerText = it.i;
+            document.getElementById('pcs-trigger-label').innerText = it.n;
+            document.getElementById('pcs-trigger-label').style.color = 'var(--text)';
+            closeModal();
+            renderPriceChart();
+        }
+
+        function renderPriceChart() {
+            const itemKey = _pcsSelected;
+            const svg = document.getElementById('price-chart-svg');
+            const placeholder = document.getElementById('price-chart-placeholder');
+            const legend = document.getElementById('price-chart-legend');
+            const rangeEl = document.getElementById('price-chart-range');
+
+            if (!itemKey) {
+                svg.style.display = 'none';
+                placeholder.style.display = 'block';
+                legend.innerHTML = '';
+                rangeEl.innerText = '';
+                return;
+            }
+
+            placeholder.style.display = 'none';
+            svg.style.display = 'none';
+            legend.innerHTML = '<span style="color:var(--muted)">載入中…</span>';
+
+            db.ref('market_price_history').orderByKey().limitToLast(48).once('value', snap => {
+                const entries = []; // [{time, price}]
+                snap.forEach(child => {
+                    const data = child.val();
+                    if (data && data.prices && data.prices[itemKey] != null) {
+                        entries.push({ time: parseInt(child.key), price: data.prices[itemKey] });
+                    }
+                });
+
+                if (entries.length < 2) {
+                    legend.innerHTML = '<span style="color:var(--muted)">歷史資料不足（至少需要 2 小時）</span>';
+                    svg.style.display = 'none';
+                    return;
+                }
+
+                // 計算圖表尺寸
+                const W = 600, H = 180, PAD_L = 48, PAD_R = 16, PAD_T = 16, PAD_B = 28;
+                const prices = entries.map(e => e.price);
+                const minP = Math.min(...prices), maxP = Math.max(...prices);
+                const priceRange = maxP - minP || 1;
+                const basePrice = ITEMS[itemKey] ? ITEMS[itemKey].b : 1;
+
+                // 座標轉換
+                const xOf = i => PAD_L + (i / (entries.length - 1)) * (W - PAD_L - PAD_R);
+                const yOf = p => PAD_T + (1 - (p - minP) / priceRange) * (H - PAD_T - PAD_B);
+
+                // 建立 polyline points
+                const points = entries.map((e, i) => `${xOf(i).toFixed(1)},${yOf(e.price).toFixed(1)}`).join(' ');
+
+                // Y 軸標籤（3 條線：min, mid, max）
+                const midP = Math.round((minP + maxP) / 2);
+                const yLabels = [
+                    { p: maxP, y: yOf(maxP) },
+                    { p: midP, y: yOf(midP) },
+                    { p: minP, y: yOf(minP) },
+                ];
+                const yAxisSvg = yLabels.map(l =>
+                    `<line x1="${PAD_L}" y1="${l.y.toFixed(1)}" x2="${W - PAD_R}" y2="${l.y.toFixed(1)}" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>
+                     <text x="${PAD_L - 4}" y="${(l.y + 4).toFixed(1)}" text-anchor="end" fill="rgba(255,255,255,0.4)" font-size="9">${l.p}</text>`
+                ).join('');
+
+                // X 軸時間標籤（最多顯示 6 個，首尾 + 等距）
+                const xLabelIdxs = entries.length <= 6
+                    ? entries.map((_, i) => i)
+                    : [0, ...Array.from({length: 4}, (_, j) => Math.round((j+1) * (entries.length-1) / 5)), entries.length-1];
+                const xAxisSvg = xLabelIdxs.map(i => {
+                    const d = new Date(entries[i].time);
+                    const label = `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}h`;
+                    return `<text x="${xOf(i).toFixed(1)}" y="${H - 4}" text-anchor="middle" fill="rgba(255,255,255,0.35)" font-size="8">${label}</text>`;
+                }).join('');
+
+                // 顏色：最後一點 vs 基礎定價
+                const lastPrice = entries[entries.length-1].price;
+                const lineColor = lastPrice >= basePrice ? '#32D74B' : '#FF453A';
+
+                // 漸層填色
+                const gradId = 'pcg_' + itemKey;
+                const gradSvg = `<defs>
+                    <linearGradient id="${gradId}" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stop-color="${lineColor}" stop-opacity="0.25"/>
+                        <stop offset="100%" stop-color="${lineColor}" stop-opacity="0.02"/>
+                    </linearGradient>
+                </defs>`;
+
+                // 填色區域（polygon = polyline + 底部兩點）
+                const fillPoints = entries.map((e, i) => `${xOf(i).toFixed(1)},${yOf(e.price).toFixed(1)}`).join(' ')
+                    + ` ${xOf(entries.length-1).toFixed(1)},${(H-PAD_B).toFixed(1)} ${xOf(0).toFixed(1)},${(H-PAD_B).toFixed(1)}`;
+
+                svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+                svg.innerHTML = `
+                    ${gradSvg}
+                    ${yAxisSvg}
+                    ${xAxisSvg}
+                    <polygon points="${fillPoints}" fill="url(#${gradId})"/>
+                    <polyline points="${points}" fill="none" stroke="${lineColor}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+                    <circle cx="${xOf(entries.length-1).toFixed(1)}" cy="${yOf(lastPrice).toFixed(1)}" r="4" fill="${lineColor}"/>
+                    <text x="${xOf(entries.length-1).toFixed(1)}" y="${(yOf(lastPrice)-8).toFixed(1)}" text-anchor="middle" fill="${lineColor}" font-size="10" font-weight="bold">${lastPrice}</text>
+                `;
+                svg.style.display = 'block';
+
+                // 圖例
+                const changeAmt = lastPrice - entries[0].price;
+                const changePct = ((changeAmt / entries[0].price) * 100).toFixed(1);
+                const changeColor = changeAmt >= 0 ? 'var(--green)' : 'var(--red)';
+                const changeSign = changeAmt >= 0 ? '+' : '';
+                rangeEl.innerText = `最近 ${entries.length} 小時`;
+                legend.innerHTML = `
+                    <span>最低 <strong>${minP}</strong></span>
+                    <span>最高 <strong>${maxP}</strong></span>
+                    <span>現值 <strong style="color:${lineColor}">${lastPrice}</strong></span>
+                    <span>基礎 <strong>${basePrice}</strong></span>
+                    <span style="color:${changeColor}">${changeSign}${changeAmt} (${changeSign}${changePct}%)</span>
+                `;
+            });
+        }
+
+        // ===== ⚡ 抽獎能量系統 =====
+        const ENERGY_RATES = { C:2, R:10, E:50, M:250, U:5 };
+
+        function toggleEnergySection(toggleEl) {
+            const body = document.getElementById('energy-section-body');
+            const chevron = toggleEl.querySelector('.prob-chevron');
+            const isOpen = body.classList.toggle('open');
+            chevron.classList.toggle('open');
+            if (isOpen) renderEnergyItems();
+        }
+
+        function renderEnergyItems() {
+            const list = document.getElementById('energy-item-list');
+            if (!list) return;
+            const convertibles = Object.keys(myInventory).filter(k => myInventory[k] > 0 && ITEMS[k]);
+            if (convertibles.length === 0) {
+                list.innerHTML = '<div style="text-align:center; color:var(--muted); font-size:12px; padding:10px;">（背包空空，先去抽個寶物吧）</div>';
+                return;
+            }
+            const rarityOrder = { M:0, E:1, R:2, C:3, U:4 };
+            convertibles.sort((a,b) => {
+                const ra = ITEMS[a].r || (ITEMS[a].t==='u'?'U':'C');
+                const rb = ITEMS[b].r || (ITEMS[b].t==='u'?'U':'C');
+                return (rarityOrder[ra]||9) - (rarityOrder[rb]||9);
+            });
+            const rarityColors = { M:'var(--gold)', E:'#C084FC', R:'#7B9CFF', C:'#A0A0A5', U:'var(--green)' };
+            list.innerHTML = convertibles.map(k => {
+                const it = ITEMS[k];
+                const rarity = it.r || (it.t==='u' ? 'U' : 'C');
+                const rate = ENERGY_RATES[rarity] || 2;
+                const qty = myInventory[k];
+                const color = rarityColors[rarity] || '#A0A0A5';
+                return `<div style="display:flex; align-items:center; gap:10px; padding:8px 10px; background:rgba(255,255,255,0.03); border-radius:10px; border:1px solid var(--border);">
+                    <div style="font-size:26px; width:36px; text-align:center;">${it.i}</div>
+                    <div style="flex:1; text-align:left;">
+                        <div style="font-size:13px; font-weight:bold;">${it.n} <span style="font-size:11px; color:var(--muted);">x${qty}</span></div>
+                        <div style="font-size:11px; color:${color};">⚡ 每個 +${rate} 能量</div>
+                    </div>
+                    <div style="display:flex; gap:6px; flex-shrink:0;">
+                        <button class="btn" onclick="convertToEnergy('${k}', 1)" style="width:auto; padding:6px 12px; font-size:12px; background:rgba(255,179,64,0.15); color:#FFB340; border-color:rgba(255,179,64,0.4);">×1</button>
+                        ${qty > 1 ? `<button class="btn" onclick="convertToEnergy('${k}', ${qty})" style="width:auto; padding:6px 12px; font-size:12px; background:rgba(255,179,64,0.15); color:#FFB340; border-color:rgba(255,179,64,0.4);">全部</button>` : ''}
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        function convertToEnergy(itemKey, qty) {
+            const it = ITEMS[itemKey];
+            if (!it) return;
+            const rarity = it.r || (it.t==='u' ? 'U' : 'C');
+            const rate = ENERGY_RATES[rarity] || 2;
+            const gain = rate * qty;
+            openConfirmModal('⚡ 確認分解',
+                `確定要分解 <strong style="color:var(--gold)">${it.i} ${it.n} ×${qty}</strong>，換取 <strong style="color:#FFB340">${gain} 點抽獎能量</strong> 嗎？<br><small style="color:var(--red);">⚠️ 分解後無法還原</small>`,
+                () => {
+                    db.ref('users/'+ME+'/items/'+itemKey).transaction(c => {
+                        if (!c || c < qty) return undefined;
+                        return c - qty;
+                    }, (err, committed) => {
+                        if (!committed) return showToast('❌ 道具不足', 'error');
+                        db.ref('users/'+ME+'/gacha_energy').transaction(c => (c||0) + gain);
+                        showToast(`⚡ 分解 ${it.n} ×${qty}，獲得 ${gain} 點能量！`);
+                        playSound('coin');
+                    });
+                }
+            );
+        }
+
+        let _drawChoiceType = 'single';
+
+        function handleLottery() {
+            const m = document.getElementById('mainLotteryBtn').dataset.mode;
+            if (m === 'free') {
+                openConfirmModal('🆓 確認首抽', '確定要使用今日的【免費首抽】嗎？', () => executeLottery('free'));
+                return;
+            }
+            openDrawChoiceModal('single');
+        }
+
+        function handleTenPull() {
+            openDrawChoiceModal('ten');
+        }
+
+        function openDrawChoiceModal(type) {
+            _drawChoiceType = type;
+            const isTen = (type === 'ten');
+            const ticketNeed = isTen ? 10 : 1;
+            const energyNeed = isTen ? 2000 : 200;
+            const ticketHave = myInventory['free_gacha_ticket'] || 0;
+            const hasTicket = ticketHave >= ticketNeed;
+            const hasEnergy = myGachaEnergy >= energyNeed;
+
+            if (!hasTicket && !hasEnergy) {
+                showToast(`❌ 需要 ${ticketNeed} 張抽獎券 或 ${energyNeed} 點能量`, 'error');
+                return;
+            }
+
+            document.getElementById('drawChoiceTitle').innerText = isTen ? '🎰 10連抽方式' : '🎰 單抽方式';
+            document.getElementById('drawChoiceSubtitle').innerText = isTen
+                ? '必觸發一次保底，獲得【抽獎券】x1'
+                : '每次抽獎計入保底次數';
+            document.getElementById('drawChoiceTicketLabel').innerText = `使用 ${ticketNeed} 張抽獎券（持有 ${ticketHave} 張）`;
+            document.getElementById('drawChoiceEnergyLabel').innerText = `消耗 ${energyNeed} 點能量（持有 ${myGachaEnergy} 點）`;
+            const ticketBtn = document.getElementById('drawChoiceTicketBtn');
+            const energyBtn = document.getElementById('drawChoiceEnergyBtn');
+            ticketBtn.disabled = !hasTicket;
+            ticketBtn.style.opacity = hasTicket ? '' : '0.4';
+            energyBtn.disabled = !hasEnergy;
+            energyBtn.style.opacity = hasEnergy ? '' : '0.4';
+            openModal('drawChoiceModal');
+        }
+
+        function drawChoiceExecute(mode) {
+            closeModal();
+            if (_drawChoiceType === 'ten') {
+                executeTenPull(mode);
+            } else {
+                if (mode === 'ticket') {
+                    db.ref('users/'+ME+'/items/free_gacha_ticket').transaction(c => (c&&c>0) ? c-1 : undefined, (e, com) => {
+                        if (!com) return showToast('❌ 抽獎券不足', 'error');
+                        executeLottery('ticket');
+                    });
+                } else {
+                    executeLottery('energy');
+                }
+            }
+        }
+
+        function openTicketChoiceModal() { openDrawChoiceModal('single'); }
 
         function useTicketAndDraw() {
             closeModal();
@@ -1490,12 +2126,6 @@
                 if (!com) return showToast('❌ 道具不足', 'error');
                 executeLottery('ticket');
             });
-        }
-
-        function handleTenPull() {
-            openConfirmModal('🎰 10連抽確認',
-                "確定要花費 <strong style='color:var(--gold)'>100 點</strong> 進行 10 連抽嗎？<br><small style='color:var(--muted);'>（必觸發一次保底，獲得【白嫖抽獎券】x1）</small>",
-                executeTenPull);
         }
 
         // 單次抽獎邏輯（不含 Firebase 寫入），供 10連抽使用
@@ -1536,55 +2166,73 @@
             }
         }
 
-        function executeTenPull() {
-            db.ref('economy/'+ME).once('value').then(ps => {
-                let pts = ps.val() || 0;
-                if (pts < 100) { playSound('error'); return showToast('❌ 點數不足 100 點！', 'error'); }
-
-                db.ref('users/'+ME).once('value').then(s => {
-                    let d = s.val() || {};
-
-                    // 計算 pity（10 次付費抽，必觸發一次保底）
-                    let pity = d.gacha_pity || 0;
-                    let ticketsEarned = 0;
-                    for (let i = 0; i < 10; i++) { pity++; if (pity >= 10) { pity = 0; ticketsEarned++; } }
-
-                    // 抽 10 次
-                    let results = [];
-                    for (let i = 0; i < 10; i++) results.push(rollOnce());
-
-                    // 累積獎勵
-                    let totalPts = 0, totalShards = 0, itemCounts = {};
-                    results.forEach(r => {
-                        if (r.type === 'pts') totalPts += r.amount;
-                        else if (r.type === 'shard') totalShards += r.amount;
-                        else if (r.type === 'item') itemCounts[r.itemKey] = (itemCounts[r.itemKey] || 0) + 1;
-                    });
-
-                    // 建立 flatUpdates 寫入 users/ME
-                    let flatUpdates = { gacha_pity: pity };
-                    flatUpdates['items/free_gacha_ticket'] = ((d.items && d.items['free_gacha_ticket']) || 0) + ticketsEarned;
-                    Object.entries(itemCounts).forEach(([k, cnt]) => {
-                        flatUpdates[`items/${k}`] = ((d.items && d.items[k]) || 0) + cnt;
-                    });
-                    db.ref('users/'+ME).update(flatUpdates);
-
-                    // 點數：transaction（扣 100，加回抽中的點數）
-                    const netPts = totalPts - 100;
-                    db.ref('economy/'+ME).transaction(c => (c||0) + netPts);
-                    if (totalShards > 0) db.ref('users/'+ME+'/shards').transaction(c => (c||0) + totalShards);
-
-                    // 紀錄 gacha_log
-                    results.forEach(r => logGachaResult(r.rarity, r.label, r.icon));
-
-                    // 更新 pity bar
-                    gachaPity = pity;
-                    document.getElementById('pity_text').innerText = `${gachaPity}/10`;
-                    document.getElementById('pity_bar').style.width = `${(gachaPity/10)*100}%`;
-
-                    playSound('coin');
-                    showTenPullResult(results, ticketsEarned);
+        function executeTenPull(mode) {
+            // 消耗資源（transaction），成功後執行 _doTenPull
+            if (mode === 'ticket') {
+                db.ref('users/'+ME+'/items/free_gacha_ticket').transaction(c => {
+                    if (!c || c < 10) return undefined;
+                    return c - 10;
+                }, (err, committed) => {
+                    if (!committed) { playSound('error'); return showToast('❌ 抽獎券不足 10 張！', 'error'); }
+                    _doTenPull('ticket');
                 });
+            } else { // energy
+                db.ref('users/'+ME+'/gacha_energy').transaction(c => {
+                    if (!c || c < 2000) return undefined;
+                    return c - 2000;
+                }, (err, committed) => {
+                    if (!committed) { playSound('error'); return showToast('❌ 能量不足 2000 點！', 'error'); }
+                    _doTenPull('energy');
+                });
+            }
+        }
+
+        function _doTenPull(mode) {
+            db.ref('users/'+ME).once('value').then(s => {
+                let d = s.val() || {};
+
+                // 計算 pity（10 次計入，必觸發一次保底）
+                let pity = d.gacha_pity || 0;
+                let ticketsEarned = 0;
+                for (let i = 0; i < 10; i++) { pity++; if (pity >= 10) { pity = 0; ticketsEarned++; } }
+
+                // 抽 10 次
+                let results = [];
+                for (let i = 0; i < 10; i++) results.push(rollOnce());
+
+                // 累積獎勵
+                let totalPts = 0, totalShards = 0, itemCounts = {};
+                results.forEach(r => {
+                    if (r.type === 'pts') totalPts += r.amount;
+                    else if (r.type === 'shard') totalShards += r.amount;
+                    else if (r.type === 'item') itemCounts[r.itemKey] = (itemCounts[r.itemKey] || 0) + 1;
+                });
+
+                // 建立 flatUpdates 寫入 users/ME
+                let flatUpdates = { gacha_pity: pity };
+                flatUpdates['items/free_gacha_ticket'] = ((d.items && d.items['free_gacha_ticket']) || 0) + ticketsEarned;
+                Object.entries(itemCounts).forEach(([k, cnt]) => {
+                    flatUpdates[`items/${k}`] = ((d.items && d.items[k]) || 0) + cnt;
+                });
+                db.ref('users/'+ME).update(flatUpdates);
+
+                // 抽中的點數直接加入
+                if (totalPts > 0) {
+                    db.ref('economy/'+ME).transaction(c => (c||0) + totalPts);
+                    logPoints(totalPts, `🎰 10連抽得獎（${mode==='ticket'?'10券':'2000能量'}）`);
+                }
+                if (totalShards > 0) db.ref('users/'+ME+'/shards').transaction(c => (c||0) + totalShards);
+
+                // 紀錄 gacha_log
+                results.forEach(r => logGachaResult(r.rarity, r.label, r.icon));
+
+                // 更新 pity bar
+                gachaPity = pity;
+                document.getElementById('pity_text').innerText = `${gachaPity}/10`;
+                document.getElementById('pity_bar').style.width = `${(gachaPity/10)*100}%`;
+
+                playSound('coin');
+                showTenPullResult(results, ticketsEarned);
             });
         }
 
@@ -1643,7 +2291,7 @@
             const showSummary = () => {
                 const summary = document.getElementById('ten-pull-summary');
                 if (ticketsEarned > 0) {
-                    summary.textContent = `🎉 保底觸發！獲得【白嫖抽獎券】x${ticketsEarned}`;
+                    summary.textContent = `🎉 保底觸發！獲得【抽獎券】x${ticketsEarned}`;
                     summary.style.display = '';
                 }
                 confirmBtn.style.display = '';
@@ -1704,13 +2352,24 @@
                 db.ref('users/'+ME).once('value').then(s=>{ 
                     let d = s.val()||{}, up = {}, tail = "", isPaid = false; 
                     
-                    if(m === "free"){ 
-                        up.last_free_lottery = getLocalDateStr(new Date()); tail = "<br>(消耗每日首抽)"; 
-                    } else if(m === "ticket"){ 
-                        up.free_gacha_active = false; tail = "<br>(消耗白嫖券)"; 
+                    if(m === "free"){
+                        up.last_free_lottery = getLocalDateStr(new Date()); tail = "<br>(消耗每日首抽)";
+                    } else if(m === "ticket"){
+                        up.free_gacha_active = false; tail = "<br>(消耗抽獎券)";
+                        isPaid = true;
+                    } else if(m === "energy") {
+                        // 能量消耗已在 drawChoiceExecute 呼叫前由 transaction 處理，此處直接進行
+                        db.ref('users/'+ME+'/gacha_energy').transaction(c => {
+                            if (!c || c < 200) return undefined;
+                            return c - 200;
+                        }, (eErr, eCom) => { if (!eCom) { playSound('error'); showToast('❌ 能量不足 200 點', 'error'); } });
+                        tail = "<br>(消耗 200 能量)";
+                        isPaid = true;
                     } else {
-                        if(pts < 10) { playSound('error'); return showToast("❌ 點數不足 10 點！", 'error'); } 
-                        db.ref('economy/'+ME).set(pts-10); 
+                        // 舊的 paid 模式（直接花10點）保留做向下兼容，正常不會觸發
+                        if(pts < 10) { playSound('error'); return showToast("❌ 點數不足 10 點！", 'error'); }
+                        db.ref('economy/'+ME).set(pts-10);
+                        logPoints(-10, '🎰 抽獎扣款');
                         isPaid = true;
                     }
                     
@@ -1745,12 +2404,13 @@
                         playSound('coin'); confetti({particleCount:150, spread:100});
                         if (won === '100_pts') {
                             db.ref('economy/'+ME).transaction(c=>(c||0)+100);
+                            logPoints(100, '🏆 抽獎頭獎');
                             logGachaResult('M', '100 點頭獎', '🏆');
-                            showModalMsg("🏆 終極頭獎！", "太爽了吧！獲得 <strong style='color:var(--gold)'>100 點</strong>！"+tail+(pityTriggered?"\n\n🎉 滿10抽保底：獲得【白嫖抽獎券】x1":""), true);
+                            showModalMsg("🏆 終極頭獎！", "太爽了吧！獲得 <strong style='color:var(--gold)'>100 點</strong>！"+tail+(pityTriggered?"\n\n🎉 滿10抽保底：獲得【抽獎券】x1":""), true);
                         } else {
                             db.ref('users/'+ME+'/items/'+won).transaction(c=>(c||0)+1);
                             logGachaResult('M', ITEMS[won].n, ITEMS[won].i);
-                            showModalMsg("🏆 終極頭獎！", `不可思議！你抽中了神話級寶物：<br><br><span style="font-size:48px;">${ITEMS[won].i}</span><br><strong style='color:var(--gold)'>${ITEMS[won].n}</strong>！`+tail+(pityTriggered?"\n\n🎉 滿10抽保底：獲得【白嫖抽獎券】x1":""), true);
+                            showModalMsg("🏆 終極頭獎！", `不可思議！你抽中了神話級寶物：<br><br><span style="font-size:48px;">${ITEMS[won].i}</span><br><strong style='color:var(--gold)'>${ITEMS[won].n}</strong>！`+tail+(pityTriggered?"\n\n🎉 滿10抽保底：獲得【抽獎券】x1":""), true);
                         }
                     }
                     else if (luck <= 3) { // 2% 史詩 (E)
@@ -1758,57 +2418,60 @@
                         db.ref('users/'+ME+'/items/'+won).transaction(c=>(c||0)+1);
                         logGachaResult('E', ITEMS[won].n, ITEMS[won].i);
                         playSound('success'); confetti();
-                        showModalMsg("✨ 史詩掉落！", `金光一閃！獲得史詩級寶物：<br><br><span style="font-size:48px;">${ITEMS[won].i}</span><br><strong style='color:var(--purple)'>${ITEMS[won].n}</strong>！`+tail+(pityTriggered?"\n\n🎉 滿10抽保底：獲得【白嫖抽獎券】x1":""), true);
+                        showModalMsg("✨ 史詩掉落！", `金光一閃！獲得史詩級寶物：<br><br><span style="font-size:48px;">${ITEMS[won].i}</span><br><strong style='color:var(--purple)'>${ITEMS[won].n}</strong>！`+tail+(pityTriggered?"\n\n🎉 滿10抽保底：獲得【抽獎券】x1":""), true);
                     }
                     else if (luck <= 10) { // 7% 稀有 (R)
                         let won = getWeightedItem(getPool('R'));
                         db.ref('users/'+ME+'/items/'+won).transaction(c=>(c||0)+1);
                         logGachaResult('R', ITEMS[won].n, ITEMS[won].i);
                         playSound('success');
-                        showModalMsg("💎 稀有掉落！", `運氣不錯！獲得稀有寶物：<br><span style="font-size:24px;">${ITEMS[won].i}</span> <strong style='color:var(--primary)'>${ITEMS[won].n}</strong>！`+tail+(pityTriggered?"\n\n🎉 滿10抽保底：獲得【白嫖抽獎券】x1":""), true);
+                        showModalMsg("💎 稀有掉落！", `運氣不錯！獲得稀有寶物：<br><span style="font-size:24px;">${ITEMS[won].i}</span> <strong style='color:var(--primary)'>${ITEMS[won].n}</strong>！`+tail+(pityTriggered?"\n\n🎉 滿10抽保底：獲得【抽獎券】x1":""), true);
                     }
                     else if (luck <= 20) { // 10% 實用道具 (U)
                         let won = getWeightedItem(Object.keys(ITEMS).filter(k => ITEMS[k].t === 'u'));
                         db.ref('users/'+ME+'/items/'+won).transaction(c=>(c||0)+1);
                         logGachaResult('U', ITEMS[won].n, ITEMS[won].i);
                         playSound('success');
-                        showModalMsg("🎒 實用道具！", `抽中了實用的功能卡片：<br><span style="font-size:24px;">${ITEMS[won].i}</span> <strong style='color:var(--green)'>${ITEMS[won].n}</strong>！`+tail+(pityTriggered?"\n\n🎉 滿10抽保底：獲得【白嫖抽獎券】x1":""), true);
+                        showModalMsg("🎒 實用道具！", `抽中了實用的功能卡片：<br><span style="font-size:24px;">${ITEMS[won].i}</span> <strong style='color:var(--green)'>${ITEMS[won].n}</strong>！`+tail+(pityTriggered?"\n\n🎉 滿10抽保底：獲得【抽獎券】x1":""), true);
                     }
                     else if (luck <= 35) { // 15% 普通寶物 (C)
                         let won = getWeightedItem(getPool('C'));
                         db.ref('users/'+ME+'/items/'+won).transaction(c=>(c||0)+1);
                         logGachaResult('C', ITEMS[won].n, ITEMS[won].i);
                         playSound('success');
-                        showModalMsg("📦 普通收集品", `獲得了一件普通收集品：<br><span style="font-size:24px;">${ITEMS[won].i}</span> <strong>${ITEMS[won].n}</strong>`+tail+(pityTriggered?"\n\n🎉 滿10抽保底：獲得【白嫖抽獎券】x1":""), true);
+                        showModalMsg("📦 普通收集品", `獲得了一件普通收集品：<br><span style="font-size:24px;">${ITEMS[won].i}</span> <strong>${ITEMS[won].n}</strong>`+tail+(pityTriggered?"\n\n🎉 滿10抽保底：獲得【抽獎券】x1":""), true);
                     }
                     else if (luck <= 40) { // 5% 大點數 (16-20)
                         let p = Math.floor(Math.random()*5)+16;
                         db.ref('economy/'+ME).transaction(c=>(c||0)+p); playSound('coin');
+                        logPoints(p, '🎰 抽獎得獎');
                         logGachaResult('pts', `${p} 點`, '💰');
-                        showModalMsg("💰 大獎金！", `手氣真好！獲得 <strong style='color:var(--gold)'>${p} 點</strong>！`+tail+(pityTriggered?"\n\n🎉 滿10抽保底：獲得【白嫖抽獎券】x1":""), true);
+                        showModalMsg("💰 大獎金！", `手氣真好！獲得 <strong style='color:var(--gold)'>${p} 點</strong>！`+tail+(pityTriggered?"\n\n🎉 滿10抽保底：獲得【抽獎券】x1":""), true);
                     }
                     else if (luck <= 50) { // 10% 中點數 (6-15)
                         let p = Math.floor(Math.random()*10)+6;
                         db.ref('economy/'+ME).transaction(c=>(c||0)+p); playSound('coin');
+                        logPoints(p, '🎰 抽獎得獎');
                         logGachaResult('pts', `${p} 點`, '🪙');
-                        showModalMsg("🪙 小回本", `拿回了 ${p} 點！`+tail+(pityTriggered?"\n\n🎉 滿10抽保底：獲得【白嫖抽獎券】x1":""), true);
+                        showModalMsg("🪙 小回本", `拿回了 ${p} 點！`+tail+(pityTriggered?"\n\n🎉 滿10抽保底：獲得【抽獎券】x1":""), true);
                     }
                     else if (luck <= 70) { // 20% 小點數 (1-5)
                         let p = Math.floor(Math.random()*5)+1;
                         db.ref('economy/'+ME).transaction(c=>(c||0)+p); playSound('coin');
+                        logPoints(p, '🎰 抽獎得獎');
                         logGachaResult('pts', `${p} 點`, '🍬');
-                        showModalMsg("🍬 小補貼", `獲得 ${p} 點零錢。`+tail+(pityTriggered?"\n\n🎉 滿10抽保底：獲得【白嫖抽獎券】x1":""), true);
+                        showModalMsg("🍬 小補貼", `獲得 ${p} 點零錢。`+tail+(pityTriggered?"\n\n🎉 滿10抽保底：獲得【抽獎券】x1":""), true);
                     }
                     else if (luck <= 85) { // 15% 碎片 (1-2)
                         let amt = Math.random() < 0.5 ? 1 : 2;
                         db.ref('users/'+ME+'/shards').transaction(c=>(c||0)+amt); playSound('success');
                         logGachaResult('shard', `碎片 x${amt}`, '🔹');
-                        showModalMsg("🔹 碎片", `稍微安慰一下，獲得 ${amt} 個水晶碎片。`+tail+(pityTriggered?"\n\n🎉 滿10抽保底：獲得【白嫖抽獎券】x1":""), true);
+                        showModalMsg("🔹 碎片", `稍微安慰一下，獲得 ${amt} 個水晶碎片。`+tail+(pityTriggered?"\n\n🎉 滿10抽保底：獲得【抽獎券】x1":""), true);
                     }
                     else { // 15% 槓龜
                         logGachaResult('miss', '槓龜', '💀');
                         playSound('error');
-                        showModalMsg("💀 槓龜", "什麼都沒有，點數被系統沒收了。"+tail+(pityTriggered?"\n\n🎉 滿10抽保底：獲得【白嫖抽獎券】x1":""), false);
+                        showModalMsg("💀 槓龜", "什麼都沒有，點數被系統沒收了。"+tail+(pityTriggered?"\n\n🎉 滿10抽保底：獲得【抽獎券】x1":""), false);
                     } 
                     setTimeout(() => {
                         loadGachaHistory();
@@ -1956,7 +2619,7 @@
         function doSpendFlexible() { 
             let a=parseInt(document.getElementById('spendAmt').value); closeModal(); 
             if(!a||a<=0)return; 
-            if(myPoints>=a){ openConfirmModal("🥤 現實支出", `確定要花費 <strong style="color:var(--red)">${a} 點</strong> 於現實支出嗎？`, ()=>{ db.ref('economy/'+ME).set(myPoints-a); showToast(`🥤 成功扣除 ${a} 點`); }); }
+            if(myPoints>=a){ openConfirmModal("🥤 現實支出", `確定要花費 <strong style="color:var(--red)">${a} 點</strong> 於現實支出嗎？`, ()=>{ db.ref('economy/'+ME).set(myPoints-a); logPoints(-a, '🥤 現實支出'); showToast(`🥤 成功扣除 ${a} 點`); }); }
             else { showToast("❌ 餘額不足", 'error'); } 
         }
 
@@ -1973,7 +2636,7 @@
             if(!a || a <= 0) return showToast("❌ 請輸入正確數量", 'error'); 
             let senderName = CFG.myName;
             if (selectedTransferType === 'points') {
-                if(myPoints >= a){ openConfirmModal("💌 支援點數", `確定要送出 <strong style="color:var(--primary)">${a} 點</strong> 給${CFG.oppName}嗎？`, ()=>{ db.ref('economy/'+ME).set(myPoints-a); db.ref('mailbox/'+OPP).push({ title:"💌 收到夥伴點數支援！", msg:`${senderName} 剛剛送了 ${a} 點給你，快收下去黑市掃貨吧！`, amount:a, claimed:false, timestamp:Date.now() }); playSound('coin'); showToast(`💌 支援成功！已送出 ${a} 點`); }); }
+                if(myPoints >= a){ openConfirmModal("💌 支援點數", `確定要送出 <strong style="color:var(--primary)">${a} 點</strong> 給${CFG.oppName}嗎？`, ()=>{ db.ref('economy/'+ME).set(myPoints-a); db.ref('mailbox/'+OPP).push({ title:"💌 收到夥伴點數支援！", msg:`${senderName} 剛剛送了 ${a} 點給你，快收下去黑市掃貨吧！`, amount:a, claimed:false, timestamp:Date.now() }); logPoints(-a, `💌 支援給${CFG.oppName}`); playSound('coin'); showToast(`💌 支援成功！已送出 ${a} 點`); }); }
                 else { showToast("❌ 餘額不足", 'error'); }
             } else {
                 let it = ITEMS[selectedTransferType];
@@ -2000,9 +2663,9 @@
                         // 支援新格式 { reward:{...}, max_uses, ... } 和舊格式（直接是數字或 reward object）
                         const rw = (raw && typeof raw==='object' && raw.reward) ? raw.reward : raw;
                         let mt="";
-                        if(typeof rw==='number'){ db.ref('economy/'+ME).transaction(v=>(v||0)+rw); mt+=`💰 獲得 ${rw} 點！<br>`; }
+                        if(typeof rw==='number'){ db.ref('economy/'+ME).transaction(v=>(v||0)+rw); logPoints(rw, '🎁 序號兌換'); mt+=`💰 獲得 ${rw} 點！<br>`; }
                         else if(rw && typeof rw==='object'){
-                            if(rw.points){ db.ref('economy/'+ME).transaction(v=>(v||0)+rw.points); mt+=`💰 獲得 ${rw.points} 點<br>`; }
+                            if(rw.points){ db.ref('economy/'+ME).transaction(v=>(v||0)+rw.points); logPoints(rw.points, '🎁 序號兌換'); mt+=`💰 獲得 ${rw.points} 點<br>`; }
                             if(rw.items){ Object.keys(rw.items).forEach(k=>{ let q=rw.items[k]; db.ref('users/'+ME+'/items/'+k).transaction(v=>(v||0)+q); mt+=`🎁 獲得【${ITEMS[k]?ITEMS[k].n:k}】x${q}<br>`; }); }
                             if(rw.shards){ db.ref('users/'+ME+'/shards').transaction(v=>(v||0)+rw.shards); mt+=`🔹 獲得【水晶碎片】x${rw.shards}<br>`; }
                         }
@@ -2051,7 +2714,8 @@
                 if (luck < 0.002) dropKey = getGem('M'); else if (luck < 0.052) dropKey = getGem('E'); else if (luck < 0.152) dropKey = getGem('R'); 
                 
                 if(dropKey) { updates['items/'+dropKey] = (d.items && d.items[dropKey] ? d.items[dropKey] : 0) + 1; dropMsg = `\n🎁 額外掉落：【${ITEMS[dropKey].n}】x1`; } 
-                db.ref('economy/'+ME).transaction(c => (c||0) + reward); db.ref('users/'+ME).update(updates); 
+                db.ref('economy/'+ME).transaction(c => (c||0) + reward); db.ref('users/'+ME).update(updates);
+                logPoints(reward, `🛌 打卡獎勵${isP?' (雙倍)':''}`); 
                 playSound('coin'); confetti({particleCount:100, spread:70, origin:{y:0.6}}); 
                 
                 let msg = `打卡成功！連續 ${newStreak} 天！\n總共獲得 ${reward} 點！\n🔹 獲得 1 個【水晶碎片】`; 

@@ -220,6 +220,21 @@
 
 <div class="page-wrapper">
 
+    <!-- ===== 玩家狀態總覽 ===== -->
+    <div class="section-card">
+        <div class="section-header" onclick="toggleSection('overview')">
+            <span class="section-header-icon">👥</span>
+            <span class="section-header-title">玩家狀態總覽</span>
+            <span class="section-chevron" id="chevron-overview">▼</span>
+        </div>
+        <div class="section-body" id="body-overview">
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;" id="overview-grid">
+                <div style="text-align:center; color:var(--muted); font-size:13px; padding:20px; grid-column:1/-1;">載入中...</div>
+            </div>
+            <button class="btn" onclick="loadOverview()" style="width:100%; margin-top:12px; background:rgba(255,255,255,0.05); font-size:13px; padding:10px;">🔄 重新整理</button>
+        </div>
+    </div>
+
     <!-- ===== 公告管理 ===== -->
     <div class="section-card">
         <div class="section-header" onclick="toggleSection('anno')">
@@ -368,7 +383,7 @@
         flex_pass: { n: "萬能作息券", i: "🎫", t: "u", r: "U", b: 30 },
         lucky_clover: { n: "保底幸運草", i: "🍀", t: "u", r: "U", b: 40 },
         double_pillow: { n: "雙倍好夢枕", i: "🌙", t: "u", r: "U", b: 30 },
-        free_gacha_ticket: { n: "白嫖抽獎券", i: "🎟️", t: "u", r: "U", b: 50 },
+        free_gacha_ticket: { n: "抽獎券", i: "🎟️", t: "u", r: "U", b: 10 },
         piggy_bank: { n: "陶瓷小豬撲滿", i: "🐷", t: "u", r: "U", b: 15 },
         mystery_box: { n: "神祕的快遞箱", i: "📦", t: "u", r: "U", b: 20 },
         sprite_bait: { n: "精靈誘餌", i: "🧚‍♂️", t: "u", r: "U", b: 20 },
@@ -690,14 +705,67 @@
     const origToggle = toggleSection;
     toggleSection = function(id) {
         origToggle(id);
-        if (id === 'mails' && !document.getElementById('body-mails').classList.contains('collapsed')) {
-            loadMails();
-        }
+        if (id === 'mails' && !document.getElementById('body-mails').classList.contains('collapsed')) loadMails();
+        if (id === 'overview' && !document.getElementById('body-overview').classList.contains('collapsed')) loadOverview();
     };
+
+    // ===== 玩家狀態總覽 =====
+    function loadOverview() {
+        const grid = document.getElementById('overview-grid');
+        if (!grid) return;
+        grid.innerHTML = '<div style="text-align:center;color:var(--muted);font-size:13px;padding:20px;grid-column:1/-1;">載入中...</div>';
+        const getLocalDateStr = d => d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+        const today = getLocalDateStr(new Date());
+        const NAMES = { p1:'👦🏻 至凱', p2:'👦🏼 柏致' };
+        Promise.all([
+            db.ref('economy').once('value'),
+            db.ref('users/p1').once('value'),
+            db.ref('users/p2').once('value')
+        ]).then(([econSnap, u1Snap, u2Snap]) => {
+            const econ = econSnap.val() || {};
+            const users = { p1: u1Snap.val()||{}, p2: u2Snap.val()||{} };
+            grid.innerHTML = ['p1','p2'].map(pid => {
+                const u = users[pid], pts = econ[pid]||0;
+                const streak = u.streak||0, pity = u.gacha_pity||0, energy = u.gacha_energy||0;
+                const items = u.items||{};
+                const buffs = [];
+                if(u.flex_active) buffs.push('🎫 萬能作息券');
+                if(u.clover_active) buffs.push('🍀 幸運草');
+                if(u.pillow_target) buffs.push('🌙 好夢枕');
+                if(u.free_gacha_active) buffs.push('🎟️ 抽獎券待用');
+                const buffHtml = buffs.length
+                    ? buffs.map(b=>`<span style="display:inline-block;padding:3px 7px;border-radius:10px;background:rgba(123,156,255,0.12);color:var(--primary);font-size:11px;margin:2px;">${b}</span>`).join('')
+                    : '<span style="color:var(--muted);font-size:11px;">無</span>';
+                const rarityCount = {U:0,C:0,R:0,E:0,M:0};
+                Object.entries(items).forEach(([k,qty]) => { const it=ITEMS[k]; if(it&&qty>0) rarityCount[it.r]=(rarityCount[it.r]||0)+qty; });
+                const invHtml = Object.entries(rarityCount).filter(([,v])=>v>0)
+                    .map(([r,v])=>`<span style="font-size:11px;color:var(--muted);margin-right:6px;">${r}×${v}</span>`).join('')
+                    || '<span style="color:var(--muted);font-size:11px;">空</span>';
+                const checked = u.last_date === today;
+                const badge = checked
+                    ? `<span style="font-size:11px;padding:2px 8px;border-radius:8px;background:rgba(74,222,128,0.12);color:var(--green);">💤 已打卡</span>`
+                    : `<span style="font-size:11px;padding:2px 8px;border-radius:8px;background:rgba(248,113,113,0.1);color:var(--red);">未打卡</span>`;
+                return `<div style="background:rgba(0,0,0,0.2);border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:14px;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+                        <span style="font-weight:bold;font-size:14px;">${NAMES[pid]}</span>${badge}
+                    </div>
+                    <div style="font-size:26px;font-weight:900;color:var(--primary);margin-bottom:6px;">${pts} 點</div>
+                    <div style="font-size:12px;color:var(--muted);margin-bottom:6px;">🔥 連勝 ${streak} 天　🎟️ 保底 ${pity}/10　⚡ 能量 ${energy}</div>
+                    <div style="font-size:11px;color:var(--muted);font-weight:bold;margin-bottom:3px;">生效道具</div>
+                    <div style="display:flex;flex-wrap:wrap;gap:2px;margin-bottom:6px;">${buffHtml}</div>
+                    <div style="font-size:11px;color:var(--muted);font-weight:bold;margin-bottom:3px;">背包</div>
+                    <div>${invHtml}</div>
+                </div>`;
+            }).join('');
+        }).catch(err => {
+            grid.innerHTML = `<div style="color:var(--red);font-size:13px;padding:10px;grid-column:1/-1;">載入失敗: ${err.message}</div>`;
+        });
+    }
 
     // 初始化
     renderItemGridCart('mail-item-grid', 'mail');
     renderItemGridCart('code-item-grid', 'code');
+    loadOverview();
 </script>
 </body>
 </html>
