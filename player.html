@@ -963,10 +963,11 @@
             const list = document.getElementById('points-log-list');
             if (!list) return;
             list.innerHTML = '<div style="text-align:center;color:var(--muted);font-size:12px;padding:10px;">載入中...</div>';
-            db.ref('points_log/' + ME).orderByChild('ts').limitToLast(20).once('value', snap => {
+            db.ref('points_log/' + ME).once('value', snap => {
                 const entries = [];
-                snap.forEach(c => entries.push(c.val()));
-                entries.reverse();
+                snap.forEach(c => { const v = c.val(); if (v && v.ts) entries.push(v); });
+                entries.sort((a, b) => b.ts - a.ts);
+                entries.splice(20);
                 if (entries.length === 0) {
                     list.innerHTML = '<div style="text-align:center;color:var(--muted);font-size:12px;padding:10px;">尚無記錄</div>';
                     return;
