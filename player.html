@@ -427,7 +427,7 @@
                 <div class="prob-toggle" onclick="togglePointsLog(this)">
                     <span>📒 點數流水帳</span><span class="prob-chevron">▼</span>
                 </div>
-                <div class="prob-body" id="points-log-body">
+                <div class="prob-body" id="points-log-body" style="max-height:0;">
                     <div id="points-log-list" style="margin-top:8px;"></div>
                 </div>
             </div>
@@ -953,8 +953,9 @@
             playSound('click');
             const body = document.getElementById('points-log-body');
             const chevron = toggleEl.querySelector('.prob-chevron');
-            const isOpen = body.classList.toggle('open');
-            chevron.classList.toggle('open');
+            const isOpen = body.style.maxHeight === '0px' || body.style.maxHeight === '0' || !body.style.maxHeight || body.style.maxHeight === '';
+            body.style.maxHeight = isOpen ? '2000px' : '0';
+            chevron.classList.toggle('open', isOpen);
             if (isOpen) loadPointsLog();
         }
 
