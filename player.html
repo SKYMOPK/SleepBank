@@ -477,7 +477,7 @@
                     <span class="prob-chevron">▼</span>
                 </div>
                 <div class="prob-body" id="energy-section-body">
-                    <div style="color:var(--muted); font-size:12px; padding:4px 2px 10px;">分解虛寶可獲得能量，累積後可消耗能量進行抽獎（單抽200 / 10連抽2000）</div>
+                    <div style="color:var(--muted); font-size:12px; padding:4px 2px 10px;">分解虛寶可獲得能量，累積後可消耗能量進行抽獎（單抽100 / 10連抽900）</div>
                     <div style="display:flex; gap:8px; flex-wrap:wrap; font-size:11px; color:var(--muted); margin-bottom:12px; background:rgba(255,255,255,0.03); border-radius:10px; padding:8px 12px;">
                         <span style="color:#A0A0A5;">📦 普通=2</span>
                         <span style="color:#7B9CFF;">💎 稀有=10</span>
@@ -1438,11 +1438,19 @@
             let pUp;
             if      (ratio > 3.0) pUp = 0.10;  // 極端狂熱
             else if (ratio > 2.0) pUp = 0.30;  // 過熱
-            else if (ratio < 0.5) pUp = 0.60;  // 超跌（繼續跌機率 40%）
+            else if (ratio < 0.5) pUp = 0.60;  // 超跌
+            else if (ratio < 1.0) {
+                // 低於基礎定價：給額外上漲偏好（煞車效果，不強制反彈）
+                pUp = lastDir === 1 ? 0.65 : lastDir === -1 ? 0.42 : 0.58;
+            }
             else pUp = lastDir === 1 ? 0.65 : lastDir === -1 ? 0.35 : 0.50; // 正常
 
+            // 稀有度絕對地板
+            const floors = { C: 1, R: 5, U: 5, E: 20, M: 20 };
+            const priceFloor = floors[rarity] ?? 1;
+
             const dir = Math.random() < pUp ? 1 : -1;
-            return Math.max(1, Math.round(currentPrice * (1 + dir * changePct)));
+            return Math.max(priceFloor, Math.round(currentPrice * (1 + dir * changePct)));
         }
 
         function shuffleArray(arr) {
