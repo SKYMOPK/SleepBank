@@ -505,6 +505,14 @@
         }
         #screen-waitroom.active { display: flex; }
         #waitroom-canvas { display: block; flex: 1; image-rendering: pixelated; }
+
+        /* 等待室手機搖桿（左半屏觸控區，與遊戲搖桿共用 .joystick-base/.joystick-knob 樣式） */
+        #wr-joystick-left {
+            position: fixed; bottom: 0; left: 0;
+            width: 50%; height: 60%;
+            pointer-events: all; z-index: 20;
+            display: none;
+        }
         #waitroom-hud {
             position: absolute; top: 0; left: 0; right: 0;
             padding: 10px 16px;
@@ -576,7 +584,7 @@
         #hotbar {
             position: fixed; bottom: 16px; left: 50%;
             transform: translateX(-50%);
-            display: flex; gap: 8px; z-index: 10;
+            display: flex; gap: 8px; z-index: 15;  /* 高於搖桿觸控區(10)，確保點擊不被截走 */
             pointer-events: all;
         }
         .hotbar-slot {
@@ -649,29 +657,32 @@
         }
         @keyframes bannerPulse { to { border-color: rgba(248,113,113,0.8); box-shadow: 0 0 20px rgba(248,113,113,0.3); } }
 
-        /* 手機虛擬搖桿 */
+        /* 手機虛擬搖桿：覆蓋左右半屏的透明觸控區，手指按下哪裡中心點就在哪裡 */
         #joystick-left, #joystick-right {
-            position: fixed; bottom: 80px;
-            width: 120px; height: 120px;
+            position: fixed; bottom: 0;
+            width: 50%; height: 68%;
             pointer-events: all; z-index: 10;
             display: none;
         }
-        #joystick-left  { left: 20px; }
-        #joystick-right { right: 20px; }
+        #joystick-left  { left: 0; }
+        #joystick-right { right: 0; }
         .joystick-base {
-            width: 100%; height: 100%;
+            display: none;               /* JS touchstart 時動態定位並顯示 */
+            position: absolute;
+            width: 110px; height: 110px;
             border-radius: 50%;
             background: rgba(255,255,255,0.06);
-            border: 2px solid rgba(255,255,255,0.12);
-            position: relative;
+            border: 2px solid rgba(255,255,255,0.15);
+            pointer-events: none;        /* 不攔截觸控，讓父層繼續接收 */
         }
         .joystick-knob {
             width: 44px; height: 44px; border-radius: 50%;
-            background: rgba(200,146,42,0.7);
+            background: rgba(200,146,42,0.65);
             border: 2px solid rgba(200,146,42,0.9);
             position: absolute; top: 50%; left: 50%;
             transform: translate(-50%, -50%);
             transition: background 0.1s;
+            pointer-events: none;
         }
         .joystick-knob.active { background: var(--accent); }
 
@@ -683,10 +694,41 @@
             border: 1px solid rgba(200,146,42,0.4);
             color: var(--accent); font-size: 18px;
             display: none; align-items: center; justify-content: center;
-            z-index: 10; cursor: pointer; pointer-events: all;
+            z-index: 20; cursor: pointer; pointer-events: all;
             transition: background 0.15s;
         }
         #bag-btn:hover { background: rgba(200,146,42,0.2); }
+
+        /* 手機聊天按鈕（與背包按鈕對稱，左上角） */
+        #mobile-chat-btn {
+            position: fixed; top: 12px; left: 12px;
+            width: 36px; height: 36px; border-radius: 10px;
+            background: rgba(0,0,0,0.55);
+            border: 1px solid rgba(200,146,42,0.4);
+            color: var(--accent); font-size: 18px;
+            display: none; align-items: center; justify-content: center;
+            z-index: 20; cursor: pointer; pointer-events: all;
+            transition: background 0.15s;
+        }
+        #mobile-chat-btn:active { background: rgba(200,146,42,0.25); }
+
+        /* 手機火把投擲瞄準鈕 */
+        #mobile-throw-btn {
+            position: fixed; right: 82px; bottom: 200px;
+            width: 52px; height: 52px; border-radius: 50%;
+            background: rgba(255,120,0,0.25);
+            border: 2px solid rgba(255,140,0,0.55);
+            color: #ff9020; font-size: 22px;
+            display: none; align-items: center; justify-content: center;
+            z-index: 20; cursor: pointer; pointer-events: all;
+            user-select: none; -webkit-user-select: none;
+            transition: background 0.12s;
+        }
+        #mobile-throw-btn.aiming {
+            background: rgba(255,140,0,0.45);
+            border-color: rgba(255,200,50,0.9);
+            box-shadow: 0 0 14px rgba(255,140,0,0.6);
+        }
 
         /* 局內背包浮層 */
         #ingame-bag {
@@ -832,7 +874,7 @@
             border: 2px solid rgba(96,165,250,0.4);
             color: var(--blue); font-size: 22px;
             display: none; align-items: center; justify-content: center;
-            z-index: 10; cursor: pointer;
+            z-index: 20; cursor: pointer; pointer-events: all;
         }
 
         /* ══════════════════════════════════
@@ -1299,10 +1341,16 @@
     <canvas id="waitroom-canvas"></canvas>
     <div id="waitroom-hud">
         <div class="wr-room-code">房間代碼：<span id="wr-room-code-display">----</span></div>
-        <div class="wr-hint">WASD 移動 · 靠近祭壇按 F 準備</div>
+        <div class="wr-hint" id="wr-hint">WASD 移動 · 靠近祭壇按 F 準備</div>
         <div class="wr-status" id="wr-status">等待夥伴加入…</div>
     </div>
     <button id="waitroom-ready-btn" onclick="toggleWaitRoomReady()">[ F ] 我準備好了</button>
+    <!-- 手機專屬移動搖桿（觸控裝置才顯示） -->
+    <div id="wr-joystick-left">
+        <div class="joystick-base">
+            <div class="joystick-knob" id="wr-jl-knob"></div>
+        </div>
+    </div>
 </div>
 
 <!-- 同步倒數 overlay -->
@@ -1384,6 +1432,8 @@
         </div>
     </div>
     <div id="mobile-interact-btn" onclick="doInteract()">F</div>
+    <div id="mobile-chat-btn" onclick="openChat()">💬</div>
+    <div id="mobile-throw-btn">🔥</div>
 </div>
 
 <!-- 局內背包浮層 -->
@@ -1949,6 +1999,7 @@ const WR_MAP = (() => {
 let wrPlayer   = { x: 3, y: 6, px: 3, py: 6, ready: false, name: '', color: '' };
 let wrOther    = { x: WR_COLS-4, y: 6, px: WR_COLS-4, py: 6, ready: false, name: '', present: false };
 let wrKeys     = {};
+const wrJlVec  = { x: 0, y: 0 };  // 等待室手機搖桿方向
 let wrRunning  = false;
 let wrRaf      = null;
 let wrSyncRef  = null;
@@ -1978,6 +2029,13 @@ function showWaitRoom(code) {
     wrRunning = true;
     wrLastTime = performance.now();
     wrRaf = requestAnimationFrame(wrLoop);
+
+    // 手機：顯示移動搖桿，更新操作提示
+    if ('ontouchstart' in window) {
+        document.getElementById('wr-joystick-left').style.display = 'block';
+        document.getElementById('wr-hint').textContent = '觸控左半區移動 · 按下方「準備」鈕';
+        setupJoystick('wr-joystick-left', 'wr-jl-knob', wrJlVec, false);
+    }
 
     // Firebase 同步：廣播自己位置（每 120ms）
     if (currentSessionId) {
@@ -2019,6 +2077,8 @@ function stopWaitRoom() {
     if (wrSyncInt) { clearInterval(wrSyncInt); wrSyncInt = null; }
     if (wrSyncRef) { wrSyncRef.off(); wrSyncRef = null; }
     document.getElementById('screen-waitroom').classList.remove('active');
+    document.getElementById('wr-joystick-left').style.display = 'none';
+    wrJlVec.x = 0; wrJlVec.y = 0;  // 清除殘留輸入
 }
 
 function toggleWaitRoomReady() {
@@ -2039,13 +2099,16 @@ function wrLoop(now) {
     const dt = Math.min(now - wrLastTime, 50);
     wrLastTime = now;
 
-    // 移動
+    // 移動（鍵盤 + 手機搖桿同時支援）
     const spd = 0.08;
     let dx = 0, dy = 0;
     if (wrKeys['w'] || wrKeys['W'] || wrKeys['ArrowUp'])    dy -= spd;
     if (wrKeys['s'] || wrKeys['S'] || wrKeys['ArrowDown'])  dy += spd;
     if (wrKeys['a'] || wrKeys['A'] || wrKeys['ArrowLeft'])  dx -= spd;
     if (wrKeys['d'] || wrKeys['D'] || wrKeys['ArrowRight']) dx += spd;
+    // 手機搖桿（比例輸入，非二值）
+    dx += wrJlVec.x * spd;
+    dy += wrJlVec.y * spd;
 
     const nx = wrPlayer.x + dx;
     const ny = wrPlayer.y + dy;
@@ -2282,6 +2345,9 @@ let collapsing = false;
 let uiOpen = false;  // 雙人模式只鎖輸入，不停遊戲循環
 let hotbarSlots = [];   // [{ type, qty }|null] × 4
 let flyingTorches = []; // 飛行中的火把
+// 手機投擲瞄準狀態
+let torchAimActive = false;
+let torchAimAngle  = 0;
 
 // 玩家狀態
 const player = {
@@ -2487,6 +2553,7 @@ async function initGame() {
         document.getElementById('joystick-left').style.display  = 'block';
         document.getElementById('joystick-right').style.display = 'block';
         document.getElementById('mobile-interact-btn').style.display = 'flex';
+        document.getElementById('mobile-chat-btn').style.display = 'flex';
         initJoysticks();
     }
 
@@ -2788,6 +2855,15 @@ function updateHotbar() {
         slotEl.classList.toggle('active', isHeld);
     });
     document.getElementById('hqty-coin').textContent = player.loot.tomb_coin || 0;
+
+    // 手機：火把丟出鈕只在持火把且有觸控時顯示
+    if ('ontouchstart' in window) {
+        const throwBtn = document.getElementById('mobile-throw-btn');
+        if (throwBtn) {
+            const show = player.heldItem === 'torch' && player.torch > 0;
+            throwBtn.style.display = show ? 'flex' : 'none';
+        }
+    }
 }
 
 function useSlot(n) {
@@ -2836,22 +2912,24 @@ function plantTorch() {
 }
 
 // 拋出火把（G 鍵）
-function throwTorch() {
+function throwTorch(overrideAngle) {
     if (!gameRunning || player.state !== 'alive') return;
     if (player.torch <= 0) { player.heldItem = null; updateHotbar(); return; }
     player.torch--;
     const torchSlot = hotbarSlots.find(s => s && s.type === 'torch');
     if (torchSlot) torchSlot.qty = player.torch;
     if (player.torch <= 0) player.heldItem = null;
-    const dist = 5 + Math.random();
+    const ang = (overrideAngle !== undefined) ? overrideAngle : mouseAngle;
+    const spd = 0.072;  // 慢速，讓飛行有足夠時間展示
     flyingTorches.push({
         x: player.x, y: player.y,
-        vx: Math.cos(mouseAngle) * 0.11,
-        vy: Math.sin(mouseAngle) * 0.11,
-        rot: 0,
-        life: 80,
-        targetDist: 3.5 + Math.random() * 0.8,  // 3.5-4.3 格
+        vx: Math.cos(ang) * spd,
+        vy: Math.sin(ang) * spd,
+        rot: Math.random() * Math.PI * 2,  // 隨機初始角度
+        life: 120,
+        targetDist: 4.5 + Math.random() * 0.8,  // 4.5-5.3 格
         traveled: 0,
+        trail: [],
     });
     updateHotbar();
 }
@@ -3459,14 +3537,22 @@ function gameLoop(ts) {
     if (chatBubble) { chatBubble.life -= dt; if (chatBubble.life <= 0) chatBubble = null; }
     if (otherChatBubble) { otherChatBubble.life -= dt; if (otherChatBubble.life <= 0) otherChatBubble = null; }
 
-    // 飛行火把更新
+    // 飛行火把更新（頂視角不加地心引力，直線飛行）
     flyingTorches = flyingTorches.filter(t => {
-        t.x += t.vx; t.vy += 0.025; t.y += t.vy; t.rot += 0.12; t.life--;
-        t.traveled = (t.traveled || 0) + Math.hypot(t.vx, t.vy);
+        // 記錄軌跡點（每 2 幀存一個，最多保留 6 個）
+        if (!t.trail) t.trail = [];
+        if (t.life % 2 === 0) t.trail.push({ x: t.x, y: t.y, a: 0.7 });
+        if (t.trail.length > 6) t.trail.shift();
+        t.trail.forEach(p => { p.a *= 0.78; });  // 軌跡淡出
+
+        t.x += t.vx; t.y += t.vy;                // 純方向移動，無重力
+        t.rot += 0.22;
+        t.life--;
+        t.traveled += Math.hypot(t.vx, t.vy);
         const gx = Math.round(t.x), gy = Math.round(t.y);
         if (t.life <= 0 || t.traveled >= t.targetDist || !canMove(gx, gy)) {
             const lx = canMove(gx, gy) ? gx : Math.round(t.x - t.vx);
-            const ly = canMove(Math.round(t.x), Math.round(t.y - t.vy)) ? Math.round(t.y - t.vy) : Math.round(t.y);
+            const ly = canMove(gx, Math.round(t.y - t.vy)) ? Math.round(t.y - t.vy) : gy;
             drops.push({ type: 'torch_ground', x: lx, y: ly, timer: Infinity });
             return false;
         }
@@ -4249,17 +4335,121 @@ function render() {
     drops = drops.filter(d => { d.timer--; return d.timer > 0; });
 
     // ─ 飛行火把 ─
+    const now_torch = Date.now();
     flyingTorches.forEach(t => {
-        const sx = t.x * TILE - camX + TILE/2;
-        const sy = t.y * TILE - camY + TILE/2;
+        const sx = t.x * TILE - camX + TILE / 2;
+        const sy = t.y * TILE - camY + TILE / 2;
+
+        // 軌跡光點（在 rotate 前用世界座標畫）
+        if (t.trail) {
+            t.trail.forEach(p => {
+                const tx = p.x * TILE - camX + TILE / 2;
+                const ty = p.y * TILE - camY + TILE / 2;
+                const r = ctx.createRadialGradient(tx, ty, 0, tx, ty, 5);
+                r.addColorStop(0, `rgba(255,160,30,${p.a * 0.8})`);
+                r.addColorStop(1, `rgba(255,80,0,0)`);
+                ctx.beginPath(); ctx.arc(tx, ty, 5, 0, Math.PI * 2);
+                ctx.fillStyle = r; ctx.fill();
+            });
+        }
+
         ctx.save();
         ctx.translate(sx, sy);
         ctx.rotate(t.rot);
-        ctx.fillStyle = '#6B3008'; ctx.fillRect(-2, -10, 4, 12);
-        ctx.fillStyle = `rgba(255,140,20,${0.5 + 0.5 * Math.sin(Date.now()/60)})`;
-        ctx.beginPath(); ctx.ellipse(0, -12, 4, 6, 0, 0, Math.PI * 2); ctx.fill();
+
+        // 把柄（帶木紋感）
+        ctx.fillStyle = '#4a2008';
+        ctx.fillRect(-2.5, -11, 5, 13);
+        ctx.fillStyle = '#6B3A14';
+        ctx.fillRect(-1, -11, 2, 13);
+
+        // 綁布
+        ctx.fillStyle = '#8B4513';
+        ctx.fillRect(-3, -2, 6, 3);
+
+        // 火炬頭底部（加粗木頭塊）
+        ctx.fillStyle = '#3d1a08';
+        ctx.beginPath(); ctx.ellipse(0, -12, 4, 3, 0, 0, Math.PI * 2); ctx.fill();
+
+        // 外層火焰（大橙紅 glow）
+        const flicker = Math.sin(now_torch / 55 + t.rot) * 0.25 + 0.75;
+        ctx.save();
+        ctx.globalAlpha = 0.35 * flicker;
+        ctx.fillStyle = '#ff4500';
+        ctx.beginPath(); ctx.ellipse(0, -18, 6, 9, 0, 0, Math.PI * 2); ctx.fill();
         ctx.restore();
+
+        // 中層火焰（橙色）
+        ctx.save();
+        ctx.globalAlpha = 0.7 * flicker;
+        ctx.fillStyle = '#ff8c00';
+        ctx.beginPath(); ctx.ellipse(0, -17, 4.5, 7, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.restore();
+
+        // 內核（亮黃）
+        ctx.save();
+        ctx.globalAlpha = 0.95 * flicker;
+        ctx.fillStyle = '#ffe066';
+        ctx.beginPath(); ctx.ellipse(0, -16, 2.5, 4.5, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.restore();
+
+        ctx.restore();
+
+        // 地面光暈（不跟著旋轉，直接在世界座標畫）
+        const glow = ctx.createRadialGradient(sx, sy, 0, sx, sy, TILE * 0.7);
+        glow.addColorStop(0, `rgba(255,150,30,${0.18 * flicker})`);
+        glow.addColorStop(1, `rgba(255,100,0,0)`);
+        ctx.beginPath(); ctx.arc(sx, sy, TILE * 0.7, 0, Math.PI * 2);
+        ctx.fillStyle = glow; ctx.fill();
     });
+
+    // ─ 手機火把投擲瞄準覆蓋層 ─
+    if (torchAimActive && player.heldItem === 'torch') {
+        const px = W / 2, py = H / 2;  // 玩家永遠在螢幕中心
+        const maxR   = 4.5 * TILE;     // 最大投擲距離（像素）
+        const litR   = 6   * TILE;     // 落點照明範圍（像素）
+        const ex = px + Math.cos(torchAimAngle) * maxR;
+        const ey = py + Math.sin(torchAimAngle) * maxR;
+
+        ctx.save();
+        ctx.globalAlpha = 0.75;
+
+        // 方向虛線
+        ctx.strokeStyle = 'rgba(255,200,80,0.85)';
+        ctx.lineWidth = 2;
+        ctx.setLineDash([6, 5]);
+        ctx.beginPath(); ctx.moveTo(px, py); ctx.lineTo(ex, ey);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        // 最大投擲範圍圓（橙色虛線圓）
+        ctx.strokeStyle = 'rgba(255,140,0,0.55)';
+        ctx.lineWidth = 1.5;
+        ctx.setLineDash([4, 6]);
+        ctx.beginPath(); ctx.arc(px, py, maxR, 0, Math.PI * 2); ctx.stroke();
+        ctx.setLineDash([]);
+
+        // 落點照明範圍圓（黃色半透明填充）
+        const illum = ctx.createRadialGradient(ex, ey, 0, ex, ey, litR);
+        illum.addColorStop(0,   'rgba(255,230,80,0.18)');
+        illum.addColorStop(0.6, 'rgba(255,160,30,0.10)');
+        illum.addColorStop(1,   'rgba(255,100,0,0)');
+        ctx.fillStyle = illum;
+        ctx.beginPath(); ctx.arc(ex, ey, litR, 0, Math.PI * 2); ctx.fill();
+
+        // 落點圓框
+        ctx.strokeStyle = 'rgba(255,220,60,0.5)';
+        ctx.lineWidth = 1.5;
+        ctx.setLineDash([3, 4]);
+        ctx.beginPath(); ctx.arc(ex, ey, litR, 0, Math.PI * 2); ctx.stroke();
+        ctx.setLineDash([]);
+
+        // 落點標記點
+        ctx.fillStyle = 'rgba(255,200,60,0.9)';
+        ctx.beginPath(); ctx.arc(ex, ey, 5, 0, Math.PI * 2); ctx.fill();
+
+        ctx.restore();
+    }
 
     // ─ 怪物 ─
     const walkTick = Math.floor(Date.now() / 200) % 2;
@@ -4799,7 +4989,9 @@ function endGame(escaped) {
         // 單人死亡路徑可能在 gameRunning = false 後被呼叫，跳過 guard
     } else if (!gameRunning) return;
     gameRunning = false;
+    torchAimActive = false;  // 清除瞄準 overlay
     document.getElementById('bag-btn').style.display = 'none';
+    document.getElementById('mobile-throw-btn').style.display = 'none';
     document.getElementById('ingame-bag').classList.remove('show');
     document.getElementById('chest-popup').classList.remove('show');
     clearInterval(gameTimer);
@@ -4873,49 +5065,119 @@ let jrAttack = false;
 function initJoysticks() {
     setupJoystick('joystick-left',  'jl-knob', jlVector, false);
     setupJoystick('joystick-right', 'jr-knob', null,     true);
+    setupMobileTorchThrow();
+}
+
+// ── 手機火把投擲：按住瞄準鈕並拖移決定方向 ──
+function setupMobileTorchThrow() {
+    const btn = document.getElementById('mobile-throw-btn');
+    if (!btn) return;
+
+    let touchId = null, ox = 0, oy = 0;
+    const DRAG_THRESHOLD = 18; // px — 超過此距離才算「有瞄準方向」
+
+    btn.addEventListener('touchstart', e => {
+        e.preventDefault();
+        if (touchId !== null) return;
+        const t = e.changedTouches[0];
+        touchId = t.identifier;
+        ox = t.clientX; oy = t.clientY;
+        torchAimActive = true;
+        torchAimAngle  = mouseAngle;  // 預設沿用上次方向
+        btn.classList.add('aiming');
+    }, { passive: false });
+
+    btn.addEventListener('touchmove', e => {
+        e.preventDefault();
+        if (touchId === null) return;
+        let t = null;
+        for (let i = 0; i < e.changedTouches.length; i++) {
+            if (e.changedTouches[i].identifier === touchId) { t = e.changedTouches[i]; break; }
+        }
+        if (!t) return;
+        const dx = t.clientX - ox, dy = t.clientY - oy;
+        if (Math.hypot(dx, dy) >= DRAG_THRESHOLD) {
+            torchAimAngle = Math.atan2(dy, dx);
+        }
+    }, { passive: false });
+
+    const endFn = e => {
+        if (touchId === null) return;
+        for (let i = 0; i < e.changedTouches.length; i++) {
+            if (e.changedTouches[i].identifier !== touchId) continue;
+            touchId = null;
+            btn.classList.remove('aiming');
+            torchAimActive = false;
+            if (gameRunning && player.heldItem === 'torch') {
+                throwTorch(torchAimAngle);
+            }
+            break;
+        }
+    };
+    btn.addEventListener('touchend',    endFn, { passive: false });
+    btn.addEventListener('touchcancel', endFn, { passive: false });
 }
 
 function setupJoystick(wrapperId, knobId, outVec, isAttack) {
     const wrapper = document.getElementById(wrapperId);
     const knob    = document.getElementById(knobId);
     if (!wrapper || !knob) return;
+    const base = knob.parentElement; // .joystick-base
 
-    let active = false, startX = 0, startY = 0;
-    const maxR = 40;
+    // 用 touchId 追蹤特定手指，支援多點觸控不互相干擾
+    let touchId = null, originX = 0, originY = 0;
+    const maxR = 46;
 
     wrapper.addEventListener('touchstart', e => {
         e.preventDefault();
+        if (touchId !== null) return; // 已在追蹤一根手指
         const t = e.changedTouches[0];
+        touchId = t.identifier;
+        originX = t.clientX;
+        originY = t.clientY;
+
+        // 把搖桿底座定位到手指按下的位置
         const rect = wrapper.getBoundingClientRect();
-        startX = rect.left + rect.width/2;
-        startY = rect.top  + rect.height/2;
-        active = true;
+        base.style.left = (t.clientX - rect.left - 55) + 'px';
+        base.style.top  = (t.clientY - rect.top  - 55) + 'px';
+        base.style.display = 'block';
+        knob.style.transform = 'translate(-50%, -50%)';
         knob.classList.add('active');
     }, { passive: false });
 
     wrapper.addEventListener('touchmove', e => {
         e.preventDefault();
-        if (!active) return;
-        const t = e.changedTouches[0];
-        let dx = t.clientX - startX;
-        let dy = t.clientY - startY;
-        const dist = Math.hypot(dx, dy);
-        if (dist > maxR) { dx = dx/dist*maxR; dy = dy/dist*maxR; }
-        knob.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`;
-        if (outVec) { outVec.x = dx/maxR; outVec.y = dy/maxR; }
-        if (isAttack) {
-            mouseAngle = Math.atan2(dy, dx);
-            jrAttack = dist > 15;
+        if (touchId === null) return;
+        let t = null;
+        for (let i = 0; i < e.changedTouches.length; i++) {
+            if (e.changedTouches[i].identifier === touchId) { t = e.changedTouches[i]; break; }
         }
+        if (!t) return;
+        let dx = t.clientX - originX;
+        let dy = t.clientY - originY;
+        const dist = Math.hypot(dx, dy);
+        if (dist > maxR) { dx = dx / dist * maxR; dy = dy / dist * maxR; }
+        knob.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`;
+        if (outVec) { outVec.x = dx / maxR; outVec.y = dy / maxR; }
+        if (isAttack) { mouseAngle = Math.atan2(dy, dx); jrAttack = dist > 15; }
     }, { passive: false });
 
-    wrapper.addEventListener('touchend', e => {
-        active = false;
-        knob.style.transform = 'translate(-50%, -50%)';
-        knob.classList.remove('active');
-        if (outVec) { outVec.x = 0; outVec.y = 0; }
-        if (isAttack) jrAttack = false;
-    });
+    const endFn = e => {
+        if (touchId === null) return;
+        for (let i = 0; i < e.changedTouches.length; i++) {
+            if (e.changedTouches[i].identifier === touchId) {
+                touchId = null;
+                base.style.display = 'none';
+                knob.style.transform = 'translate(-50%, -50%)';
+                knob.classList.remove('active');
+                if (outVec) { outVec.x = 0; outVec.y = 0; }
+                if (isAttack) jrAttack = false;
+                break;
+            }
+        }
+    };
+    wrapper.addEventListener('touchend',   endFn);
+    wrapper.addEventListener('touchcancel', endFn);
 }
 
 // 滑鼠攻擊（電腦）
