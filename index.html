@@ -133,6 +133,15 @@
         }
         .btn-grip:hover { box-shadow: 0 8px 24px rgba(191, 90, 242, 0.18); border-color: rgba(191,90,242,0.60); }
 
+        /* 盜墓筆記按鈕 */
+        .btn-tomb {
+            background: rgba(180, 120, 40, 0.08);
+            border: 1px solid rgba(180, 120, 40, 0.38);
+            color: #C8922A;
+            margin-top: 4px;
+        }
+        .btn-tomb:hover { box-shadow: 0 8px 24px rgba(180,120,40,0.18); border-color: rgba(180,120,40,0.65); }
+
         /* 即時時鐘設計 */
         .time-display {
             margin-top: 16px;
@@ -265,6 +274,11 @@
             <span style="font-size: 22px;">🤜</span> 握力日記
         </a>
 
+        <!-- 盜墓筆記入口 -->
+        <a href="tomb.html" class="btn btn-tomb">
+            <span style="font-size: 22px;">⚱️</span> 盜墓筆記
+        </a>
+
         <!-- 即時時鐘 -->
         <div class="time-display">
             <div class="dot"></div>
@@ -315,34 +329,6 @@
         // 每秒更新一次時間
         setInterval(updateClock, 1000);
         updateClock(); // 初始化馬上執行一次
-
-        // 首頁入口按鈕音效（與握力日記 click 同風格）
-        const _indexAc = new (window.AudioContext || window.webkitAudioContext)();
-        function _indexTone(freq, vol, delay, dur) {
-            if (_indexAc.state === 'suspended') _indexAc.resume();
-            const osc = _indexAc.createOscillator();
-            const gain = _indexAc.createGain();
-            osc.connect(gain);
-            gain.connect(_indexAc.destination);
-            osc.type = 'sine';
-            osc.frequency.value = freq;
-            const t0 = _indexAc.currentTime + delay;
-            gain.gain.setValueAtTime(vol, t0);
-            gain.gain.exponentialRampToValueAtTime(0.001, t0 + dur);
-            osc.start(t0);
-            osc.stop(t0 + dur + 0.05);
-        }
-        function playIndexNavSound() {
-            _indexTone(380, 0.045, 0, 0.07);
-        }
-        document.querySelectorAll('.login-card a.btn').forEach(function (el) {
-            el.addEventListener('click', function (e) {
-                e.preventDefault();
-                playIndexNavSound();
-                const href = el.getAttribute('href');
-                setTimeout(function () { location.href = href; }, 70);
-            });
-        });
     </script>
 </body>
 </html>

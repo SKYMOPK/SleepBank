@@ -10,207 +10,501 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         :root {
-            --bg: #0C0C12; --card: #15151E; --card2: #1C1C27; --border: rgba(255,255,255,0.07);
-            --accent: #FF8C00; --accent-lt: #FFB347; --accent-glow: rgba(255, 140, 0, 0.18);
-            --text: #F2F2F7; --text2: #8E8E9A; --text3: #3A3A45;
-            --green: #34C759; --red: #FF453A; --yellow: #FFD60A;
+            --bg:           #0C0C12;
+            --card:         #15151E;
+            --card2:        #1C1C27;
+            --border:       rgba(255,255,255,0.07);
+            --accent:       #FF8C00;
+            --accent-lt:    #FFB347;
+            --accent-glow:  rgba(255, 140, 0, 0.18);
+            --text:         #F2F2F7;
+            --text2:        #8E8E9A;
+            --text3:        #3A3A45;
+            --green:        #34C759;
+            --red:          #FF453A;
+            --yellow:       #FFD60A;
         }
 
-        body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; min-height: 100vh; }
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            min-height: 100vh;
+        }
 
+        /* ── User Select ── */
         #user-select {
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            min-height: 100vh; padding: 32px 20px; gap: 28px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 32px 20px;
+            gap: 28px;
         }
-        .logo-wrap { text-align: center; }
+
+        .logo-wrap {
+            text-align: center;
+        }
+
         .logo-icon {
-            font-size: 72px; display: block; filter: drop-shadow(0 0 28px rgba(255,140,0,0.45));
+            font-size: 72px;
+            display: block;
+            filter: drop-shadow(0 0 28px rgba(255,140,0,0.45));
             animation: pulse-icon 3s ease-in-out infinite;
         }
+
         @keyframes pulse-icon {
             0%, 100% { filter: drop-shadow(0 0 28px rgba(255,140,0,0.45)); }
             50%       { filter: drop-shadow(0 0 44px rgba(255,140,0,0.70)); }
         }
-        .logo-title { font-size: 30px; font-weight: 900; letter-spacing: -0.5px; margin-top: 12px; }
-        .logo-sub { color: var(--text2); font-size: 13px; margin-top: 6px; }
-        .user-cards { display: flex; gap: 14px; width: 100%; max-width: 360px; }
-        .user-card {
-            flex: 1; background: var(--card); border: 2px solid var(--border); border-radius: 22px;
-            padding: 28px 12px; text-align: center; cursor: pointer; transition: all 0.2s ease;
+
+        .logo-title {
+            font-size: 30px;
+            font-weight: 900;
+            letter-spacing: -0.5px;
+            margin-top: 12px;
         }
+
+        .logo-sub {
+            color: var(--text2);
+            font-size: 13px;
+            margin-top: 6px;
+        }
+
+        .user-cards {
+            display: flex;
+            gap: 14px;
+            width: 100%;
+            max-width: 360px;
+        }
+
+        .user-card {
+            flex: 1;
+            background: var(--card);
+            border: 2px solid var(--border);
+            border-radius: 22px;
+            padding: 28px 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
         .user-card:hover {
-            border-color: var(--accent); background: var(--card2); transform: translateY(-3px);
+            border-color: var(--accent);
+            background: var(--card2);
+            transform: translateY(-3px);
             box-shadow: 0 12px 32px rgba(255,140,0,0.15);
         }
+
         .user-card .av { font-size: 42px; }
         .user-card .name { font-size: 18px; font-weight: 800; margin-top: 10px; }
         .user-card .role { font-size: 12px; color: var(--text2); margin-top: 3px; }
 
-        .user-select-back {
-            font-size: 14px; font-weight: 600; color: var(--text2); text-decoration: none;
-            padding: 9px 18px; border-radius: 100px; border: 1px solid var(--border);
-            background: var(--card2); transition: all 0.15s; align-self: center;
+        /* ── Main App ── */
+        #app {
+            display: none;
+            max-width: 480px;
+            margin: 0 auto;
+            padding: 0 16px 80px;
         }
-        .user-select-back:hover { border-color: var(--accent); color: var(--accent-lt); }
 
-        #app { display: none; max-width: 480px; margin: 0 auto; padding: 0 16px 80px; }
+        /* ── Header ── */
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px 0 4px;
+        }
 
-        .header { padding: 20px 0 8px; }
-        .header-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
-        .header-left { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-        .header-title { font-size: 20px; font-weight: 900; }
+        .header-title {
+            font-size: 20px;
+            font-weight: 900;
+        }
+
         .user-chip {
-            background: var(--card2); border: 1px solid var(--border); border-radius: 100px;
-            padding: 7px 15px; font-size: 13px; font-weight: 600; cursor: pointer; color: var(--text2);
+            background: var(--card2);
+            border: 1px solid var(--border);
+            border-radius: 100px;
+            padding: 7px 15px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
             transition: all 0.15s;
+            color: var(--text2);
         }
+
         .user-chip:hover { border-color: var(--accent); color: var(--text); }
 
-        .grip-nav { display: flex; gap: 8px; flex-wrap: wrap; }
-        .grip-nav-btn {
-            font-size: 12px; font-weight: 700; color: var(--text2);
-            padding: 6px 14px; border-radius: 100px; border: 1px solid var(--border);
-            background: var(--card2); cursor: pointer; transition: all 0.15s;
-            font-family: inherit;
-        }
-        .grip-nav-btn:hover { border-color: var(--accent); color: var(--accent-lt); }
-        .grip-nav-btn.active { border-color: var(--accent); color: var(--accent-lt); background: rgba(255,140,0,0.08); }
-
-        .home-link {
-            background: var(--card2); border: 1px solid var(--border); border-radius: 100px;
-            padding: 7px 13px; font-size: 13px; font-weight: 600; color: var(--text2); text-decoration: none;
-            transition: all 0.15s;
-        }
-        .home-link:hover { border-color: var(--accent); color: var(--text); }
-
-        .grip-panel { display: none; }
-        .grip-panel.is-active { display: block; }
-
+        /* ── Status Card ── */
         .status-card {
-            background: var(--card); border-radius: 26px; padding: 26px 24px; margin: 14px 0 10px;
-            border: 1px solid var(--border); position: relative; overflow: hidden;
+            background: var(--card);
+            border-radius: 26px;
+            padding: 26px 24px;
+            margin: 14px 0 10px;
+            border: 1px solid var(--border);
+            position: relative;
+            overflow: hidden;
         }
+
         .status-card::after {
-            content: ''; position: absolute; top: -60px; right: -60px;
-            width: 200px; height: 200px; border-radius: 50%; background: var(--accent-glow); pointer-events: none;
+            content: '';
+            position: absolute;
+            top: -60px; right: -60px;
+            width: 200px; height: 200px;
+            border-radius: 50%;
+            background: var(--accent-glow);
+            pointer-events: none;
         }
-        .status-date { font-size: 12px; color: var(--text2); font-weight: 600; margin-bottom: 18px; letter-spacing: 0.3px; }
-        .status-main { display: flex; align-items: center; gap: 20px; }
-        .status-emoji { font-size: 56px; line-height: 1; flex-shrink: 0; }
+
+        .status-date {
+            font-size: 12px;
+            color: var(--text2);
+            font-weight: 600;
+            margin-bottom: 18px;
+            letter-spacing: 0.3px;
+        }
+
+        .status-main {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .status-emoji {
+            font-size: 56px;
+            line-height: 1;
+            flex-shrink: 0;
+        }
+
         .status-info { flex: 1; }
-        .status-value { font-size: 48px; font-weight: 900; color: var(--accent-lt); line-height: 1; letter-spacing: -2px; }
-        .status-unit { font-size: 18px; font-weight: 400; color: var(--text2); margin-left: 3px; }
-        .status-label { font-size: 15px; font-weight: 700; margin-top: 6px; color: var(--text); }
-        .status-diff { font-size: 12px; color: var(--text2); margin-top: 3px; font-weight: 500; }
+
+        .status-value {
+            font-size: 48px;
+            font-weight: 900;
+            color: var(--accent-lt);
+            line-height: 1;
+            letter-spacing: -2px;
+        }
+
+        .status-unit {
+            font-size: 18px;
+            font-weight: 400;
+            color: var(--text2);
+            margin-left: 3px;
+        }
+
+        .status-label {
+            font-size: 15px;
+            font-weight: 700;
+            margin-top: 6px;
+            color: var(--text);
+        }
+
+        .status-diff {
+            font-size: 12px;
+            color: var(--text2);
+            margin-top: 3px;
+            font-weight: 500;
+        }
+
         .status-diff.up   { color: var(--green); }
         .status-diff.down { color: var(--red); }
+
         .cold-badge {
-            display: inline-flex; align-items: center; gap: 5px;
-            background: rgba(255,214,10,0.10); border: 1px solid rgba(255,214,10,0.28);
-            border-radius: 100px; padding: 5px 12px; font-size: 12px; font-weight: 600; color: var(--yellow); margin-top: 14px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            background: rgba(255,214,10,0.10);
+            border: 1px solid rgba(255,214,10,0.28);
+            border-radius: 100px;
+            padding: 5px 12px;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--yellow);
+            margin-top: 14px;
         }
 
+        /* ── Input Card ── */
         .input-card {
-            background: var(--card); border-radius: 22px; padding: 22px; margin: 10px 0; border: 1px solid var(--border);
+            background: var(--card);
+            border-radius: 22px;
+            padding: 22px;
+            margin: 10px 0;
+            border: 1px solid var(--border);
         }
-        .input-label { font-size: 11px; font-weight: 700; color: var(--text3); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 14px; }
-        .input-row { display: flex; gap: 10px; align-items: stretch; }
+
+        .input-label {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--text3);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 14px;
+        }
+
+        .input-row {
+            display: flex;
+            gap: 10px;
+            align-items: stretch;
+        }
+
         .grip-input {
-            flex: 1; background: var(--card2); border: 2px solid var(--border); border-radius: 16px;
-            padding: 14px 16px; font-size: 30px; font-weight: 800; color: var(--text); text-align: center;
-            outline: none; transition: border-color 0.2s; -moz-appearance: textfield;
+            flex: 1;
+            background: var(--card2);
+            border: 2px solid var(--border);
+            border-radius: 16px;
+            padding: 14px 16px;
+            font-size: 30px;
+            font-weight: 800;
+            color: var(--text);
+            text-align: center;
+            outline: none;
+            transition: border-color 0.2s;
+            -moz-appearance: textfield;
         }
+
         .grip-input::-webkit-inner-spin-button,
         .grip-input::-webkit-outer-spin-button { -webkit-appearance: none; }
+
         .grip-input:focus { border-color: var(--accent); }
         .grip-input::placeholder { color: var(--text3); font-size: 22px; font-weight: 400; }
+        .grip-input:disabled { opacity: 0.38; cursor: not-allowed; }
+
         .submit-btn {
-            background: var(--accent); border: none; border-radius: 16px; padding: 0 26px;
-            font-size: 15px; font-weight: 800; color: #fff; cursor: pointer; transition: all 0.15s;
-            white-space: nowrap; letter-spacing: 0.3px;
-        }
-        .submit-btn:hover:not(:disabled) {
-            background: var(--accent-lt); transform: translateY(-1px); box-shadow: 0 6px 20px rgba(255,140,0,0.35);
-        }
-        .submit-btn:active:not(:disabled) { transform: scale(0.97); }
-        .submit-btn:disabled { background: var(--card2); color: var(--text3); cursor: not-allowed; }
-        .recorded-line {
-            text-align: center; color: var(--green); font-size: 12px; font-weight: 600; margin-top: 10px;
-            display: none; align-items: center; justify-content: center; gap: 6px;
+            background: var(--accent);
+            border: none;
+            border-radius: 16px;
+            padding: 0 26px;
+            font-size: 15px;
+            font-weight: 800;
+            color: #fff;
+            cursor: pointer;
+            transition: all 0.15s;
+            white-space: nowrap;
+            letter-spacing: 0.3px;
         }
 
+        .submit-btn:hover:not(:disabled) {
+            background: var(--accent-lt);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(255,140,0,0.35);
+        }
+
+        .submit-btn:active:not(:disabled) { transform: scale(0.97); }
+
+        .submit-btn:disabled {
+            background: var(--card2);
+            color: var(--text3);
+            cursor: not-allowed;
+        }
+
+        .recorded-line {
+            text-align: center;
+            color: var(--green);
+            font-size: 12px;
+            font-weight: 600;
+            margin-top: 10px;
+            display: none;
+            gap: 5px;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* ── Section label ── */
         .section-label {
-            font-size: 11px; font-weight: 700; color: var(--text3); text-transform: uppercase;
-            letter-spacing: 1px; margin: 18px 0 8px;
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--text3);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin: 18px 0 8px;
         }
-        .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+
+        /* ── Stats Row ── */
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+
         .stat-box {
-            background: var(--card); border-radius: 18px; padding: 16px 10px; text-align: center; border: 1px solid var(--border);
+            background: var(--card);
+            border-radius: 18px;
+            padding: 16px 10px;
+            text-align: center;
+            border: 1px solid var(--border);
         }
-        .stat-val { font-size: 24px; font-weight: 900; color: var(--text); letter-spacing: -0.5px; }
-        .stat-name { font-size: 11px; color: var(--text2); margin-top: 3px; font-weight: 500; }
-        .stat-extra { margin-top: 5px; font-size: 10px; }
+
+        .stat-val {
+            font-size: 24px;
+            font-weight: 900;
+            color: var(--text);
+            letter-spacing: -0.5px;
+        }
+
+        .stat-name {
+            font-size: 11px;
+            color: var(--text2);
+            margin-top: 3px;
+            font-weight: 500;
+        }
+
+        .stat-extra {
+            margin-top: 5px;
+            font-size: 10px;
+        }
+
         .tag {
-            display: inline-flex; align-items: center; gap: 3px; border-radius: 100px;
-            padding: 2px 8px; font-size: 10px; font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+            border-radius: 100px;
+            padding: 2px 8px;
+            font-size: 10px;
+            font-weight: 700;
         }
+
         .tag-orange { background: rgba(255,140,0,0.12); color: var(--accent-lt); }
         .tag-green  { background: rgba(52,199,89,0.12);  color: var(--green); }
         .tag-red    { background: rgba(255,69,58,0.12);   color: var(--red); }
         .tag-muted  { background: rgba(142,142,154,0.12); color: var(--text2); }
 
+        /* ── Fatigue Warning ── */
         .fatigue-wrap {
-            background: rgba(255,69,58,0.08); border: 1px solid rgba(255,69,58,0.22);
-            border-radius: 18px; padding: 14px 18px; display: none; align-items: center; gap: 12px; margin: 10px 0;
+            background: rgba(255,69,58,0.08);
+            border: 1px solid rgba(255,69,58,0.22);
+            border-radius: 18px;
+            padding: 14px 18px;
+            display: none;
+            align-items: center;
+            gap: 12px;
+            margin: 10px 0;
         }
+
         .fatigue-icon { font-size: 26px; }
+
         .fatigue-title { font-size: 14px; font-weight: 700; color: var(--red); }
-        .fatigue-sub { font-size: 12px; color: var(--text2); margin-top: 2px; }
+        .fatigue-sub   { font-size: 12px; color: var(--text2); margin-top: 2px; }
 
-        .chart-card { background: var(--card); border-radius: 22px; padding: 20px; border: 1px solid var(--border); }
-        .card-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; flex-wrap: wrap; gap: 8px; }
+        /* ── Chart Card ── */
+        .chart-card {
+            background: var(--card);
+            border-radius: 22px;
+            padding: 20px;
+            border: 1px solid var(--border);
+        }
+
+        .card-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 14px;
+        }
+
         .card-title { font-size: 14px; font-weight: 700; }
-        .legend { display: flex; gap: 12px; font-size: 11px; color: var(--text2); align-items: center; }
-        .leg-line { display: inline-block; width: 14px; height: 2px; border-radius: 2px; vertical-align: middle; margin-right: 3px; }
+
+        .legend {
+            display: flex;
+            gap: 12px;
+            font-size: 11px;
+            color: var(--text2);
+            align-items: center;
+        }
+
+        .leg-line {
+            display: inline-block;
+            width: 14px; height: 2px;
+            border-radius: 2px;
+            vertical-align: middle;
+            margin-right: 3px;
+        }
+
         .leg-dash {
-            display: inline-block; width: 14px; height: 0; border-top: 2px dashed #8E8E9A;
-            vertical-align: middle; margin-right: 3px;
+            display: inline-block;
+            width: 14px; height: 0;
+            border-top: 2px dashed #8E8E9A;
+            vertical-align: middle;
+            margin-right: 3px;
         }
-        .chart-svg { width: 100%; overflow: visible; display: block; }
 
-        .hint { font-size: 12px; color: var(--text2); margin-bottom: 10px; line-height: 1.5; }
-        .records-card { background: var(--card); border-radius: 22px; padding: 6px 16px 12px; border: 1px solid var(--border); }
+        .chart-svg {
+            width: 100%;
+            overflow: visible;
+            display: block;
+        }
+
+        /* ── Records List ── */
+        .records-card {
+            background: var(--card);
+            border-radius: 22px;
+            padding: 6px 20px;
+            border: 1px solid var(--border);
+        }
+
         .rec-row {
-            display: flex; align-items: center; justify-content: space-between; gap: 8px;
-            padding: 12px 0; border-bottom: 1px solid var(--border); flex-wrap: wrap;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border);
         }
-        .rec-row:last-child { border-bottom: none; }
-        .rec-date { font-size: 13px; color: var(--text2); font-weight: 500; flex: 1; min-width: 100px; }
-        .rec-date.today { color: var(--accent-lt); font-weight: 700; }
-        .rec-right { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
-        .rec-val { font-size: 17px; font-weight: 800; }
-        .rec-delta { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 100px; }
-        .rec-btn {
-            font-size: 11px; font-weight: 700; padding: 6px 12px; border-radius: 10px;
-            border: 1px solid var(--border); background: var(--card2); color: var(--text2);
-            cursor: pointer; transition: all 0.15s; font-family: inherit;
-        }
-        .rec-btn:hover { border-color: var(--accent); color: var(--accent-lt); }
-        .rec-btn-del:hover { border-color: var(--red); color: var(--red); }
 
-        .empty-state { text-align: center; padding: 36px 20px; color: var(--text2); }
+        .rec-row:last-child { border-bottom: none; }
+
+        .rec-date {
+            font-size: 13px;
+            color: var(--text2);
+            font-weight: 500;
+        }
+
+        .rec-date.today { color: var(--accent-lt); font-weight: 700; }
+
+        .rec-right {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .rec-val { font-size: 17px; font-weight: 800; }
+
+        .rec-delta {
+            font-size: 11px;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 100px;
+        }
+
+        /* ── Empty State ── */
+        .empty-state {
+            text-align: center;
+            padding: 36px 20px;
+            color: var(--text2);
+        }
+
         .empty-icon { font-size: 44px; margin-bottom: 12px; }
         .empty-text { font-size: 15px; font-weight: 600; }
-        .empty-sub { font-size: 12px; color: var(--text3); margin-top: 5px; }
+        .empty-sub  { font-size: 12px; color: var(--text3); margin-top: 5px; }
 
+        /* ── Toast ── */
         #toast {
-            position: fixed; bottom: 32px; left: 50%;
+            position: fixed;
+            bottom: 32px;
+            left: 50%;
             transform: translateX(-50%) translateY(110px);
-            background: #22222F; border: 1px solid rgba(255,255,255,0.1); border-radius: 100px;
-            padding: 12px 24px; font-size: 14px; font-weight: 600; box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+            background: #22222F;
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 100px;
+            padding: 12px 24px;
+            font-size: 14px;
+            font-weight: 600;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.5);
             transition: transform 0.32s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            z-index: 999; white-space: nowrap; pointer-events: none;
+            z-index: 999;
+            white-space: nowrap;
+            pointer-events: none;
         }
+
         #toast.show { transform: translateX(-50%) translateY(0); }
 
         /* ── Edit Modal ── */
@@ -247,18 +541,12 @@
         .modal-btn-cancel:hover { color: var(--text); }
         .modal-btn-confirm { background: var(--accent); color: #fff; }
         .modal-btn-confirm:hover { background: var(--accent-lt); }
-        .modal-delete-hint {
-            font-size: 12px; color: var(--red); line-height: 1.5; text-align: center;
-            margin-bottom: 18px; opacity: 0.95;
-        }
-        .modal-btn-danger { background: var(--red); color: #fff; }
-        .modal-btn-danger:hover { filter: brightness(1.12); }
     </style>
 </head>
 <body>
 
+<!-- ── User Selection Screen ── -->
 <div id="user-select">
-    <a href="index.html" class="user-select-back">← 返回宿舍首頁</a>
     <div class="logo-wrap">
         <span class="logo-icon">🤜</span>
         <div class="logo-title">握力日記</div>
@@ -278,97 +566,96 @@
     </div>
 </div>
 
+<!-- ── Main App ── -->
 <div id="app">
     <div class="header">
-        <div class="header-top">
-            <div class="header-left">
-                <a href="index.html" class="home-link">← 首頁</a>
-                <div class="header-title" id="header-tab-title">握力日記</div>
-            </div>
-            <div class="user-chip" id="user-chip" onclick="switchUser()">— · 切換</div>
+        <div style="display:flex;align-items:center;gap:10px">
+            <a href="index.html" style="background:var(--card2);border:1px solid var(--border);border-radius:100px;padding:7px 13px;font-size:13px;font-weight:600;color:var(--text2);text-decoration:none;transition:all 0.15s" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--text)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text2)'">← 首頁</a>
+            <div class="header-title">🤜 握力日記</div>
         </div>
-        <nav class="grip-nav">
-            <button type="button" class="grip-nav-btn active" data-tab="main" onclick="showGripTab('main',true)">今日</button>
-            <button type="button" class="grip-nav-btn" data-tab="analytics" onclick="showGripTab('analytics',true)">數據分析</button>
-            <button type="button" class="grip-nav-btn" data-tab="history" onclick="showGripTab('history',true)">歷史紀錄</button>
-        </nav>
+        <div class="user-chip" id="user-chip" onclick="switchUser()">— · 切換</div>
     </div>
 
-    <div id="panel-main" class="grip-panel is-active">
-        <div class="status-card">
-            <div class="status-date" id="status-date">載入中...</div>
-            <div class="status-main">
-                <div class="status-emoji" id="s-emoji">⏳</div>
-                <div class="status-info">
-                    <div>
-                        <span class="status-value" id="s-value">—</span>
-                        <span class="status-unit">kg</span>
-                    </div>
-                    <div class="status-label" id="s-label">今日尚未記錄</div>
-                    <div class="status-diff" id="s-diff"></div>
+    <!-- Status card -->
+    <div class="status-card">
+        <div class="status-date" id="status-date">載入中...</div>
+        <div class="status-main">
+            <div class="status-emoji" id="s-emoji">⏳</div>
+            <div class="status-info">
+                <div>
+                    <span class="status-value" id="s-value">—</span>
+                    <span class="status-unit">kg</span>
                 </div>
+                <div class="status-label" id="s-label">今日尚未記錄</div>
+                <div class="status-diff" id="s-diff"></div>
             </div>
-            <div id="s-extra"></div>
         </div>
-        <div class="input-card">
-            <div class="input-label">輸入今日握力 (kg)</div>
-            <div class="input-row">
-                <input type="number" id="grip-input" class="grip-input" placeholder="0" min="1" max="200" step="0.5">
-                <button class="submit-btn" id="submit-btn" onclick="submitToday()">記錄</button>
-            </div>
-            <div class="recorded-line" id="recorded-line">
-                <span style="color:var(--green)">✓</span> 今天已記錄 · 可直接修改後按「更新」
-            </div>
+        <div id="s-extra"></div>
+    </div>
+
+    <!-- Input card -->
+    <div class="input-card">
+        <div class="input-label">輸入今日握力 (kg)</div>
+        <div class="input-row">
+            <input type="number" id="grip-input" class="grip-input"
+                   placeholder="0" min="1" max="200" step="0.5">
+            <button class="submit-btn" id="submit-btn" onclick="submitToday()">記錄</button>
+        </div>
+        <div class="recorded-line" id="recorded-line" style="display:none">
+            <span style="color:var(--green)">✓</span> 今天已記錄
+            <button onclick="editToday()" style="margin-left:8px;background:none;border:none;color:var(--text2);font-size:12px;cursor:pointer;text-decoration:underline;padding:0">修改</button>
         </div>
     </div>
 
-    <div id="panel-analytics" class="grip-panel">
-        <div class="section-label">數據分析</div>
-        <div class="stats-row">
-            <div class="stat-box">
-                <div class="stat-val" id="stat-pr">—</div>
-                <div class="stat-name">個人紀錄</div>
-                <div class="stat-extra" id="stat-pr-date"></div>
-            </div>
-            <div class="stat-box">
-                <div class="stat-val" id="stat-7avg">—</div>
-                <div class="stat-name">7日均值</div>
-                <div class="stat-extra" id="stat-trend"></div>
-            </div>
-            <div class="stat-box">
-                <div class="stat-val" id="stat-30avg">—</div>
-                <div class="stat-name">30日均值</div>
-                <div class="stat-extra" id="stat-days"></div>
-            </div>
+    <!-- Stats -->
+    <div class="section-label">數據分析</div>
+    <div class="stats-row">
+        <div class="stat-box">
+            <div class="stat-val" id="stat-pr">—</div>
+            <div class="stat-name">個人紀錄</div>
+            <div class="stat-extra" id="stat-pr-date"></div>
         </div>
-        <div class="fatigue-wrap" id="fatigue-wrap">
-            <div class="fatigue-icon">⚠️</div>
-            <div>
-                <div class="fatigue-title">連續疲勞警告</div>
-                <div class="fatigue-sub" id="fatigue-sub"></div>
-            </div>
+        <div class="stat-box">
+            <div class="stat-val" id="stat-7avg">—</div>
+            <div class="stat-name">7日均值</div>
+            <div class="stat-extra" id="stat-trend"></div>
         </div>
-        <div class="section-label">握力趨勢</div>
-        <div class="chart-card">
-            <div class="card-head">
-                <div class="card-title">近 30 日走勢</div>
-                <div class="legend">
-                    <span><span class="leg-line" style="background:var(--accent)"></span>實際</span>
-                    <span><span class="leg-dash"></span>7日均線</span>
-                </div>
-            </div>
-            <svg id="chart-svg" class="chart-svg" viewBox="0 0 520 160" preserveAspectRatio="none" style="height:160px"></svg>
+        <div class="stat-box">
+            <div class="stat-val" id="stat-30avg">—</div>
+            <div class="stat-name">30日均值</div>
+            <div class="stat-extra" id="stat-days"></div>
         </div>
     </div>
 
-    <div id="panel-history" class="grip-panel">
-        <div class="section-label">全部紀錄</div>
-        <p class="hint">由新到舊排列。可編輯任意日期數值，或刪除該筆紀錄。</p>
-        <div class="records-card" id="records-card">
-            <div class="empty-state">
-                <div class="empty-icon">💪</div>
-                <div class="empty-text">載入中…</div>
+    <!-- Fatigue warning -->
+    <div class="fatigue-wrap" id="fatigue-wrap">
+        <div class="fatigue-icon">⚠️</div>
+        <div>
+            <div class="fatigue-title">連續疲勞警告</div>
+            <div class="fatigue-sub" id="fatigue-sub"></div>
+        </div>
+    </div>
+
+    <!-- Chart -->
+    <div class="section-label">30日走勢</div>
+    <div class="chart-card">
+        <div class="card-head">
+            <div class="card-title">握力趨勢</div>
+            <div class="legend">
+                <span><span class="leg-line" style="background:var(--accent)"></span>實際</span>
+                <span><span class="leg-dash"></span>7日均線</span>
             </div>
+        </div>
+        <svg id="chart-svg" class="chart-svg" viewBox="0 0 520 160"
+             preserveAspectRatio="none" style="height:160px"></svg>
+    </div>
+
+    <!-- Recent records -->
+    <div class="section-label">近期紀錄</div>
+    <div class="records-card" id="records-card">
+        <div class="empty-state">
+            <div class="empty-icon">💪</div>
+            <div class="empty-text">開始你的第一次記錄吧！</div>
         </div>
     </div>
 </div>
@@ -389,571 +676,470 @@
     </div>
 </div>
 
-<!-- Delete confirm Modal -->
-<div class="modal-overlay" id="delete-modal" onclick="closeDeleteModal(event)">
-    <div class="modal-box">
-        <div class="modal-title">刪除紀錄</div>
-        <div class="modal-sub" id="delete-modal-sub"></div>
-        <div class="modal-delete-hint">確定要刪除這筆資料嗎？此操作無法復原。</div>
-        <div class="modal-actions">
-            <button type="button" class="modal-btn modal-btn-cancel" onclick="closeDeleteModal()">取消</button>
-            <button type="button" class="modal-btn modal-btn-danger" onclick="confirmDelete()">刪除</button>
-        </div>
-    </div>
-</div>
-
 <script>
-(function () {
-    const firebaseConfig = {
-        apiKey: 'AIzaSyArUT_yPRn3CR9ejNbp8ycYGjP6gHPPKJA',
-        authDomain: 'gymsleep-e99d9.firebaseapp.com',
-        databaseURL: 'https://gymsleep-e99d9-default-rtdb.firebaseio.com/',
-        projectId: 'gymsleep-e99d9',
-        storageBucket: 'gymsleep-e99d9.firebasestorage.app',
-        messagingSenderId: '346919034740',
-        appId: '1:346919034740:web:3399498d40359c10b61621',
-    };
+// ── Firebase ──────────────────────────────────────────────────────────
+const firebaseConfig = {
+    apiKey: "AIzaSyArUT_yPRn3CR9ejNbp8ycYGjP6gHPPKJA",
+    authDomain: "gymsleep-e99d9.firebaseapp.com",
+    databaseURL: "https://gymsleep-e99d9-default-rtdb.firebaseio.com/",
+    projectId: "gymsleep-e99d9",
+    storageBucket: "gymsleep-e99d9.firebasestorage.app",
+    messagingSenderId: "346919034740",
+    appId: "1:346919034740:web:3399498d40359c10b61621"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
 
-    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
+// ── State ─────────────────────────────────────────────────────────────
+let ME = null;
+let records = {};
+let dbListener = null;
 
-    let ME = null;
-    let records = {};
-    let dbListener = null;
+// ── Helpers ───────────────────────────────────────────────────────────
+function todayStr() {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
 
-    // ── Sound Engine ──────────────────────────────────────────────────
-    const _ac = new (window.AudioContext || window.webkitAudioContext)();
-    function _tone(freq, vol, delay, dur) {
-        if (_ac.state === 'suspended') _ac.resume();
-        const osc = _ac.createOscillator(), gain = _ac.createGain();
-        osc.connect(gain); gain.connect(_ac.destination);
-        osc.type = 'sine'; osc.frequency.value = freq;
-        const t = _ac.currentTime + delay;
-        gain.gain.setValueAtTime(vol, t);
-        gain.gain.exponentialRampToValueAtTime(0.001, t + dur);
-        osc.start(t); osc.stop(t + dur + 0.05);
+function fmtShort(str) {
+    const [, m, d] = str.split('-');
+    return `${+m}/${+d}`;
+}
+
+function fmtFull(str) {
+    const [y, m, d] = str.split('-');
+    return `${y}年${+m}月${+d}日`;
+}
+
+const WEEK = ['日','一','二','三','四','五','六'];
+
+function showToast(msg, dur = 2200) {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.classList.add('show');
+    setTimeout(() => el.classList.remove('show'), dur);
+}
+
+// ── User ──────────────────────────────────────────────────────────────
+function selectUser(player) {
+    ME = player;
+    localStorage.setItem('grip_user', player);
+    document.getElementById('user-select').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    document.getElementById('user-chip').textContent = (player === 'p1' ? '至凱' : '柏致') + ' · 切換';
+    loadRecords();
+}
+
+function switchUser() {
+    if (dbListener) { db.ref(`grip/${ME}/records`).off('value', dbListener); dbListener = null; }
+    records = {};
+    ME = null;
+    localStorage.removeItem('grip_user');
+    document.getElementById('user-select').style.display = 'flex';
+    document.getElementById('app').style.display = 'none';
+}
+
+// ── Load ──────────────────────────────────────────────────────────────
+function loadRecords() {
+    if (dbListener) db.ref(`grip/${ME}/records`).off('value', dbListener);
+    dbListener = db.ref(`grip/${ME}/records`).on('value', snap => {
+        records = snap.val() || {};
+        render();
+    });
+}
+
+// ── Sorted records ────────────────────────────────────────────────────
+function getSorted() {
+    return Object.entries(records)
+        .map(([date, value]) => ({ date, value: Number(value) }))
+        .sort((a, b) => a.date < b.date ? -1 : 1);
+}
+
+// ── Status ────────────────────────────────────────────────────────────
+// Returns null if today not recorded.
+// Returns { type, diff, avg7 } or { type:'cold', remaining }
+function calcStatus(sorted, today) {
+    const todayIdx = sorted.findIndex(r => r.date === today);
+    if (todayIdx < 0) return null;
+
+    const prior = sorted.slice(0, todayIdx);
+    if (prior.length < 7) return { type: 'cold', remaining: 7 - prior.length };
+
+    const last7 = prior.slice(-7);
+    const avg7 = last7.reduce((s, r) => s + r.value, 0) / 7;
+    const val = sorted[todayIdx].value;
+    const diff = (val - avg7) / avg7;
+
+    if (diff > 0.05)  return { type: 'fire',   diff, avg7 };
+    if (diff >= 0)    return { type: 'strong',  diff, avg7 };
+    if (diff >= -0.05) return { type: 'tired',  diff, avg7 };
+    return              { type: 'rest',  diff, avg7 };
+}
+
+// Records below 7-day prior average, from most recent backwards
+// Returns { count, isConsecutiveCalendar }
+function fatigueDays(sorted) {
+    const fatigueRecs = [];
+    for (let i = sorted.length - 1; i >= 7; i--) {
+        const avg = sorted.slice(i-7, i).reduce((s, r) => s + r.value, 0) / 7;
+        if (sorted[i].value < avg) fatigueRecs.unshift(sorted[i]);
+        else break;
     }
-    function playSound(type) {
-        if      (type === 'click')   { _tone(380, 0.045, 0, 0.07); }
-        else if (type === 'open')    { _tone(440, 0.07, 0, 0.20); _tone(554, 0.05, 0.10, 0.28); }
-        else if (type === 'close')   { _tone(554, 0.06, 0, 0.14); _tone(415, 0.04, 0.09, 0.22); }
-        else if (type === 'add')     { _tone(659, 0.09, 0, 0.25); _tone(784, 0.07, 0.12, 0.32); }
-        else if (type === 'remove')  { _tone(320, 0.07, 0, 0.22); }
-        else if (type === 'error')   { _tone(260, 0.09, 0, 0.18); _tone(210, 0.07, 0.15, 0.26); }
+    if (fatigueRecs.length === 0) return { count: 0, isConsecutiveCalendar: true };
+    let isConsecutiveCalendar = true;
+    for (let i = 1; i < fatigueRecs.length; i++) {
+        const diff = (new Date(fatigueRecs[i].date) - new Date(fatigueRecs[i-1].date)) / 86400000;
+        if (diff > 1) { isConsecutiveCalendar = false; break; }
+    }
+    return { count: fatigueRecs.length, isConsecutiveCalendar };
+}
+
+// 7-day rolling avg at index i (uses i-7 to i-1)
+function rollingAvg7At(sorted, i) {
+    if (i < 7) return null;
+    return sorted.slice(i-7, i).reduce((s, r) => s + r.value, 0) / 7;
+}
+
+// ── Render ────────────────────────────────────────────────────────────
+function render() {
+    const sorted = getSorted();
+    const today = todayStr();
+    const todayVal = records[today];
+    const hasToday = todayVal != null;
+
+    // Header date
+    const now = new Date();
+    document.getElementById('status-date').textContent =
+        `${fmtFull(today)} 週${WEEK[now.getDay()]}`;
+
+    // Status card
+    renderStatusCard(sorted, today, hasToday);
+
+    // Input state
+    const input = document.getElementById('grip-input');
+    const btn = document.getElementById('submit-btn');
+    const recLine = document.getElementById('recorded-line');
+    if (hasToday) {
+        input.value = todayVal;
+        input.disabled = true;
+        btn.disabled = true;
+        recLine.style.display = 'flex';
+    } else {
+        input.value = '';
+        input.disabled = false;
+        btn.disabled = false;
+        recLine.style.display = 'none';
     }
 
-    const TAB_KEY = 'grip_ui_tab';
-    const TAB_TITLES = { main: '🤜 今日', analytics: '📊 數據分析', history: '📜 歷史紀錄' };
+    // Stats
+    renderStats(sorted);
 
-    window.showGripTab = function (tab, fromUser) {
-        if (!['main', 'analytics', 'history'].includes(tab)) tab = 'main';
-        if (fromUser) playSound('click');
-        try { sessionStorage.setItem(TAB_KEY, tab); } catch (e) {}
-        document.querySelectorAll('.grip-panel').forEach(function (p) {
-            p.classList.toggle('is-active', p.id === 'panel-' + tab);
-        });
-        document.querySelectorAll('.grip-nav-btn').forEach(function (b) {
-            b.classList.toggle('active', b.getAttribute('data-tab') === tab);
-        });
-        var ht = document.getElementById('header-tab-title');
-        if (ht) ht.textContent = TAB_TITLES[tab] || '握力日記';
-    };
-
-    function todayStr() {
-        var d = new Date();
-        return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+    // Fatigue
+    const { count: fc, isConsecutiveCalendar } = fatigueDays(sorted);
+    const fw = document.getElementById('fatigue-wrap');
+    if (fc >= 3) {
+        fw.style.display = 'flex';
+        const label = isConsecutiveCalendar ? `連續 ${fc} 天` : `${fc} 筆`;
+        document.getElementById('fatigue-sub').textContent =
+            `已 ${label} 低於7日基準，考慮讓身體休息一下`;
+    } else {
+        fw.style.display = 'none';
     }
 
-    function fmtShort(str) {
-        var parts = str.split('-');
-        return String(+parts[1]) + '/' + String(+parts[2]);
-    }
+    // Chart
+    renderChart(sorted);
 
-    function fmtFull(str) {
-        var p = str.split('-');
-        return p[0] + '年' + (+p[1]) + '月' + (+p[2]) + '日';
-    }
+    // Records list
+    renderList(sorted);
+}
 
-    var WEEK = ['日', '一', '二', '三', '四', '五', '六'];
+function renderStatusCard(sorted, today, hasToday) {
+    const emojiEl = document.getElementById('s-emoji');
+    const valEl   = document.getElementById('s-value');
+    const lblEl   = document.getElementById('s-label');
+    const diffEl  = document.getElementById('s-diff');
+    const extraEl = document.getElementById('s-extra');
 
-    function showToast(msg, dur) {
-        var el = document.getElementById('toast');
-        if (!el) return;
-        el.textContent = msg;
-        el.classList.add('show');
-        setTimeout(function () { el.classList.remove('show'); }, dur || 2200);
-    }
-
-    function getSorted() {
-        return Object.keys(records).map(function (date) {
-            return { date: date, value: Number(records[date]) };
-        }).sort(function (a, b) { return a.date < b.date ? -1 : 1; });
-    }
-
-    function calcStatus(sorted, today) {
-        var todayIdx = sorted.findIndex(function (r) { return r.date === today; });
-        if (todayIdx < 0) return null;
-        var prior = sorted.slice(0, todayIdx);
-        var countWithToday = todayIdx + 1;
-        if (countWithToday < 7) return { type: 'cold', remaining: 7 - countWithToday };
-        var baselineAvg, baselineDays;
-        if (prior.length >= 7) {
-            var last7 = prior.slice(-7);
-            baselineAvg = last7.reduce(function (s, r) { return s + r.value; }, 0) / 7;
-            baselineDays = 7;
-        } else {
-            baselineAvg = prior.reduce(function (s, r) { return s + r.value; }, 0) / prior.length;
-            baselineDays = prior.length;
-        }
-        var val = sorted[todayIdx].value;
-        var diff = (val - baselineAvg) / baselineAvg;
-        if (diff > 0.05) return { type: 'fire', diff: diff, avg7: baselineAvg, baselineDays: baselineDays };
-        if (diff >= 0) return { type: 'strong', diff: diff, avg7: baselineAvg, baselineDays: baselineDays };
-        if (diff >= -0.05) return { type: 'tired', diff: diff, avg7: baselineAvg, baselineDays: baselineDays };
-        return { type: 'rest', diff: diff, avg7: baselineAvg, baselineDays: baselineDays };
-    }
-
-    function fatigueDays(sorted) {
-        var fatigueRecs = [];
-        for (var i = sorted.length - 1; i >= 7; i--) {
-            var avg = sorted.slice(i - 7, i).reduce(function (s, r) { return s + r.value; }, 0) / 7;
-            if (sorted[i].value < avg) fatigueRecs.unshift(sorted[i]);
-            else break;
-        }
-        if (fatigueRecs.length === 0) return { count: 0, isConsecutiveCalendar: true };
-        var isConsecutiveCalendar = true;
-        for (var j = 1; j < fatigueRecs.length; j++) {
-            var dd = (new Date(fatigueRecs[j].date) - new Date(fatigueRecs[j - 1].date)) / 86400000;
-            if (dd > 1) { isConsecutiveCalendar = false; break; }
-        }
-        return { count: fatigueRecs.length, isConsecutiveCalendar: isConsecutiveCalendar };
-    }
-
-    function rollingAvg7At(sorted, i) {
-        if (i < 7) return null;
-        return sorted.slice(i - 7, i).reduce(function (s, r) { return s + r.value; }, 0) / 7;
-    }
-
-    function renderStatusCard(sorted, today, hasToday) {
-        var emojiEl = document.getElementById('s-emoji');
-        if (!emojiEl) return;
-        var valEl = document.getElementById('s-value');
-        var lblEl = document.getElementById('s-label');
-        var diffEl = document.getElementById('s-diff');
-        var extraEl = document.getElementById('s-extra');
-        if (!hasToday) {
-            emojiEl.textContent = sorted.length === 0 ? '💪' : '⏳';
-            valEl.textContent = '—';
-            lblEl.textContent = '今日尚未記錄';
-            diffEl.textContent = '';
-            extraEl.innerHTML = '';
-            return;
-        }
-        var status = calcStatus(sorted, today);
-        valEl.textContent = records[today];
-        if (!status) {
-            emojiEl.textContent = '💪';
-            lblEl.textContent = '已記錄';
-            diffEl.textContent = '';
-            extraEl.innerHTML = '';
-            return;
-        }
-        if (status.type === 'cold') {
-            emojiEl.textContent = '📈';
-            lblEl.textContent = '已記錄';
-            diffEl.textContent = '';
-            extraEl.innerHTML = '<div class="cold-badge">⏳ 累積基準中，再累積 ' + status.remaining + ' 筆</div>';
-            return;
-        }
+    if (!hasToday) {
+        emojiEl.textContent = sorted.length === 0 ? '💪' : '⏳';
+        valEl.textContent = '—';
+        lblEl.textContent = '今日尚未記錄';
+        diffEl.textContent = '';
         extraEl.innerHTML = '';
-        var pct = (status.diff * 100).toFixed(1);
-        var sign = status.diff >= 0 ? '+' : '';
-        var n = status.baselineDays || 7;
-        var cfg = {
-            fire:   { emoji: '🔥', lbl: '狀態極佳！今天超越了自己', cls: 'up' },
-            strong: { emoji: '💪', lbl: '表現穩定，維持在水準上', cls: 'up' },
-            tired:  { emoji: '😮‍💨', lbl: '今天有點疲憊', cls: 'down' },
-            rest:   { emoji: '🛌', lbl: '建議充分休息，養精蓄銳', cls: 'down' }
-        };
-        var c = cfg[status.type];
-        emojiEl.textContent = c.emoji;
-        lblEl.textContent = c.lbl;
-        diffEl.textContent = sign + pct + '% vs ' + n + '日基準均線（' + status.avg7.toFixed(1) + ' kg）';
-        diffEl.className = 'status-diff ' + c.cls;
+        return;
     }
 
-    function renderStats(sorted) {
-        if (!document.getElementById('stat-pr')) return;
-        var prEl = document.getElementById('stat-pr');
-        var prDate = document.getElementById('stat-pr-date');
-        var avg7El = document.getElementById('stat-7avg');
-        var trendEl = document.getElementById('stat-trend');
-        var avg30El = document.getElementById('stat-30avg');
-        var daysEl = document.getElementById('stat-days');
-        if (sorted.length === 0) {
-            prEl.textContent = '—';
-            avg7El.textContent = '—';
-            avg30El.textContent = '—';
-            prDate.innerHTML = '';
-            trendEl.innerHTML = '';
-            daysEl.innerHTML = '';
-            return;
-        }
-        var pr = sorted.reduce(function (mx, r) { return r.value > mx.value ? r : mx; }, sorted[0]);
-        var isToday = pr.date === todayStr();
-        prEl.textContent = pr.value;
-        prDate.innerHTML = '<span class="tag tag-orange">' + (isToday ? '今天！' : fmtShort(pr.date)) + '</span>';
-        var last7 = sorted.slice(-7);
-        var avg7 = last7.reduce(function (s, r) { return s + r.value; }, 0) / last7.length;
-        avg7El.textContent = avg7.toFixed(1);
-        var prev7 = sorted.slice(-14, -7);
-        if (prev7.length >= 3) {
-            var pAvg = prev7.reduce(function (s, r) { return s + r.value; }, 0) / prev7.length;
-            var diff = (avg7 - pAvg) / pAvg;
-            if (diff > 0.02) trendEl.innerHTML = '<span class="tag tag-green">↑ 上升</span>';
-            else if (diff < -0.02) trendEl.innerHTML = '<span class="tag tag-red">↓ 下降</span>';
-            else trendEl.innerHTML = '<span class="tag tag-muted">→ 穩定</span>';
-        } else {
-            trendEl.innerHTML = '<span class="tag tag-muted">累積中</span>';
-        }
-        var last30 = sorted.slice(-30);
-        var avg30 = last30.reduce(function (s, r) { return s + r.value; }, 0) / last30.length;
-        avg30El.textContent = avg30.toFixed(1);
-        daysEl.innerHTML = '<span class="tag tag-muted">' + sorted.length + ' 天</span>';
+    const status = calcStatus(sorted, today);
+    valEl.textContent = records[today];
+
+    if (!status) {
+        emojiEl.textContent = '💪';
+        lblEl.textContent = '已記錄';
+        diffEl.textContent = '';
+        extraEl.innerHTML = '';
+        return;
     }
 
-    function renderChart(sorted) {
-        var svg = document.getElementById('chart-svg');
-        if (!svg) return;
-        if (sorted.length < 2) {
-            svg.innerHTML = '<text x="260" y="80" text-anchor="middle" fill="#3A3A45" font-size="13" font-family="-apple-system,sans-serif">需要更多數據（至少 2 筆）</text>';
-            return;
-        }
-        var data = sorted.slice(-30);
-        var n = data.length;
-        var today = todayStr();
-        var W = 520, H = 160, PL = 34, PR = 10, PT = 10, PB = 28;
-        var cW = W - PL - PR, cH = H - PT - PB;
-        var vals = data.map(function (d) { return d.value; });
-        var minV = Math.min.apply(null, vals);
-        var maxV = Math.max.apply(null, vals);
-        var range = maxV - minV || 1;
-        var t0 = new Date(data[0].date).getTime();
-        var t1 = new Date(data[n - 1].date).getTime();
-        var tSpan = t1 - t0 || 1;
-        function xOf(dateStr) { return PL + ((new Date(dateStr).getTime() - t0) / tSpan) * cW; }
-        function yOf(v) { return PT + cH - ((v - minV) / range) * cH; }
-        var GAP_MS = 86400000 * 1.5;
-        var lineSegs = [];
-        var curSeg = [];
-        data.forEach(function (d, i) {
-            if (i > 0) {
-                var gap = new Date(d.date) - new Date(data[i - 1].date);
-                if (gap > GAP_MS) { if (curSeg.length >= 2) lineSegs.push(curSeg); curSeg = []; }
-            }
-            curSeg.push(xOf(d.date) + ',' + yOf(d.value));
-        });
-        if (curSeg.length >= 1) lineSegs.push(curSeg);
-        var areaSegs = lineSegs.map(function (pts) {
-            var coords = pts.map(function (p) { return p.split(',').map(Number); });
-            var s = 'M' + coords[0][0] + ',' + coords[0][1];
-            for (var k = 1; k < coords.length; k++) s += ' L' + coords[k][0] + ',' + coords[k][1];
-            s += ' L' + coords[coords.length - 1][0] + ',' + (PT + cH) + ' L' + coords[0][0] + ',' + (PT + cH) + ' Z';
-            return s;
-        });
-        var baseSegs = [];
-        var bSeg = [];
-        data.forEach(function (d, i) {
-            if (i > 0) {
-                var g2 = new Date(d.date) - new Date(data[i - 1].date);
-                if (g2 > GAP_MS) { if (bSeg.length >= 2) baseSegs.push(bSeg.join(' ')); bSeg = []; }
-            }
-            var globalIdx = sorted.findIndex(function (r) { return r.date === d.date; });
-            var avg = rollingAvg7At(sorted, globalIdx);
-            if (avg !== null) bSeg.push(xOf(d.date) + ',' + yOf(avg));
-            else { if (bSeg.length >= 2) baseSegs.push(bSeg.join(' ')); bSeg = []; }
-        });
-        if (bSeg.length >= 2) baseSegs.push(bSeg.join(' '));
-        var yLevels = [minV, (minV + maxV) / 2, maxV];
-        var yLabels = yLevels.map(function (v) {
-            return '<text x="' + (PL - 4) + '" y="' + yOf(v) + '" text-anchor="end" dominant-baseline="middle" fill="#3A3A45" font-size="9" font-family="-apple-system,sans-serif">' + Math.round(v) + '</text>';
-        }).join('');
-        var step = Math.max(1, Math.floor(n / 5));
-        var xLabels = data.map(function (d, i) {
-            if (i % step !== 0 && i !== n - 1) return '';
-            return '<text x="' + xOf(d.date) + '" y="' + (H - 3) + '" text-anchor="middle" fill="#3A3A45" font-size="9" font-family="-apple-system,sans-serif">' + fmtShort(d.date) + '</text>';
-        }).join('');
-        var dots = data.map(function (d) {
-            var isT = d.date === today;
-            return '<circle cx="' + xOf(d.date) + '" cy="' + yOf(d.value) + '" r="' + (isT ? 5.5 : 3) + '" fill="var(--accent)" stroke="' + (isT ? '#fff' : 'none') + '" stroke-width="' + (isT ? 2 : 0) + '"/>';
-        }).join('');
-        var gId = 'grip-grad-' + ME;
-        svg.innerHTML =
-            '<defs><linearGradient id="' + gId + '" x1="0" y1="0" x2="0" y2="1">' +
-            '<stop offset="0%" stop-color="#FF8C00" stop-opacity="0.28"/><stop offset="100%" stop-color="#FF8C00" stop-opacity="0"/></linearGradient></defs>' +
-            '<line x1="' + PL + '" y1="' + PT + '" x2="' + PL + '" y2="' + (PT + cH) + '" stroke="#1C1C27" stroke-width="1"/>' +
-            '<line x1="' + PL + '" y1="' + (PT + cH) + '" x2="' + (W - PR) + '" y2="' + (PT + cH) + '" stroke="#1C1C27" stroke-width="1"/>' +
-            yLabels + xLabels +
-            areaSegs.map(function (d) { return '<path d="' + d + '" fill="url(#' + gId + ')"/>'; }).join('') +
-            baseSegs.map(function (pts) {
-                return '<polyline points="' + pts + '" fill="none" stroke="#3A3A52" stroke-width="1.5" stroke-dasharray="5,3"/>';
-            }).join('') +
-            lineSegs.map(function (pts) {
-                return '<polyline points="' + pts.join(' ') + '" fill="none" stroke="#FF8C00" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>';
-            }).join('') + dots;
+    if (status.type === 'cold') {
+        emojiEl.textContent = '📈';
+        lblEl.textContent = '已記錄';
+        diffEl.textContent = '';
+        extraEl.innerHTML = `<div class="cold-badge">⏳ 累積基準中，還需 ${status.remaining} 筆</div>`;
+        return;
     }
 
-    function renderHistoryList(sorted) {
-        var el = document.getElementById('records-card');
-        if (!el) return;
-        if (sorted.length === 0) {
-            el.innerHTML = '<div class="empty-state"><div class="empty-icon">💪</div><div class="empty-text">尚無紀錄</div><div class="empty-sub">在「今日」分頁開始記錄吧</div></div>';
-            return;
-        }
-        var rev = sorted.slice().reverse();
-        el.innerHTML = rev.map(function (r) {
-            var idx = sorted.findIndex(function (s) { return s.date === r.date; });
-            var deltaHTML = '';
-            if (idx > 0) {
-                var delta = r.value - sorted[idx - 1].value;
-                var sign = delta >= 0 ? '+' : '';
-                var cls = delta > 0 ? 'tag-green' : delta < 0 ? 'tag-red' : 'tag-muted';
-                deltaHTML = '<span class="rec-delta tag ' + cls + '">' + sign + delta.toFixed(1) + '</span>';
-            }
-            var isT = r.date === todayStr();
-            return '<div class="rec-row"><div class="rec-date' + (isT ? ' today' : '') + '">' + (isT ? '今天' : fmtFull(r.date)) + '</div><div class="rec-right">' +
-                '<div class="rec-val">' + r.value + '<span style="font-size:12px;color:var(--text2);font-weight:400"> kg</span></div>' + deltaHTML +
-                '<button type="button" class="rec-btn" data-act="edit" data-date="' + r.date + '">編輯</button>' +
-                '<button type="button" class="rec-btn rec-btn-del" data-act="del" data-date="' + r.date + '">刪除</button></div></div>';
-        }).join('');
+    extraEl.innerHTML = '';
+
+    const pct  = (status.diff * 100).toFixed(1);
+    const sign = status.diff >= 0 ? '+' : '';
+
+    const cfg = {
+        fire:   { emoji: '🔥', lbl: '狀態極佳！今天超越了自己',  cls: 'up' },
+        strong: { emoji: '💪', lbl: '表現穩定，維持在水準上',    cls: 'up' },
+        tired:  { emoji: '😮‍💨', lbl: '今天有點疲憊',             cls: 'down' },
+        rest:   { emoji: '🛌', lbl: '建議充分休息，養精蓄銳',    cls: 'down' },
+    };
+    const c = cfg[status.type];
+    emojiEl.textContent = c.emoji;
+    lblEl.textContent   = c.lbl;
+    diffEl.textContent  = `${sign}${pct}% vs 7日均線（${status.avg7.toFixed(1)} kg）`;
+    diffEl.className    = `status-diff ${c.cls}`;
+}
+
+function renderStats(sorted) {
+    const prEl     = document.getElementById('stat-pr');
+    const prDate   = document.getElementById('stat-pr-date');
+    const avg7El   = document.getElementById('stat-7avg');
+    const trendEl  = document.getElementById('stat-trend');
+    const avg30El  = document.getElementById('stat-30avg');
+    const daysEl   = document.getElementById('stat-days');
+
+    if (sorted.length === 0) {
+        [prEl, avg7El, avg30El].forEach(e => e.textContent = '—');
+        prDate.innerHTML = trendEl.innerHTML = daysEl.innerHTML = '';
+        return;
     }
 
-    function render() {
-        var sorted = getSorted();
-        var today = todayStr();
-        var todayVal = records[today];
-        var hasToday = todayVal != null;
-        var now = new Date();
-        var sd = document.getElementById('status-date');
-        if (sd) sd.textContent = fmtFull(today) + ' 週' + WEEK[now.getDay()];
-        renderStatusCard(sorted, today, hasToday);
-        var input = document.getElementById('grip-input');
-        var btn = document.getElementById('submit-btn');
-        var recLine = document.getElementById('recorded-line');
-        if (input && btn) {
-            if (hasToday) {
-                input.value = todayVal;
-                input.disabled = false;
-                btn.disabled = false;
-                btn.textContent = '更新';
-                if (recLine) recLine.style.display = 'flex';
-            } else {
-                input.value = '';
-                input.disabled = false;
-                btn.disabled = false;
-                btn.textContent = '記錄';
-                if (recLine) recLine.style.display = 'none';
-            }
-        }
-        renderStats(sorted);
-        var fw = document.getElementById('fatigue-wrap');
-        if (fw) {
-            var fd = fatigueDays(sorted);
-            if (fd.count >= 3) {
-                fw.style.display = 'flex';
-                document.getElementById('fatigue-sub').textContent = '已 ' + (fd.isConsecutiveCalendar ? '連續 ' + fd.count + ' 天' : fd.count + ' 筆') + ' 低於7日基準，考慮讓身體休息一下';
-            } else fw.style.display = 'none';
-        }
-        renderChart(sorted);
-        renderHistoryList(sorted);
+    // PR
+    const pr = sorted.reduce((mx, r) => r.value > mx.value ? r : mx, sorted[0]);
+    const isToday = pr.date === todayStr();
+    prEl.textContent = pr.value;
+    prDate.innerHTML = `<span class="tag tag-orange">${isToday ? '今天！' : fmtShort(pr.date)}</span>`;
+
+    // 7-day avg
+    const last7 = sorted.slice(-7);
+    const avg7 = last7.reduce((s, r) => s + r.value, 0) / last7.length;
+    avg7El.textContent = avg7.toFixed(1);
+
+    // Trend: recent 7 vs prior 7
+    const prev7 = sorted.slice(-14, -7);
+    if (prev7.length >= 3) {
+        const pAvg = prev7.reduce((s, r) => s + r.value, 0) / prev7.length;
+        const diff = (avg7 - pAvg) / pAvg;
+        if (diff > 0.02)
+            trendEl.innerHTML = `<span class="tag tag-green">↑ 上升</span>`;
+        else if (diff < -0.02)
+            trendEl.innerHTML = `<span class="tag tag-red">↓ 下降</span>`;
+        else
+            trendEl.innerHTML = `<span class="tag tag-muted">→ 穩定</span>`;
+    } else {
+        trendEl.innerHTML = `<span class="tag tag-muted">累積中</span>`;
     }
 
-    function loadRecords() {
-        if (dbListener) db.ref('grip/' + ME + '/records').off('value', dbListener);
-        dbListener = db.ref('grip/' + ME + '/records').on('value', function (snap) {
-            records = snap.val() || {};
-            render();
-        });
+    // 30-day avg
+    const last30 = sorted.slice(-30);
+    const avg30 = last30.reduce((s, r) => s + r.value, 0) / last30.length;
+    avg30El.textContent = avg30.toFixed(1);
+    daysEl.innerHTML = `<span class="tag tag-muted">${sorted.length} 天</span>`;
+}
+
+// ── Chart ─────────────────────────────────────────────────────────────
+function renderChart(sorted) {
+    const svg = document.getElementById('chart-svg');
+
+    if (sorted.length < 2) {
+        svg.innerHTML = `<text x="260" y="80" text-anchor="middle" fill="#3A3A45"
+            font-size="13" font-family="-apple-system,sans-serif">需要更多數據（至少 2 筆）</text>`;
+        return;
     }
 
-    window.selectUser = function (player) {
-        ME = player;
-        playSound('click');
-        localStorage.setItem('grip_user', player);
-        document.getElementById('user-select').style.display = 'none';
-        document.getElementById('app').style.display = 'block';
-        var chip = document.getElementById('user-chip');
-        if (chip) chip.textContent = (player === 'p1' ? '至凱' : '柏致') + ' · 切換';
-        var tab = 'main';
-        try { tab = sessionStorage.getItem(TAB_KEY) || 'main'; } catch (e) {}
-        showGripTab(['main', 'analytics', 'history'].indexOf(tab) >= 0 ? tab : 'main');
-        loadRecords();
-    };
+    const data = sorted.slice(-30);
+    const n    = data.length;
+    const today = todayStr();
 
-    window.switchUser = function () {
-        var modal = document.getElementById('edit-modal');
-        if (modal) modal.classList.remove('show');
-        _editDate = null;
-        var delModal = document.getElementById('delete-modal');
-        if (delModal) delModal.classList.remove('show');
-        _deleteDate = null;
-        if (dbListener) {
-            db.ref('grip/' + ME + '/records').off('value', dbListener);
-            dbListener = null;
+    const W  = 520, H = 160;
+    const PL = 34, PR = 10, PT = 10, PB = 28;
+    const cW = W - PL - PR;
+    const cH = H - PT - PB;
+
+    const vals = data.map(d => d.value);
+    const minV = Math.min(...vals);
+    const maxV = Math.max(...vals);
+    const range = maxV - minV || 1;
+
+    // Calendar-based X axis: position by actual date, not index
+    const t0 = new Date(data[0].date).getTime();
+    const t1 = new Date(data[n-1].date).getTime();
+    const tSpan = t1 - t0 || 1;
+    const xOf  = dateStr => PL + ((new Date(dateStr).getTime() - t0) / tSpan) * cW;
+    const yOf  = v => PT + cH - ((v - minV) / range) * cH;
+
+    // Line broken into segments at gaps > 1 day
+    const GAP_MS = 86400000 * 1.5; // 1.5 days threshold
+    const lineSegs = [];
+    let curSeg = [];
+    data.forEach((d, i) => {
+        if (i > 0) {
+            const gap = new Date(d.date) - new Date(data[i-1].date);
+            if (gap > GAP_MS) { if (curSeg.length >= 2) lineSegs.push(curSeg); curSeg = []; }
         }
-        records = {};
-        ME = null;
-        localStorage.removeItem('grip_user');
-        document.getElementById('user-select').style.display = 'flex';
-        document.getElementById('app').style.display = 'none';
-    };
+        curSeg.push(`${xOf(d.date)},${yOf(d.value)}`);
+    });
+    if (curSeg.length >= 1) lineSegs.push(curSeg);
 
-    function onHistoryClick(e) {
-        var btn = e.target.closest('[data-act]');
-        if (!btn || !ME) return;
-        var date = btn.getAttribute('data-date');
-        if (btn.getAttribute('data-act') === 'edit') gripEditRecord(date);
-        if (btn.getAttribute('data-act') === 'del') gripDeleteRecord(date);
+    // Area fill: per segment
+    const areaSegs = lineSegs.map(pts => {
+        const coords = pts.map(p => p.split(',').map(Number));
+        return `M${coords[0][0]},${coords[0][1]}`
+            + coords.slice(1).map(([x,y]) => ` L${x},${y}`).join('')
+            + ` L${coords[coords.length-1][0]},${PT+cH} L${coords[0][0]},${PT+cH} Z`;
+    });
+
+    // 7-day rolling baseline (also break at gaps)
+    const baseSegs = [];
+    let bSeg = [];
+    data.forEach((d, i) => {
+        if (i > 0) {
+            const gap = new Date(d.date) - new Date(data[i-1].date);
+            if (gap > GAP_MS) { if (bSeg.length >= 2) baseSegs.push(bSeg.join(' ')); bSeg = []; }
+        }
+        const globalIdx = sorted.findIndex(r => r.date === d.date);
+        const avg = rollingAvg7At(sorted, globalIdx);
+        if (avg !== null) bSeg.push(`${xOf(d.date)},${yOf(avg)}`);
+        else { if (bSeg.length >= 2) baseSegs.push(bSeg.join(' ')); bSeg = []; }
+    });
+    if (bSeg.length >= 2) baseSegs.push(bSeg.join(' '));
+
+    // Y axis labels
+    const yLevels = [minV, (minV+maxV)/2, maxV];
+    const yLabels = yLevels.map(v =>
+        `<text x="${PL-4}" y="${yOf(v)}" text-anchor="end" dominant-baseline="middle"
+            fill="#3A3A45" font-size="9" font-family="-apple-system,sans-serif">${Math.round(v)}</text>`
+    ).join('');
+
+    // X axis labels: show up to 5, always include first & last
+    const step = Math.max(1, Math.floor(n / 5));
+    const xLabels = data.map((d, i) => {
+        if (i % step !== 0 && i !== n-1) return '';
+        return `<text x="${xOf(d.date)}" y="${H-3}" text-anchor="middle"
+            fill="#3A3A45" font-size="9" font-family="-apple-system,sans-serif">${fmtShort(d.date)}</text>`;
+    }).join('');
+
+    // Dots
+    const dots = data.map(d => {
+        const isT = d.date === today;
+        return `<circle cx="${xOf(d.date)}" cy="${yOf(d.value)}"
+            r="${isT ? 5.5 : 3}" fill="var(--accent)"
+            stroke="${isT ? '#fff' : 'none'}" stroke-width="${isT ? 2 : 0}"/>`;
+    }).join('');
+
+    const gId = `grip-grad-${ME}`;
+    svg.innerHTML = `
+        <defs>
+          <linearGradient id="${gId}" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%"   stop-color="#FF8C00" stop-opacity="0.28"/>
+            <stop offset="100%" stop-color="#FF8C00" stop-opacity="0"/>
+          </linearGradient>
+        </defs>
+        <line x1="${PL}" y1="${PT}" x2="${PL}" y2="${PT+cH}" stroke="#1C1C27" stroke-width="1"/>
+        <line x1="${PL}" y1="${PT+cH}" x2="${W-PR}" y2="${PT+cH}" stroke="#1C1C27" stroke-width="1"/>
+        ${yLabels}
+        ${xLabels}
+        ${areaSegs.map(d => `<path d="${d}" fill="url(#${gId})"/>`).join('')}
+        ${baseSegs.map(pts =>
+            `<polyline points="${pts}" fill="none" stroke="#3A3A52"
+                stroke-width="1.5" stroke-dasharray="5,3"/>`
+        ).join('')}
+        ${lineSegs.map(pts =>
+            `<polyline points="${pts.join(' ')}" fill="none" stroke="#FF8C00"
+                stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>`
+        ).join('')}
+        ${dots}`;
+}
+
+// ── Records List ──────────────────────────────────────────────────────
+function renderList(sorted) {
+    const el = document.getElementById('records-card');
+
+    if (sorted.length === 0) {
+        el.innerHTML = `
+            <div class="empty-state">
+                <div class="empty-icon">💪</div>
+                <div class="empty-text">開始你的第一次記錄吧！</div>
+                <div class="empty-sub">每天一次，見證自己的成長</div>
+            </div>`;
+        return;
     }
 
-    var _editDate = null;
-    var _deleteDate = null;
-    window.gripEditRecord = function (date) {
-        if (!ME || records[date] == null) return;
-        var dm = document.getElementById('delete-modal');
-        if (dm) dm.classList.remove('show');
-        _deleteDate = null;
-        _editDate = date;
-        var p = date.split('-');
-        document.getElementById('edit-modal-sub').textContent = p[0] + '年' + (+p[1]) + '月' + (+p[2]) + '日';
-        var inp = document.getElementById('edit-modal-input');
-        inp.value = records[date];
-        playSound('open');
-        document.getElementById('edit-modal').classList.add('show');
-        setTimeout(function () { inp.focus(); inp.select(); }, 120);
-    };
-    window.closeEditModal = function (e) {
-        if (e && e.target !== document.getElementById('edit-modal')) return;
-        playSound('close');
-        document.getElementById('edit-modal').classList.remove('show');
-        _editDate = null;
-    };
-    window.confirmEdit = function () {
-        var modal = document.getElementById('edit-modal');
-        if (!ME) {
-            showToast('⚠️ 請先選擇使用者');
-            return;
-        }
-        var date = _editDate;
-        if (!date || typeof date !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
-            playSound('error');
-            showToast('⚠️ 無效的編輯狀態，請重新操作');
-            if (modal) modal.classList.remove('show');
-            _editDate = null;
-            return;
-        }
-        if (records[date] == null) {
-            playSound('error');
-            showToast('⚠️ 該日紀錄已不存在');
-            if (modal) modal.classList.remove('show');
-            _editDate = null;
-            return;
-        }
-        var raw = document.getElementById('edit-modal-input').value;
-        var val = parseFloat(raw);
-        if (!raw || isNaN(val) || val <= 0 || val > 200) {
-            showToast('⚠️ 請輸入有效握力值（1–200 kg）');
-            return;
-        }
-        var rounded = Math.round(val * 10) / 10;
-        if (modal) modal.classList.remove('show');
-        _editDate = null;
-        db.ref('grip/' + ME + '/records/' + date).set(rounded)
-            .then(function () { playSound('add'); showToast('✅ 已更新'); })
-            .catch(function () { playSound('error'); showToast('❌ 失敗，請重試'); });
-    };
+    const recent = sorted.slice(-10).reverse();
+    el.innerHTML = recent.map(r => {
+        const idx = sorted.findIndex(s => s.date === r.date);
 
-    window.gripDeleteRecord = function (date) {
-        if (!ME || records[date] == null) return;
-        if (!date || typeof date !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(date)) return;
-        var em = document.getElementById('edit-modal');
-        if (em) em.classList.remove('show');
-        _editDate = null;
-        _deleteDate = date;
-        var val = records[date];
-        document.getElementById('delete-modal-sub').textContent =
-            fmtFull(date) + '　' + val + ' kg';
-        playSound('open');
-        document.getElementById('delete-modal').classList.add('show');
-    };
-    window.closeDeleteModal = function (e) {
-        if (e && e.target !== document.getElementById('delete-modal')) return;
-        playSound('close');
-        document.getElementById('delete-modal').classList.remove('show');
-        _deleteDate = null;
-    };
-    window.confirmDelete = function () {
-        if (!ME) {
-            showToast('⚠️ 請先選擇使用者');
-            return;
-        }
-        var date = _deleteDate;
-        var delModal = document.getElementById('delete-modal');
-        if (!date || typeof date !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
-            playSound('error');
-            showToast('⚠️ 無效的刪除狀態，請重新操作');
-            if (delModal) delModal.classList.remove('show');
-            _deleteDate = null;
-            return;
-        }
-        if (records[date] == null) {
-            playSound('error');
-            showToast('⚠️ 該日紀錄已不存在');
-            if (delModal) delModal.classList.remove('show');
-            _deleteDate = null;
-            return;
-        }
-        if (delModal) delModal.classList.remove('show');
-        _deleteDate = null;
-        db.ref('grip/' + ME + '/records/' + date).remove()
-            .then(function () { playSound('remove'); showToast('✅ 已刪除'); })
-            .catch(function () { playSound('error'); showToast('❌ 失敗，請重試'); });
-    };
+        const isT = r.date === todayStr();
 
-    window.submitToday = function () {
-        if (!ME) return;
-        var raw = document.getElementById('grip-input').value;
-        var val = parseFloat(raw);
-        if (!raw || isNaN(val) || val <= 0 || val > 200) {
-            playSound('error'); showToast('⚠️ 請輸入有效握力值（1–200 kg）');
-            return;
+        let deltaHTML = '';
+        if (idx > 0) {
+            const delta = r.value - sorted[idx-1].value;
+            const sign = delta >= 0 ? '+' : '';
+            const cls = delta > 0 ? 'tag-green' : delta < 0 ? 'tag-red' : 'tag-muted';
+            deltaHTML = `<span class="rec-delta tag ${cls}">${sign}${delta.toFixed(1)}</span>`;
         }
-        var t = todayStr();
-        var isUpdate = records[t] != null;
-        var rounded = Math.round(val * 10) / 10;
-        db.ref('grip/' + ME + '/records/' + t).set(rounded)
-            .then(function () { playSound('add'); showToast(isUpdate ? '✅ 今日握力已更新！' : '✅ 今日握力已記錄！'); })
-            .catch(function () { playSound('error'); showToast('❌ 儲存失敗，請重試'); });
-    };
 
-    (function gripBindEvents() {
-        var inp = document.getElementById('grip-input');
-        if (inp && !inp.dataset.gripBound) {
-            inp.dataset.gripBound = '1';
-            inp.addEventListener('keydown', function (e) { if (e.key === 'Enter') submitToday(); });
-        }
-        var minp = document.getElementById('edit-modal-input');
-        if (minp && !minp.dataset.gripBound) {
-            minp.dataset.gripBound = '1';
-            minp.addEventListener('keydown', function (e) { if (e.key === 'Enter') confirmEdit(); });
-        }
-        var hist = document.getElementById('records-card');
-        if (hist && !hist.dataset.gripHistBound) {
-            hist.dataset.gripHistBound = '1';
-            hist.addEventListener('click', onHistoryClick);
-        }
-    })();
-})();
+        return `<div class="rec-row">
+            <div class="rec-date ${isT ? 'today' : ''}">${isT ? '今天' : fmtShort(r.date)}</div>
+            <div class="rec-right">
+                <div class="rec-val">${r.value}<span style="font-size:12px;color:var(--text2);font-weight:400"> kg</span></div>
+                ${deltaHTML}
+            </div>
+        </div>`;
+    }).join('');
+}
+
+// ── Edit today ────────────────────────────────────────────────────────
+function editToday() {
+    const input = document.getElementById('grip-input');
+    const btn   = document.getElementById('submit-btn');
+    const line  = document.getElementById('recorded-line');
+    input.disabled = false;
+    btn.disabled   = false;
+    line.style.display = 'none';
+    input.focus();
+    input.select();
+}
+
+// ── Submit ────────────────────────────────────────────────────────────
+function submitToday() {
+    const raw = document.getElementById('grip-input').value;
+    const val = parseFloat(raw);
+
+    if (!raw || isNaN(val) || val <= 0 || val > 200) {
+        showToast('⚠️ 請輸入有效握力值（1–200 kg）');
+        return;
+    }
+
+    const rounded = Math.round(val * 10) / 10;
+    db.ref(`grip/${ME}/records/${todayStr()}`).set(rounded)
+        .then(() => showToast('✅ 今日握力已記錄！'))
+        .catch(() => showToast('❌ 儲存失敗，請重試'));
+}
+
+document.getElementById('grip-input').addEventListener('keydown', e => {
+    if (e.key === 'Enter') submitToday();
+});
+
+// ── Auto-login ────────────────────────────────────────────────────────
+const saved = localStorage.getItem('grip_user');
+if (saved === 'p1' || saved === 'p2') selectUser(saved);
 </script>
 </body>
 </html>
