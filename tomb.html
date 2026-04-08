@@ -524,6 +524,35 @@
         .wr-room-code span { color: var(--accent); font-weight: 900; font-size: 15px; }
         .wr-hint { font-size: 11px; color: rgba(255,255,255,0.45); text-align: center; }
         .wr-status { font-size: 12px; color: var(--muted); text-align: right; }
+        /* 等待室裝備選帶面板（位於準備鈕上方） */
+        #wr-loadout-panel {
+            position: absolute; bottom: 84px; left: 50%; transform: translateX(-50%);
+            background: rgba(10,8,5,0.88); border: 1px solid rgba(200,146,42,0.3);
+            border-radius: 14px; padding: 10px 14px;
+            display: none; align-items: center; gap: 12px;
+            z-index: 15; pointer-events: all;
+            backdrop-filter: blur(8px); white-space: nowrap;
+            transition: opacity 0.3s;
+        }
+        .wr-lo-group { display: flex; align-items: center; gap: 6px; font-size: 13px; }
+        .wr-lo-sep   { width: 1px; height: 22px; background: rgba(255,255,255,0.1); }
+        .wr-qty-btn  {
+            width: 22px; height: 22px; border-radius: 50%;
+            background: rgba(200,146,42,0.15); border: 1px solid rgba(200,146,42,0.4);
+            color: var(--accent); font-size: 16px; line-height: 1;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; user-select: none;
+        }
+        .wr-qty-btn:active { background: rgba(200,146,42,0.4); }
+        .wr-qty-num { font-size: 15px; font-weight: 800; color: #f0e8d0; min-width: 16px; text-align: center; }
+        .wr-qty-max { font-size: 10px; color: rgba(255,255,255,0.35); }
+        #wr-ekey-btn {
+            padding: 3px 9px; border-radius: 8px; font-size: 12px; font-weight: 700;
+            background: rgba(200,146,42,0.08); border: 1px solid rgba(200,146,42,0.25);
+            color: rgba(255,255,255,0.35); cursor: pointer;
+        }
+        #wr-ekey-btn.on { background: rgba(200,146,42,0.25); border-color: var(--accent); color: var(--accent); }
+
         #waitroom-ready-btn {
             position: absolute; bottom: 28px; left: 50%; transform: translateX(-50%);
             padding: 12px 28px; font-size: 14px; font-weight: 800; border-radius: 12px;
@@ -535,6 +564,7 @@
             background: rgba(74,222,128,0.15); border-color: rgba(74,222,128,0.55); color: #4ADE80;
         }
         #waitroom-ready-btn:hover { transform: translateX(-50%) translateY(-2px); filter: brightness(1.15); }
+        #waitroom-ready-btn:disabled { cursor: default; filter: none; }
 
         /* 同步倒數 overlay */
         #countdown-overlay {
@@ -1344,7 +1374,27 @@
         <div class="wr-hint" id="wr-hint">WASD 移動 · 靠近祭壇按 F 準備</div>
         <div class="wr-status" id="wr-status">等待夥伴加入…</div>
     </div>
-    <button id="waitroom-ready-btn" onclick="toggleWaitRoomReady()">[ F ] 我準備好了</button>
+    <!-- 等待室裝備選帶面板 -->
+    <div id="wr-loadout-panel">
+        <div class="wr-lo-group">
+            <span>🩹</span>
+            <div class="wr-qty-btn" onclick="wrAdjustLoadout('bandage',-1)">−</div>
+            <div class="wr-qty-num" id="wr-lo-bandage">0</div>
+            <div class="wr-qty-btn" onclick="wrAdjustLoadout('bandage',+1)">+</div>
+            <span class="wr-qty-max" id="wr-lo-bandage-max">/0</span>
+        </div>
+        <div class="wr-lo-sep"></div>
+        <div class="wr-lo-group">
+            <span>🔥</span>
+            <div class="wr-qty-btn" onclick="wrAdjustLoadout('torch',-1)">−</div>
+            <div class="wr-qty-num" id="wr-lo-torch">0</div>
+            <div class="wr-qty-btn" onclick="wrAdjustLoadout('torch',+1)">+</div>
+            <span class="wr-qty-max" id="wr-lo-torch-max">/0</span>
+        </div>
+        <div class="wr-lo-sep"></div>
+        <div id="wr-ekey-btn" onclick="wrToggleEkey()">🗝️ 鑰匙</div>
+    </div>
+    <button id="waitroom-ready-btn" onclick="toggleWaitRoomReady()">[ F ] 準備好了 →進入</button>
     <!-- 手機專屬移動搖桿（觸控裝置才顯示） -->
     <div id="wr-joystick-left">
         <div class="joystick-base">
@@ -1677,14 +1727,16 @@ function renderTombStatus(data) {
 }
 
 function showManualOpenBtn() {
-    // 避免重複
+    // 先同步移除舊的、立即插入佔位 wrap，避免多次非同步呼叫產生重複按鈕
     const existEl = document.getElementById('manual-open-btn-wrap');
     if (existEl) existEl.remove();
+    const wrap = document.createElement('div');
+    wrap.id = 'manual-open-btn-wrap';
+    wrap.style.cssText = 'margin-top:10px;text-align:center';
+    document.getElementById('tomb-status-card').appendChild(wrap);  // 立即佔位
+
     db.ref(`economy/${ME}`).once('value', snap => {
         const bal = snap.val() || 0;
-        const wrap = document.createElement('div');
-        wrap.id = 'manual-open-btn-wrap';
-        wrap.style.cssText = 'margin-top:10px;text-align:center';
         const btn = document.createElement('button');
         btn.className = 'btn btn-accent';
         btn.style.cssText = 'font-size:13px;padding:10px 18px;width:100%';
@@ -1694,8 +1746,6 @@ function showManualOpenBtn() {
             : `點數不足（現有 ${bal} 點，需 100 點）`;
         btn.onclick = manualOpenTomb;
         wrap.appendChild(btn);
-        const tombCard = document.getElementById('tomb-status-card');
-        tombCard.appendChild(wrap);
     });
 }
 
@@ -2000,6 +2050,22 @@ let wrPlayer   = { x: 3, y: 6, px: 3, py: 6, ready: false, name: '', color: '' }
 let wrOther    = { x: WR_COLS-4, y: 6, px: WR_COLS-4, py: 6, ready: false, name: '', present: false };
 let wrKeys     = {};
 const wrJlVec  = { x: 0, y: 0 };  // 等待室手機搖桿方向
+const wrLoadout  = { bandage: 0, torch: 0, ekey: false };  // 等待室裝備選帶
+let   wrOuterBag = {};  // 局外背包快照（進等待室時讀取）
+
+function wrAdjustLoadout(item, delta) {
+    const maxOwned = item === 'bandage' ? (wrOuterBag.tomb_bandage || 0)
+                                       : (wrOuterBag.tomb_torch   || 0);
+    const cap = Math.min(item === 'bandage' ? 5 : 3, maxOwned);
+    wrLoadout[item] = Math.max(0, Math.min(cap, wrLoadout[item] + delta));
+    document.getElementById(`wr-lo-${item}`).textContent = wrLoadout[item];
+}
+
+function wrToggleEkey() {
+    if (!wrOuterBag.e_key) { showToast('背包沒有黃金鑰匙', 'error'); return; }
+    wrLoadout.ekey = !wrLoadout.ekey;
+    document.getElementById('wr-ekey-btn').classList.toggle('on', wrLoadout.ekey);
+}
 let wrRunning  = false;
 let wrRaf      = null;
 let wrSyncRef  = null;
@@ -2025,6 +2091,27 @@ function showWaitRoom(code) {
     canvas.height = window.innerHeight;
 
     document.getElementById('waitroom-ready-btn').classList.remove('ready');
+
+    // 重置裝備選帶狀態並載入背包
+    wrLoadout.bandage = 0; wrLoadout.torch = 0; wrLoadout.ekey = false;
+    wrOuterBag = {};
+    document.getElementById('wr-lo-bandage').textContent = '0';
+    document.getElementById('wr-lo-torch').textContent   = '0';
+    document.getElementById('wr-ekey-btn').classList.remove('on');
+    document.getElementById('wr-loadout-panel').style.display  = 'flex';
+    document.getElementById('wr-loadout-panel').style.opacity  = '1';
+    document.getElementById('wr-loadout-panel').style.pointerEvents = 'all';
+    const btn = document.getElementById('waitroom-ready-btn');
+    btn.textContent = '[ F ] 準備好了 →進入'; btn.classList.remove('ready'); btn.disabled = false;
+    db.ref(`tomb/players/${ME}/outerBag`).once('value', snap => {
+        wrOuterBag = snap.val() || {};
+        document.getElementById('wr-lo-bandage-max').textContent = `/${wrOuterBag.tomb_bandage || 0}`;
+        document.getElementById('wr-lo-torch-max').textContent   = `/${wrOuterBag.tomb_torch   || 0}`;
+    });
+    db.ref(`users/${ME}/items/e_key`).once('value', snap => {
+        wrOuterBag.e_key = snap.val() || 0;
+        document.getElementById('wr-ekey-btn').style.opacity = wrOuterBag.e_key ? '1' : '0.45';
+    });
 
     wrRunning = true;
     wrLastTime = performance.now();
@@ -2057,15 +2144,10 @@ function showWaitRoom(code) {
                 wrOther.present = true;
                 if (!otherPlayerId) { otherPlayerId = otherId; }
             }
-            // 更新狀態文字
-            if (wrPlayer.ready && wrOther.ready) {
-                document.getElementById('wr-status').textContent = '雙方已準備！正在進入…';
-                // 開始選裝備流程
-                stopWaitRoom();
-                showLoadout();
-            } else if (wrOther.present) {
+            // 更新狀態文字（不再觸發 showLoadout，改由個人按 F 觸發）
+            if (wrOther.present) {
                 document.getElementById('wr-status').textContent = wrOther.ready
-                    ? '夥伴已準備！等你…' : '夥伴在場，尚未準備';
+                    ? '夥伴已進入！等你…' : '夥伴在場，尚未準備';
             }
         });
     }
@@ -2078,14 +2160,57 @@ function stopWaitRoom() {
     if (wrSyncRef) { wrSyncRef.off(); wrSyncRef = null; }
     document.getElementById('screen-waitroom').classList.remove('active');
     document.getElementById('wr-joystick-left').style.display = 'none';
-    wrJlVec.x = 0; wrJlVec.y = 0;  // 清除殘留輸入
+    document.getElementById('wr-loadout-panel').style.display = 'none';
+    wrJlVec.x = 0; wrJlVec.y = 0;
 }
 
 function toggleWaitRoomReady() {
-    wrPlayer.ready = !wrPlayer.ready;
+    if (wrPlayer.ready) return;   // 已確認不可取消（道具已扣除）
+    wrPlayer.ready = true;
     const btn = document.getElementById('waitroom-ready-btn');
-    btn.textContent = wrPlayer.ready ? '✓ 已準備！（再按取消）' : '[ F ] 我準備好了';
-    btn.classList.toggle('ready', wrPlayer.ready);
+    btn.textContent = '⏳ 進入中…';
+    btn.classList.add('ready');
+    btn.disabled = true;
+    // 鎖定裝備選擇
+    const panel = document.getElementById('wr-loadout-panel');
+    panel.style.pointerEvents = 'none';
+    panel.style.opacity = '0.5';
+    enterTombFromWaitRoom();
+}
+
+async function enterTombFromWaitRoom() {
+    // 將等待室裝備選帶同步到 loadout（與 enterTomb 共用後續邏輯）
+    loadout.bandage = wrLoadout.bandage;
+    loadout.torch   = wrLoadout.torch;
+    loadout.ekey    = wrLoadout.ekey;
+
+    const updates = {};
+    if (loadout.bandage > 0)
+        updates[`tomb/players/${ME}/outerBag/tomb_bandage`] = firebase.database.ServerValue.increment(-loadout.bandage);
+    if (loadout.torch > 0)
+        updates[`tomb/players/${ME}/outerBag/tomb_torch`] = firebase.database.ServerValue.increment(-loadout.torch);
+    if (loadout.ekey)
+        updates[`users/${ME}/items/e_key`] = firebase.database.ServerValue.increment(-1);
+    updates[`tomb/players/${ME}/stats/totalRuns`] = firebase.database.ServerValue.increment(1);
+
+    try {
+        if (Object.keys(updates).length > 0) await db.ref().update(updates);
+    } catch(e) {
+        showToast('進入失敗：' + e.message, 'error');
+        // 回滾 ready 狀態
+        wrPlayer.ready = false;
+        const btn = document.getElementById('waitroom-ready-btn');
+        btn.textContent = '[ F ] 準備好了 →進入';
+        btn.classList.remove('ready'); btn.disabled = false;
+        document.getElementById('wr-loadout-panel').style.pointerEvents = 'all';
+        document.getElementById('wr-loadout-panel').style.opacity = '1';
+        return;
+    }
+
+    stopWaitRoom();
+    await db.ref(`tomb/sessions/${currentSessionId}/players/${ME}/loadoutReady`).set(true);
+    showScreen('screen-playing');
+    listenForGameStart();
 }
 
 function wrCanMove(x, y) {
@@ -2344,7 +2469,9 @@ let gameTimer = null;
 let collapsing = false;
 let uiOpen = false;  // 雙人模式只鎖輸入，不停遊戲循環
 let hotbarSlots = [];   // [{ type, qty }|null] × 4
-let flyingTorches = []; // 飛行中的火把
+let flyingTorches      = []; // 自己丟出的飛行火把
+let otherFlyingTorches = []; // 隊友丟出的飛行火把（多人模式）
+let otherTorchLights   = []; // 隊友地面火把座標（只用於 fog 清除，不可拾取）
 // 手機投擲瞄準狀態
 let torchAimActive = false;
 let torchAimAngle  = 0;
@@ -2656,7 +2783,8 @@ function generateMap(seed) {
     monsters = [];
     chests   = [];
     drops    = [];
-    flyingTorches = [];
+    flyingTorches      = [];
+    otherFlyingTorches = [];
 
     const midR = 7, midC = 12; // 房間內出口中心（buildRoom 對應）
     // 簡易生成：每個 grid 格子放一個房間模板
@@ -2919,18 +3047,30 @@ function throwTorch(overrideAngle) {
     const torchSlot = hotbarSlots.find(s => s && s.type === 'torch');
     if (torchSlot) torchSlot.qty = player.torch;
     if (player.torch <= 0) player.heldItem = null;
-    const ang = (overrideAngle !== undefined) ? overrideAngle : mouseAngle;
-    const spd = 0.072;  // 慢速，讓飛行有足夠時間展示
+    const ang  = (overrideAngle !== undefined) ? overrideAngle : mouseAngle;
+    const spd  = 0.072;
+    const tDist = 4.5 + Math.random() * 0.8;   // 4.5-5.3 格
     flyingTorches.push({
         x: player.x, y: player.y,
         vx: Math.cos(ang) * spd,
         vy: Math.sin(ang) * spd,
-        rot: Math.random() * Math.PI * 2,  // 隨機初始角度
+        rot: Math.random() * Math.PI * 2,
         life: 120,
-        targetDist: 4.5 + Math.random() * 0.8,  // 4.5-5.3 格
+        targetDist: tDist,
         traveled: 0,
         trail: [],
     });
+    // 多人模式：廣播投擲事件給隊友
+    if (currentSessionId && ME) {
+        db.ref(`tomb/sessions/${currentSessionId}/players/${ME}/torchThrow`).set({
+            ts: Date.now(),
+            x: player.x, y: player.y,
+            vx: Math.cos(ang) * spd,
+            vy: Math.sin(ang) * spd,
+            targetDist: tDist,
+            life: 120,
+        });
+    }
     updateHotbar();
 }
 
@@ -3557,6 +3697,21 @@ function gameLoop(ts) {
             return false;
         }
         return true;
+    });
+
+    // 隊友飛行火把更新（物理與自己相同，落地不放道具避免重複）
+    otherFlyingTorches = otherFlyingTorches.filter(t => {
+        if (!t.trail) t.trail = [];
+        if (t.life % 2 === 0) t.trail.push({ x: t.x, y: t.y, a: 0.7 });
+        if (t.trail.length > 6) t.trail.shift();
+        t.trail.forEach(p => { p.a *= 0.78; });
+        t.x += t.vx; t.y += t.vy;
+        t.rot += 0.22;
+        t.life--;
+        t.traveled += Math.hypot(t.vx, t.vy);
+        const gx = Math.round(t.x), gy = Math.round(t.y);
+        return t.life > 0 && t.traveled < t.targetDist && canMove(gx, gy);
+        // 落地後自然消失（ground torch 由對方那端的 drops 廣播同步）
     });
 
     // 怪物 AI
@@ -4403,6 +4558,43 @@ function render() {
         ctx.fillStyle = glow; ctx.fill();
     });
 
+    // ─ 隊友飛行火把（多人模式，視覺與自己相同）─
+    otherFlyingTorches.forEach(t => {
+        const sx = t.x * TILE - camX + TILE / 2;
+        const sy = t.y * TILE - camY + TILE / 2;
+        if (t.trail) {
+            t.trail.forEach(p => {
+                const tx = p.x * TILE - camX + TILE / 2;
+                const ty = p.y * TILE - camY + TILE / 2;
+                const r = ctx.createRadialGradient(tx, ty, 0, tx, ty, 5);
+                r.addColorStop(0, `rgba(255,160,30,${p.a * 0.8})`);
+                r.addColorStop(1, 'rgba(255,80,0,0)');
+                ctx.beginPath(); ctx.arc(tx, ty, 5, 0, Math.PI * 2);
+                ctx.fillStyle = r; ctx.fill();
+            });
+        }
+        ctx.save();
+        ctx.translate(sx, sy); ctx.rotate(t.rot);
+        ctx.fillStyle = '#4a2008'; ctx.fillRect(-2.5, -11, 5, 13);
+        ctx.fillStyle = '#6B3A14'; ctx.fillRect(-1, -11, 2, 13);
+        ctx.fillStyle = '#8B4513'; ctx.fillRect(-3, -2, 6, 3);
+        ctx.fillStyle = '#3d1a08';
+        ctx.beginPath(); ctx.ellipse(0, -12, 4, 3, 0, 0, Math.PI * 2); ctx.fill();
+        const fl2 = Math.sin(now_torch / 55 + t.rot) * 0.25 + 0.75;
+        ctx.save(); ctx.globalAlpha = 0.35 * fl2; ctx.fillStyle = '#ff4500';
+        ctx.beginPath(); ctx.ellipse(0, -18, 6, 9, 0, 0, Math.PI * 2); ctx.fill(); ctx.restore();
+        ctx.save(); ctx.globalAlpha = 0.7 * fl2; ctx.fillStyle = '#ff8c00';
+        ctx.beginPath(); ctx.ellipse(0, -17, 4.5, 7, 0, 0, Math.PI * 2); ctx.fill(); ctx.restore();
+        ctx.save(); ctx.globalAlpha = 0.95 * fl2; ctx.fillStyle = '#ffe066';
+        ctx.beginPath(); ctx.ellipse(0, -16, 2.5, 4.5, 0, 0, Math.PI * 2); ctx.fill(); ctx.restore();
+        ctx.restore();
+        const glow2 = ctx.createRadialGradient(sx, sy, 0, sx, sy, TILE * 0.7);
+        glow2.addColorStop(0, `rgba(255,150,30,${0.18 * fl2})`);
+        glow2.addColorStop(1, 'rgba(255,100,0,0)');
+        ctx.beginPath(); ctx.arc(sx, sy, TILE * 0.7, 0, Math.PI * 2);
+        ctx.fillStyle = glow2; ctx.fill();
+    });
+
     // ─ 手機火把投擲瞄準覆蓋層 ─
     if (torchAimActive && player.heldItem === 'torch') {
         const px = W / 2, py = H / 2;  // 玩家永遠在螢幕中心
@@ -4778,13 +4970,37 @@ function render() {
             const cy2 = d.y * TILE - camY + TILE/2;
             const r2  = 6 * TILE;
             const g2  = fogCtx.createRadialGradient(cx2, cy2, 0, cx2, cy2, r2);
-            g2.addColorStop(0,   'rgba(0,0,0,1)');   // 中心完全挖空
+            g2.addColorStop(0,   'rgba(0,0,0,1)');
             g2.addColorStop(0.6, 'rgba(0,0,0,0.9)');
             g2.addColorStop(1,   'rgba(0,0,0,0)');
             fogCtx.fillStyle = g2;
             fogCtx.beginPath();
-            fogCtx.arc(cx2, cy2, r2, 0, Math.PI * 2);
-            fogCtx.fill();
+            fogCtx.arc(cx2, cy2, r2, 0, Math.PI * 2); fogCtx.fill();
+        });
+
+        // 飛行中火把：照亮當前位置（4 格）+ 軌跡路徑（依 alpha 漸弱）
+        const _clearTorchLight = (tx, ty, radius, alpha) => {
+            const tcx = tx * TILE - camX + TILE / 2;
+            const tcy = ty * TILE - camY + TILE / 2;
+            const tg  = fogCtx.createRadialGradient(tcx, tcy, 0, tcx, tcy, radius);
+            tg.addColorStop(0,   `rgba(0,0,0,${alpha})`);
+            tg.addColorStop(0.5, `rgba(0,0,0,${alpha * 0.7})`);
+            tg.addColorStop(1,   'rgba(0,0,0,0)');
+            fogCtx.fillStyle = tg;
+            fogCtx.beginPath(); fogCtx.arc(tcx, tcy, radius, 0, Math.PI * 2); fogCtx.fill();
+        };
+        // 隊友地面火把（照明範圍同地面火把 6 格）
+        otherTorchLights.forEach(pos => {
+            _clearTorchLight(pos.x, pos.y, 6 * TILE, 0.92);
+        });
+        // 飛行火把路徑照明
+        [...flyingTorches, ...otherFlyingTorches].forEach(t => {
+            // 軌跡路徑（較小、依 alpha 漸弱）
+            if (t.trail) {
+                t.trail.forEach(p => _clearTorchLight(p.x, p.y, 2.8 * TILE, p.a * 0.9));
+            }
+            // 當前位置（主光源）
+            _clearTorchLight(t.x, t.y, 4 * TILE, 0.95);
         });
 
         fogCtx.globalCompositeOperation = 'source-over';
@@ -4904,6 +5120,36 @@ function setupDuoSync() {
         });
     }
 
+    // ── 廣播自己的地面火把位置（每 1.5s，隊友用於 fog 清除）──
+    setInterval(() => {
+        if (!gameRunning) return;
+        const positions = drops
+            .filter(d => d.type === 'torch_ground')
+            .map(d => ({ x: d.x, y: d.y }));
+        db.ref(`tomb/sessions/${currentSessionId}/players/${ME}/torchLights`).set(positions);
+    }, 1500);
+
+    // ── 監聽隊友地面火把位置 ──
+    db.ref(`tomb/sessions/${currentSessionId}/players/${otherPlayerId}/torchLights`).on('value', snap => {
+        otherTorchLights = snap.val() || [];
+    });
+
+    // ── 監聽隊友投擲火把事件 ──
+    db.ref(`tomb/sessions/${currentSessionId}/players/${otherPlayerId}/torchThrow`).on('value', snap => {
+        const d = snap.val();
+        if (!d || !d.ts) return;
+        if (Date.now() - d.ts > 4000) return; // 超過 4 秒的舊事件忽略
+        otherFlyingTorches.push({
+            x: d.x, y: d.y,
+            vx: d.vx, vy: d.vy,
+            rot: Math.random() * Math.PI * 2,
+            life: d.life || 120,
+            targetDist: d.targetDist || 5,
+            traveled: 0,
+            trail: [],
+        });
+    });
+
     // ── 監聽對方聊天 ──
     listenOtherChat(currentSessionId, otherPlayerId);
 
@@ -4989,7 +5235,9 @@ function endGame(escaped) {
         // 單人死亡路徑可能在 gameRunning = false 後被呼叫，跳過 guard
     } else if (!gameRunning) return;
     gameRunning = false;
-    torchAimActive = false;  // 清除瞄準 overlay
+    torchAimActive     = false;
+    otherFlyingTorches = [];
+    otherTorchLights   = [];
     document.getElementById('bag-btn').style.display = 'none';
     document.getElementById('mobile-throw-btn').style.display = 'none';
     document.getElementById('ingame-bag').classList.remove('show');
@@ -5073,8 +5321,8 @@ function setupMobileTorchThrow() {
     const btn = document.getElementById('mobile-throw-btn');
     if (!btn) return;
 
-    let touchId = null, ox = 0, oy = 0;
-    const DRAG_THRESHOLD = 18; // px — 超過此距離才算「有瞄準方向」
+    let touchId = null, ox = 0, oy = 0, hasDragged = false;
+    const DRAG_THRESHOLD = 22; // px — 超過才算確認投擲方向；不足則取消
 
     btn.addEventListener('touchstart', e => {
         e.preventDefault();
@@ -5082,8 +5330,9 @@ function setupMobileTorchThrow() {
         const t = e.changedTouches[0];
         touchId = t.identifier;
         ox = t.clientX; oy = t.clientY;
+        hasDragged = false;
         torchAimActive = true;
-        torchAimAngle  = mouseAngle;  // 預設沿用上次方向
+        torchAimAngle  = mouseAngle;
         btn.classList.add('aiming');
     }, { passive: false });
 
@@ -5097,6 +5346,7 @@ function setupMobileTorchThrow() {
         if (!t) return;
         const dx = t.clientX - ox, dy = t.clientY - oy;
         if (Math.hypot(dx, dy) >= DRAG_THRESHOLD) {
+            hasDragged = true;
             torchAimAngle = Math.atan2(dy, dx);
         }
     }, { passive: false });
@@ -5108,9 +5358,11 @@ function setupMobileTorchThrow() {
             touchId = null;
             btn.classList.remove('aiming');
             torchAimActive = false;
-            if (gameRunning && player.heldItem === 'torch') {
+            // 只有拖移超過閾值才投擲；輕觸或縮回原位 = 取消
+            if (hasDragged && gameRunning && player.heldItem === 'torch') {
                 throwTorch(torchAimAngle);
             }
+            hasDragged = false;
             break;
         }
     };
