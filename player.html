@@ -2534,9 +2534,12 @@
                     
                     // 幸運草防槓龜機制 (如果在 85~100 的槓龜區間，強制改為其他獎項)
                     let luck = Math.random() * 100; 
-                    if(d.clover_active){ 
-                        if(luck > 85) luck = Math.random() * 85; 
-                        up.clover_active = false; tail += "<br>(🍀 保底幸運草發動：防槓龜)"; 
+                    if(d.clover_active){
+                        if(luck > 85) luck = Math.random() * 85;
+                        const remaining = (d.clover_count || 1) - 1;
+                        up.clover_count = remaining;
+                        up.clover_active = remaining > 0;
+                        tail += "<br>(🍀 保底幸運草發動：防槓龜" + (remaining > 0 ? `，剩餘 ${remaining} 層` : '，已耗盡') + ")";
                     }
                     
                     // 保底機制計算
@@ -2646,7 +2649,7 @@
         }
 
         // ===== 🎁 物品使用 =====
-        const BATCH_ITEMS = ['piggy_bank', 'mystery_box', 'shard_jar'];
+        const BATCH_ITEMS = ['piggy_bank', 'mystery_box', 'shard_jar', 'lucky_clover', 'sync_dream'];
         let itemUseQty = 1, itemUseKey = '';
 
         function adjustItemUseQty(delta) {
@@ -2723,6 +2726,23 @@
                         });
                         playSound('success');
                         showModalMsg(`📦 開了 ${qty} 個箱子！`, lines, true);
+                    } else if (k === 'lucky_clover') {
+                        // 累加到 clover_count（轉盤每次消耗 1 層）
+                        db.ref('users/'+ME+'/clover_count').transaction(c => (c||0)+qty);
+                        db.ref('users/'+ME+'/clover_active').set(true);
+                        playSound('success');
+                        showModalMsg(`🍀 幸運草 ×${qty}`, `成功疊加了 <strong style="color:var(--green)">${qty} 層</strong>保底幸運草！<br>未來 ${qty} 次轉盤都不會槓龜！`, true);
+                    } else if (k === 'sync_dream') {
+                        const total = qty * 25;
+                        db.ref('economy/'+ME).transaction(v=>(v||0)+total);
+                        logPoints(total, `🎉 共鳴發財夢 ×${qty}`);
+                        db.ref('mailbox/'+OPP).push({
+                            title:`🎁 收到【共鳴發財夢 ×${qty}】的祝福！`,
+                            msg:`${CFG.myName}一次使用了 ${qty} 個共鳴發財夢，大方地分享好運！快收下這 ${total} 點吧！`,
+                            points: total, claimed: false, timestamp: Date.now()
+                        });
+                        playSound('coin');
+                        showModalMsg(`🎉 共鳴 ×${qty}`, `你獲得了 <strong style="color:var(--gold)">${total} 點</strong>！<br>禮物信件（${total} 點）已同步發送給${CFG.oppName}！`, true);
                     }
                 });
                 return;
@@ -2745,7 +2765,7 @@
                 if(!com) return showToast("❌ 道具不足", 'error'); 
                 
                 if(k==='flex_pass') db.ref('users/'+ME+'/flex_active').set(true); 
-                if(k==='lucky_clover') db.ref('users/'+ME+'/clover_active').set(true); 
+                if(k==='lucky_clover'){ db.ref('users/'+ME+'/clover_active').set(true); db.ref('users/'+ME+'/clover_count').transaction(c=>(c||0)+1); }
                 if(k==='free_gacha_ticket') db.ref('users/'+ME+'/free_gacha_active').set(true); 
                 if(k==='double_pillow'){ let t=new Date(); if(t.getHours()>=2)t.setDate(t.getDate()+1); db.ref('users/'+ME+'/pillow_target').set(getLocalDateStr(t)); } 
                 if(['flex_pass', 'lucky_clover', 'free_gacha_ticket', 'double_pillow'].includes(k)){ playSound('success'); showToast(`✨ 【${ITEMS[k].n}】已經生效！`); return; }

@@ -537,6 +537,28 @@ function toast(msg, ms=2500) {
     setTimeout(()=>el.style.opacity='0', ms);
 }
 
+// ── Sound ─────────────────────────────────────────────────────────
+const _AC = new (window.AudioContext || window.webkitAudioContext)();
+function _beep(freq, dur, type='sine', vol=0.15, delay=0) {
+    const o = _AC.createOscillator(), g = _AC.createGain();
+    o.connect(g); g.connect(_AC.destination);
+    o.type = type; o.frequency.value = freq;
+    const t = _AC.currentTime + delay;
+    g.gain.setValueAtTime(vol, t);
+    g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+    o.start(t); o.stop(t + dur);
+}
+// 出發音效：低→高 兩音
+function sfxDepart() { _beep(300,0.1); _beep(500,0.15,undefined,undefined,0.1); }
+// 邀請送出：清脆雙音
+function sfxInvite() { _beep(600,0.08,'triangle'); _beep(800,0.1,'triangle',undefined,0.09); }
+// 領取結果 - 獲利：歡快三音
+function sfxWin()    { _beep(520,0.08); _beep(660,0.08,undefined,undefined,0.09); _beep(880,0.15,undefined,undefined,0.18); }
+// 領取結果 - 虧損：低沉
+function sfxLoss()   { _beep(280,0.2,'sawtooth',0.1); }
+// 獲得虛寶：神聖感
+function sfxItem()   { [0,0.1,0.2,0.32].forEach((d,i)=>_beep([660,784,880,1046][i],0.18,'sine',0.13,d)); }
+
 // ── Init ─────────────────────────────────────────────────────────
 function setPoints(val) {
     myPoints = (typeof val === 'number' && val >= 0) ? val : 0;
@@ -635,6 +657,7 @@ async function startSolo() {
     await db.ref(`expedition/${ME}/active`).set(run);
     await incrementCount(ME, selectedDiff);
 
+    sfxDepart();
     toast('遠征出發！');
     document.getElementById('invest-box').style.display = 'none';
     document.getElementById('start-btns').style.display = 'none';
@@ -657,6 +680,7 @@ async function inviteDuo() {
             difficulty:selectedDiff, diffLabel:DIFF[selectedDiff].label,
             hostInvest:investment, ts:Date.now(),
         });
+        sfxInvite();
         toast(`邀請已送出給 ${NAMES[PARTNER]}！`);
     } catch(e) { toast('錯誤：' + e.message); }
 }
@@ -713,6 +737,7 @@ async function acceptDuoInvite() {
         incrementCount(inv.from, inv.difficulty),
         db.ref(`expedition/duo_invite/${ME}`).remove(),
     ]);
+    sfxDepart();
     toast('雙人遠征出發！');
 }
 
@@ -806,8 +831,10 @@ function showResult(ev, mult, invest, returned, profit, itemKey) {
     if (itemKey) {
         itemEl.style.display = 'block';
         itemEl.textContent   = `🎁 獲得虛寶：${IICON[itemKey]||''} ${INAME[itemKey]||itemKey}`;
+        setTimeout(sfxItem, 200);
     } else {
         itemEl.style.display = 'none';
+        setTimeout(profit >= 0 ? sfxWin : sfxLoss, 100);
     }
     document.getElementById('result-modal').classList.add('open');
 }

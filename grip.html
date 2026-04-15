@@ -106,8 +106,48 @@
             display: none;
             max-width: 480px;
             margin: 0 auto;
-            padding: 0 16px 80px;
+            padding: 0 16px 90px;
         }
+
+        /* ── Tab bar ── */
+        .tab-bar {
+            position: fixed;
+            bottom: 0; left: 0; right: 0;
+            display: none;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px 20px 20px;
+            background: rgba(12,12,18,0.92);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid var(--border);
+            z-index: 100;
+        }
+        .tab-bar.visible { display: flex; }
+        .tab-btn {
+            flex: 1; max-width: 180px;
+            padding: 10px 0;
+            border-radius: 14px;
+            border: 1px solid var(--border);
+            background: var(--card2);
+            color: var(--text2);
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+        .tab-btn.active {
+            background: rgba(255,140,0,0.12);
+            border-color: rgba(255,140,0,0.4);
+            color: var(--accent-lt);
+        }
+
+        /* ── Tab panels ── */
+        .tab-panel { display: none; }
+        .tab-panel.active { display: block; }
 
         /* ── Header ── */
         .header {
@@ -576,97 +616,109 @@
         <div class="user-chip" id="user-chip" onclick="switchUser()">— · 切換</div>
     </div>
 
-    <!-- Status card -->
-    <div class="status-card">
-        <div class="status-date" id="status-date">載入中...</div>
-        <div class="status-main">
-            <div class="status-emoji" id="s-emoji">⏳</div>
-            <div class="status-info">
-                <div>
-                    <span class="status-value" id="s-value">—</span>
-                    <span class="status-unit">kg</span>
+    <!-- Tab panel: 記錄 -->
+    <div class="tab-panel active" id="panel-record">
+        <!-- Status card -->
+        <div class="status-card">
+            <div class="status-date" id="status-date">載入中...</div>
+            <div class="status-main">
+                <div class="status-emoji" id="s-emoji">⏳</div>
+                <div class="status-info">
+                    <div>
+                        <span class="status-value" id="s-value">—</span>
+                        <span class="status-unit">kg</span>
+                    </div>
+                    <div class="status-label" id="s-label">今日尚未記錄</div>
+                    <div class="status-diff" id="s-diff"></div>
                 </div>
-                <div class="status-label" id="s-label">今日尚未記錄</div>
-                <div class="status-diff" id="s-diff"></div>
+            </div>
+            <div id="s-extra"></div>
+        </div>
+
+        <!-- Input card -->
+        <div class="input-card">
+            <div class="input-label">輸入今日握力 (kg)</div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px;">
+                <div>
+                    <div style="font-size:11px; color:var(--text2); margin-bottom:6px; text-align:center; font-weight:600;">🤜 左手</div>
+                    <input type="number" id="grip-input-l" class="grip-input"
+                           placeholder="0" min="1" max="200" step="0.5">
+                </div>
+                <div>
+                    <div style="font-size:11px; color:var(--text2); margin-bottom:6px; text-align:center; font-weight:600;">🤛 右手</div>
+                    <input type="number" id="grip-input-r" class="grip-input"
+                           placeholder="0" min="1" max="200" step="0.5">
+                </div>
+            </div>
+            <button class="submit-btn" id="submit-btn" onclick="submitToday()" style="width:100%; padding:14px 26px;">記錄</button>
+            <div class="recorded-line" id="recorded-line" style="display:none">
+                <span style="color:var(--green)">✓</span> 今天已記錄
+                <button onclick="openEditModal()" style="margin-left:8px;background:none;border:none;color:var(--text2);font-size:12px;cursor:pointer;text-decoration:underline;padding:0">修改</button>
             </div>
         </div>
-        <div id="s-extra"></div>
     </div>
 
-    <!-- Input card -->
-    <div class="input-card">
-        <div class="input-label">輸入今日握力 (kg)</div>
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px;">
+    <!-- Tab panel: 統計 -->
+    <div class="tab-panel" id="panel-stats">
+        <!-- Stats -->
+        <div class="section-label">數據分析</div>
+        <div class="stats-row">
+            <div class="stat-box">
+                <div class="stat-val" id="stat-pr">—</div>
+                <div class="stat-name">個人紀錄</div>
+                <div class="stat-extra" id="stat-pr-date"></div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-val" id="stat-7avg">—</div>
+                <div class="stat-name">7日均值</div>
+                <div class="stat-extra" id="stat-trend"></div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-val" id="stat-30avg">—</div>
+                <div class="stat-name">30日均值</div>
+                <div class="stat-extra" id="stat-days"></div>
+            </div>
+        </div>
+
+        <!-- Fatigue warning -->
+        <div class="fatigue-wrap" id="fatigue-wrap">
+            <div class="fatigue-icon">⚠️</div>
             <div>
-                <div style="font-size:11px; color:var(--text2); margin-bottom:6px; text-align:center; font-weight:600;">🤜 左手</div>
-                <input type="number" id="grip-input-l" class="grip-input"
-                       placeholder="0" min="1" max="200" step="0.5">
-            </div>
-            <div>
-                <div style="font-size:11px; color:var(--text2); margin-bottom:6px; text-align:center; font-weight:600;">🤛 右手</div>
-                <input type="number" id="grip-input-r" class="grip-input"
-                       placeholder="0" min="1" max="200" step="0.5">
+                <div class="fatigue-title">連續疲勞警告</div>
+                <div class="fatigue-sub" id="fatigue-sub"></div>
             </div>
         </div>
-        <button class="submit-btn" id="submit-btn" onclick="submitToday()" style="width:100%; padding:14px 26px;">記錄</button>
-        <div class="recorded-line" id="recorded-line" style="display:none">
-            <span style="color:var(--green)">✓</span> 今天已記錄
-            <button onclick="openEditModal()" style="margin-left:8px;background:none;border:none;color:var(--text2);font-size:12px;cursor:pointer;text-decoration:underline;padding:0">修改</button>
-        </div>
-    </div>
 
-    <!-- Stats -->
-    <div class="section-label">數據分析</div>
-    <div class="stats-row">
-        <div class="stat-box">
-            <div class="stat-val" id="stat-pr">—</div>
-            <div class="stat-name">個人紀錄</div>
-            <div class="stat-extra" id="stat-pr-date"></div>
+        <!-- Chart -->
+        <div class="section-label">30日走勢</div>
+        <div class="chart-card">
+            <div class="card-head">
+                <div class="card-title">握力趨勢</div>
+                <div class="legend">
+                    <span><span class="leg-line" style="background:#FF8C00"></span>右手</span>
+                    <span><span class="leg-line" style="background:#5AC8FA"></span>左手</span>
+                    <span><span class="leg-dash"></span>7日均</span>
+                </div>
+            </div>
+            <svg id="chart-svg" class="chart-svg" viewBox="0 0 520 160"
+                 preserveAspectRatio="none" style="height:160px"></svg>
         </div>
-        <div class="stat-box">
-            <div class="stat-val" id="stat-7avg">—</div>
-            <div class="stat-name">7日均值</div>
-            <div class="stat-extra" id="stat-trend"></div>
-        </div>
-        <div class="stat-box">
-            <div class="stat-val" id="stat-30avg">—</div>
-            <div class="stat-name">30日均值</div>
-            <div class="stat-extra" id="stat-days"></div>
-        </div>
-    </div>
 
-    <!-- Fatigue warning -->
-    <div class="fatigue-wrap" id="fatigue-wrap">
-        <div class="fatigue-icon">⚠️</div>
-        <div>
-            <div class="fatigue-title">連續疲勞警告</div>
-            <div class="fatigue-sub" id="fatigue-sub"></div>
-        </div>
-    </div>
-
-    <!-- Chart -->
-    <div class="section-label">30日走勢</div>
-    <div class="chart-card">
-        <div class="card-head">
-            <div class="card-title">握力趨勢</div>
-            <div class="legend">
-                <span><span class="leg-line" style="background:#FF8C00"></span>右手</span>
-                <span><span class="leg-line" style="background:#5AC8FA"></span>左手</span>
-                <span><span class="leg-dash"></span>7日均</span>
+        <!-- Recent records -->
+        <div class="section-label">近期紀錄</div>
+        <div class="records-card" id="records-card">
+            <div class="empty-state">
+                <div class="empty-icon">💪</div>
+                <div class="empty-text">開始你的第一次記錄吧！</div>
             </div>
         </div>
-        <svg id="chart-svg" class="chart-svg" viewBox="0 0 520 160"
-             preserveAspectRatio="none" style="height:160px"></svg>
     </div>
+</div>
 
-    <!-- Recent records -->
-    <div class="section-label">近期紀錄</div>
-    <div class="records-card" id="records-card">
-        <div class="empty-state">
-            <div class="empty-icon">💪</div>
-            <div class="empty-text">開始你的第一次記錄吧！</div>
-        </div>
-    </div>
+<!-- Tab bar -->
+<div class="tab-bar" id="tab-bar">
+    <button class="tab-btn active" id="tab-record" onclick="switchTab('record')">📝 記錄</button>
+    <button class="tab-btn" id="tab-stats" onclick="switchTab('stats')">📊 統計</button>
 </div>
 
 <div id="toast"></div>
@@ -745,8 +797,16 @@ function selectUser(player) {
     localStorage.setItem('grip_user', player);
     document.getElementById('user-select').style.display = 'none';
     document.getElementById('app').style.display = 'block';
+    document.getElementById('tab-bar').classList.add('visible');
     document.getElementById('user-chip').textContent = (player === 'p1' ? '至凱' : '柏致') + ' · 切換';
     loadRecords();
+}
+
+function switchTab(tab) {
+    document.getElementById('panel-record').classList.toggle('active', tab === 'record');
+    document.getElementById('panel-stats').classList.toggle('active', tab === 'stats');
+    document.getElementById('tab-record').classList.toggle('active', tab === 'record');
+    document.getElementById('tab-stats').classList.toggle('active', tab === 'stats');
 }
 
 function switchUser() {
@@ -756,6 +816,8 @@ function switchUser() {
     localStorage.removeItem('grip_user');
     document.getElementById('user-select').style.display = 'flex';
     document.getElementById('app').style.display = 'none';
+    document.getElementById('tab-bar').classList.remove('visible');
+    switchTab('record');
 }
 
 // ── Load ──────────────────────────────────────────────────────────────
@@ -1154,25 +1216,42 @@ function renderList(sorted) {
             <div class="rec-right">
                 ${handHTML}
                 ${deltaHTML}
+                <button onclick="openEditModalDate('${r.date}')" style="margin-left:6px;background:none;border:none;color:var(--text2);font-size:13px;cursor:pointer;padding:2px 4px;border-radius:6px;transition:color 0.15s" title="編輯" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--text2)'">✏️</button>
             </div>
         </div>`;
     }).join('');
 }
 
+// ── Sound ─────────────────────────────────────────────────────────────
+const AC = new (window.AudioContext || window.webkitAudioContext)();
+function beep(freq, dur, type='sine', vol=0.18) {
+    const o = AC.createOscillator(), g = AC.createGain();
+    o.connect(g); g.connect(AC.destination);
+    o.type = type; o.frequency.value = freq;
+    g.gain.setValueAtTime(vol, AC.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, AC.currentTime + dur);
+    o.start(); o.stop(AC.currentTime + dur);
+}
+function sfxRecord()  { beep(520,0.08); setTimeout(()=>beep(780,0.12),80); }
+function sfxEdit()    { beep(400,0.06,'triangle'); setTimeout(()=>beep(500,0.08,'triangle'),60); }
+function sfxError()   { beep(220,0.18,'sawtooth',0.1); }
+
 // ── Edit today (via modal) ────────────────────────────────────────────
 let editingDate = null;
 
-function openEditModal() {
-    const today = todayStr();
-    const raw = records[today];
+function openEditModal() { openEditModalDate(todayStr()); }
+
+function openEditModalDate(date) {
+    const raw = records[date];
     let l = 0, r = 0;
     if (raw !== null && typeof raw === 'object') {
         l = raw.l || 0; r = raw.r || 0;
     } else if (raw) {
         l = Number(raw); r = Number(raw);
     }
-    editingDate = today;
-    document.getElementById('edit-modal-sub').textContent = `修改 ${fmtFull(today)} 的紀錄`;
+    editingDate = date;
+    sfxEdit();
+    document.getElementById('edit-modal-sub').textContent = `修改 ${fmtFull(date)} 的紀錄`;
     document.getElementById('edit-modal-input-l').value = l || '';
     document.getElementById('edit-modal-input-r').value = r || '';
     document.getElementById('edit-modal').classList.add('show');
@@ -1198,8 +1277,8 @@ function confirmEdit() {
     if (finalL === 0 && finalR === 0) { showToast('⚠️ 請至少輸入一手的握力值'); return; }
     const date = editingDate || todayStr();
     db.ref(`grip/${ME}/records/${date}`).set({ l: finalL, r: finalR })
-        .then(() => { showToast('✅ 紀錄已更新！'); document.getElementById('edit-modal').classList.remove('show'); editingDate = null; })
-        .catch(() => showToast('❌ 儲存失敗，請重試'));
+        .then(() => { sfxRecord(); showToast('✅ 紀錄已更新！'); document.getElementById('edit-modal').classList.remove('show'); editingDate = null; })
+        .catch(() => { sfxError(); showToast('❌ 儲存失敗，請重試'); });
 }
 
 // ── Submit ────────────────────────────────────────────────────────────
@@ -1216,8 +1295,8 @@ function submitToday() {
     const finalR = rawR ? Math.round(r * 10) / 10 : 0;
 
     db.ref(`grip/${ME}/records/${todayStr()}`).set({ l: finalL, r: finalR })
-        .then(() => showToast('✅ 今日握力已記錄！'))
-        .catch(() => showToast('❌ 儲存失敗，請重試'));
+        .then(() => { sfxRecord(); showToast('✅ 今日握力已記錄！'); })
+        .catch(() => { sfxError(); showToast('❌ 儲存失敗，請重試'); });
 }
 
 document.getElementById('grip-input-r').addEventListener('keydown', e => {
