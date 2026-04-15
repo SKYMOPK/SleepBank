@@ -670,6 +670,22 @@
         <button class="btn" style="background:transparent; color:var(--muted);" onclick="closeModal()">取消</button>
     </div></div>
     
+    <!-- 🛍️ 黑市購買數量 Modal -->
+    <div id="marketBuyQtyModal" class="modal-overlay"><div class="modal-content">
+        <div id="mBuyIcon" style="font-size:56px; margin-bottom:10px;">🛍️</div>
+        <h3 id="mBuyTitle" style="margin-top:0; font-size:20px; color:var(--primary);">購買商品</h3>
+        <p id="mBuyDesc" style="font-size:12px; color:var(--muted); margin-bottom:6px;"></p>
+        <p id="mBuyStock" style="font-size:12px; color:var(--muted); margin-bottom:16px;"></p>
+        <div class="qty-stepper">
+            <button class="qty-btn" id="mBuyMinus" onclick="adjustMarketBuyQty(-1)">－</button>
+            <div><div class="qty-val" id="mBuyQtyVal">1</div><div class="qty-label">購買數量</div></div>
+            <button class="qty-btn" id="mBuyPlus" onclick="adjustMarketBuyQty(1)">＋</button>
+        </div>
+        <div id="mBuyTotal" style="font-size:15px; color:var(--primary); font-weight:bold; margin:12px 0 20px; text-align:center;"></div>
+        <button class="btn btn-primary" style="margin-bottom:12px;" onclick="doMarketBuyQty()">💰 確認購買</button>
+        <button class="btn" style="background:transparent; color:var(--muted);" onclick="closeModal()">取消</button>
+    </div></div>
+
     <div id="spendModal" class="modal-overlay"><div class="modal-content"><h3 style="color:var(--red); margin-top:0; font-size:22px;">🥤 現實支出</h3><input type="number" id="spendAmt" class="modal-input" placeholder="輸入花費點數" min="1"><button class="btn" style="background: rgba(255,69,58,0.15); border-color:rgba(255,69,58,0.3); color:var(--red); margin-bottom:15px;" onclick="doSpendFlexible()">確認扣款</button><button class="btn" style="background:transparent;" onclick="closeModal()">取消</button></div></div>
     
     <div id="transferModal" class="modal-overlay"><div class="modal-content" style="max-width: 480px;"><h3 style="color:var(--primary); margin-top:0; font-size:22px;">💌 支援夥伴</h3><p style="color:var(--muted); font-size:13px; margin-bottom: 15px;">請選擇要送出的資產：</p><div id="transfer-grid" class="transfer-grid"></div><input type="number" id="transAmt" class="modal-input" placeholder="輸入要送出的數量" min="1"><button class="btn btn-primary" style="margin-bottom:15px;" onclick="doTransfer()">確認送出</button><button class="btn" style="background:transparent;" onclick="closeModal()">取消</button></div></div>
@@ -1609,7 +1625,7 @@
                         <div style="font-size:11px; color:var(--muted); margin-bottom:10px;">庫存 ${slot.qty} 個</div>
                         ${sold
                             ? `<button class="btn disabled" style="background:transparent; color:var(--muted); border:1px dashed rgba(255,255,255,0.2); font-size:12px;">售完</button>`
-                            : `<button class="btn btn-primary" onclick="openConfirmModal('🛍️ 確認購買', '確定要花費 <strong style=\\'color:var(--primary)\\'>${buyPrice} 點</strong>（含5%手續費）買入【${it.n}】嗎？', ()=>buyMarketItem(${i},'${slot.key}',${slot.price}))" style="font-size:12px; padding:8px;">💰 ${buyPrice} 買入</button>`
+                            : `<button class="btn btn-primary" onclick="openMarketBuyQty(${i},'${slot.key}',${slot.qty},${slot.price})" style="font-size:12px; padding:8px;">💰 ${buyPrice} 買入</button>`
                         }
                     </div>`;
                 });
@@ -1699,6 +1715,70 @@
                     logPoints(-buyPrice, `🛍️ 黑市購入 ${ITEMS[k].n}`);
                     playSound('coin');
                     showToast(`🛍️ 花了 ${buyPrice} 點（含5%手續費）買下【${ITEMS[k].n}】！`);
+                });
+            });
+        }
+
+        // ── 黑市多量購買 ──
+        let marketBuyQty = 1, marketBuySlotIdx = 0, marketBuyKey = '', marketBuyUnitPrice = 0, marketBuyMaxQty = 1;
+
+        function openMarketBuyQty(slotIdx, key, slotQty, price) {
+            const it = ITEMS[key];
+            const buyPrice = Math.ceil(price * 1.05);
+            const affordable = Math.floor(myPoints / buyPrice);
+            marketBuySlotIdx = slotIdx;
+            marketBuyKey = key;
+            marketBuyUnitPrice = buyPrice;
+            marketBuyMaxQty = Math.min(slotQty, Math.max(1, affordable));
+            marketBuyQty = 1;
+            document.getElementById('mBuyIcon').innerText = it.i;
+            document.getElementById('mBuyTitle').innerText = it.n;
+            document.getElementById('mBuyDesc').innerText = `單價 ${buyPrice} 點（含5%手續費）`;
+            document.getElementById('mBuyStock').innerText = `庫存 ${slotQty} 個 · 你的點數 ${myPoints} 點`;
+            document.getElementById('mBuyQtyVal').innerText = 1;
+            document.getElementById('mBuyMinus').disabled = true;
+            document.getElementById('mBuyPlus').disabled = marketBuyMaxQty <= 1;
+            document.getElementById('mBuyTotal').innerText = `合計 ${buyPrice} 點`;
+            openModal('marketBuyQtyModal');
+        }
+
+        function adjustMarketBuyQty(delta) {
+            marketBuyQty = Math.max(1, Math.min(marketBuyMaxQty, marketBuyQty + delta));
+            document.getElementById('mBuyQtyVal').innerText = marketBuyQty;
+            document.getElementById('mBuyMinus').disabled = marketBuyQty <= 1;
+            document.getElementById('mBuyPlus').disabled = marketBuyQty >= marketBuyMaxQty;
+            document.getElementById('mBuyTotal').innerText = `合計 ${marketBuyQty * marketBuyUnitPrice} 點`;
+        }
+
+        function doMarketBuyQty() {
+            closeModal();
+            const qty = marketBuyQty;
+            const k = marketBuyKey;
+            const slotIdx = marketBuySlotIdx;
+            const totalCost = qty * marketBuyUnitPrice;
+            if (qty === 1) {
+                // reuse original single-buy path for atomicity
+                buyMarketItem(slotIdx, k, Math.round(marketBuyUnitPrice / 1.05));
+                return;
+            }
+            // Multi-buy: deduct stock qty times, then deduct points, then add items
+            db.ref(`market_current/items/${slotIdx}/qty`).transaction(c => {
+                if (!c || c < qty) return undefined;
+                return c - qty;
+            }, (err, committed) => {
+                if (!committed) return showToast('❌ 庫存不足！', 'error');
+                db.ref('economy/'+ME).transaction(v => {
+                    if ((v||0) < totalCost) return undefined;
+                    return (v||0) - totalCost;
+                }, (err2, committed2) => {
+                    if (!committed2) {
+                        db.ref(`market_current/items/${slotIdx}/qty`).transaction(c => (c||0) + qty);
+                        return showToast('❌ 點數不足！', 'error');
+                    }
+                    db.ref('users/'+ME+'/items/'+k).transaction(c=>(c||0)+qty);
+                    logPoints(-totalCost, `🛍️ 黑市購入 ${ITEMS[k].n} x${qty}`);
+                    playSound('coin');
+                    showToast(`🛍️ 花了 ${totalCost} 點買下【${ITEMS[k].n}】x${qty}！`);
                 });
             });
         }
@@ -2583,7 +2663,11 @@
             document.getElementById('itemUseIcon').innerText=it.i;
             document.getElementById('itemUseTitle').innerText=it.n;
             const qtyRow = document.getElementById('itemUseQtyRow');
-            if(it.t==='u'){
+            if(k === 'free_gacha_ticket'){
+                document.getElementById('itemUseDesc').innerHTML=it.d+"<br><br><span style='color:var(--green); font-weight:bold;'>🎟️ 請至【轉盤抽獎】區使用抽獎券</span>";
+                b.style.display='none';
+                qtyRow.style.display = 'none';
+            } else if(it.t==='u'){
                 document.getElementById('itemUseDesc').innerText=it.d;
                 b.style.display='block';
                 b.onclick=()=>doUseItem(k);
@@ -2598,8 +2682,8 @@
                 document.getElementById('itemUseDesc').innerHTML=it.d+"<br><br><span style='color:var(--red); font-weight:bold;'>⚠️ 這是收藏用虛寶，無法直接使用。<br>請至黑市高價出售換取點數！</span>";
                 b.style.display='none';
                 qtyRow.style.display = 'none';
-            } 
-            openModal('itemUseModal'); 
+            }
+            openModal('itemUseModal');
         }
         
         function doUseItem(k) {

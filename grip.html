@@ -596,14 +596,22 @@
     <!-- Input card -->
     <div class="input-card">
         <div class="input-label">輸入今日握力 (kg)</div>
-        <div class="input-row">
-            <input type="number" id="grip-input" class="grip-input"
-                   placeholder="0" min="1" max="200" step="0.5">
-            <button class="submit-btn" id="submit-btn" onclick="submitToday()">記錄</button>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px;">
+            <div>
+                <div style="font-size:11px; color:var(--text2); margin-bottom:6px; text-align:center; font-weight:600;">🤜 左手</div>
+                <input type="number" id="grip-input-l" class="grip-input"
+                       placeholder="0" min="1" max="200" step="0.5">
+            </div>
+            <div>
+                <div style="font-size:11px; color:var(--text2); margin-bottom:6px; text-align:center; font-weight:600;">🤛 右手</div>
+                <input type="number" id="grip-input-r" class="grip-input"
+                       placeholder="0" min="1" max="200" step="0.5">
+            </div>
         </div>
+        <button class="submit-btn" id="submit-btn" onclick="submitToday()" style="width:100%; padding:14px 26px;">記錄</button>
         <div class="recorded-line" id="recorded-line" style="display:none">
             <span style="color:var(--green)">✓</span> 今天已記錄
-            <button onclick="editToday()" style="margin-left:8px;background:none;border:none;color:var(--text2);font-size:12px;cursor:pointer;text-decoration:underline;padding:0">修改</button>
+            <button onclick="openEditModal()" style="margin-left:8px;background:none;border:none;color:var(--text2);font-size:12px;cursor:pointer;text-decoration:underline;padding:0">修改</button>
         </div>
     </div>
 
@@ -642,8 +650,9 @@
         <div class="card-head">
             <div class="card-title">握力趨勢</div>
             <div class="legend">
-                <span><span class="leg-line" style="background:var(--accent)"></span>實際</span>
-                <span><span class="leg-dash"></span>7日均線</span>
+                <span><span class="leg-line" style="background:#FF8C00"></span>右手</span>
+                <span><span class="leg-line" style="background:#5AC8FA"></span>左手</span>
+                <span><span class="leg-dash"></span>7日均</span>
             </div>
         </div>
         <svg id="chart-svg" class="chart-svg" viewBox="0 0 520 160"
@@ -667,8 +676,18 @@
     <div class="modal-box">
         <div class="modal-title">修改紀錄</div>
         <div class="modal-sub" id="edit-modal-sub"></div>
-        <input type="number" class="modal-input" id="edit-modal-input"
-               min="1" max="200" step="0.5" placeholder="0">
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:14px;">
+            <div>
+                <div style="font-size:11px; color:#8E8E9A; margin-bottom:6px; text-align:center; font-weight:600;">🤜 左手</div>
+                <input type="number" class="modal-input" id="edit-modal-input-l"
+                       min="1" max="200" step="0.5" placeholder="0">
+            </div>
+            <div>
+                <div style="font-size:11px; color:#8E8E9A; margin-bottom:6px; text-align:center; font-weight:600;">🤛 右手</div>
+                <input type="number" class="modal-input" id="edit-modal-input-r"
+                       min="1" max="200" step="0.5" placeholder="0">
+            </div>
+        </div>
         <div class="modal-actions">
             <button class="modal-btn modal-btn-cancel" onclick="closeEditModal()">取消</button>
             <button class="modal-btn modal-btn-confirm" onclick="confirmEdit()">確認</button>
@@ -749,9 +768,24 @@ function loadRecords() {
 }
 
 // ── Sorted records ────────────────────────────────────────────────────
+// Normalises both legacy (number) and new ({ l, r }) records.
+// `value` = max(l, r) used for all stats/chart compatibility.
 function getSorted() {
     return Object.entries(records)
-        .map(([date, value]) => ({ date, value: Number(value) }))
+        .map(([date, raw]) => {
+            let l, r;
+            if (raw !== null && typeof raw === 'object') {
+                l = Number(raw.l) || 0;
+                r = Number(raw.r) || 0;
+            } else {
+                // Legacy: single number → treat as right hand
+                l = Number(raw) || 0;
+                r = Number(raw) || 0;
+            }
+            const recorded = [l, r].filter(v => v > 0);
+            const value = recorded.length ? recorded.reduce((s, v) => s + v, 0) / recorded.length : 0;
+            return { date, l, r, value };
+        })
         .sort((a, b) => a.date < b.date ? -1 : 1);
 }
 
@@ -816,17 +850,23 @@ function render() {
     renderStatusCard(sorted, today, hasToday);
 
     // Input state
-    const input = document.getElementById('grip-input');
+    const inputL = document.getElementById('grip-input-l');
+    const inputR = document.getElementById('grip-input-r');
     const btn = document.getElementById('submit-btn');
     const recLine = document.getElementById('recorded-line');
     if (hasToday) {
-        input.value = todayVal;
-        input.disabled = true;
+        const todayRec = sorted.find(r => r.date === today);
+        inputL.value = todayRec ? todayRec.l : '';
+        inputR.value = todayRec ? todayRec.r : '';
+        inputL.disabled = true;
+        inputR.disabled = true;
         btn.disabled = true;
         recLine.style.display = 'flex';
     } else {
-        input.value = '';
-        input.disabled = false;
+        inputL.value = '';
+        inputR.value = '';
+        inputL.disabled = false;
+        inputR.disabled = false;
         btn.disabled = false;
         recLine.style.display = 'none';
     }
@@ -870,7 +910,8 @@ function renderStatusCard(sorted, today, hasToday) {
     }
 
     const status = calcStatus(sorted, today);
-    valEl.textContent = records[today];
+    const todayRec = sorted.find(r => r.date === today);
+    valEl.textContent = todayRec ? todayRec.value.toFixed(1) : '—';
 
     if (!status) {
         emojiEl.textContent = '💪';
@@ -904,6 +945,10 @@ function renderStatusCard(sorted, today, hasToday) {
     lblEl.textContent   = c.lbl;
     diffEl.textContent  = `${sign}${pct}% vs 7日均線（${status.avg7.toFixed(1)} kg）`;
     diffEl.className    = `status-diff ${c.cls}`;
+    // Show left/right breakdown if different
+    if (todayRec && todayRec.l !== todayRec.r) {
+        extraEl.innerHTML = `<div style="margin-top:10px; font-size:12px; color:var(--text2);">🤜 左手 <strong style="color:var(--text)">${todayRec.l} kg</strong> &nbsp;·&nbsp; 🤛 右手 <strong style="color:var(--text)">${todayRec.r} kg</strong></div>`;
+    }
 }
 
 function renderStats(sorted) {
@@ -954,6 +999,21 @@ function renderStats(sorted) {
 }
 
 // ── Chart ─────────────────────────────────────────────────────────────
+function buildLineSegs(data, xOf, yOf, valFn) {
+    const GAP_MS = 86400000 * 1.5;
+    const segs = [];
+    let cur = [];
+    data.forEach((d, i) => {
+        if (i > 0 && new Date(d.date) - new Date(data[i-1].date) > GAP_MS) {
+            if (cur.length >= 2) segs.push(cur);
+            cur = [];
+        }
+        cur.push(`${xOf(d.date)},${yOf(valFn(d))}`);
+    });
+    if (cur.length >= 1) segs.push(cur);
+    return segs;
+}
+
 function renderChart(sorted) {
     const svg = document.getElementById('chart-svg');
 
@@ -972,46 +1032,30 @@ function renderChart(sorted) {
     const cW = W - PL - PR;
     const cH = H - PT - PB;
 
-    const vals = data.map(d => d.value);
-    const minV = Math.min(...vals);
-    const maxV = Math.max(...vals);
+    // Include both l and r for Y scale
+    const allVals = data.flatMap(d => [d.l, d.r]).filter(v => v > 0);
+    const minV = Math.min(...allVals);
+    const maxV = Math.max(...allVals);
     const range = maxV - minV || 1;
 
-    // Calendar-based X axis: position by actual date, not index
     const t0 = new Date(data[0].date).getTime();
     const t1 = new Date(data[n-1].date).getTime();
     const tSpan = t1 - t0 || 1;
-    const xOf  = dateStr => PL + ((new Date(dateStr).getTime() - t0) / tSpan) * cW;
-    const yOf  = v => PT + cH - ((v - minV) / range) * cH;
+    const xOf = dateStr => PL + ((new Date(dateStr).getTime() - t0) / tSpan) * cW;
+    const yOf = v => PT + cH - ((v - minV) / range) * cH;
 
-    // Line broken into segments at gaps > 1 day
-    const GAP_MS = 86400000 * 1.5; // 1.5 days threshold
-    const lineSegs = [];
-    let curSeg = [];
-    data.forEach((d, i) => {
-        if (i > 0) {
-            const gap = new Date(d.date) - new Date(data[i-1].date);
-            if (gap > GAP_MS) { if (curSeg.length >= 2) lineSegs.push(curSeg); curSeg = []; }
-        }
-        curSeg.push(`${xOf(d.date)},${yOf(d.value)}`);
-    });
-    if (curSeg.length >= 1) lineSegs.push(curSeg);
+    // Two lines: right (orange) and left (blue)
+    const segsR = buildLineSegs(data, xOf, yOf, d => d.r);
+    const segsL = buildLineSegs(data, xOf, yOf, d => d.l);
 
-    // Area fill: per segment
-    const areaSegs = lineSegs.map(pts => {
-        const coords = pts.map(p => p.split(',').map(Number));
-        return `M${coords[0][0]},${coords[0][1]}`
-            + coords.slice(1).map(([x,y]) => ` L${x},${y}`).join('')
-            + ` L${coords[coords.length-1][0]},${PT+cH} L${coords[0][0]},${PT+cH} Z`;
-    });
-
-    // 7-day rolling baseline (also break at gaps)
+    // 7-day rolling baseline (based on max value)
+    const GAP_MS = 86400000 * 1.5;
     const baseSegs = [];
     let bSeg = [];
     data.forEach((d, i) => {
-        if (i > 0) {
-            const gap = new Date(d.date) - new Date(data[i-1].date);
-            if (gap > GAP_MS) { if (bSeg.length >= 2) baseSegs.push(bSeg.join(' ')); bSeg = []; }
+        if (i > 0 && new Date(d.date) - new Date(data[i-1].date) > GAP_MS) {
+            if (bSeg.length >= 2) baseSegs.push(bSeg.join(' '));
+            bSeg = [];
         }
         const globalIdx = sorted.findIndex(r => r.date === d.date);
         const avg = rollingAvg7At(sorted, globalIdx);
@@ -1027,7 +1071,7 @@ function renderChart(sorted) {
             fill="#3A3A45" font-size="9" font-family="-apple-system,sans-serif">${Math.round(v)}</text>`
     ).join('');
 
-    // X axis labels: show up to 5, always include first & last
+    // X axis labels
     const step = Math.max(1, Math.floor(n / 5));
     const xLabels = data.map((d, i) => {
         if (i % step !== 0 && i !== n-1) return '';
@@ -1035,36 +1079,39 @@ function renderChart(sorted) {
             fill="#3A3A45" font-size="9" font-family="-apple-system,sans-serif">${fmtShort(d.date)}</text>`;
     }).join('');
 
-    // Dots
-    const dots = data.map(d => {
+    // Dots for both hands
+    const dotsR = data.map(d => {
         const isT = d.date === today;
-        return `<circle cx="${xOf(d.date)}" cy="${yOf(d.value)}"
-            r="${isT ? 5.5 : 3}" fill="var(--accent)"
-            stroke="${isT ? '#fff' : 'none'}" stroke-width="${isT ? 2 : 0}"/>`;
+        return `<circle cx="${xOf(d.date)}" cy="${yOf(d.r)}"
+            r="${isT ? 5 : 2.5}" fill="#FF8C00"
+            stroke="${isT ? '#fff' : 'none'}" stroke-width="${isT ? 1.5 : 0}"/>`;
+    }).join('');
+    const dotsL = data.map(d => {
+        const isT = d.date === today;
+        return `<circle cx="${xOf(d.date)}" cy="${yOf(d.l)}"
+            r="${isT ? 5 : 2.5}" fill="#5AC8FA"
+            stroke="${isT ? '#fff' : 'none'}" stroke-width="${isT ? 1.5 : 0}"/>`;
     }).join('');
 
-    const gId = `grip-grad-${ME}`;
     svg.innerHTML = `
-        <defs>
-          <linearGradient id="${gId}" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%"   stop-color="#FF8C00" stop-opacity="0.28"/>
-            <stop offset="100%" stop-color="#FF8C00" stop-opacity="0"/>
-          </linearGradient>
-        </defs>
         <line x1="${PL}" y1="${PT}" x2="${PL}" y2="${PT+cH}" stroke="#1C1C27" stroke-width="1"/>
         <line x1="${PL}" y1="${PT+cH}" x2="${W-PR}" y2="${PT+cH}" stroke="#1C1C27" stroke-width="1"/>
         ${yLabels}
         ${xLabels}
-        ${areaSegs.map(d => `<path d="${d}" fill="url(#${gId})"/>`).join('')}
         ${baseSegs.map(pts =>
             `<polyline points="${pts}" fill="none" stroke="#3A3A52"
                 stroke-width="1.5" stroke-dasharray="5,3"/>`
         ).join('')}
-        ${lineSegs.map(pts =>
+        ${segsL.map(pts =>
+            `<polyline points="${pts.join(' ')}" fill="none" stroke="#5AC8FA"
+                stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="0.8"/>`
+        ).join('')}
+        ${segsR.map(pts =>
             `<polyline points="${pts.join(' ')}" fill="none" stroke="#FF8C00"
                 stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>`
         ).join('')}
-        ${dots}`;
+        ${dotsL}
+        ${dotsR}`;
 }
 
 // ── Records List ──────────────────────────────────────────────────────
@@ -1084,8 +1131,8 @@ function renderList(sorted) {
     const recent = sorted.slice(-10).reverse();
     el.innerHTML = recent.map(r => {
         const idx = sorted.findIndex(s => s.date === r.date);
-
         const isT = r.date === todayStr();
+        const isLegacy = r.l === r.r; // both same → came from single-value legacy
 
         let deltaHTML = '';
         if (idx > 0) {
@@ -1095,46 +1142,89 @@ function renderList(sorted) {
             deltaHTML = `<span class="rec-delta tag ${cls}">${sign}${delta.toFixed(1)}</span>`;
         }
 
+        const handHTML = isLegacy
+            ? `<div class="rec-val">${r.value}<span style="font-size:12px;color:var(--text2);font-weight:400"> kg</span></div>`
+            : `<div style="display:flex;flex-direction:column;align-items:flex-end;gap:1px;">
+                <div style="font-size:13px;font-weight:700;color:#5AC8FA">🤜 ${r.l}<span style="font-size:11px;font-weight:400"> kg</span></div>
+                <div style="font-size:13px;font-weight:700;color:#FF8C00">🤛 ${r.r}<span style="font-size:11px;font-weight:400"> kg</span></div>
+               </div>`;
+
         return `<div class="rec-row">
             <div class="rec-date ${isT ? 'today' : ''}">${isT ? '今天' : fmtShort(r.date)}</div>
             <div class="rec-right">
-                <div class="rec-val">${r.value}<span style="font-size:12px;color:var(--text2);font-weight:400"> kg</span></div>
+                ${handHTML}
                 ${deltaHTML}
             </div>
         </div>`;
     }).join('');
 }
 
-// ── Edit today ────────────────────────────────────────────────────────
-function editToday() {
-    const input = document.getElementById('grip-input');
-    const btn   = document.getElementById('submit-btn');
-    const line  = document.getElementById('recorded-line');
-    input.disabled = false;
-    btn.disabled   = false;
-    line.style.display = 'none';
-    input.focus();
-    input.select();
+// ── Edit today (via modal) ────────────────────────────────────────────
+let editingDate = null;
+
+function openEditModal() {
+    const today = todayStr();
+    const raw = records[today];
+    let l = 0, r = 0;
+    if (raw !== null && typeof raw === 'object') {
+        l = raw.l || 0; r = raw.r || 0;
+    } else if (raw) {
+        l = Number(raw); r = Number(raw);
+    }
+    editingDate = today;
+    document.getElementById('edit-modal-sub').textContent = `修改 ${fmtFull(today)} 的紀錄`;
+    document.getElementById('edit-modal-input-l').value = l || '';
+    document.getElementById('edit-modal-input-r').value = r || '';
+    document.getElementById('edit-modal').classList.add('show');
+    document.getElementById('edit-modal-input-r').focus();
+}
+
+function closeEditModal(e) {
+    if (e && e.target !== document.getElementById('edit-modal')) return;
+    document.getElementById('edit-modal').classList.remove('show');
+    editingDate = null;
+}
+
+function confirmEdit() {
+    const rawL = document.getElementById('edit-modal-input-l').value;
+    const rawR = document.getElementById('edit-modal-input-r').value;
+    const l = parseFloat(rawL), r = parseFloat(rawR);
+    if ((!rawL && !rawR) || (rawL && (isNaN(l) || l <= 0 || l > 200)) || (rawR && (isNaN(r) || r <= 0 || r > 200))) {
+        showToast('⚠️ 請輸入有效握力值（1–200 kg）');
+        return;
+    }
+    const finalL = rawL ? Math.round(l * 10) / 10 : 0;
+    const finalR = rawR ? Math.round(r * 10) / 10 : 0;
+    if (finalL === 0 && finalR === 0) { showToast('⚠️ 請至少輸入一手的握力值'); return; }
+    const date = editingDate || todayStr();
+    db.ref(`grip/${ME}/records/${date}`).set({ l: finalL, r: finalR })
+        .then(() => { showToast('✅ 紀錄已更新！'); document.getElementById('edit-modal').classList.remove('show'); editingDate = null; })
+        .catch(() => showToast('❌ 儲存失敗，請重試'));
 }
 
 // ── Submit ────────────────────────────────────────────────────────────
 function submitToday() {
-    const raw = document.getElementById('grip-input').value;
-    const val = parseFloat(raw);
+    const rawL = document.getElementById('grip-input-l').value;
+    const rawR = document.getElementById('grip-input-r').value;
+    const l = parseFloat(rawL), r = parseFloat(rawR);
 
-    if (!raw || isNaN(val) || val <= 0 || val > 200) {
-        showToast('⚠️ 請輸入有效握力值（1–200 kg）');
-        return;
-    }
+    if (!rawL && !rawR) { showToast('⚠️ 請輸入左手或右手的握力值'); return; }
+    if (rawL && (isNaN(l) || l <= 0 || l > 200)) { showToast('⚠️ 左手數值無效（1–200 kg）'); return; }
+    if (rawR && (isNaN(r) || r <= 0 || r > 200)) { showToast('⚠️ 右手數值無效（1–200 kg）'); return; }
 
-    const rounded = Math.round(val * 10) / 10;
-    db.ref(`grip/${ME}/records/${todayStr()}`).set(rounded)
+    const finalL = rawL ? Math.round(l * 10) / 10 : 0;
+    const finalR = rawR ? Math.round(r * 10) / 10 : 0;
+
+    db.ref(`grip/${ME}/records/${todayStr()}`).set({ l: finalL, r: finalR })
         .then(() => showToast('✅ 今日握力已記錄！'))
         .catch(() => showToast('❌ 儲存失敗，請重試'));
 }
 
-document.getElementById('grip-input').addEventListener('keydown', e => {
+document.getElementById('grip-input-r').addEventListener('keydown', e => {
     if (e.key === 'Enter') submitToday();
+});
+document.getElementById('grip-input-l').addEventListener('keydown', e => {
+    if (e.key === 'Enter') document.getElementById('grip-input-r').focus();
 });
 
 // ── Auto-login ────────────────────────────────────────────────────────
