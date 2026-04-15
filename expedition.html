@@ -460,22 +460,10 @@ function choosePlayer(p) {
     location.href = `expedition.html?player=${p}`;
 }
 
-// ── State (宣告在 initApp 之前，避免 Firebase 同步回呼的 TDZ) ──────
-let myPoints = 0, selectedDiff = null, investment = 100;
-let activeRun = null, tickTimer = null;
-let pendingInvite = null, inviteInvest = 100;
-
-if (!ME || (ME !== 'p1' && ME !== 'p2')) {
-    document.getElementById('player-select').style.display = 'block';
-} else {
-    document.getElementById('main-content').style.display = 'block';
-    initApp();
-}
-
+// ── 所有 const/let 在 initApp() 之前宣告，避免 TDZ ────────────────
 const PARTNER = ME === 'p1' ? 'p2' : 'p1';
 const NAMES   = { p1:'至凱', p2:'柏致' };
 
-// ── Event tables ─────────────────────────────────────────────────
 const EVENTS = {
     quick: [
         { p:.20, n:'地圖有誤', d:'繞遠路才發現目標早被搶先',   m:0.50, ico:'🗺️' },
@@ -511,7 +499,17 @@ const E_POOL = ['e_bottle','e_gem','e_scale','e_projector','e_cloud','e_baku','e
 const INAME  = {r_musicbox:'星空八音盒',r_moonstone:'靜謐月光石',r_dreamcatcher:'捕夢網殘骸',r_feather:'午睡精靈羽毛',r_owl:'深層睡眠貓頭鷹',r_bear:'守護泰迪熊',r_cat:'壓胸口的胖橘貓',r_wine:'微醺的熱紅酒',r_blanket:'重力被',r_rain:'白噪音雨滴',r_massage:'筋膜槍馬達',r_incense:'奇楠沉香',r_diary:'上鎖的夢境日記',r_star:'安眠流星',e_bottle:'極光琉璃瓶',e_gem:'織夢彩寶',e_scale:'沉睡巨龍鱗片',e_projector:'銀河投影燈',e_cloud:'雷雨雲碎片',e_baku:'食夢貘木雕',e_sand:'被遺忘的沙漏',e_key:'潛意識黃金鑰匙',e_score:'人魚安眠曲樂譜'};
 const IICON  = {r_musicbox:'🎶',r_moonstone:'🌕',r_dreamcatcher:'🕸️',r_feather:'🪶',r_owl:'🦉',r_bear:'🧸',r_cat:'🐈',r_wine:'🍷',r_blanket:'🛌',r_rain:'🌧️',r_massage:'💆',r_incense:'🌿',r_diary:'📓',r_star:'🌟',e_bottle:'🧪',e_gem:'🔮',e_scale:'🐉',e_projector:'✨',e_cloud:'🌩️',e_baku:'🐘',e_sand:'⌛',e_key:'🗝️',e_score:'🧜‍♀️'};
 
-// ── State ────────────────────────────────────────────────────────
+let myPoints = 0, selectedDiff = null, investment = 100;
+let activeRun = null, tickTimer = null;
+let pendingInvite = null, inviteInvest = 100;
+
+if (!ME || (ME !== 'p1' && ME !== 'p2')) {
+    document.getElementById('player-select').style.display = 'block';
+} else {
+    document.getElementById('main-content').style.display = 'block';
+    initApp();
+}
+
 // ── Helpers ──────────────────────────────────────────────────────
 const dateStr = () => { const d=new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; };
 
@@ -621,14 +619,19 @@ async function incrementCount(player, diff) {
 async function startSolo() {
     if (!selectedDiff)        { toast('請先選擇難度'); return; }
     if (activeRun)             { toast('已有進行中的遠征'); return; }
-    if (myPoints < investment) { toast('點數不足！'); return; }
+    if (myPoints < investment) { toast(`點數不足！（目前 ${myPoints} 點，需 ${investment} 點）`); return; }
+    try {
 
     const seed     = (Math.random() * 0xFFFFFFFF) >>> 0;
     const eventIdx = pickEvent(selectedDiff, seed);
     const now      = Date.now();
     const run      = { difficulty:selectedDiff, investment, startAt:now, endAt:now+DIFF[selectedDiff].dur, eventIdx, isDuo:false };
 
-    await db.ref(`economy/${ME}`).set(myPoints - investment);
+    const tx = await db.ref(`economy/${ME}`).transaction(p => {
+        if ((p||0) < investment) return undefined;
+        return (p||0) - investment;
+    });
+    if (!tx.committed) { toast('點數不足（交易失敗）'); return; }
     await db.ref(`expedition/${ME}/active`).set(run);
     await incrementCount(ME, selectedDiff);
 
@@ -637,23 +640,25 @@ async function startSolo() {
     document.getElementById('start-btns').style.display = 'none';
     selectedDiff = null;
     renderDiffCards();
+    } catch(e) { toast('錯誤：' + e.message); }
 }
 
 // ── Duo invite ───────────────────────────────────────────────────
 async function inviteDuo() {
     if (!selectedDiff)        { toast('請先選擇難度'); return; }
     if (activeRun)             { toast('已有進行中的遠征'); return; }
-    if (myPoints < investment) { toast('點數不足！'); return; }
+    if (myPoints < investment) { toast(`點數不足！（目前 ${myPoints} 點，需 ${investment} 點）`); return; }
+    try {
+        const partnerActive = (await db.ref(`expedition/${PARTNER}/active`).once('value')).val();
+        if (partnerActive) { toast(`${NAMES[PARTNER]} 已有進行中的遠征`); return; }
 
-    const partnerActive = (await db.ref(`expedition/${PARTNER}/active`).once('value')).val();
-    if (partnerActive) { toast(`${NAMES[PARTNER]} 已有進行中的遠征`); return; }
-
-    await db.ref(`expedition/duo_invite/${PARTNER}`).set({
-        from:ME, fromName:NAMES[ME],
-        difficulty:selectedDiff, diffLabel:DIFF[selectedDiff].label,
-        hostInvest:investment, ts:Date.now(),
-    });
-    toast(`邀請已送出給 ${NAMES[PARTNER]}！`);
+        await db.ref(`expedition/duo_invite/${PARTNER}`).set({
+            from:ME, fromName:NAMES[ME],
+            difficulty:selectedDiff, diffLabel:DIFF[selectedDiff].label,
+            hostInvest:investment, ts:Date.now(),
+        });
+        toast(`邀請已送出給 ${NAMES[PARTNER]}！`);
+    } catch(e) { toast('錯誤：' + e.message); }
 }
 
 function renderInvite(inv) {
