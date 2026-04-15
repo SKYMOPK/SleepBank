@@ -27,6 +27,11 @@
             backdrop-filter: blur(20px); border-bottom: 1px solid var(--border);
             position: sticky; top: 0; z-index: 50;
         }
+        .top-center {
+            position: absolute; left: 50%; transform: translateX(-50%);
+            display: flex; align-items: center; gap: 0; pointer-events: none;
+        }
+        .top-center > * { pointer-events: auto; }
         .back-btn { font-size: 22px; text-decoration: none; color: var(--muted); padding: 4px 8px; }
         .top-title { font-weight: 800; font-size: 18px; letter-spacing: 1px; }
         .pts-badge {
@@ -193,6 +198,11 @@
         .tag-standard { background: rgba(123,156,255,0.12); color: var(--standard); border: 1px solid rgba(123,156,255,0.3); }
         .tag-abyss    { background: rgba(192,132,252,0.12); color: var(--abyss);   border: 1px solid rgba(192,132,252,0.3); }
 
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50%       { transform: translateY(-8px); }
+        }
+
         /* ── Toast ── */
         #toast {
             position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
@@ -204,19 +214,11 @@
     </style>
 </head>
 <body>
-<script>
-window.onerror = function(msg, src, line, col, err) {
-    var el = document.getElementById('pts-display');
-    var file = (src||'').split('/').pop().split('?')[0].substring(0,20);
-    if (el) el.textContent = '[' + file + ':' + line + '] ' + (msg||'').substring(0,60);
-    return true;
-};
-</script>
 
 <!-- Top bar -->
 <div class="top-bar">
     <a href="index.html" class="back-btn">←</a>
-    <div style="display:flex; align-items:center; gap:0;">
+    <div class="top-center">
         <div class="top-title">⚔️ 聯合遠征</div>
         <button class="help-btn" onclick="document.getElementById('help-modal').classList.add('open')" title="說明">?</button>
     </div>
@@ -241,6 +243,12 @@ window.onerror = function(msg, src, line, col, err) {
 
 <!-- Main content -->
 <div class="content" id="main-content" style="display:none;">
+
+    <!-- Loading state -->
+    <div id="loading-state" style="text-align:center; padding:70px 0;">
+        <div style="font-size:36px; margin-bottom:12px; animation:float 2s ease-in-out infinite;">⚔️</div>
+        <div style="color:var(--muted); font-size:14px; font-weight:600; letter-spacing:1px;">讀取遠征資料...</div>
+    </div>
 
     <!-- Duo invite -->
     <div class="invite-box" id="invite-box">
@@ -277,7 +285,7 @@ window.onerror = function(msg, src, line, col, err) {
     </div>
 
     <!-- Difficulty selector -->
-    <div id="start-section">
+    <div id="start-section" style="display:none;">
         <div class="sec-label">選擇難度</div>
 
         <div class="box diff-card" id="card-quick" onclick="selectDiff('quick')">
@@ -502,16 +510,18 @@ const IICON  = {r_musicbox:'🎶',r_moonstone:'🌕',r_dreamcatcher:'🕸️',r_
 let myPoints = 0, selectedDiff = null, investment = 100;
 let activeRun = null, tickTimer = null;
 let pendingInvite = null, inviteInvest = 100;
+let _loaded = false, _claiming = false;
+
+// ── Helpers ──────────────────────────────────────────────────────
+const dateStr = () => { const d=new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; };
 
 if (!ME || (ME !== 'p1' && ME !== 'p2')) {
     document.getElementById('player-select').style.display = 'block';
+    document.getElementById('pts-display').style.display = 'none';
 } else {
     document.getElementById('main-content').style.display = 'block';
     initApp();
 }
-
-// ── Helpers ──────────────────────────────────────────────────────
-const dateStr = () => { const d=new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; };
 
 function seededRng(seed) {
     let s = (seed ^ 0xDEADBEEF) >>> 0;
@@ -656,6 +666,8 @@ async function startSolo() {
     if (!tx.committed) { toast('點數不足（交易失敗）'); return; }
     await db.ref(`expedition/${ME}/active`).set(run);
     await incrementCount(ME, selectedDiff);
+    // 清除送出給對方的邀請（若有）
+    await db.ref(`expedition/duo_invite/${PARTNER}`).remove();
 
     sfxDepart();
     toast('遠征出發！');
@@ -688,6 +700,15 @@ async function inviteDuo() {
 function renderInvite(inv) {
     const box = document.getElementById('invite-box');
     if (!inv || inv.from === ME) { box.style.display='none'; pendingInvite=null; return; }
+
+    // 3 分鐘過期
+    if (Date.now() - (inv.ts || 0) > 3 * 60 * 1000) {
+        box.style.display='none'; pendingInvite=null;
+        db.ref(`expedition/duo_invite/${ME}`).remove();
+        toast('邀請已過期（超過 3 分鐘）');
+        return;
+    }
+
     pendingInvite = inv;
     box.style.display = 'block';
     document.getElementById('inv-name').textContent = inv.fromName;
@@ -709,8 +730,12 @@ async function acceptDuoInvite() {
         await db.ref(`expedition/duo_invite/${ME}`).remove(); return;
     }
 
-    // Deduct guest points
-    await db.ref(`economy/${ME}`).set(myPoints - inviteInvest);
+    // Deduct guest points via transaction
+    const guestTx = await db.ref(`economy/${ME}`).transaction(pts => {
+        if ((pts||0) < inviteInvest) return undefined;
+        return (pts||0) - inviteInvest;
+    });
+    if (!guestTx.committed) { toast('點數不足！'); return; }
 
     // Deduct host points via transaction
     const tx = await db.ref(`economy/${inv.from}`).transaction(pts => {
@@ -747,6 +772,10 @@ async function declineDuoInvite() {
 
 // ── Active run ───────────────────────────────────────────────────
 function renderActive() {
+    if (!_loaded) {
+        _loaded = true;
+        document.getElementById('loading-state').style.display = 'none';
+    }
     const actSec   = document.getElementById('active-section');
     const startSec = document.getElementById('start-section');
 
@@ -790,25 +819,38 @@ function tick() {
 
 // ── Claim result ─────────────────────────────────────────────────
 async function claimResult() {
-    if (!activeRun) return;
-    const run  = activeRun;
-    const ev   = EVENTS[run.difficulty][run.eventIdx];
-    const mult = run.isDuo ? ev.m + 0.1 : ev.m;
-    const returned = Math.round(run.investment * mult);
-    const profit   = returned - run.investment;
+    if (!activeRun || _claiming) return;
+    _claiming = true;
+    const btn = document.getElementById('claim-btn');
+    btn.disabled = true;
+    btn.textContent = '⏳ 處理中...';
 
-    await db.ref(`economy/${ME}`).transaction(p => (p||0) + returned);
+    try {
+        const run  = activeRun;
+        const ev   = EVENTS[run.difficulty][run.eventIdx];
+        const mult = run.isDuo ? ev.m + 0.1 : ev.m;
+        const returned = Math.round(run.investment * mult);
+        const profit   = returned - run.investment;
 
-    let itemKey = null;
-    if (run.difficulty === 'abyss' && ev.hasItem) itemKey = grantAbyssItem();
+        await db.ref(`economy/${ME}`).transaction(p => (p||0) + returned);
 
-    await db.ref(`expedition/${ME}/history`).push({
-        ts:Date.now(), difficulty:run.difficulty, investment:run.investment,
-        eventName:ev.n, mult, returned, isDuo:run.isDuo, item:itemKey,
-    });
-    await db.ref(`expedition/${ME}/active`).remove();
+        let itemKey = null;
+        if (run.difficulty === 'abyss' && ev.hasItem) itemKey = grantAbyssItem();
 
-    showResult(ev, mult, run.investment, returned, profit, itemKey);
+        await db.ref(`expedition/${ME}/history`).push({
+            ts:Date.now(), difficulty:run.difficulty, investment:run.investment,
+            eventName:ev.n, mult, returned, isDuo:run.isDuo, item:itemKey,
+        });
+        await db.ref(`expedition/${ME}/active`).remove();
+
+        showResult(ev, mult, run.investment, returned, profit, itemKey);
+    } catch(e) {
+        toast('領取失敗：' + e.message);
+        btn.disabled = false;
+        btn.innerHTML = '🎁 領取結果';
+    } finally {
+        _claiming = false;
+    }
 }
 
 function grantAbyssItem() {
