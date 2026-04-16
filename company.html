@@ -1,0 +1,1295 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>創業模擬</title>
+<script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js" crossorigin="anonymous"></script>
+<script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js" crossorigin="anonymous"></script>
+<style>
+:root {
+    --bg:#0C0E16; --card:#161A28; --text:#EEEEF8; --muted:#8890A8;
+    --border:rgba(255,255,255,0.09); --gold:#F0C040; --green:#4ADE80;
+    --red:#F87171; --purple:#C084FC; --primary:#7B9CFF;
+    --accent-lt:#A5C0FF;
+}
+*{ box-sizing:border-box; margin:0; padding:0; }
+body{ font-family:-apple-system,BlinkMacSystemFont,sans-serif; background:radial-gradient(ellipse at top left,#1a1f35 0%,#0C0E16 60%); color:var(--text); min-height:100vh; padding-bottom:80px; }
+
+/* top bar */
+.top-bar{ display:flex; align-items:center; justify-content:space-between; padding:16px 20px; background:rgba(12,14,22,0.88); backdrop-filter:blur(20px); border-bottom:1px solid var(--border); position:sticky; top:0; z-index:50; }
+.back-btn{ font-size:22px; text-decoration:none; color:var(--muted); padding:4px 8px; }
+.top-center{ position:absolute; left:50%; transform:translateX(-50%); display:flex; align-items:center; gap:6px; }
+.top-title{ font-weight:800; font-size:17px; letter-spacing:1px; }
+.pts-badge{ font-size:13px; font-weight:bold; color:var(--gold); background:rgba(240,192,64,0.1); border:1px solid rgba(240,192,64,0.3); padding:5px 14px; border-radius:20px; }
+
+/* content */
+.content{ padding:14px 16px 0; max-width:480px; margin:0 auto; }
+.sec-label{ font-size:11px; font-weight:700; letter-spacing:2.5px; color:var(--muted); text-transform:uppercase; margin:18px 0 10px; }
+.box{ background:rgba(22,26,42,0.65); border:1px solid var(--border); border-radius:20px; padding:18px; margin-bottom:10px; }
+
+/* player select */
+#player-select{ text-align:center; padding:60px 20px; }
+.ps-btns{ display:flex; gap:12px; justify-content:center; }
+.ps-btn{ flex:1; max-width:160px; padding:20px 16px; border-radius:20px; border:1px solid var(--border); background:rgba(22,26,42,0.7); cursor:pointer; text-align:center; transition:all 0.2s; }
+.ps-btn:hover{ transform:translateY(-4px); filter:brightness(1.15); }
+.ps-btn .ps-ico{ font-size:36px; margin-bottom:8px; }
+.ps-btn .ps-name{ font-weight:800; font-size:16px; }
+.ps-p1{ border-color:rgba(0,255,136,0.3); color:#00ff88; }
+.ps-p2{ border-color:rgba(0,229,255,0.3); color:#00e5ff; }
+
+/* tabs */
+.tab-bar{ position:fixed; bottom:0; left:0; right:0; display:flex; justify-content:center; gap:6px; padding:10px 16px 20px; background:rgba(12,12,18,0.95); backdrop-filter:blur(20px); border-top:1px solid var(--border); z-index:100; }
+.tab-btn{ flex:1; max-width:130px; padding:9px 0; border-radius:14px; border:1px solid var(--border); background:rgba(255,255,255,0.04); color:var(--muted); font-size:12px; font-weight:700; cursor:pointer; transition:all 0.2s; }
+.tab-btn.active{ background:rgba(123,156,255,0.12); border-color:rgba(123,156,255,0.4); color:var(--accent-lt); }
+.tab-panel{ display:none; }
+.tab-panel.active{ display:block; }
+
+/* stat cards */
+.stat-row{ display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px; }
+.stat-card{ background:rgba(22,26,42,0.65); border:1px solid var(--border); border-radius:16px; padding:14px; }
+.stat-val{ font-size:26px; font-weight:900; margin:4px 0 2px; }
+.stat-lbl{ font-size:11px; color:var(--muted); font-weight:600; letter-spacing:1px; }
+
+/* treasury big */
+.treasury-box{ text-align:center; padding:24px 18px; }
+.treasury-amt{ font-size:48px; font-weight:900; color:var(--gold); letter-spacing:1px; }
+.treasury-lbl{ font-size:12px; color:var(--muted); margin-top:4px; }
+
+/* efficiency bar */
+.eff-bar-bg{ height:6px; background:rgba(255,255,255,0.08); border-radius:3px; overflow:hidden; margin-top:8px; }
+.eff-bar-fill{ height:100%; border-radius:3px; transition:width 0.6s ease; }
+
+/* buttons */
+.btn{ width:100%; padding:13px; border-radius:16px; border:1px solid rgba(255,255,255,0.1); font-weight:bold; font-size:14px; cursor:pointer; color:#fff; transition:all 0.2s; display:flex; justify-content:center; align-items:center; gap:8px; background:rgba(255,255,255,0.05); margin-bottom:8px; }
+.btn:hover:not(:disabled){ filter:brightness(1.15); transform:translateY(-2px); }
+.btn:active:not(:disabled){ transform:scale(0.97); }
+.btn:disabled{ opacity:0.4; cursor:not-allowed; }
+.btn-primary{ background:rgba(123,156,255,0.12); border-color:rgba(123,156,255,0.35); }
+.btn-green{ background:rgba(74,222,128,0.12); border-color:rgba(74,222,128,0.35); color:var(--green); }
+.btn-gold{ background:rgba(240,192,64,0.10); border-color:rgba(240,192,64,0.35); color:var(--gold); }
+.btn-red{ background:rgba(248,113,113,0.09); border-color:rgba(248,113,113,0.30); color:var(--red); }
+.btn-purple{ background:rgba(192,132,252,0.10); border-color:rgba(192,132,252,0.35); color:var(--purple); }
+.btn-sm{ padding:8px 16px; width:auto; font-size:13px; margin-bottom:0; border-radius:10px; }
+
+/* employee card */
+.emp-card{ display:flex; align-items:center; gap:12px; padding:12px 14px; background:rgba(22,26,42,0.5); border:1px solid var(--border); border-radius:14px; margin-bottom:8px; }
+.emp-dept{ font-size:11px; padding:2px 8px; border-radius:6px; font-weight:700; }
+.dept-ops{ background:rgba(123,156,255,0.12); color:var(--primary); border:1px solid rgba(123,156,255,0.25); }
+.dept-rd{ background:rgba(192,132,252,0.12); color:var(--purple); border:1px solid rgba(192,132,252,0.25); }
+.dept-mkt{ background:rgba(240,192,64,0.10); color:var(--gold); border:1px solid rgba(240,192,64,0.25); }
+
+/* dept upgrade card */
+.dept-card{ display:flex; justify-content:space-between; align-items:center; padding:14px 16px; background:rgba(22,26,42,0.5); border:1px solid var(--border); border-radius:14px; margin-bottom:8px; }
+.dept-stars span{ font-size:16px; }
+
+/* contract card */
+.contract-card{ padding:16px; background:rgba(22,26,42,0.5); border:1px solid var(--border); border-radius:16px; margin-bottom:10px; }
+.contract-type{ font-size:10px; font-weight:700; padding:2px 8px; border-radius:6px; display:inline-block; margin-bottom:8px; }
+.type-open{ background:rgba(74,222,128,0.12); color:var(--green); border:1px solid rgba(74,222,128,0.3); }
+.type-bid{ background:rgba(240,192,64,0.10); color:var(--gold); border:1px solid rgba(240,192,64,0.3); }
+.type-joint{ background:rgba(192,132,252,0.12); color:var(--purple); border:1px solid rgba(192,132,252,0.3); }
+.contract-title{ font-weight:800; font-size:15px; margin-bottom:4px; }
+.contract-reward{ font-size:22px; font-weight:900; color:var(--green); }
+
+/* market event */
+.event-box{ text-align:center; padding:20px; }
+.event-icon{ font-size:48px; margin-bottom:10px; }
+.event-mult{ font-size:28px; font-weight:900; }
+
+/* crisis banner */
+.crisis-banner{ background:rgba(248,113,113,0.12); border:1px solid rgba(248,113,113,0.35); border-radius:16px; padding:16px; margin-bottom:10px; }
+
+/* transfer row */
+.transfer-row{ display:flex; gap:8px; align-items:center; }
+.transfer-input{ flex:1; background:rgba(255,255,255,0.06); border:1px solid var(--border); border-radius:12px; padding:10px 14px; color:var(--text); font-size:15px; font-weight:700; outline:none; }
+.transfer-input:focus{ border-color:rgba(123,156,255,0.4); }
+
+/* modal */
+.modal-bg{ display:none; position:fixed; inset:0; background:rgba(0,0,0,0.80); backdrop-filter:blur(10px); z-index:200; align-items:center; justify-content:center; padding:20px; }
+.modal-bg.open{ display:flex; }
+.modal-box{ background:var(--card); border:1px solid rgba(255,255,255,0.12); border-radius:24px; padding:28px 22px; max-width:340px; width:100%; text-align:center; }
+
+/* toast */
+#toast{ position:fixed; bottom:90px; left:50%; transform:translateX(-50%); background:rgba(22,26,42,0.96); border:1px solid var(--border); padding:10px 20px; border-radius:12px; font-size:14px; font-weight:bold; z-index:999; opacity:0; transition:opacity 0.3s; pointer-events:none; white-space:nowrap; max-width:90vw; overflow:hidden; text-overflow:ellipsis; }
+
+/* loading */
+#loading-state{ text-align:center; padding:70px 0; }
+@keyframes float{ 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+
+/* p&l row */
+.pl-row{ display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid rgba(255,255,255,0.05); font-size:13px; }
+.pl-row:last-child{ border-bottom:none; }
+
+/* level badge */
+.lv-badge{ display:inline-block; font-size:11px; font-weight:700; padding:3px 10px; border-radius:8px; background:rgba(123,156,255,0.12); border:1px solid rgba(123,156,255,0.3); color:var(--primary); }
+
+/* rep bar */
+.rep-bar-bg{ height:5px; background:rgba(255,255,255,0.08); border-radius:3px; overflow:hidden; margin-top:6px; }
+.rep-bar-fill{ height:100%; background:linear-gradient(90deg,var(--purple),var(--primary)); border-radius:3px; transition:width 0.6s; }
+
+/* competitor card */
+.comp-row{ display:flex; justify-content:space-between; align-items:center; padding:12px 14px; background:rgba(22,26,42,0.5); border:1px solid var(--border); border-radius:14px; margin-bottom:8px; }
+</style>
+</head>
+<body>
+
+<!-- top bar -->
+<div class="top-bar">
+    <a href="index.html" class="back-btn">←</a>
+    <div class="top-center">
+        <div class="top-title">🏢 創業模擬</div>
+    </div>
+    <div class="pts-badge" id="pts-display" style="display:none;">讀取中...</div>
+</div>
+
+<!-- player select -->
+<div id="player-select" style="display:none;">
+    <div style="text-align:center; padding:60px 20px;">
+        <div style="font-size:40px; margin-bottom:16px; animation:float 2s ease-in-out infinite;">🏢</div>
+        <h2 style="font-size:22px; font-weight:800; margin-bottom:8px;">創業模擬</h2>
+        <p style="font-size:13px; color:var(--muted); margin-bottom:28px;">請選擇你的身分</p>
+        <div class="ps-btns">
+            <div class="ps-btn ps-p1" onclick="choosePlayer('p1')">
+                <div class="ps-ico">👦🏻</div>
+                <div class="ps-name">至凱</div>
+            </div>
+            <div class="ps-btn ps-p2" onclick="choosePlayer('p2')">
+                <div class="ps-ico">👦🏼</div>
+                <div class="ps-name">柏致</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- main -->
+<div id="main-content" style="display:none;">
+    <div id="loading-state">
+        <div style="font-size:36px; margin-bottom:12px; animation:float 2s ease-in-out infinite;">🏢</div>
+        <div style="color:var(--muted); font-size:14px; font-weight:600;">讀取中...</div>
+    </div>
+
+    <!-- 公司概況 tab -->
+    <div class="tab-panel active" id="panel-overview">
+        <div class="content">
+
+            <!-- crisis banner -->
+            <div class="crisis-banner" id="crisis-banner" style="display:none;">
+                <div style="font-weight:800; font-size:15px; color:var(--red);">⚠️ 公司危機！</div>
+                <div style="font-size:13px; color:var(--muted); margin-top:4px;" id="crisis-desc"></div>
+                <div style="margin-top:10px; display:flex; gap:8px; align-items:center;">
+                    <input class="transfer-input" id="rescue-input" type="number" min="1" placeholder="注資金額" style="font-size:14px;">
+                    <button class="btn btn-red btn-sm" onclick="rescueCompany()">注資救援</button>
+                </div>
+            </div>
+
+            <!-- company name + found -->
+            <div class="box" id="company-header-box" style="display:none;">
+                <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                    <div>
+                        <div style="font-size:20px; font-weight:900;" id="co-name-display">我的公司</div>
+                        <div style="font-size:12px; color:var(--muted); margin-top:2px;" id="co-tag-display"></div>
+                    </div>
+                    <span class="lv-badge" id="co-level-badge">Lv.1</span>
+                </div>
+                <div style="margin-top:14px;">
+                    <div style="display:flex; justify-content:space-between; font-size:12px; color:var(--muted); margin-bottom:4px;">
+                        <span>聲譽</span>
+                        <span id="co-rep-val">0 / 80</span>
+                    </div>
+                    <div class="rep-bar-bg"><div class="rep-bar-fill" id="co-rep-bar" style="width:0%"></div></div>
+                </div>
+            </div>
+
+            <!-- founding UI -->
+            <div id="found-ui" style="display:none;">
+                <div class="sec-label">建立你的公司</div>
+                <div class="box">
+                    <div style="margin-bottom:14px;">
+                        <div style="font-size:12px; color:var(--muted); margin-bottom:6px;">公司名稱</div>
+                        <input class="transfer-input" id="found-name" type="text" maxlength="12" placeholder="例：至凱科技">
+                    </div>
+                    <div style="margin-bottom:14px;">
+                        <div style="font-size:12px; color:var(--muted); margin-bottom:8px;">產業標籤（純裝飾）</div>
+                        <div style="display:flex; flex-wrap:wrap; gap:8px;" id="tag-btns">
+                            <button class="btn btn-sm" onclick="selectTag(this,'科技')" data-tag="科技">💻 科技</button>
+                            <button class="btn btn-sm" onclick="selectTag(this,'餐飲')" data-tag="餐飲">🍜 餐飲</button>
+                            <button class="btn btn-sm" onclick="selectTag(this,'創意')" data-tag="創意">🎨 創意</button>
+                            <button class="btn btn-sm" onclick="selectTag(this,'金融')" data-tag="金融">💰 金融</button>
+                            <button class="btn btn-sm" onclick="selectTag(this,'健康')" data-tag="健康">🏥 健康</button>
+                            <button class="btn btn-sm" onclick="selectTag(this,'教育')" data-tag="教育">📚 教育</button>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" onclick="foundCompany()">🚀 創立公司（免費）</button>
+                </div>
+            </div>
+
+            <!-- treasury -->
+            <div class="box treasury-box" id="treasury-box" style="display:none;">
+                <div class="treasury-lbl">公司金庫</div>
+                <div class="treasury-amt" id="treasury-display">0</div>
+                <div class="treasury-lbl" style="margin-top:2px;">點</div>
+            </div>
+
+            <!-- today stats -->
+            <div id="today-stats" style="display:none;">
+                <div class="sec-label">今日狀況</div>
+                <div class="stat-row">
+                    <div class="stat-card">
+                        <div class="stat-lbl">員工效率</div>
+                        <div class="stat-val" id="eff-display">--</div>
+                        <div class="eff-bar-bg"><div class="eff-bar-fill" id="eff-bar" style="width:0%; background:var(--green);"></div></div>
+                        <div style="font-size:11px; color:var(--muted); margin-top:6px;" id="eff-reason"></div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-lbl">今日市場</div>
+                        <div class="stat-val" id="market-mult-display">--</div>
+                        <div style="font-size:11px; color:var(--muted); margin-top:6px;" id="market-event-name"></div>
+                    </div>
+                </div>
+
+                <div class="box">
+                    <div class="pl-row"><span>📥 今日收入</span><span style="color:var(--green);" id="today-income">--</span></div>
+                    <div class="pl-row"><span>📤 薪資支出</span><span style="color:var(--red);" id="today-expenses">--</span></div>
+                    <div class="pl-row" style="font-weight:800;"><span>淨損益</span><span id="today-net">--</span></div>
+                </div>
+            </div>
+
+            <!-- transfer -->
+            <div id="transfer-section" style="display:none;">
+                <div class="sec-label">資金調度</div>
+                <div class="box">
+                    <div style="font-size:13px; color:var(--muted); margin-bottom:10px;">個人點數 ↔ 公司金庫</div>
+                    <div class="transfer-row" style="margin-bottom:8px;">
+                        <input class="transfer-input" id="inject-input" type="number" min="1" placeholder="注資金額">
+                        <button class="btn btn-gold btn-sm" onclick="injectCapital()">注資 →</button>
+                    </div>
+                    <div class="transfer-row">
+                        <input class="transfer-input" id="withdraw-input" type="number" min="1" placeholder="提領金額">
+                        <button class="btn btn-green btn-sm" onclick="withdrawProfit()">← 提領</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 員工 tab -->
+    <div class="tab-panel" id="panel-employees">
+        <div class="content">
+            <div class="sec-label">部門升級</div>
+            <div id="dept-list"></div>
+
+            <div class="sec-label">員工列表 <span id="emp-count-label" style="font-size:11px; color:var(--muted); font-weight:400; letter-spacing:0;"></span></div>
+            <div id="emp-list"></div>
+
+            <div class="sec-label">招募員工</div>
+            <div class="box">
+                <div style="font-size:13px; color:var(--muted); margin-bottom:14px;">招募費 100 點（公司金庫），每日薪資 15 點</div>
+                <div style="margin-bottom:12px;">
+                    <div style="font-size:12px; color:var(--muted); margin-bottom:8px;">部門</div>
+                    <div style="display:flex; gap:8px;">
+                        <button class="btn btn-sm" id="hire-dept-ops" onclick="selectHireDept('ops')" style="flex:1;">🔧 營運</button>
+                        <button class="btn btn-sm" id="hire-dept-rd" onclick="selectHireDept('rd')" style="flex:1;">🔬 研發</button>
+                        <button class="btn btn-sm" id="hire-dept-mkt" onclick="selectHireDept('mkt')" style="flex:1;">📣 行銷</button>
+                    </div>
+                </div>
+                <button class="btn btn-primary" onclick="hireEmployee()">➕ 招募（100 點）</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 合約 tab -->
+    <div class="tab-panel" id="panel-contracts">
+        <div class="content">
+            <div class="sec-label">今日合約</div>
+            <div id="contract-list">
+                <div style="color:var(--muted); font-size:13px; text-align:center; padding:30px;">讀取中...</div>
+            </div>
+
+            <div class="sec-label">進行中合約</div>
+            <div id="active-contract-box">
+                <div style="color:var(--muted); font-size:13px; text-align:center; padding:20px;">目前沒有進行中的合約</div>
+            </div>
+
+            <div class="sec-label">合約紀錄</div>
+            <div id="contract-history"></div>
+        </div>
+    </div>
+
+    <!-- 市場 tab -->
+    <div class="tab-panel" id="panel-market">
+        <div class="content">
+            <div class="sec-label">今日市場事件</div>
+            <div class="box">
+                <div class="event-box" id="event-display">
+                    <div style="color:var(--muted); font-size:13px;">讀取中...</div>
+                </div>
+            </div>
+
+            <div class="sec-label">競爭對手</div>
+            <div id="competitor-box"></div>
+
+            <div class="sec-label">市場走勢（近7日）</div>
+            <div class="box" id="market-history"></div>
+        </div>
+    </div>
+
+    <!-- tab bar -->
+    <div class="tab-bar" id="tab-bar" style="display:none;">
+        <button class="tab-btn active" id="tab-overview" onclick="switchTab('overview')">🏢 概況</button>
+        <button class="tab-btn" id="tab-employees" onclick="switchTab('employees')">👥 員工</button>
+        <button class="tab-btn" id="tab-contracts" onclick="switchTab('contracts')">📋 合約</button>
+        <button class="tab-btn" id="tab-market" onclick="switchTab('market')">📊 市場</button>
+    </div>
+</div>
+
+<!-- fire modal -->
+<div class="modal-bg" id="fire-modal">
+    <div class="modal-box">
+        <div style="font-size:36px; margin-bottom:12px;">😢</div>
+        <div style="font-size:18px; font-weight:900; margin-bottom:6px;">解僱員工</div>
+        <div style="font-size:13px; color:var(--muted); margin-bottom:20px;" id="fire-modal-desc"></div>
+        <button class="btn btn-red" onclick="confirmFire()">確認解僱</button>
+        <button class="btn" onclick="document.getElementById('fire-modal').classList.remove('open')">取消</button>
+    </div>
+</div>
+
+<!-- hire modal -->
+<div class="modal-bg" id="hire-modal">
+    <div class="modal-box">
+        <div style="font-size:36px; margin-bottom:12px;">👤</div>
+        <div style="font-size:18px; font-weight:900; margin-bottom:6px;" id="hire-modal-title">招募員工</div>
+        <div style="font-size:13px; color:var(--muted); margin-bottom:20px;" id="hire-modal-desc"></div>
+        <button class="btn btn-primary" onclick="confirmHire()">✓ 確認招募</button>
+        <button class="btn" onclick="document.getElementById('hire-modal').classList.remove('open')">取消</button>
+    </div>
+</div>
+
+<!-- bid modal -->
+<div class="modal-bg" id="bid-modal">
+    <div class="modal-box">
+        <div style="font-size:18px; font-weight:900; margin-bottom:6px;">🏷️ 競標出價</div>
+        <div style="font-size:13px; color:var(--muted); margin-bottom:6px;" id="bid-modal-title"></div>
+        <div style="font-size:12px; color:var(--muted); margin-bottom:16px;" id="bid-modal-current"></div>
+        <input class="transfer-input" id="bid-input" type="number" min="1" placeholder="出價金額（從金庫扣）" style="margin-bottom:14px; width:100%; text-align:center;">
+        <button class="btn btn-gold" onclick="confirmBid()">確認出價</button>
+        <button class="btn" onclick="document.getElementById('bid-modal').classList.remove('open')">取消</button>
+    </div>
+</div>
+
+<!-- joint modal -->
+<div class="modal-bg" id="joint-modal">
+    <div class="modal-box">
+        <div style="font-size:36px; margin-bottom:10px;">🤝</div>
+        <div style="font-size:18px; font-weight:900; margin-bottom:6px;" id="joint-modal-title"></div>
+        <div style="font-size:13px; color:var(--muted); margin-bottom:6px;" id="joint-modal-desc"></div>
+        <div style="font-size:22px; font-weight:900; color:var(--purple); margin-bottom:16px;" id="joint-modal-reward"></div>
+        <button class="btn btn-purple" onclick="acceptJoint()">✓ 接受合作</button>
+        <button class="btn" onclick="document.getElementById('joint-modal').classList.remove('open')">稍後再說</button>
+    </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ── Firebase ──────────────────────────────────────────────────────
+const FC = { apiKey:"AIzaSyArUT_yPRn3CR9ejNbp8ycYGjP6gHPPKJA", authDomain:"gymsleep-e99d9.firebaseapp.com", databaseURL:"https://gymsleep-e99d9-default-rtdb.firebaseio.com/", projectId:"gymsleep-e99d9", storageBucket:"gymsleep-e99d9.firebasestorage.app", messagingSenderId:"346919034740", appId:"1:346919034740:web:3399498d40359c10b61621" };
+try { firebase.initializeApp(FC); } catch(e) {}
+const db = firebase.database();
+
+// ── Constants ─────────────────────────────────────────────────────
+const NAMES = { p1:'至凱', p2:'柏致' };
+const EMP_NAMES = ['小明','小華','阿強','小美','阿志','小芳','阿傑','小玲','阿誠','小燕','阿文','小琪','阿豪','小雅','阿偉'];
+const EMP_BASE_INCOME = 22; // per employee per day
+const EMP_HIRE_COST   = 100;
+const EMP_SALARY      = 15; // per employee per day
+
+const DEPT_INFO = {
+    ops:  { label:'🔧 營運', desc:'提升每日基礎收入', color:'var(--primary)' },
+    rd:   { label:'🔬 研發', desc:'提升合約獎勵', color:'var(--purple)' },
+    mkt:  { label:'📣 行銷', desc:'加速聲譽成長', color:'var(--gold)' },
+};
+const DEPT_UPGRADE_COST = [150, 350, 700]; // cost for level 1,2,3
+
+const DEPT_MULTIPLIER = {
+    ops:  [0, 0.20, 0.45, 0.75],  // income bonus at lv 0,1,2,3
+    rd:   [0, 0.15, 0.35, 0.65],  // contract reward bonus
+    mkt:  [0, 2,    4,    7   ],   // extra rep per day
+};
+
+const COMPANY_LEVEL = [
+    { lv:1, maxEmp:3,  repNeeded:0,   label:'新創' },
+    { lv:2, maxEmp:5,  repNeeded:80,  label:'成長' },
+    { lv:3, maxEmp:8,  repNeeded:180, label:'穩定' },
+    { lv:4, maxEmp:12, repNeeded:350, label:'龍頭' },
+];
+
+const CONTRACT_POOL = [
+    { title:'APP 開發案',     base:200, icon:'📱' },
+    { title:'品牌設計',       base:160, icon:'🎨' },
+    { title:'數據分析報告',   base:190, icon:'📊' },
+    { title:'社群媒體管理',   base:140, icon:'📣' },
+    { title:'網站重構',       base:230, icon:'💻' },
+    { title:'市場調研',       base:170, icon:'🔍' },
+    { title:'產品發布活動',   base:250, icon:'🚀' },
+    { title:'客戶關係管理',   base:180, icon:'🤝' },
+    { title:'供應鏈優化',     base:200, icon:'⚙️' },
+    { title:'AI 導入顧問',    base:320, icon:'🤖' },
+    { title:'財務審計',       base:220, icon:'📋' },
+    { title:'員工培訓課程',   base:150, icon:'📚' },
+    { title:'後端系統升級',   base:260, icon:'🔧' },
+    { title:'電商平台建置',   base:280, icon:'🛒' },
+    { title:'客戶服務優化',   base:155, icon:'💬' },
+];
+
+const MARKET_EVENTS = [
+    { type:'boom',    icon:'📈', desc:'景氣大好！商業活動熱絡',   mult:1.20, label:'+20%' },
+    { type:'bust',    icon:'📉', desc:'景氣低迷，客戶預算緊縮',   mult:0.80, label:'-20%' },
+    { type:'normal',  icon:'😐', desc:'市場平穩，一切如常',       mult:1.00, label:'±0%'  },
+    { type:'normal',  icon:'😐', desc:'平靜無波，穩定運作',       mult:1.00, label:'±0%'  },
+    { type:'normal',  icon:'😐', desc:'普通的一天',               mult:1.00, label:'±0%'  },
+    { type:'boost',   icon:'🎉', desc:'城市博覽會！商機湧現',     mult:1.35, label:'+35%' },
+    { type:'slight+', icon:'🌤️', desc:'小陽春，生意比平常好',    mult:1.10, label:'+10%' },
+    { type:'slight-', icon:'🌧️', desc:'生意稍淡，但尚可接受',    mult:0.90, label:'-10%' },
+    { type:'tech',    icon:'💡', desc:'科技熱潮，研發類合約增加', mult:1.15, label:'+15%' },
+    { type:'crisis',  icon:'⚡', desc:'行業動盪，風險與機會並存', mult:0.85, label:'-15%' },
+];
+
+// ── State ─────────────────────────────────────────────────────────
+const _params = new URLSearchParams(location.search);
+let ME = _params.get('player');
+const PARTNER = ME === 'p1' ? 'p2' : 'p1';
+
+const dateStr   = () => { const d=new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; };
+const dateStrOf = (offset) => { const d=new Date(); d.setDate(d.getDate()+offset); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; };
+
+let myPoints = 0, companyData = null, hireDept = 'ops', selectedTag = '科技';
+let marketData = null, bidContractIdx = null;
+let _appInitialized = false, _processingDaily = false;
+
+function choosePlayer(p) { location.href = `company.html?player=${p}`; }
+
+if (!ME || (ME !== 'p1' && ME !== 'p2')) {
+    document.getElementById('player-select').style.display = 'block';
+} else {
+    document.getElementById('main-content').style.display = 'block';
+    document.getElementById('pts-display').style.display = 'block';
+    initApp();
+}
+
+// ── Helpers ───────────────────────────────────────────────────────
+function seededRngSeq(seed, n) {
+    const results = [];
+    let s = seed;
+    for (let i = 0; i < n; i++) {
+        s = ((s ^ 0xDEADBEEF) >>> 0);
+        s = (Math.imul(s ^ (s >>> 16), 0x45d9f3b)) >>> 0;
+        s = (Math.imul(s ^ (s >>> 16), 0x45d9f3b)) >>> 0;
+        results.push(((s ^ (s >>> 16)) >>> 0) / 0xFFFFFFFF);
+    }
+    return results;
+}
+
+function dateSeed(dateString) {
+    let h = 0;
+    for (let i = 0; i < dateString.length; i++) h = (Math.imul(31, h) + dateString.charCodeAt(i)) | 0;
+    return Math.abs(h);
+}
+
+function toast(msg, ms=2500) {
+    const el = document.getElementById('toast');
+    el.textContent = msg; el.style.opacity = '1';
+    setTimeout(() => el.style.opacity = '0', ms);
+}
+
+function switchTab(tab) {
+    ['overview','employees','contracts','market'].forEach(t => {
+        document.getElementById(`panel-${t}`).classList.toggle('active', t === tab);
+        document.getElementById(`tab-${t}`).classList.toggle('active', t === tab);
+    });
+    if (tab === 'contracts') renderContracts();
+    if (tab === 'market')    renderMarket();
+    if (tab === 'employees') renderEmployees();
+}
+
+function getCompanyLevel(rep) {
+    let lv = COMPANY_LEVEL[0];
+    for (const l of COMPANY_LEVEL) { if (rep >= l.repNeeded) lv = l; }
+    return lv;
+}
+
+function calcEfficiency(userData) {
+    const lastDate = userData.last_date || '';
+    const today    = dateStr();
+    const yesterday = dateStrOf(-1);
+    const checked  = (lastDate === today || lastDate === yesterday);
+    if (!checked) return 0.60;
+    const streak = userData.streak || 0;
+    if (streak >= 7)  return 1.30;
+    if (streak >= 3)  return 1.10;
+    return 1.00;
+}
+
+function effLabel(eff) {
+    if (eff >= 1.30) return { text:'130%', color:'var(--green)',  reason:'連勤 7 天加成' };
+    if (eff >= 1.10) return { text:'110%', color:'var(--green)',  reason:'連勤 3 天加成' };
+    if (eff >= 1.00) return { text:'100%', color:'var(--primary)', reason:'正常出勤' };
+    return              { text: '60%', color:'var(--red)',     reason:'昨日未打卡' };
+}
+
+function calcDailyIncome(company, efficiency, marketMult) {
+    const emps   = Object.keys(company.employees || {}).length;
+    const opsLv  = (company.departments?.ops?.level) || 0;
+    const base   = emps * EMP_BASE_INCOME;
+    const bonus  = 1 + DEPT_MULTIPLIER.ops[opsLv];
+    return Math.round(base * bonus * efficiency * marketMult);
+}
+
+function calcDailyExpenses(company) {
+    const emps = Object.keys(company.employees || {}).length;
+    return emps * EMP_SALARY;
+}
+
+function calcContractReward(base, company) {
+    const rdLv = (company.departments?.rd?.level) || 0;
+    const lv   = getCompanyLevel(company.reputation || 0).lv;
+    return Math.round(base * (1 + DEPT_MULTIPLIER.rd[rdLv]) * (1 + (lv - 1) * 0.15));
+}
+
+// ── Daily market generation ────────────────────────────────────────
+async function generateDailyMarketIfNeeded(today) {
+    const snap = await db.ref(`market/daily/${today}/generated`).once('value');
+    if (snap.val()) return;
+
+    // Use transaction to ensure only one player generates
+    const tx = await db.ref(`market/daily/${today}/generated`).transaction(v => {
+        if (v) return undefined; // already done
+        return true;
+    });
+    if (!tx.committed) return;
+
+    const seed = dateSeed(today);
+    const rng  = seededRngSeq(seed, 10);
+
+    const eventIdx = Math.floor(rng[0] * MARKET_EVENTS.length);
+    const event    = MARKET_EVENTS[eventIdx];
+
+    // Pick 3 unique contracts (open, bid, joint)
+    const used = new Set();
+    const contracts = [];
+    const types = ['open', 'bid', 'joint'];
+    for (let i = 0; i < 3; i++) {
+        let idx;
+        do { idx = Math.floor(rng[1 + i] * CONTRACT_POOL.length); } while (used.has(idx));
+        used.add(idx);
+        const c = CONTRACT_POOL[idx];
+        contracts.push({ title:c.title, base:c.base, icon:c.icon, type:types[i] });
+    }
+
+    await db.ref(`market/daily/${today}`).update({
+        generated: true,
+        event: { type:event.type, icon:event.icon, desc:event.desc, mult:event.mult, label:event.label },
+        contracts: contracts,
+    });
+}
+
+// ── Daily processing ───────────────────────────────────────────────
+async function processDailyIfNeeded() {
+    if (_processingDaily || !companyData || companyData.status === 'bankrupt') return;
+    const today = dateStr();
+
+    // Check if already processed today
+    const procSnap = await db.ref(`company/${ME}/daily/${today}/processed`).once('value');
+    if (procSnap.val()) return;
+
+    _processingDaily = true;
+    // Mark immediately to prevent double-processing (race condition guard)
+    const markTx = await db.ref(`company/${ME}/daily/${today}/processed`).transaction(v => {
+        if (v) return undefined;
+        return true;
+    });
+    if (!markTx.committed) { _processingDaily = false; return; }
+
+    // Get sleep data
+    const userSnap = await db.ref(`users/${ME}`).once('value');
+    const userData = userSnap.val() || {};
+    const efficiency = calcEfficiency(userData);
+
+    // Get market event
+    await generateDailyMarketIfNeeded(today);
+    const mktSnap = await db.ref(`market/daily/${today}/event`).once('value');
+    const event   = mktSnap.val() || { mult:1.0, desc:'平靜的一天' };
+
+    // Process pending bid from yesterday
+    await resolvePendingBid(dateStrOf(-1));
+
+    // Calculate P&L (only if company has employees)
+    const emps = Object.keys(companyData.employees || {}).length;
+    let income = 0, expenses = 0;
+    if (emps > 0) {
+        income   = calcDailyIncome(companyData, efficiency, event.mult);
+        expenses = calcDailyExpenses(companyData);
+    }
+    const net = income - expenses;
+
+    // Reputation gain
+    const mktLv = (companyData.departments?.mkt?.level) || 0;
+    const repGain = 1 + DEPT_MULTIPLIER.mkt[mktLv] + (efficiency < 1 ? -1 : 0);
+
+    // Update treasury + reputation atomically
+    const updates = {};
+    updates[`company/${ME}/daily/${today}/efficiency`]  = efficiency;
+    updates[`company/${ME}/daily/${today}/income`]      = income;
+    updates[`company/${ME}/daily/${today}/expenses`]    = expenses;
+    updates[`company/${ME}/daily/${today}/net`]         = net;
+    updates[`company/${ME}/daily/${today}/eventMult`]   = event.mult;
+    await db.ref().update(updates);
+
+    await db.ref(`company/${ME}/treasury`).transaction(t => (t || 0) + net);
+    await db.ref(`company/${ME}/reputation`).transaction(r => Math.max(0, (r || 0) + repGain));
+
+    // Check crisis：讀 Firebase 最新值，不用 stale companyData
+    const freshSnap = await db.ref(`company/${ME}`).once('value');
+    const fresh = freshSnap.val() || {};
+    if ((fresh.treasury || 0) <= 0) {
+        if (!fresh.crisis_since) {
+            await db.ref(`company/${ME}/crisis_since`).set(Date.now());
+            await db.ref(`company/${ME}/status`).set('crisis');
+        } else {
+            const daysSince = (Date.now() - fresh.crisis_since) / (1000 * 60 * 60 * 24);
+            if (daysSince >= 3) {
+                await db.ref(`company/${ME}/status`).set('bankrupt');
+                toast('⚠️ 公司已宣告倒閉');
+            }
+        }
+    } else if (fresh.status === 'crisis') {
+        await db.ref(`company/${ME}/status`).set('active');
+        await db.ref(`company/${ME}/crisis_since`).set(null);
+    }
+
+    // Level up check
+    await checkLevelUp();
+    _processingDaily = false;
+}
+
+async function resolvePendingBid(dateKey) {
+    const today = dateStr();
+    const bidsSnap = await db.ref(`market/daily/${dateKey}/bids`).once('value');
+    if (!bidsSnap.val()) return;
+
+    const bids = bidsSnap.val();
+    for (const [idx, bid] of Object.entries(bids)) {
+        if (bid.resolved) continue;
+        const contracts = (await db.ref(`market/daily/${dateKey}/contracts/${idx}`).once('value')).val();
+        if (!contracts) continue;
+
+        // Determine winner
+        const p1bid = bid.p1 || 0, p2bid = bid.p2 || 0;
+        let winner = null;
+        if (p1bid > 0 && p2bid > 0) winner = p1bid >= p2bid ? 'p1' : 'p2';
+        else if (p1bid > 0) winner = 'p1';
+        else if (p2bid > 0) winner = 'p2';
+
+        if (winner) {
+            const loser = winner === 'p1' ? 'p2' : 'p1';
+            const loserBid = winner === 'p1' ? p2bid : p1bid;
+            const winnerBid = winner === 'p1' ? p1bid : p2bid;
+            const coSnap = await db.ref(`company/${winner}`).once('value');
+            const co = coSnap.val() || {};
+            const reward = calcContractReward(contracts.base, co);
+
+            // Refund loser their bid
+            if (loserBid > 0) await db.ref(`company/${loser}/treasury`).transaction(t => (t||0) + loserBid);
+            // Winner gets reward, bid is consumed
+            await db.ref(`company/${winner}/treasury`).transaction(t => (t||0) + reward);
+            await db.ref(`company/${winner}/contract_history`).push({
+                ts: Date.now(), title: contracts.title, reward, type: 'bid', won: true
+            });
+        } else {
+            // No bids → refund nothing, just mark resolved
+        }
+        await db.ref(`market/daily/${dateKey}/bids/${idx}/resolved`).set(true);
+    }
+}
+
+async function checkLevelUp() {
+    const snap = await db.ref(`company/${ME}`).once('value');
+    const co   = snap.val() || {};
+    const rep  = co.reputation || 0;
+    const curLv = co.level || 1;
+    const newLvData = getCompanyLevel(rep);
+    if (newLvData.lv > curLv) {
+        await db.ref(`company/${ME}/level`).set(newLvData.lv);
+        toast(`🎉 公司升至 Lv.${newLvData.lv}（${newLvData.label}）！`);
+    }
+}
+
+// ── Init ──────────────────────────────────────────────────────────
+function initApp() {
+    // Personal points
+    db.ref('economy').on('value', s => {
+        const d = s.val() || {};
+        myPoints = d[ME] || 0;
+        document.getElementById('pts-display').textContent = myPoints + ' 點';
+    });
+
+    // Company data
+    db.ref(`company/${ME}`).on('value', async snap => {
+        companyData = snap.val();
+        document.getElementById('loading-state').style.display = 'none';
+        document.getElementById('tab-bar').style.display = 'flex';
+        renderOverview();
+        if (!_appInitialized) {
+            _appInitialized = true;
+            await generateDailyMarketIfNeeded(dateStr());
+            await processDailyIfNeeded();
+        }
+    });
+
+    // Market listener：合約 tab 開著時自動更新
+    db.ref(`market/daily/${dateStr()}`).on('value', s => {
+        marketData = s.val();
+        if (document.getElementById('panel-contracts').classList.contains('active')) {
+            renderContracts();
+        }
+    });
+}
+
+// ── Render Overview ───────────────────────────────────────────────
+async function renderOverview() {
+    const co = companyData;
+
+    if (!co || !co.name) {
+        // Show founding UI
+        document.getElementById('found-ui').style.display = 'block';
+        document.getElementById('company-header-box').style.display = 'none';
+        document.getElementById('treasury-box').style.display = 'none';
+        document.getElementById('today-stats').style.display = 'none';
+        document.getElementById('transfer-section').style.display = 'none';
+        document.getElementById('crisis-banner').style.display = 'none';
+        return;
+    }
+
+    document.getElementById('found-ui').style.display = 'none';
+    document.getElementById('company-header-box').style.display = 'block';
+    document.getElementById('treasury-box').style.display = 'block';
+    document.getElementById('transfer-section').style.display = 'block';
+
+    // Header
+    document.getElementById('co-name-display').textContent = co.name;
+    document.getElementById('co-tag-display').textContent  = co.tag ? `#${co.tag}` : '';
+    const lvData = getCompanyLevel(co.reputation || 0);
+    document.getElementById('co-level-badge').textContent  = `Lv.${lvData.lv} ${lvData.label}`;
+
+    // Reputation bar
+    const rep = co.reputation || 0;
+    const nextLvData = COMPANY_LEVEL.find(l => l.repNeeded > rep) || COMPANY_LEVEL[COMPANY_LEVEL.length - 1];
+    document.getElementById('co-rep-val').textContent = `${rep} / ${nextLvData.repNeeded > rep ? nextLvData.repNeeded : '最高'}`;
+    document.getElementById('co-rep-bar').style.width = Math.min(100, (rep / (nextLvData.repNeeded || rep + 1)) * 100) + '%';
+
+    // Treasury
+    document.getElementById('treasury-display').textContent = (co.treasury || 0).toLocaleString();
+
+    // Crisis
+    const crisisBanner = document.getElementById('crisis-banner');
+    if (co.status === 'crisis') {
+        crisisBanner.style.display = 'block';
+        const days = co.crisis_since ? Math.floor((Date.now() - co.crisis_since) / (1000*60*60*24)) : 0;
+        document.getElementById('crisis-desc').textContent = `金庫已無資金，距倒閉還有 ${3 - days} 天，請盡快注資！`;
+    } else if (co.status === 'bankrupt') {
+        crisisBanner.style.display = 'block';
+        document.getElementById('crisis-desc').innerHTML = '公司已倒閉。<button class="btn btn-primary btn-sm" onclick="restartCompany()" style="margin-top:8px;">🔄 重新創業</button>';
+    } else {
+        crisisBanner.style.display = 'none';
+    }
+
+    // Today stats
+    const today = dateStr();
+    const todaySnap = await db.ref(`company/${ME}/daily/${today}`).once('value');
+    const todayData = todaySnap.val();
+
+    if (todayData && todayData.processed) {
+        document.getElementById('today-stats').style.display = 'block';
+
+        const eff = todayData.efficiency || 1.0;
+        const eLabel = effLabel(eff);
+        document.getElementById('eff-display').textContent = eLabel.text;
+        document.getElementById('eff-display').style.color = eLabel.color;
+        document.getElementById('eff-reason').textContent  = eLabel.reason;
+        document.getElementById('eff-bar').style.width     = (eff * 100 / 1.3) + '%';
+        document.getElementById('eff-bar').style.background = eLabel.color;
+
+        const evMult = todayData.eventMult || 1.0;
+        document.getElementById('market-mult-display').textContent = (evMult >= 1 ? '+' : '') + Math.round((evMult - 1) * 100) + '%';
+        document.getElementById('market-mult-display').style.color = evMult >= 1 ? 'var(--green)' : 'var(--red)';
+
+        const mktSnap = await db.ref(`market/daily/${today}/event`).once('value');
+        const mktEvt  = mktSnap.val();
+        if (mktEvt) document.getElementById('market-event-name').textContent = mktEvt.icon + ' ' + mktEvt.desc;
+
+        document.getElementById('today-income').textContent   = `+${todayData.income || 0} 點`;
+        document.getElementById('today-expenses').textContent = `-${todayData.expenses || 0} 點`;
+        const net = todayData.net || 0;
+        const netEl = document.getElementById('today-net');
+        netEl.textContent = (net >= 0 ? '+' : '') + net + ' 點';
+        netEl.style.color = net >= 0 ? 'var(--green)' : 'var(--red)';
+    } else {
+        document.getElementById('today-stats').style.display = 'none';
+    }
+}
+
+// ── Render Employees ──────────────────────────────────────────────
+function renderEmployees() {
+    const co = companyData;
+    if (!co || !co.name) { document.getElementById('emp-list').innerHTML = '<div style="color:var(--muted);text-align:center;padding:20px;font-size:13px;">請先創立公司</div>'; return; }
+
+    const employees = co.employees || {};
+    const empArr    = Object.entries(employees);
+    const lvData    = getCompanyLevel(co.reputation || 0);
+
+    document.getElementById('emp-count-label').textContent = `(${empArr.length} / ${lvData.maxEmp})`;
+
+    // Department upgrade cards
+    const deptHtml = Object.entries(DEPT_INFO).map(([key, info]) => {
+        const lv   = (co.departments?.[key]?.level) || 0;
+        const maxLv = 3;
+        const canUp = lv < maxLv;
+        const cost  = canUp ? DEPT_UPGRADE_COST[lv] : 0;
+        const stars = '★'.repeat(lv) + '☆'.repeat(maxLv - lv);
+        const effects = [
+            `Lv1: ${key==='mkt'?'+2 聲譽/日':key==='rd'?'+15% 合約獎勵':'+20% 基礎收入'}`,
+            `Lv2: ${key==='mkt'?'+4 聲譽/日':key==='rd'?'+35% 合約獎勵':'+45% 基礎收入'}`,
+            `Lv3: ${key==='mkt'?'+7 聲譽/日':key==='rd'?'+65% 合約獎勵':'+75% 基礎收入'}`,
+        ];
+        return `<div class="dept-card">
+            <div>
+                <div style="font-weight:800; font-size:15px;">${info.label}</div>
+                <div style="font-size:11px; color:var(--muted); margin-top:2px;">${effects[Math.min(lv, 2)]}</div>
+                <div class="dept-stars" style="margin-top:4px; color:${info.color};">${stars.split('').map(s => `<span style="opacity:${s==='★'?1:0.25}">${s}</span>`).join('')}</div>
+            </div>
+            ${canUp
+                ? `<button class="btn btn-sm btn-primary" onclick="upgradeDept('${key}')" style="flex-shrink:0;">升級 ${cost}點</button>`
+                : `<div style="font-size:12px;color:var(--green);font-weight:700;">MAX</div>`
+            }
+        </div>`;
+    }).join('');
+    document.getElementById('dept-list').innerHTML = deptHtml;
+
+    // Employee list
+    if (empArr.length === 0) {
+        document.getElementById('emp-list').innerHTML = '<div style="color:var(--muted);text-align:center;padding:20px;font-size:13px;">尚無員工</div>';
+    } else {
+        document.getElementById('emp-list').innerHTML = empArr.map(([id, emp]) => {
+            const deptInfo = DEPT_INFO[emp.dept] || DEPT_INFO.ops;
+            return `<div class="emp-card">
+                <div style="font-size:24px;">👤</div>
+                <div style="flex:1;">
+                    <div style="font-weight:700; font-size:14px;">${emp.name}</div>
+                    <div style="font-size:11px; color:var(--muted); margin-top:2px;">薪資 ${emp.salary} 點/日</div>
+                </div>
+                <span class="emp-dept dept-${emp.dept}">${deptInfo.label}</span>
+                <button onclick="fireEmployee('${id}')" style="background:none;border:none;color:var(--muted);font-size:16px;cursor:pointer;padding:4px;">✕</button>
+            </div>`;
+        }).join('');
+    }
+
+    // Hire button state
+    const isFull = empArr.length >= lvData.maxEmp;
+    document.querySelector('#panel-employees .btn-primary').disabled = isFull;
+    document.querySelector('#panel-employees .btn-primary').textContent = isFull ? `🔒 員工已滿（Lv${lvData.lv}上限）` : '➕ 招募（100 點）';
+}
+
+// ── Render Contracts ──────────────────────────────────────────────
+async function renderContracts() {
+    const co = companyData;
+    if (!co || !co.name) {
+        document.getElementById('contract-list').innerHTML = '<div style="color:var(--muted);font-size:13px;text-align:center;padding:30px;">請先創立公司</div>';
+        return;
+    }
+
+    const today = dateStr();
+    await generateDailyMarketIfNeeded(today);
+    const mktSnap = await db.ref(`market/daily/${today}`).once('value');
+    const mkt = mktSnap.val() || {};
+    const contracts = mkt.contracts || [];
+    const claims    = mkt.claims || {};
+    const bids      = mkt.bids   || {};
+    const joints    = mkt.joint  || {};
+
+    if (contracts.length === 0) {
+        document.getElementById('contract-list').innerHTML = '<div style="color:var(--muted);font-size:13px;text-align:center;padding:30px;">今日合約尚未生成</div>';
+        return;
+    }
+
+    const html = contracts.map((c, i) => {
+        const reward  = calcContractReward(c.base, co);
+        const claim   = claims[i];
+        const myBid   = bids[i]?.[ME] || 0;
+        const oppBid  = bids[i]?.[PARTNER] || 0;
+
+        let actionHtml = '';
+        let statusHtml = '';
+
+        if (c.type === 'open') {
+            if (claim === ME) {
+                statusHtml = `<div style="font-size:12px;color:var(--green);font-weight:700;margin-top:8px;">✓ 你已接案</div>`;
+            } else if (claim === PARTNER) {
+                statusHtml = `<div style="font-size:12px;color:var(--muted);margin-top:8px;">已被 ${NAMES[PARTNER]} 接走</div>`;
+            } else {
+                actionHtml = `<button class="btn btn-green btn-sm" onclick="claimOpenContract(${i})" style="margin-top:10px;">搶接（+${reward} 點）</button>`;
+            }
+        } else if (c.type === 'bid') {
+            if (myBid > 0) {
+                statusHtml = `<div style="font-size:12px;color:var(--gold);font-weight:700;margin-top:8px;">你已出價 ${myBid} 點${oppBid > 0 ? `，對方出價 ${oppBid} 點` : '，等待對方出價'}</div>`;
+            } else {
+                actionHtml = `<button class="btn btn-gold btn-sm" onclick="openBidModal(${i},'${c.title}',${reward})" style="margin-top:10px;">出價競標（最高者得獎勵 ${reward} 點）</button>`;
+            }
+            if (bids[i]?.resolved) {
+                const won = bids[i]?.winner === ME;
+                statusHtml = `<div style="font-size:12px;color:${won?'var(--green)':'var(--muted)'};font-weight:700;margin-top:8px;">${won ? `✓ 你贏得競標！+${reward} 點` : '競標失敗'}</div>`;
+            }
+        } else if (c.type === 'joint') {
+            const myAcc  = joints[i]?.[ME]      || false;
+            const oppAcc = joints[i]?.[PARTNER] || false;
+            const splitReward = Math.round(reward * 0.65);
+            if (myAcc && oppAcc) {
+                statusHtml = `<div style="font-size:12px;color:var(--green);font-weight:700;margin-top:8px;">✓ 合作已達成！各得 ${splitReward} 點</div>`;
+            } else if (myAcc) {
+                statusHtml = `<div style="font-size:12px;color:var(--purple);font-weight:700;margin-top:8px;">✓ 你已同意，等待 ${NAMES[PARTNER]} 接受</div>`;
+            } else if (oppAcc) {
+                actionHtml = `<button class="btn btn-purple btn-sm" onclick="openJointModal(${i},'${c.title}',${splitReward})" style="margin-top:10px;">🤝 ${NAMES[PARTNER]} 想合作！接受（+${splitReward} 點）</button>`;
+            } else {
+                actionHtml = `<button class="btn btn-purple btn-sm" onclick="proposeJoint(${i})" style="margin-top:10px;">邀請合作（各得 ${splitReward} 點）</button>`;
+            }
+        }
+
+        const typeLabel = c.type === 'open' ? '搶單' : c.type === 'bid' ? '競標' : '合作';
+        const typeCls   = `type-${c.type}`;
+        return `<div class="contract-card">
+            <span class="contract-type ${typeCls}">${typeLabel}</span>
+            <div class="contract-title">${c.icon} ${c.title}</div>
+            <div style="font-size:12px;color:var(--muted);margin-top:2px;">基礎獎勵 ${c.base} 點${(calcContractReward(c.base, co) !== c.base) ? ` → 你的獎勵 <strong style="color:var(--green)">${calcContractReward(c.base, co)} 點</strong>` : ''}</div>
+            ${statusHtml}${actionHtml}
+        </div>`;
+    }).join('');
+    document.getElementById('contract-list').innerHTML = html;
+
+    // Active contract
+    const activeC = co.active_contract;
+    if (activeC) {
+        document.getElementById('active-contract-box').innerHTML = `<div class="contract-card" style="border-color:rgba(123,156,255,0.3);">
+            <div class="contract-title">${activeC.icon || '📋'} ${activeC.title}</div>
+            <div style="font-size:12px;color:var(--muted);margin-top:4px;">進行中...</div>
+        </div>`;
+    } else {
+        document.getElementById('active-contract-box').innerHTML = '<div style="color:var(--muted);font-size:13px;text-align:center;padding:16px;">目前沒有進行中的合約</div>';
+    }
+
+    // Contract history
+    const histSnap = await db.ref(`company/${ME}/contract_history`).orderByChild('ts').limitToLast(5).once('value');
+    const histRows = [];
+    histSnap.forEach(c => histRows.unshift(c.val()));
+    if (histRows.length > 0) {
+        document.getElementById('contract-history').innerHTML = histRows.map(h => `
+            <div class="comp-row">
+                <div><div style="font-weight:700;font-size:14px;">${h.title}</div><div style="font-size:11px;color:var(--muted);">${h.type === 'bid' ? '競標' : h.type === 'joint' ? '合作' : '搶單'}</div></div>
+                <div style="font-weight:900;color:var(--green);">+${h.reward} 點</div>
+            </div>`).join('');
+    } else {
+        document.getElementById('contract-history').innerHTML = '<div style="color:var(--muted);font-size:13px;text-align:center;padding:16px;">尚無紀錄</div>';
+    }
+}
+
+// ── Render Market ─────────────────────────────────────────────────
+async function renderMarket() {
+    const today = dateStr();
+    await generateDailyMarketIfNeeded(today);
+    const mktSnap = await db.ref(`market/daily/${today}/event`).once('value');
+    const event   = mktSnap.val();
+
+    if (event) {
+        const color = event.mult >= 1.1 ? 'var(--green)' : event.mult <= 0.9 ? 'var(--red)' : 'var(--muted)';
+        document.getElementById('event-display').innerHTML = `
+            <div class="event-icon">${event.icon}</div>
+            <div style="font-weight:800;font-size:16px;margin-bottom:6px;">${event.desc}</div>
+            <div class="event-mult" style="color:${color};">${event.label}</div>
+            <div style="font-size:12px;color:var(--muted);margin-top:6px;">影響今日所有收入</div>`;
+    }
+
+    // Competitor
+    const oppSnap = await db.ref(`company/${PARTNER}`).once('value');
+    const opp     = oppSnap.val();
+    if (opp && opp.name) {
+        const oppLv = getCompanyLevel(opp.reputation || 0);
+        const oppEmps = Object.keys(opp.employees || {}).length;
+        document.getElementById('competitor-box').innerHTML = `
+            <div class="comp-row">
+                <div>
+                    <div style="font-weight:800;font-size:15px;">${opp.name}</div>
+                    <div style="font-size:12px;color:var(--muted);margin-top:2px;">#${opp.tag || '未設定'} · Lv.${oppLv.lv} ${oppLv.label}</div>
+                </div>
+                <div style="text-align:right;">
+                    <div style="font-size:13px;font-weight:700;">👤 ${oppEmps} 人</div>
+                    <div style="font-size:12px;color:var(--muted);">聲譽 ${opp.reputation || 0}</div>
+                </div>
+            </div>`;
+    } else {
+        document.getElementById('competitor-box').innerHTML = '<div style="color:var(--muted);font-size:13px;text-align:center;padding:16px;">對方尚未創立公司</div>';
+    }
+
+    // Market history (last 7 days)
+    const histHtml = [];
+    for (let i = 6; i >= 0; i--) {
+        const d   = dateStrOf(-i);
+        const s   = await db.ref(`market/daily/${d}/event`).once('value');
+        const ev  = s.val();
+        if (ev) {
+            const color = ev.mult >= 1.1 ? 'var(--green)' : ev.mult <= 0.9 ? 'var(--red)' : 'var(--muted)';
+            histHtml.push(`<div class="pl-row"><span>${ev.icon} ${d.slice(5)}</span><span style="color:${color};font-weight:700;">${ev.label}</span></div>`);
+        }
+    }
+    document.getElementById('market-history').innerHTML = histHtml.length ? histHtml.join('') : '<div style="color:var(--muted);font-size:13px;text-align:center;padding:16px;">尚無資料</div>';
+}
+
+// ── Actions ───────────────────────────────────────────────────────
+function selectTag(btn, tag) {
+    selectedTag = tag;
+    document.querySelectorAll('#tag-btns .btn').forEach(b => b.classList.remove('btn-primary'));
+    btn.classList.add('btn-primary');
+}
+
+async function foundCompany() {
+    const name = document.getElementById('found-name').value.trim();
+    if (!name) { toast('請輸入公司名稱'); return; }
+    const co = {
+        name, tag: selectedTag,
+        founded: Date.now(),
+        level: 1,
+        treasury: 0,
+        reputation: 0,
+        status: 'active',
+        crisis_since: null,
+        employees: {},
+        departments: { ops:{level:0}, rd:{level:0}, mkt:{level:0} },
+    };
+    await db.ref(`company/${ME}`).set(co);
+    toast(`🎉 ${name} 正式創立！`);
+}
+
+async function restartCompany() {
+    await db.ref(`company/${ME}`).remove();
+    toast('重新開始...');
+}
+
+function selectHireDept(dept) {
+    hireDept = dept;
+    ['ops','rd','mkt'].forEach(d => {
+        document.getElementById(`hire-dept-${d}`).classList.toggle('btn-primary', d === dept);
+    });
+}
+
+function hireEmployee() {
+    if (!companyData || !companyData.name) { toast('請先創立公司'); return; }
+    const emps   = Object.keys(companyData.employees || {}).length;
+    const lvData = getCompanyLevel(companyData.reputation || 0);
+    if (emps >= lvData.maxEmp) { toast('員工已滿，升級公司等級才能再招募'); return; }
+    if ((companyData.treasury || 0) < EMP_HIRE_COST) { toast(`公司金庫不足 ${EMP_HIRE_COST} 點`); return; }
+
+    const deptInfo = DEPT_INFO[hireDept];
+    const name = EMP_NAMES[Math.floor(Math.random() * EMP_NAMES.length)];
+    document.getElementById('hire-modal-title').textContent = `招募至 ${deptInfo.label}`;
+    document.getElementById('hire-modal-desc').textContent  = `員工「${name}」將加入 ${deptInfo.label} 部門，每日薪資 ${EMP_SALARY} 點。招募費 ${EMP_HIRE_COST} 點從公司金庫扣除。`;
+    document.getElementById('hire-modal').classList.add('open');
+    document.getElementById('hire-modal')._pendingName = name;
+}
+
+async function confirmHire() {
+    document.getElementById('hire-modal').classList.remove('open');
+    const name = document.getElementById('hire-modal')._pendingName;
+    const tx = await db.ref(`company/${ME}/treasury`).transaction(t => {
+        if ((t || 0) < EMP_HIRE_COST) return undefined;
+        return (t || 0) - EMP_HIRE_COST;
+    });
+    if (!tx.committed) { toast('公司金庫不足'); return; }
+    await db.ref(`company/${ME}/employees`).push({ name, salary: EMP_SALARY, dept: hireDept, hired: Date.now() });
+    toast(`✅ ${name} 加入了！`);
+}
+
+function fireEmployee(id) {
+    const emp = companyData?.employees?.[id];
+    if (!emp) return;
+    document.getElementById('fire-modal-desc').textContent = `確定要解僱「${emp.name}」嗎？解僱後立即生效，不退還招募費。`;
+    document.getElementById('fire-modal')._pendingId = id;
+    document.getElementById('fire-modal').classList.add('open');
+}
+
+async function confirmFire() {
+    const id = document.getElementById('fire-modal')._pendingId;
+    document.getElementById('fire-modal').classList.remove('open');
+    await db.ref(`company/${ME}/employees/${id}`).remove();
+    toast('員工已離職');
+}
+
+async function upgradeDept(key) {
+    const co = companyData;
+    if (!co) return;
+    const lv   = (co.departments?.[key]?.level) || 0;
+    if (lv >= 3) { toast('已達最高等級'); return; }
+    const cost = DEPT_UPGRADE_COST[lv];
+    if ((co.treasury || 0) < cost) { toast(`公司金庫不足 ${cost} 點`); return; }
+    const tx = await db.ref(`company/${ME}/treasury`).transaction(t => {
+        if ((t||0) < cost) return undefined;
+        return (t||0) - cost;
+    });
+    if (!tx.committed) { toast('公司金庫不足'); return; }
+    await db.ref(`company/${ME}/departments/${key}/level`).transaction(l => (l||0) + 1);
+    toast(`✅ ${DEPT_INFO[key].label} 升至 Lv.${lv + 1}`);
+}
+
+async function injectCapital() {
+    const amt = parseInt(document.getElementById('inject-input').value);
+    if (!amt || amt <= 0) { toast('請輸入有效金額'); return; }
+    if (myPoints < amt)   { toast('個人點數不足'); return; }
+    const tx = await db.ref(`economy/${ME}`).transaction(p => {
+        if ((p||0) < amt) return undefined;
+        return (p||0) - amt;
+    });
+    if (!tx.committed) { toast('個人點數不足'); return; }
+    await db.ref(`company/${ME}/treasury`).transaction(t => (t||0) + amt);
+    document.getElementById('inject-input').value = '';
+    toast(`✅ 已注資 ${amt} 點`);
+}
+
+async function withdrawProfit() {
+    const amt = parseInt(document.getElementById('withdraw-input').value);
+    if (!amt || amt <= 0) { toast('請輸入有效金額'); return; }
+    if ((companyData?.treasury || 0) < amt) { toast('公司金庫不足'); return; }
+    const tx = await db.ref(`company/${ME}/treasury`).transaction(t => {
+        if ((t||0) < amt) return undefined;
+        return (t||0) - amt;
+    });
+    if (!tx.committed) { toast('公司金庫不足'); return; }
+    await db.ref(`economy/${ME}`).transaction(p => (p||0) + amt);
+    document.getElementById('withdraw-input').value = '';
+    toast(`✅ 已提領 ${amt} 點`);
+}
+
+async function rescueCompany() {
+    const amt = parseInt(document.getElementById('rescue-input').value);
+    if (!amt || amt <= 0) { toast('請輸入有效金額'); return; }
+    if (myPoints < amt)   { toast('個人點數不足'); return; }
+    const tx = await db.ref(`economy/${ME}`).transaction(p => {
+        if ((p||0) < amt) return undefined;
+        return (p||0) - amt;
+    });
+    if (!tx.committed) { toast('個人點數不足'); return; }
+    await db.ref(`company/${ME}/treasury`).transaction(t => (t||0) + amt);
+    const freshT = (await db.ref(`company/${ME}/treasury`).once('value')).val() || 0;
+    if (freshT > 0) {
+        await db.ref(`company/${ME}/status`).set('active');
+        await db.ref(`company/${ME}/crisis_since`).set(null);
+        toast('✅ 公司已從危機中救回！');
+    } else {
+        toast(`✅ 已注資 ${amt} 點`);
+    }
+    document.getElementById('rescue-input').value = '';
+}
+
+// Contracts
+async function claimOpenContract(idx) {
+    const today = dateStr();
+    const tx = await db.ref(`market/daily/${today}/claims/${idx}`).transaction(v => {
+        if (v) return undefined; // already claimed
+        return ME;
+    });
+    if (!tx.committed) { toast('已被搶先一步！'); return; }
+
+    const mktSnap = await db.ref(`market/daily/${today}/contracts/${idx}`).once('value');
+    const c       = mktSnap.val();
+    const reward  = calcContractReward(c.base, companyData);
+    await db.ref(`company/${ME}/treasury`).transaction(t => (t||0) + reward);
+    await db.ref(`company/${ME}/contract_history`).push({ ts:Date.now(), title:c.title, reward, type:'open' });
+    await db.ref(`company/${ME}/reputation`).transaction(r => (r||0) + 3);
+    toast(`✅ 接案成功！+${reward} 點`);
+    renderContracts();
+}
+
+function openBidModal(idx, title, reward) {
+    bidContractIdx = idx;
+    document.getElementById('bid-modal-title').textContent  = title;
+    document.getElementById('bid-modal-current').textContent = `預計獎勵：${reward} 點（明日結算）`;
+    document.getElementById('bid-input').value = '';
+    document.getElementById('bid-modal').classList.add('open');
+}
+
+async function confirmBid() {
+    const amt = parseInt(document.getElementById('bid-input').value);
+    if (!amt || amt <= 0) { toast('請輸入出價金額'); return; }
+    if ((companyData?.treasury || 0) < amt) { toast('公司金庫不足'); return; }
+
+    const today = dateStr();
+    // Deduct bid from treasury
+    const tx = await db.ref(`company/${ME}/treasury`).transaction(t => {
+        if ((t||0) < amt) return undefined;
+        return (t||0) - amt;
+    });
+    if (!tx.committed) { toast('公司金庫不足'); return; }
+    await db.ref(`market/daily/${today}/bids/${bidContractIdx}/${ME}`).set(amt);
+    document.getElementById('bid-modal').classList.remove('open');
+    toast(`✅ 已出價 ${amt} 點，明日結算`);
+    renderContracts();
+}
+
+async function proposeJoint(idx) {
+    const today = dateStr();
+    await db.ref(`market/daily/${today}/joint/${idx}/${ME}`).set(true);
+    toast(`✅ 已發出合作邀請給 ${NAMES[PARTNER]}`);
+    renderContracts();
+}
+
+function openJointModal(idx, title, reward) {
+    document.getElementById('joint-modal-title').textContent  = title;
+    document.getElementById('joint-modal-desc').textContent   = `${NAMES[PARTNER]} 邀請你一起承接這個合約`;
+    document.getElementById('joint-modal-reward').textContent = `各得 +${reward} 點`;
+    document.getElementById('joint-modal').onclick = null;
+    document.getElementById('joint-modal')._idx = idx;
+    document.getElementById('joint-modal')._reward = reward;
+    document.getElementById('joint-modal').classList.add('open');
+}
+
+async function acceptJoint() {
+    const modal = document.getElementById('joint-modal');
+    const idx   = modal._idx;
+    modal.classList.remove('open');
+
+    const today = dateStr();
+    await db.ref(`market/daily/${today}/joint/${idx}/${ME}`).set(true);
+
+    // Transaction 防止雙重發放
+    const payTx = await db.ref(`market/daily/${today}/joint/${idx}/reward_paid`).transaction(v => {
+        if (v) return undefined;
+        return true;
+    });
+    if (!payTx.committed) {
+        toast('🤝 合作已達成，獎勵已發放！');
+        renderContracts();
+        return;
+    }
+
+    const mktSnap = await db.ref(`market/daily/${today}/contracts/${idx}`).once('value');
+    const c = mktSnap.val();
+    const finalReward = calcContractReward(c.base, companyData);
+    const splitReward = Math.round(finalReward * 0.65);
+
+    await db.ref(`company/${ME}/treasury`).transaction(t => (t||0) + splitReward);
+    await db.ref(`company/${PARTNER}/treasury`).transaction(t => (t||0) + splitReward);
+    await db.ref(`company/${ME}/contract_history`).push({ ts:Date.now(), title:c.title, reward:splitReward, type:'joint' });
+    await db.ref(`company/${PARTNER}/contract_history`).push({ ts:Date.now(), title:c.title, reward:splitReward, type:'joint' });
+    await db.ref(`company/${ME}/reputation`).transaction(r => (r||0) + 3);
+    await db.ref(`company/${PARTNER}/reputation`).transaction(r => (r||0) + 3);
+    toast(`🤝 合作成功！+${splitReward} 點`);
+    renderContracts();
+}
+</script>
+</body>
+</html>

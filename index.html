@@ -8,185 +8,100 @@
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
     <style>
         :root {
-            --bg: #121212;
-            --card: #1C1C1E;
-            --text: #F2F2F7;
-            --muted: #8E8E93;
-            --p1-color: #00ff88; /* 至凱的專屬霓虹綠 */
-            --p2-color: #00e5ff; /* 柏致的專屬霓虹藍 */
+            --bg: #0C0E16;
+            --card: #161A28;
+            --border: rgba(255,255,255,0.08);
+            --text: #EEEEF8;
+            --muted: #8890A8;
+            --p1: #00ff88;
+            --p2: #00e5ff;
         }
-        
-        * { box-sizing: border-box; }
-        
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background: var(--bg);
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+            background: radial-gradient(ellipse at top, #1a1f35 0%, #0C0E16 55%);
             color: var(--text);
-            margin: 0;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
-            justify-content: center;
             align-items: center;
-            padding: 20px;
-            /* 加上微微的頂部漸層光暈，增加質感 */
-            background: radial-gradient(circle at top, #2a2a35 0%, #121212 50%);
+            padding: 0 0 32px;
         }
 
-        /* 登入卡片主體 */
-        .login-card {
-            background: var(--card);
-            border: 1px solid #2C2C2E;
-            border-radius: 24px;
-            padding: 28px 22px 24px;
+        /* ── Header ── */
+        .header {
             width: 100%;
-            max-width: 360px;
+            max-width: 420px;
+            padding: 28px 20px 0;
             text-align: center;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.6);
-            animation: slideUp 0.8s ease-out;
         }
-
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* 浮動的月亮圖示 */
-        .icon-wrapper {
-            font-size: 48px;
-            margin-bottom: 10px;
+        .header-icon {
+            font-size: 44px;
             animation: float 3s ease-in-out infinite;
-        }
-
-        @keyframes float {
-            0% { transform: translateY(0px); }
-            50% { transform: translateY(-12px); }
-            100% { transform: translateY(0px); }
-        }
-
-        h1 {
-            font-size: 24px;
-            margin: 0 0 10px 0;
-            font-weight: 800;
-            letter-spacing: 1.5px;
-        }
-
-        .subtitle {
-            color: var(--muted);
-            font-size: 13px;
-            margin-bottom: 20px;
-            line-height: 1.5;
-        }
-
-        /* 大按鈕設計 */
-        .btn {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-            width: 100%;
-            padding: 15px;
-            border-radius: 14px;
-            text-decoration: none;
-            font-size: 15px;
-            font-weight: bold;
+            display: block;
             margin-bottom: 10px;
-            transition: all 0.2s ease;
-            position: relative;
-            overflow: hidden;
         }
-
-        .btn:hover { transform: translateY(-3px); filter: brightness(1.18); }
-        .btn:active { transform: scale(0.96) translateY(0); }
-
-        /* 至凱專屬按鈕 */
-        .btn-p1 {
-            background: rgba(0, 255, 136, 0.08);
-            border: 1px solid rgba(0, 255, 136, 0.4);
-            color: var(--p1-color);
+        @keyframes float {
+            0%,100% { transform: translateY(0); }
+            50%      { transform: translateY(-10px); }
         }
-        .btn-p1:hover { box-shadow: 0 8px 24px rgba(0, 255, 136, 0.18); border-color: rgba(0,255,136,0.65); }
-
-        /* 柏致專屬按鈕 */
-        .btn-p2 {
-            background: rgba(0, 229, 255, 0.08);
-            border: 1px solid rgba(0, 229, 255, 0.4);
-            color: var(--p2-color);
+        .header-title {
+            font-size: 26px;
+            font-weight: 900;
+            letter-spacing: 2px;
+            margin-bottom: 6px;
         }
-        .btn-p2:hover { box-shadow: 0 8px 24px rgba(0, 229, 255, 0.18); border-color: rgba(0,229,255,0.65); }
-
-        /* 宿舍帳本按鈕 */
-        .btn-split {
-            background: rgba(255, 159, 10, 0.08);
-            border: 1px solid rgba(255, 159, 10, 0.4);
-            color: #FF9F0A;
-            margin-top: 8px;
-        }
-        .btn-split:hover { box-shadow: 0 8px 24px rgba(255, 159, 10, 0.18); border-color: rgba(255,159,10,0.65); }
-
-        /* 握力日記按鈕 */
-        .btn-grip {
-            background: rgba(191, 90, 242, 0.08);
-            border: 1px solid rgba(191, 90, 242, 0.35);
-            color: #BF5AF2;
-            margin-top: 4px;
-        }
-        .btn-grip:hover { box-shadow: 0 8px 24px rgba(191, 90, 242, 0.18); border-color: rgba(191,90,242,0.60); }
-
-        /* 聯合遠征按鈕 */
-        .btn-expedition {
-            background: rgba(248, 113, 113, 0.08);
-            border: 1px solid rgba(248, 113, 113, 0.35);
-            color: #F87171;
-            margin-top: 4px;
-        }
-        .btn-expedition:hover { box-shadow: 0 8px 24px rgba(248,113,113,0.18); border-color: rgba(248,113,113,0.60); }
-
-        /* 即時時鐘設計 */
-        .time-display {
-            margin-top: 16px;
-            font-size: 14px;
-            font-weight: 600;
+        .header-sub {
+            font-size: 12px;
             color: var(--muted);
-            background: #000;
-            padding: 10px 20px;
-            border-radius: 20px;
+            margin-bottom: 16px;
+            line-height: 1.6;
+        }
+        .time-pill {
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            border: 1px solid #2C2C2E;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid var(--border);
+            padding: 7px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--muted);
+            margin-bottom: 4px;
         }
-        
         .dot {
-            width: 8px;
-            height: 8px;
-            background-color: var(--p1-color);
+            width: 7px; height: 7px;
             border-radius: 50%;
+            background: var(--p1);
             animation: blink 1s infinite alternate;
+            flex-shrink: 0;
         }
-
         @keyframes blink {
-            from { opacity: 1; box-shadow: 0 0 8px var(--p1-color); }
-            to { opacity: 0.2; box-shadow: none; }
+            from { opacity: 1; box-shadow: 0 0 6px var(--p1); }
+            to   { opacity: 0.2; box-shadow: none; }
         }
 
-        /* 公告條 */
+        /* ── Announcement ── */
         .anno-card {
             display: none;
-            align-items: center;
-            gap: 10px;
-            width: 100%;
-            max-width: 360px;
-            padding: 11px 14px 11px 18px;
+            width: calc(100% - 40px);
+            max-width: 420px;
+            margin: 16px 0 0;
+            padding: 12px 16px 12px 20px;
             border-radius: 14px;
-            background: rgba(14, 16, 26, 0.72);
+            background: rgba(14,16,26,0.72);
             backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
             border: 1px solid rgba(123,156,255,0.25);
-            margin-bottom: 12px;
-            animation: slideUp 0.5s ease-out;
             position: relative;
             overflow: hidden;
+            animation: slideDown 0.4s ease-out;
+        }
+        @keyframes slideDown {
+            from { opacity:0; transform:translateY(-8px); }
+            to   { opacity:1; transform:translateY(0); }
         }
         .anno-card::before {
             content: '';
@@ -196,98 +111,160 @@
             background: var(--anno-accent, #7B9CFF);
             border-radius: 0 2px 2px 0;
         }
-        .anno-signal {
-            display: flex;
-            gap: 3px;
-            align-items: center;
-            flex-shrink: 0;
+        .anno-inner { display: flex; align-items: flex-start; gap: 10px; }
+        .anno-icon  { font-size: 18px; flex-shrink: 0; }
+        .anno-title { font-weight: 700; font-size: 13px; color: var(--text); }
+        .anno-text  { font-size: 12px; color: rgba(238,238,248,0.6); line-height: 1.5; margin-top: 2px; }
+        .anno-date  { font-size: 10px; color: var(--muted); margin-left: auto; flex-shrink: 0; padding-left: 8px; }
+
+        /* ── Section label ── */
+        .section {
+            width: calc(100% - 40px);
+            max-width: 420px;
+            margin-top: 22px;
         }
-        .anno-signal span {
-            display: block;
-            width: 5px; height: 5px;
-            border-radius: 50%;
-            background: var(--anno-accent, #7B9CFF);
-            animation: pulse-dot 1.4s ease-in-out infinite;
-        }
-        .anno-signal span:nth-child(2) { animation-delay: 0.2s; opacity: 0.55; width: 4px; height: 4px; }
-        .anno-signal span:nth-child(3) { animation-delay: 0.4s; opacity: 0.3;  width: 3px; height: 3px; }
-        @keyframes pulse-dot {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.2; }
-        }
-        .anno-icon { font-size: 18px; flex-shrink: 0; }
-        .anno-content { flex: 1; min-width: 0; text-align: left; }
-        .anno-title {
-            font-weight: 700;
-            font-size: 14px;
-            color: #EEEEF8;
-        }
-        .anno-text {
-            font-size: 12px;
-            color: rgba(238,238,248,0.65);
-            line-height: 1.6;
-            margin-top: 3px;
-        }
-        .anno-date {
+        .section-label {
             font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 2.5px;
             color: var(--muted);
-            flex-shrink: 0;
-            align-self: flex-start;
+            text-transform: uppercase;
+            margin-bottom: 10px;
         }
+
+        /* ── Player cards (side by side) ── */
+        .player-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        .player-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px 12px;
+            border-radius: 20px;
+            text-decoration: none;
+            border: 1px solid var(--border);
+            background: rgba(22,26,42,0.6);
+            transition: all 0.2s;
+            gap: 8px;
+        }
+        .player-card:hover  { transform: translateY(-4px); filter: brightness(1.15); }
+        .player-card:active { transform: scale(0.97); }
+        .player-card .p-ico  { font-size: 38px; }
+        .player-card .p-name { font-size: 16px; font-weight: 900; }
+        .player-card .p-sub  { font-size: 11px; color: var(--muted); }
+        .card-p1 { border-color: rgba(0,255,136,0.3); color: var(--p1); }
+        .card-p1:hover { box-shadow: 0 8px 28px rgba(0,255,136,0.15); border-color: rgba(0,255,136,0.55); }
+        .card-p2 { border-color: rgba(0,229,255,0.3); color: var(--p2); }
+        .card-p2:hover { box-shadow: 0 8px 28px rgba(0,229,255,0.15); border-color: rgba(0,229,255,0.55); }
+
+        /* ── Feature grid (2×2) ── */
+        .feature-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        .feature-card {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            padding: 16px;
+            border-radius: 18px;
+            text-decoration: none;
+            border: 1px solid var(--border);
+            background: rgba(22,26,42,0.6);
+            transition: all 0.2s;
+            gap: 6px;
+        }
+        .feature-card:hover  { transform: translateY(-3px); filter: brightness(1.15); }
+        .feature-card:active { transform: scale(0.97); }
+        .feature-card .f-ico  { font-size: 28px; }
+        .feature-card .f-name { font-size: 14px; font-weight: 800; }
+        .feature-card .f-sub  { font-size: 11px; color: var(--muted); line-height: 1.4; }
+
+        .feat-split    { border-color: rgba(255,159,10,0.3);  color: #FF9F0A; }
+        .feat-split:hover  { box-shadow: 0 6px 20px rgba(255,159,10,0.14); border-color: rgba(255,159,10,0.55); }
+        .feat-grip     { border-color: rgba(191,90,242,0.3);  color: #BF5AF2; }
+        .feat-grip:hover   { box-shadow: 0 6px 20px rgba(191,90,242,0.14); border-color: rgba(191,90,242,0.55); }
+        .feat-exp      { border-color: rgba(248,113,113,0.3); color: #F87171; }
+        .feat-exp:hover    { box-shadow: 0 6px 20px rgba(248,113,113,0.14); border-color: rgba(248,113,113,0.55); }
+        .feat-company  { border-color: rgba(74,222,128,0.3);  color: #4ADE80; }
+        .feat-company:hover { box-shadow: 0 6px 20px rgba(74,222,128,0.14); border-color: rgba(74,222,128,0.55); }
     </style>
 </head>
 <body>
 
-    <!-- 公告條 -->
-    <div class="anno-card" id="anno-card">
-        <div class="anno-signal"><span></span><span></span><span></span></div>
-        <div class="anno-icon" id="anno-icon">📢</div>
-        <div class="anno-content">
-            <div class="anno-title" id="anno-title"></div>
-            <div class="anno-text" id="anno-text"></div>
+    <!-- Header -->
+    <div class="header">
+        <span class="header-icon">🏠</span>
+        <div class="header-title">宿舍系統</div>
+        <div class="header-sub">每日 00:00 – 02:00 準時打卡</div>
+        <div class="time-pill">
+            <div class="dot"></div>
+            <span id="clock">載入中...</span>
         </div>
-        <div class="anno-date" id="anno-date"></div>
     </div>
 
-    <div class="login-card">
-        <div class="icon-wrapper">🏠</div>
-        <h1>宿舍系統</h1>
-        <div class="subtitle">請選擇您的專屬身分登入<br>每日 00:00 - 02:00 準時打卡</div>
+    <!-- Announcement -->
+    <div class="anno-card" id="anno-card">
+        <div class="anno-inner">
+            <div class="anno-icon" id="anno-icon">📢</div>
+            <div style="flex:1; min-width:0;">
+                <div class="anno-title" id="anno-title"></div>
+                <div class="anno-text"  id="anno-text"></div>
+            </div>
+            <div class="anno-date" id="anno-date"></div>
+        </div>
+    </div>
 
-        <!-- 至凱的入口 -->
-        <a href="player.html?player=p1" class="btn btn-p1">
-            <span style="font-size: 22px;">👦🏻</span> 至凱 的睡眠金庫
-        </a>
+    <!-- Player section -->
+    <div class="section">
+        <div class="section-label">選擇身分</div>
+        <div class="player-grid">
+            <a href="player.html?player=p1" class="player-card card-p1">
+                <div class="p-ico">👦🏻</div>
+                <div class="p-name">至凱</div>
+                <div class="p-sub">睡眠金庫</div>
+            </a>
+            <a href="player.html?player=p2" class="player-card card-p2">
+                <div class="p-ico">👦🏼</div>
+                <div class="p-name">柏致</div>
+                <div class="p-sub">睡眠金庫</div>
+            </a>
+        </div>
+    </div>
 
-        <!-- 柏致的入口 -->
-        <a href="player.html?player=p2" class="btn btn-p2">
-            <span style="font-size: 22px;">👦🏼</span> 柏致 的睡眠金庫
-        </a>
-
-        <!-- 帳本入口 -->
-        <a href="split.html" class="btn btn-split">
-            <span style="font-size: 22px;">📒</span> 帳本
-        </a>
-
-        <!-- 握力日記入口 -->
-        <a href="grip.html" class="btn btn-grip">
-            <span style="font-size: 22px;">🤜</span> 握力日記
-        </a>
-
-        <!-- 聯合遠征入口 -->
-        <a href="expedition.html" class="btn btn-expedition">
-            <span style="font-size: 22px;">⚔️</span> 聯合遠征
-        </a>
-
-        <!-- 即時時鐘 -->
-        <div class="time-display">
-            <div class="dot"></div>
-            <span id="clock">時間載入中...</span>
+    <!-- Feature section -->
+    <div class="section">
+        <div class="section-label">功能</div>
+        <div class="feature-grid">
+            <a href="split.html" class="feature-card feat-split">
+                <div class="f-ico">📒</div>
+                <div class="f-name">帳本</div>
+                <div class="f-sub">宿舍費用分帳</div>
+            </a>
+            <a href="grip.html" class="feature-card feat-grip">
+                <div class="f-ico">🤜</div>
+                <div class="f-name">握力日記</div>
+                <div class="f-sub">訓練紀錄與趨勢</div>
+            </a>
+            <a href="expedition.html" class="feature-card feat-exp">
+                <div class="f-ico">⚔️</div>
+                <div class="f-name">聯合遠征</div>
+                <div class="f-sub">雙人冒險投資</div>
+            </a>
+            <a href="company.html" class="feature-card feat-company">
+                <div class="f-ico">🏢</div>
+                <div class="f-name">創業模擬</div>
+                <div class="f-sub">經營你的公司</div>
+            </a>
         </div>
     </div>
 
     <script>
-        // Firebase 公告監聽
         const firebaseConfig = { apiKey: "AIzaSyArUT_yPRn3CR9ejNbp8ycYGjP6gHPPKJA", authDomain: "gymsleep-e99d9.firebaseapp.com", databaseURL: "https://gymsleep-e99d9-default-rtdb.firebaseio.com/", projectId: "gymsleep-e99d9", storageBucket: "gymsleep-e99d9.firebasestorage.app", messagingSenderId: "346919034740", appId: "1:346919034740:web:3399498d40359c10b61621" };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
@@ -297,38 +274,23 @@
             const card = document.getElementById('anno-card');
             if (d && d.is_active) {
                 document.getElementById('anno-title').innerText = d.title || '';
-                document.getElementById('anno-text').innerText = d.text || '';
-                document.getElementById('anno-date').innerText = d.date || '';
-                let icon, accent;
-                if (d.type === 'event') {
-                    icon = '🔥'; accent = '#F0C040';
-                } else if (d.type === 'update') {
-                    icon = '✨'; accent = '#4ADE80';
-                } else {
-                    icon = '📢'; accent = '#7B9CFF';
-                }
+                document.getElementById('anno-text').innerText  = d.text  || '';
+                document.getElementById('anno-date').innerText  = d.date  || '';
+                const map = { event:['🔥','#F0C040'], update:['✨','#4ADE80'] };
+                const [icon, accent] = map[d.type] || ['📢','#7B9CFF'];
                 document.getElementById('anno-icon').innerText = icon;
                 card.style.setProperty('--anno-accent', accent);
-                card.style.display = 'flex';
+                card.style.display = 'block';
             } else {
                 card.style.display = 'none';
             }
         });
 
-        // 即時時鐘的 JavaScript
         function updateClock() {
-            const now = new Date();
-            const timeString = now.toLocaleTimeString('zh-TW', { 
-                hour12: false, 
-                hour: '2-digit', 
-                minute: '2-digit', 
-                second: '2-digit' 
-            });
-            document.getElementById('clock').innerText = "當前時間：" + timeString;
+            document.getElementById('clock').innerText = new Date().toLocaleTimeString('zh-TW', { hour12:false, hour:'2-digit', minute:'2-digit', second:'2-digit' });
         }
-        // 每秒更新一次時間
         setInterval(updateClock, 1000);
-        updateClock(); // 初始化馬上執行一次
+        updateClock();
     </script>
 </body>
 </html>
