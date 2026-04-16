@@ -128,6 +128,14 @@ body{ font-family:-apple-system,BlinkMacSystemFont,sans-serif; background:radial
 .rep-bar-bg{ height:5px; background:rgba(255,255,255,0.08); border-radius:3px; overflow:hidden; margin-top:6px; }
 .rep-bar-fill{ height:100%; background:linear-gradient(90deg,var(--purple),var(--primary)); border-radius:3px; transition:width 0.6s; }
 
+/* contract outcome */
+.outcome-pill{ display:inline-block; font-size:11px; font-weight:700; padding:3px 10px; border-radius:8px; margin-top:6px; }
+.outcome-ruin  { background:rgba(239,68,68,0.15);   color:#EF4444; border:1px solid rgba(239,68,68,0.3); }
+.outcome-loss  { background:rgba(248,113,113,0.12); color:#F87171; border:1px solid rgba(248,113,113,0.3); }
+.outcome-ok    { background:rgba(74,222,128,0.10);  color:#4ADE80; border:1px solid rgba(74,222,128,0.3); }
+.outcome-great { background:rgba(252,211,77,0.12);  color:#FCD34D; border:1px solid rgba(252,211,77,0.3); }
+.outcome-win   { background:rgba(240,192,64,0.15);  color:#F0C040; border:1px solid rgba(240,192,64,0.4); }
+
 /* competitor card */
 .comp-row{ display:flex; justify-content:space-between; align-items:center; padding:12px 14px; background:rgba(22,26,42,0.5); border:1px solid var(--border); border-radius:14px; margin-bottom:8px; }
 
@@ -142,6 +150,82 @@ body{ font-family:-apple-system,BlinkMacSystemFont,sans-serif; background:radial
 .macro-badge.neg{ background:rgba(248,113,113,0.10); border-color:rgba(248,113,113,0.3); color:var(--red); }
 .macro-badge.pos{ background:rgba(74,222,128,0.10); border-color:rgba(74,222,128,0.3); color:var(--green); }
 .macro-badge.neu{ background:rgba(136,144,168,0.10); border-color:rgba(136,144,168,0.3); color:var(--muted); }
+
+/* ════════════════ Extra Polish & Animations ════════════════ */
+@keyframes slideUp   { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
+@keyframes shimmerKf { 0%{background-position:-200% 0} 100%{background-position:200% 0} }
+@keyframes shakeKf   { 0%,100%{transform:translateX(0)} 20%,60%{transform:translateX(-5px)} 40%,80%{transform:translateX(5px)} }
+@keyframes popInKf   { 0%{opacity:0;transform:scale(0.55)} 70%{transform:scale(1.07)} 100%{opacity:1;transform:scale(1)} }
+@keyframes floatUpKf { 0%{opacity:1;transform:translateY(0)} 100%{opacity:0;transform:translateY(-72px)} }
+@keyframes rippleKf  { from{transform:scale(0);opacity:0.45} to{transform:scale(3.5);opacity:0} }
+@keyframes glowGold  { 0%,100%{box-shadow:0 0 10px rgba(240,192,64,0.18)} 50%{box-shadow:0 0 32px rgba(240,192,64,0.55),0 0 60px rgba(240,192,64,0.18)} }
+@keyframes spinKf    { to{transform:rotate(360deg)} }
+@keyframes lvupKf    { 0%{opacity:0;transform:scale(0.5) translateY(20px)} 60%{opacity:1;transform:scale(1.08) translateY(-4px)} 100%{transform:scale(1) translateY(0)} }
+@keyframes confettiK { 0%{transform:translateY(-24px) rotate(0deg);opacity:1} 100%{transform:translateY(105vh) rotate(720deg);opacity:0} }
+@keyframes crisisKf  { 0%,100%{border-color:rgba(248,113,113,0.35)} 50%{border-color:rgba(248,113,113,0.75);box-shadow:0 0 18px rgba(248,113,113,0.2)} }
+@keyframes fadeInKf  { from{opacity:0} to{opacity:1} }
+
+/* Entrance helpers */
+.anim-enter { animation:slideUp 0.35s cubic-bezier(0.34,1.1,0.64,1) both; }
+.anim-pop   { animation:popInKf 0.4s cubic-bezier(0.34,1.2,0.64,1) both; }
+
+/* Ripple on buttons */
+.btn { position:relative; overflow:hidden; }
+.ripple-wave { position:absolute; border-radius:50%; background:rgba(255,255,255,0.22); animation:rippleKf 0.65s linear forwards; pointer-events:none; }
+
+/* Loading spinner */
+.spinner { width:28px; height:28px; border:3px solid rgba(255,255,255,0.1); border-top-color:var(--primary); border-radius:50%; animation:spinKf 0.75s linear infinite; margin:0 auto 12px; }
+
+/* Treasury glow */
+.treasury-amt { text-shadow:0 0 28px rgba(240,192,64,0.3); }
+.treasury-box.flash-pos .treasury-amt { animation:glowGold 0.7s ease; }
+.treasury-box.flash-neg .treasury-amt { animation:shakeKf  0.5s ease; }
+
+/* Float text */
+.float-text { position:fixed; font-size:14px; font-weight:900; pointer-events:none; z-index:900; white-space:nowrap; animation:floatUpKf 1.4s ease forwards; }
+
+/* Toast upgrade */
+#toast { transition:opacity 0.3s, transform 0.3s; }
+#toast.t-success { border-color:rgba(74,222,128,0.5);  color:var(--green);  background:rgba(10,22,14,0.97); }
+#toast.t-error   { border-color:rgba(248,113,113,0.5); color:var(--red);    background:rgba(22,10,10,0.97); }
+#toast.t-gold    { border-color:rgba(240,192,64,0.5);  color:var(--gold);   background:rgba(22,20,8,0.97); }
+#toast.t-purple  { border-color:rgba(192,132,252,0.5); color:var(--purple); background:rgba(14,10,22,0.97); }
+
+/* Level-up overlay */
+#lvup-overlay { position:fixed;inset:0;z-index:600;align-items:center;justify-content:center;flex-direction:column;background:rgba(0,0,0,0.78);backdrop-filter:blur(16px);display:none;cursor:pointer; }
+.lvup-emoji    { font-size:72px; animation:popInKf 0.5s cubic-bezier(0.34,1.4,0.64,1) 0.1s both; }
+.lvup-headline { font-size:11px; font-weight:700; color:var(--muted); margin-top:14px; letter-spacing:3px; text-transform:uppercase; }
+.lvup-name     { font-size:32px; font-weight:900; color:var(--gold); margin-top:6px; animation:lvupKf 0.6s ease 0.3s both; }
+.lvup-tap      { font-size:12px; color:rgba(136,144,168,0.55); margin-top:28px; animation:fadeInKf 0.8s 2s both; }
+
+/* Crisis glow */
+.crisis-banner { animation:crisisKf 2.2s ease infinite; position:relative; overflow:hidden; }
+.crisis-banner::before { content:''; position:absolute; inset:0; border-radius:16px; background:linear-gradient(90deg,transparent,rgba(248,113,113,0.08),transparent); background-size:200% 100%; animation:shimmerKf 2.8s linear infinite; pointer-events:none; }
+
+/* Macro boom glow */
+.macro-box.boom-glow { animation:glowGold 2.5s ease infinite; }
+
+/* Tab fade */
+.tab-panel.active { animation:slideUp 0.22s ease; }
+
+/* Modal pop */
+.modal-box { animation:popInKf 0.3s cubic-bezier(0.34,1.2,0.64,1); }
+
+/* Employee hover */
+.emp-card { transition:transform 0.15s, box-shadow 0.15s; }
+.emp-card:hover { transform:translateX(3px); box-shadow:3px 0 14px rgba(0,0,0,0.35); }
+
+/* Contract hover */
+.contract-card { transition:transform 0.15s; }
+.contract-card:hover { transform:translateY(-2px); }
+
+/* Dept card hover */
+.dept-card { transition:transform 0.15s; }
+.dept-card:hover { transform:translateY(-2px); }
+
+/* ps-btn glow on hover */
+.ps-p1:hover { box-shadow:0 8px 28px rgba(0,255,136,0.2); }
+.ps-p2:hover { box-shadow:0 8px 28px rgba(0,229,255,0.2); }
 </style>
 </head>
 <body>
@@ -177,7 +261,7 @@ body{ font-family:-apple-system,BlinkMacSystemFont,sans-serif; background:radial
 <!-- main -->
 <div id="main-content" style="display:none;">
     <div id="loading-state">
-        <div style="font-size:36px; margin-bottom:12px; animation:float 2s ease-in-out infinite;">🏢</div>
+        <div class="spinner"></div>
         <div style="color:var(--muted); font-size:14px; font-weight:600;">讀取中...</div>
     </div>
 
@@ -278,7 +362,8 @@ body{ font-family:-apple-system,BlinkMacSystemFont,sans-serif; background:radial
 
                 <div class="box">
                     <div class="pl-row"><span>📥 今日收入</span><span style="color:var(--green);" id="today-income">--</span></div>
-                    <div class="pl-row"><span>📤 薪資支出</span><span style="color:var(--red);" id="today-expenses">--</span></div>
+                    <div class="pl-row"><span>👤 薪資支出</span><span style="color:var(--red);" id="today-expenses">--</span></div>
+                    <div class="pl-row"><span>🏗️ 公司開銷</span><span style="color:var(--red);" id="today-overhead">--</span></div>
                     <div class="pl-row" style="font-weight:800;"><span>淨損益</span><span id="today-net">--</span></div>
                     <div class="pl-row" id="weekly-tax-row" style="display:none;"><span>🏛️ 本週企業稅（20%）</span><span style="color:var(--red);" id="today-weekly-tax">--</span></div>
                     <div class="pl-row" id="audit-row" style="display:none;"><span>🔍 稅務稽查（+10%）</span><span style="color:var(--red);" id="today-audit-tax">--</span></div>
@@ -419,6 +504,14 @@ body{ font-family:-apple-system,BlinkMacSystemFont,sans-serif; background:radial
     </div>
 </div>
 
+<!-- Level-up overlay -->
+<div id="lvup-overlay" onclick="this.style.display='none'">
+    <div class="lvup-emoji" id="lvup-emoji">🚀</div>
+    <div class="lvup-headline">公司升級</div>
+    <div class="lvup-name" id="lvup-name">Lv.2 成長</div>
+    <div class="lvup-tap">點擊繼續</div>
+</div>
+
 <div id="toast"></div>
 
 <script>
@@ -536,10 +629,17 @@ function dateSeed(dateString) {
     return Math.abs(h);
 }
 
-function toast(msg, ms=2500) {
+function toast(msg, type='', ms=2800) {
     const el = document.getElementById('toast');
-    el.textContent = msg; el.style.opacity = '1';
-    setTimeout(() => el.style.opacity = '0', ms);
+    el.textContent = msg;
+    el.className = type ? `t-${type}` : '';
+    el.style.opacity = '1';
+    el.style.transform = 'translateX(-50%) translateY(0)';
+    clearTimeout(el._t);
+    el._t = setTimeout(() => {
+        el.style.opacity = '0';
+        el.style.transform = 'translateX(-50%) translateY(6px)';
+    }, ms);
 }
 
 function switchTab(tab) {
@@ -547,6 +647,7 @@ function switchTab(tab) {
         document.getElementById(`panel-${t}`).classList.toggle('active', t === tab);
         document.getElementById(`tab-${t}`).classList.toggle('active', t === tab);
     });
+    SFX.click();
     if (tab === 'contracts') renderContracts();
     if (tab === 'market')    renderMarket();
     if (tab === 'employees') renderEmployees();
@@ -585,9 +686,54 @@ function calcDailyIncome(company, efficiency, marketMult) {
     return Math.round(base * bonus * efficiency * marketMult);
 }
 
+const LEVEL_OVERHEAD = { 1:10, 2:40, 3:100, 4:200 };
+
+function calcDailyOverhead(company) {
+    const lv = getCompanyLevel(company.reputation || 0).lv;
+    return LEVEL_OVERHEAD[lv] || 10;
+}
+
 function calcDailyExpenses(company) {
     const emps = Object.keys(company.employees || {}).length;
-    return emps * EMP_SALARY;
+    return emps * EMP_SALARY + calcDailyOverhead(company);
+}
+
+function contractDuration(base) {
+    return base <= 170 ? 1 : base <= 230 ? 2 : 3;
+}
+
+function calcBidOutcome(seed, bidAmt, expectedReward, efficiency, macroMult) {
+    const rng = seededRngSeq(dateSeed(seed + 'bid'), 1)[0];
+    let bias = 0;
+    const bidRatio = Math.min(1, bidAmt / Math.max(1, expectedReward));
+    bias += bidRatio * 0.18; // 出價越高，越可能得到好結果
+    if (efficiency >= 1.30) bias += 0.08;
+    else if (efficiency < 1.00) bias -= 0.08;
+    if (macroMult >= 1.25) bias += 0.05;
+    else if (macroMult <= 0.50) bias -= 0.10;
+    const r = Math.max(0, Math.min(0.999, rng + bias));
+    if (r < 0.22) return { mult:0.50, label:'勉強完成', icon:'😓', cls:'outcome-loss'  };
+    if (r < 0.58) return { mult:1.00, label:'正常完成', icon:'✅', cls:'outcome-ok'    };
+    if (r < 0.85) return { mult:1.30, label:'超額完成', icon:'🌟', cls:'outcome-great' };
+    return          { mult:1.50,      label:'大獲成功', icon:'🏆', cls:'outcome-win'   };
+}
+
+function calcContractOutcome(seed, efficiency, macroMult) {
+    const rng = seededRngSeq(dateSeed(seed + 'outcome'), 1)[0];
+    let bias = 0;
+    if (efficiency >= 1.30) bias += 0.15;
+    else if (efficiency >= 1.10) bias += 0.08;
+    else if (efficiency < 1.00) bias -= 0.14;
+    if (macroMult >= 1.25) bias += 0.08;
+    else if (macroMult <= 0.50) bias -= 0.16;
+    else if (macroMult <= 0.75) bias -= 0.08;
+    const r = Math.max(0, Math.min(0.999, rng + bias));
+    if (r < 0.08)  return { mult:0,    label:'爛尾',     icon:'💀', cls:'outcome-ruin'  };
+    if (r < 0.20)  return { mult:0.10, label:'大幅虧損', icon:'📛', cls:'outcome-loss'  };
+    if (r < 0.36)  return { mult:0.25, label:'略有虧損', icon:'📉', cls:'outcome-loss'  };
+    if (r < 0.68)  return { mult:1.00, label:'正常完成', icon:'✅', cls:'outcome-ok'    };
+    if (r < 0.90)  return { mult:1.50, label:'超額完成', icon:'🌟', cls:'outcome-great' };
+    return          { mult:2.00,       label:'大獲成功', icon:'🏆', cls:'outcome-win'   };
 }
 
 function getWeekKey() {
@@ -613,8 +759,9 @@ function getCurrentMacroPhase() {
 
 function calcContractReward(base, company) {
     const rdLv = (company.departments?.rd?.level) || 0;
-    const lv   = getCompanyLevel(company.reputation || 0).lv;
-    return Math.round(base * (1 + DEPT_MULTIPLIER.rd[rdLv]) * (1 + (lv - 1) * 0.15));
+    const emps = Object.keys(company.employees || {}).length;
+    const empScale = 0.4 + emps * 0.10; // 0人→0.4× … 12人→1.60×
+    return Math.round(base * empScale * (1 + DEPT_MULTIPLIER.rd[rdLv]));
 }
 
 // ── Daily market generation ────────────────────────────────────────
@@ -705,6 +852,7 @@ async function processDailyIfNeeded() {
     updates[`company/${ME}/daily/${today}/efficiency`]  = efficiency;
     updates[`company/${ME}/daily/${today}/income`]      = income;
     updates[`company/${ME}/daily/${today}/expenses`]    = expenses;
+    updates[`company/${ME}/daily/${today}/overhead`]    = calcDailyOverhead(companyData);
     updates[`company/${ME}/daily/${today}/net`]         = net;
     updates[`company/${ME}/daily/${today}/eventMult`]   = event.mult;
     updates[`company/${ME}/daily/${today}/macroMult`]   = macro.mult;
@@ -794,15 +942,24 @@ async function resolvePendingBid(dateKey) {
             const co = coSnap.val() || {};
             const reward = calcContractReward(contracts.base, co);
 
-            // Refund loser their bid
+            // 浮動結果（出價越高結果越好，不會爛尾）
+            const userSnap = await db.ref(`users/${winner}`).once('value');
+            const efficiency = calcEfficiency(userSnap.val() || {});
+            const macro = getCurrentMacroPhase();
+            const outcome = calcBidOutcome(`${dateKey}-bid-${idx}-${winner}`, winnerBid, reward, efficiency, macro.mult);
+            const finalReward = Math.round(reward * outcome.mult);
+            const net = finalReward - winnerBid;
+
+            // 退還輸家
             if (loserBid > 0) await db.ref(`company/${loser}/treasury`).transaction(t => (t||0) + loserBid);
-            // Winner gets reward, bid is consumed
-            await db.ref(`company/${winner}/treasury`).transaction(t => (t||0) + reward);
+            // 贏家拿浮動獎勵（出價已扣，不退）
+            await db.ref(`company/${winner}/treasury`).transaction(t => (t||0) + finalReward);
             await db.ref(`company/${winner}/contract_history`).push({
-                ts: Date.now(), title: contracts.title, reward, type: 'bid', won: true
+                ts:Date.now(), title:contracts.title,
+                payout:finalReward, deposit:winnerBid, net,
+                outcome:outcome.label, outcomeCls:outcome.cls, icon:outcome.icon,
+                type:'bid', won:true
             });
-        } else {
-            // No bids → refund nothing, just mark resolved
         }
         await db.ref(`market/daily/${dateKey}/bids/${idx}/resolved`).set(true);
     }
@@ -816,7 +973,8 @@ async function checkLevelUp() {
     const newLvData = getCompanyLevel(rep);
     if (newLvData.lv > curLv) {
         await db.ref(`company/${ME}/level`).set(newLvData.lv);
-        toast(`🎉 公司升至 Lv.${newLvData.lv}（${newLvData.label}）！`);
+        showLevelUpOverlay(newLvData);
+        toast(`🎉 公司升至 Lv.${newLvData.lv}（${newLvData.label}）！`, 'gold');
     }
 }
 
@@ -883,8 +1041,8 @@ async function renderOverview() {
     document.getElementById('co-rep-val').textContent = `${rep} / ${nextLvData.repNeeded > rep ? nextLvData.repNeeded : '最高'}`;
     document.getElementById('co-rep-bar').style.width = Math.min(100, (rep / (nextLvData.repNeeded || rep + 1)) * 100) + '%';
 
-    // Treasury
-    document.getElementById('treasury-display').textContent = (co.treasury || 0).toLocaleString();
+    // Treasury (animated counter)
+    animateTreasury(co.treasury || 0);
 
     // Crisis
     const crisisBanner = document.getElementById('crisis-banner');
@@ -914,6 +1072,7 @@ async function renderOverview() {
         document.getElementById('macro-mult-badge').textContent = `收入倍率 ${multTxt}`;
         document.getElementById('macro-mult-badge').className   = `macro-badge ${badgeCls}`;
         document.getElementById('macro-days-badge').textContent = `剩餘 ${macro.daysLeft} 天`;
+        document.getElementById('macro-box').classList.toggle('boom-glow', macro.mult >= 1.25);
     }
 
     // Today stats
@@ -941,7 +1100,9 @@ async function renderOverview() {
         if (mktEvt) document.getElementById('market-event-name').textContent = mktEvt.icon + ' ' + mktEvt.desc;
 
         document.getElementById('today-income').textContent   = `+${todayData.income || 0} 點`;
-        document.getElementById('today-expenses').textContent = `-${todayData.expenses || 0} 點`;
+        const salary = (todayData.expenses || 0) - (todayData.overhead || 0);
+        document.getElementById('today-expenses').textContent = `-${salary} 點`;
+        document.getElementById('today-overhead').textContent = `-${todayData.overhead || 0} 點`;
         const net = todayData.net || 0;
         const netEl = document.getElementById('today-net');
         netEl.textContent = (net >= 0 ? '+' : '') + net + ' 點';
@@ -1008,9 +1169,9 @@ function renderEmployees() {
     if (empArr.length === 0) {
         document.getElementById('emp-list').innerHTML = '<div style="color:var(--muted);text-align:center;padding:20px;font-size:13px;">尚無員工</div>';
     } else {
-        document.getElementById('emp-list').innerHTML = empArr.map(([id, emp]) => {
+        document.getElementById('emp-list').innerHTML = empArr.map(([id, emp], i) => {
             const deptInfo = DEPT_INFO[emp.dept] || DEPT_INFO.ops;
-            return `<div class="emp-card">
+            return `<div class="emp-card anim-enter" style="animation-delay:${i*0.05}s">
                 <div style="font-size:24px;">👤</div>
                 <div style="flex:1;">
                     <div style="font-weight:700; font-size:14px;">${emp.name}</div>
@@ -1061,12 +1222,14 @@ async function renderContracts() {
         let statusHtml = '';
 
         if (c.type === 'open') {
+            const deposit = Math.floor(reward * 0.30);
+            const days    = contractDuration(c.base);
             if (claim === ME) {
-                statusHtml = `<div style="font-size:12px;color:var(--green);font-weight:700;margin-top:8px;">✓ 你已接案</div>`;
+                statusHtml = `<div style="font-size:12px;color:var(--green);font-weight:700;margin-top:8px;">✓ 已接案（${days}天後可領）</div>`;
             } else if (claim === PARTNER) {
                 statusHtml = `<div style="font-size:12px;color:var(--muted);margin-top:8px;">已被 ${NAMES[PARTNER]} 接走</div>`;
             } else {
-                actionHtml = `<button class="btn btn-green btn-sm" onclick="claimOpenContract(${i})" style="margin-top:10px;">搶接（+${reward} 點）</button>`;
+                actionHtml = `<button class="btn btn-green btn-sm" onclick="claimOpenContract(${i})" style="margin-top:10px;">接案（押金 ${deposit} 點・${days}天後結算）</button>`;
             }
         } else if (c.type === 'bid') {
             if (myBid > 0) {
@@ -1079,23 +1242,36 @@ async function renderContracts() {
                 statusHtml = `<div style="font-size:12px;color:${won?'var(--green)':'var(--muted)'};font-weight:700;margin-top:8px;">${won ? `✓ 你贏得競標！+${reward} 點` : '競標失敗'}</div>`;
             }
         } else if (c.type === 'joint') {
-            const myAcc  = joints[i]?.[ME]      || false;
-            const oppAcc = joints[i]?.[PARTNER] || false;
+            const myAcc  = joints[i]?.[ME]?.accepted      || false;
+            const oppAcc = joints[i]?.[PARTNER]?.accepted || false;
+            const active = joints[i]?.active;
             const splitReward = Math.round(reward * 0.65);
-            if (myAcc && oppAcc) {
-                statusHtml = `<div style="font-size:12px;color:var(--green);font-weight:700;margin-top:8px;">✓ 合作已達成！各得 ${splitReward} 點</div>`;
+            const deposit = Math.floor(splitReward * 0.20);
+            const myCollected = joints[i]?.[ME]?.collected || false;
+            if (active) {
+                const ready = dateStr() >= active.collectDate;
+                const daysLeft = ready ? 0 : Math.ceil((new Date(active.collectDate) - new Date(dateStr())) / 86400000);
+                if (myCollected) {
+                    statusHtml = `<div style="font-size:12px;color:var(--muted);margin-top:8px;">✓ 已領取</div>`;
+                } else if (ready) {
+                    actionHtml = `<button class="btn btn-purple btn-sm" onclick="collectJointContract('${today}',${i})" style="margin-top:10px;">🤝 領取合作結果</button>`;
+                } else {
+                    statusHtml = `<div style="font-size:12px;color:var(--purple);font-weight:700;margin-top:8px;">🤝 進行中・${daysLeft} 天後可領</div>`;
+                }
+            } else if (myAcc && oppAcc) {
+                statusHtml = `<div style="font-size:12px;color:var(--purple);margin-top:8px;">啟動中...</div>`;
             } else if (myAcc) {
-                statusHtml = `<div style="font-size:12px;color:var(--purple);font-weight:700;margin-top:8px;">✓ 你已同意，等待 ${NAMES[PARTNER]} 接受</div>`;
+                statusHtml = `<div style="font-size:12px;color:var(--purple);font-weight:700;margin-top:8px;">✓ 已出押金，等待 ${NAMES[PARTNER]} 接受</div>`;
             } else if (oppAcc) {
-                actionHtml = `<button class="btn btn-purple btn-sm" onclick="openJointModal(${i},'${c.title}',${splitReward})" style="margin-top:10px;">🤝 ${NAMES[PARTNER]} 想合作！接受（+${splitReward} 點）</button>`;
+                actionHtml = `<button class="btn btn-purple btn-sm" onclick="openJointModal(${i},'${c.title}',${splitReward},${deposit})" style="margin-top:10px;">🤝 ${NAMES[PARTNER]} 邀請合作！接受（押金 ${deposit} 點）</button>`;
             } else {
-                actionHtml = `<button class="btn btn-purple btn-sm" onclick="proposeJoint(${i})" style="margin-top:10px;">邀請合作（各得 ${splitReward} 點）</button>`;
+                actionHtml = `<button class="btn btn-purple btn-sm" onclick="proposeJoint(${i})" style="margin-top:10px;">邀請合作（押金 ${deposit} 點・各得約 ${splitReward} 點）</button>`;
             }
         }
 
         const typeLabel = c.type === 'open' ? '搶單' : c.type === 'bid' ? '競標' : '合作';
         const typeCls   = `type-${c.type}`;
-        return `<div class="contract-card">
+        return `<div class="contract-card anim-enter" style="animation-delay:${i*0.07}s">
             <span class="contract-type ${typeCls}">${typeLabel}</span>
             <div class="contract-title">${c.icon} ${c.title}</div>
             <div style="font-size:12px;color:var(--muted);margin-top:2px;">基礎獎勵 ${c.base} 點${(calcContractReward(c.base, co) !== c.base) ? ` → 你的獎勵 <strong style="color:var(--green)">${calcContractReward(c.base, co)} 點</strong>` : ''}</div>
@@ -1104,13 +1280,27 @@ async function renderContracts() {
     }).join('');
     document.getElementById('contract-list').innerHTML = html;
 
-    // Active contract
-    const activeC = co.active_contract;
-    if (activeC) {
-        document.getElementById('active-contract-box').innerHTML = `<div class="contract-card" style="border-color:rgba(123,156,255,0.3);">
-            <div class="contract-title">${activeC.icon || '📋'} ${activeC.title}</div>
-            <div style="font-size:12px;color:var(--muted);margin-top:4px;">進行中...</div>
-        </div>`;
+    // Active contracts
+    const activeSnap = await db.ref(`company/${ME}/activeContracts`).once('value');
+    const activeMap  = activeSnap.val() || {};
+    const activeKeys = Object.keys(activeMap);
+    if (activeKeys.length > 0) {
+        const today = dateStr();
+        document.getElementById('active-contract-box').innerHTML = activeKeys.map(key => {
+            const ct = activeMap[key];
+            const ready = today >= ct.collectDate;
+            const daysLeft = ready ? 0 : Math.ceil((new Date(ct.collectDate) - new Date(today)) / 86400000);
+            return `<div class="contract-card" style="border-color:rgba(123,156,255,0.3);">
+                <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+                    <div>
+                        <div class="contract-title" style="font-size:14px;">${ct.icon} ${ct.title}</div>
+                        <div style="font-size:11px;color:var(--muted);margin-top:3px;">押金 ${ct.deposit} 點・預期 ${ct.reward} 點</div>
+                    </div>
+                    <span style="font-size:11px;font-weight:700;color:${ready?'var(--green)':'var(--muted)'};">${ready?'可領取':`${daysLeft}天後`}</span>
+                </div>
+                ${ready ? `<button class="btn btn-primary btn-sm" onclick="collectContract('${key}')" style="margin-top:10px;">領取結果</button>` : ''}
+            </div>`;
+        }).join('');
     } else {
         document.getElementById('active-contract-box').innerHTML = '<div style="color:var(--muted);font-size:13px;text-align:center;padding:16px;">目前沒有進行中的合約</div>';
     }
@@ -1120,11 +1310,19 @@ async function renderContracts() {
     const histRows = [];
     histSnap.forEach(c => histRows.unshift(c.val()));
     if (histRows.length > 0) {
-        document.getElementById('contract-history').innerHTML = histRows.map(h => `
-            <div class="comp-row">
-                <div><div style="font-weight:700;font-size:14px;">${h.title}</div><div style="font-size:11px;color:var(--muted);">${h.type === 'bid' ? '競標' : h.type === 'joint' ? '合作' : '搶單'}</div></div>
-                <div style="font-weight:900;color:var(--green);">+${h.reward} 點</div>
-            </div>`).join('');
+        document.getElementById('contract-history').innerHTML = histRows.map(h => {
+            const netStr = h.net !== undefined ? ((h.net>=0?'+':'')+h.net+' 點') : `+${h.reward||0} 點`;
+            const netColor = (h.net === undefined || h.net >= 0) ? 'var(--green)' : 'var(--red)';
+            const outcomeHtml = h.outcomeCls ? `<span class="outcome-pill ${h.outcomeCls}">${h.icon} ${h.outcome}</span>` : '';
+            return `<div class="comp-row" style="flex-wrap:wrap;gap:4px;">
+                <div style="flex:1;min-width:0;">
+                    <div style="font-weight:700;font-size:14px;">${h.title}</div>
+                    <div style="font-size:11px;color:var(--muted);">${h.type==='bid'?'競標':h.type==='joint'?'合作':'搶單'}</div>
+                    ${outcomeHtml}
+                </div>
+                <div style="font-weight:900;color:${netColor};white-space:nowrap;">${netStr}</div>
+            </div>`;
+        }).join('');
     } else {
         document.getElementById('contract-history').innerHTML = '<div style="color:var(--muted);font-size:13px;text-align:center;padding:16px;">尚無紀錄</div>';
     }
@@ -1203,7 +1401,8 @@ async function foundCompany() {
         departments: { ops:{level:0}, rd:{level:0}, mkt:{level:0} },
     };
     await db.ref(`company/${ME}`).set(co);
-    toast(`🎉 ${name} 正式創立！`);
+    SFX.levelUp();
+    toast(`🎉 ${name} 正式創立！`, 'gold');
 }
 
 async function restartCompany() {
@@ -1242,7 +1441,8 @@ async function confirmHire() {
     });
     if (!tx.committed) { toast('公司金庫不足'); return; }
     await db.ref(`company/${ME}/employees`).push({ name, salary: EMP_SALARY, dept: hireDept, hired: Date.now() });
-    toast(`✅ ${name} 加入了！`);
+    SFX.hire();
+    toast(`✅ ${name} 加入了！`, 'success');
 }
 
 function fireEmployee(id) {
@@ -1257,6 +1457,7 @@ async function confirmFire() {
     const id = document.getElementById('fire-modal')._pendingId;
     document.getElementById('fire-modal').classList.remove('open');
     await db.ref(`company/${ME}/employees/${id}`).remove();
+    SFX.fire();
     toast('員工已離職');
 }
 
@@ -1273,7 +1474,8 @@ async function upgradeDept(key) {
     });
     if (!tx.committed) { toast('公司金庫不足'); return; }
     await db.ref(`company/${ME}/departments/${key}/level`).transaction(l => (l||0) + 1);
-    toast(`✅ ${DEPT_INFO[key].label} 升至 Lv.${lv + 1}`);
+    SFX.success();
+    toast(`✅ ${DEPT_INFO[key].label} 升至 Lv.${lv + 1}`, 'success');
 }
 
 async function injectCapital() {
@@ -1287,7 +1489,8 @@ async function injectCapital() {
     if (!tx.committed) { toast('個人點數不足'); return; }
     await db.ref(`company/${ME}/treasury`).transaction(t => (t||0) + amt);
     document.getElementById('inject-input').value = '';
-    toast(`✅ 已注資 ${amt} 點`);
+    SFX.coin();
+    toast(`✅ 已注資 ${amt} 點`, 'gold');
 }
 
 async function withdrawProfit() {
@@ -1301,7 +1504,8 @@ async function withdrawProfit() {
     if (!tx.committed) { toast('公司金庫不足'); return; }
     await db.ref(`economy/${ME}`).transaction(p => (p||0) + amt);
     document.getElementById('withdraw-input').value = '';
-    toast(`✅ 已提領 ${amt} 點`);
+    SFX.coin();
+    toast(`✅ 已提領 ${amt} 點`, 'gold');
 }
 
 async function rescueCompany() {
@@ -1318,7 +1522,7 @@ async function rescueCompany() {
     if (freshT > 0) {
         await db.ref(`company/${ME}/status`).set('active');
         await db.ref(`company/${ME}/crisis_since`).set(null);
-        toast('✅ 公司已從危機中救回！');
+        SFX.success(); toast('✅ 公司已從危機中救回！', 'success');
     } else {
         toast(`✅ 已注資 ${amt} 點`);
     }
@@ -1328,19 +1532,73 @@ async function rescueCompany() {
 // Contracts
 async function claimOpenContract(idx) {
     const today = dateStr();
+    const mktSnap = await db.ref(`market/daily/${today}/contracts/${idx}`).once('value');
+    const c = mktSnap.val();
+    if (!c) return;
+    const reward  = calcContractReward(c.base, companyData);
+    const deposit = Math.floor(reward * 0.30);
+    const days    = contractDuration(c.base);
+
+    if ((companyData?.treasury || 0) < deposit) {
+        toast(`金庫不足！需押金 ${deposit} 點`); return;
+    }
+
     const tx = await db.ref(`market/daily/${today}/claims/${idx}`).transaction(v => {
-        if (v) return undefined; // already claimed
+        if (v) return undefined;
         return ME;
     });
     if (!tx.committed) { toast('已被搶先一步！'); return; }
 
-    const mktSnap = await db.ref(`market/daily/${today}/contracts/${idx}`).once('value');
-    const c       = mktSnap.val();
-    const reward  = calcContractReward(c.base, companyData);
-    await db.ref(`company/${ME}/treasury`).transaction(t => (t||0) + reward);
-    await db.ref(`company/${ME}/contract_history`).push({ ts:Date.now(), title:c.title, reward, type:'open' });
-    await db.ref(`company/${ME}/reputation`).transaction(r => (r||0) + 3);
-    toast(`✅ 接案成功！+${reward} 點`);
+    await db.ref(`company/${ME}/treasury`).transaction(t => (t||0) - deposit);
+
+    const collectDate = (() => {
+        const d = new Date(); d.setDate(d.getDate() + days);
+        return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    })();
+
+    await db.ref(`company/${ME}/activeContracts`).push({
+        title:c.title, base:c.base, icon:c.icon,
+        reward, deposit,
+        startDate:today, collectDate,
+        seed:`${today}-${idx}-${ME}`,
+        duration:days,
+    });
+
+    SFX.contract();
+    toast(`📝 已接案！押金 -${deposit} 點，${days} 天後可領`, 'purple');
+    renderContracts();
+}
+
+async function collectContract(key) {
+    const snap = await db.ref(`company/${ME}/activeContracts/${key}`).once('value');
+    const ct = snap.val();
+    if (!ct) return;
+    if (dateStr() < ct.collectDate) { toast('還沒到收款日！'); return; }
+
+    const userSnap = await db.ref(`users/${ME}`).once('value');
+    const efficiency = calcEfficiency(userSnap.val() || {});
+    const macro = getCurrentMacroPhase();
+    const outcome = calcContractOutcome(ct.seed, efficiency, macro.mult);
+    const payout = Math.round(ct.reward * outcome.mult);
+    const net    = payout - ct.deposit;
+
+    await db.ref(`company/${ME}/treasury`).transaction(t => (t||0) + payout);
+    await db.ref(`company/${ME}/activeContracts/${key}`).remove();
+    await db.ref(`company/${ME}/contract_history`).push({
+        ts:Date.now(), title:ct.title,
+        payout, deposit:ct.deposit, net,
+        outcome:outcome.label, outcomeCls:outcome.cls, icon:outcome.icon,
+        type:'open',
+    });
+
+    const rep = outcome.mult >= 1.5 ? 5 : outcome.mult >= 1.0 ? 3 : outcome.mult === 0 ? -3 : 0;
+    if (rep !== 0) await db.ref(`company/${ME}/reputation`).transaction(r => Math.max(0, (r||0) + rep));
+
+    const netStr = (net >= 0 ? '+' : '') + net;
+    const _tType = outcome.mult >= 1.5 ? 'gold' : outcome.mult >= 1.0 ? 'success' : 'error';
+    toast(`${outcome.icon} ${outcome.label}！領回 ${payout} 點，淨利 ${netStr} 點`, _tType);
+    if (outcome.mult >= 1.0) { SFX.success(); const _r = document.getElementById('treasury-box').getBoundingClientRect(); spawnSparkles(_r.left + _r.width/2, _r.top + _r.height/2); }
+    else SFX.ruin();
     renderContracts();
 }
 
@@ -1366,24 +1624,30 @@ async function confirmBid() {
     if (!tx.committed) { toast('公司金庫不足'); return; }
     await db.ref(`market/daily/${today}/bids/${bidContractIdx}/${ME}`).set(amt);
     document.getElementById('bid-modal').classList.remove('open');
-    toast(`✅ 已出價 ${amt} 點，明日結算`);
+    SFX.contract();
+    toast(`✅ 已出價 ${amt} 點，明日結算`, 'gold');
     renderContracts();
 }
 
 async function proposeJoint(idx) {
     const today = dateStr();
-    await db.ref(`market/daily/${today}/joint/${idx}/${ME}`).set(true);
-    toast(`✅ 已發出合作邀請給 ${NAMES[PARTNER]}`);
+    const mktSnap = await db.ref(`market/daily/${today}/contracts/${idx}`).once('value');
+    const c = mktSnap.val();
+    const splitReward = Math.round(calcContractReward(c.base, companyData) * 0.65);
+    const deposit = Math.floor(splitReward * 0.20);
+    if ((companyData?.treasury || 0) < deposit) { toast(`金庫不足！需押金 ${deposit} 點`); return; }
+    await db.ref(`company/${ME}/treasury`).transaction(t => (t||0) - deposit);
+    await db.ref(`market/daily/${today}/joint/${idx}/${ME}`).set({ accepted:true, deposit });
+    SFX.contract();
+    toast(`✅ 已邀請合作！押金 -${deposit} 點，等待 ${NAMES[PARTNER]}`, 'purple');
     renderContracts();
 }
 
-function openJointModal(idx, title, reward) {
+function openJointModal(idx, title, splitReward, deposit) {
     document.getElementById('joint-modal-title').textContent  = title;
     document.getElementById('joint-modal-desc').textContent   = `${NAMES[PARTNER]} 邀請你一起承接這個合約`;
-    document.getElementById('joint-modal-reward').textContent = `各得 +${reward} 點`;
-    document.getElementById('joint-modal').onclick = null;
+    document.getElementById('joint-modal-reward').textContent = `各得約 ${splitReward} 點・押金 ${deposit} 點`;
     document.getElementById('joint-modal')._idx = idx;
-    document.getElementById('joint-modal')._reward = reward;
     document.getElementById('joint-modal').classList.add('open');
 }
 
@@ -1393,32 +1657,189 @@ async function acceptJoint() {
     modal.classList.remove('open');
 
     const today = dateStr();
-    await db.ref(`market/daily/${today}/joint/${idx}/${ME}`).set(true);
-
-    // Transaction 防止雙重發放
-    const payTx = await db.ref(`market/daily/${today}/joint/${idx}/reward_paid`).transaction(v => {
-        if (v) return undefined;
-        return true;
-    });
-    if (!payTx.committed) {
-        toast('🤝 合作已達成，獎勵已發放！');
-        renderContracts();
-        return;
-    }
-
     const mktSnap = await db.ref(`market/daily/${today}/contracts/${idx}`).once('value');
     const c = mktSnap.val();
-    const finalReward = calcContractReward(c.base, companyData);
-    const splitReward = Math.round(finalReward * 0.65);
+    const splitReward = Math.round(calcContractReward(c.base, companyData) * 0.65);
+    const deposit = Math.floor(splitReward * 0.20);
+    if ((companyData?.treasury || 0) < deposit) { toast(`金庫不足！需押金 ${deposit} 點`); return; }
 
-    await db.ref(`company/${ME}/treasury`).transaction(t => (t||0) + splitReward);
-    await db.ref(`company/${PARTNER}/treasury`).transaction(t => (t||0) + splitReward);
-    await db.ref(`company/${ME}/contract_history`).push({ ts:Date.now(), title:c.title, reward:splitReward, type:'joint' });
-    await db.ref(`company/${PARTNER}/contract_history`).push({ ts:Date.now(), title:c.title, reward:splitReward, type:'joint' });
-    await db.ref(`company/${ME}/reputation`).transaction(r => (r||0) + 3);
-    await db.ref(`company/${PARTNER}/reputation`).transaction(r => (r||0) + 3);
-    toast(`🤝 合作成功！+${splitReward} 點`);
+    await db.ref(`company/${ME}/treasury`).transaction(t => (t||0) - deposit);
+    await db.ref(`market/daily/${today}/joint/${idx}/${ME}`).set({ accepted:true, deposit });
+
+    // 啟動合約（第二人接受時觸發）
+    const days = contractDuration(c.base);
+    const collectDate = (() => {
+        const d = new Date(); d.setDate(d.getDate() + days);
+        return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    })();
+    const activeTx = await db.ref(`market/daily/${today}/joint/${idx}/active`).transaction(v => v ? undefined : {
+        collectDate, seed:`${today}-joint-${idx}`, marketDate:today, contractIdx:idx
+    });
+
+    SFX.contract();
+    toast(`🤝 合作開始！押金 -${deposit} 點，${days} 天後可領`, 'purple');
     renderContracts();
+}
+
+async function collectJointContract(marketDate, contractIdx) {
+    const jointSnap = await db.ref(`market/daily/${marketDate}/joint/${contractIdx}`).once('value');
+    const jd = jointSnap.val();
+    if (!jd?.active || dateStr() < jd.active.collectDate) { toast('還沒到收款日！'); return; }
+    const myCollected = jd[ME]?.collected;
+    if (myCollected) { toast('你已領取過了！'); return; }
+
+    const tx = await db.ref(`market/daily/${marketDate}/joint/${contractIdx}/${ME}/collected`).transaction(v => v ? undefined : true);
+    if (!tx.committed) { toast('你已領取過了！'); return; }
+
+    const mktSnap = await db.ref(`market/daily/${marketDate}/contracts/${contractIdx}`).once('value');
+    const c = mktSnap.val();
+    // 共同命運：只用 seed 決定結果，不受當下效率/景氣影響
+    const outcome = calcContractOutcome(jd.active.seed, 1.0, 1.0);
+    const splitReward = Math.round(calcContractReward(c.base, companyData) * 0.65);
+    const payout = Math.round(splitReward * outcome.mult);
+    const myDeposit = jd[ME]?.deposit || 0;
+    const net = payout - myDeposit;
+
+    await db.ref(`company/${ME}/treasury`).transaction(t => (t||0) + payout);
+    const rep = outcome.mult >= 1.5 ? 5 : outcome.mult >= 1.0 ? 3 : outcome.mult === 0 ? -3 : 0;
+    if (rep !== 0) await db.ref(`company/${ME}/reputation`).transaction(r => Math.max(0, (r||0) + rep));
+    await db.ref(`company/${ME}/contract_history`).push({
+        ts:Date.now(), title:c.title,
+        payout, deposit:myDeposit, net,
+        outcome:outcome.label, outcomeCls:outcome.cls, icon:outcome.icon,
+        type:'joint'
+    });
+
+    const netStr = (net >= 0 ? '+' : '') + net;
+    const _jType = outcome.mult >= 1.5 ? 'gold' : outcome.mult >= 1.0 ? 'success' : 'error';
+    toast(`${outcome.icon} ${outcome.label}！領回 ${payout} 點，淨利 ${netStr} 點`, _jType);
+    if (outcome.mult >= 1.0) { SFX.success(); const _jr = document.getElementById('treasury-box').getBoundingClientRect(); spawnSparkles(_jr.left + _jr.width/2, _jr.top + _jr.height/2); }
+    else SFX.ruin();
+    renderContracts();
+}
+
+// ── Sound Engine ──────────────────────────────────────────────────
+const SFX = (() => {
+    let _ctx = null;
+    function ctx() {
+        if (!_ctx) _ctx = new (window.AudioContext || window.webkitAudioContext)();
+        if (_ctx.state === 'suspended') _ctx.resume().catch(()=>{});
+        return _ctx;
+    }
+    function tone(freq, dur, type='sine', vol=0.26, delay=0) {
+        try {
+            const c = ctx(), t = c.currentTime + delay;
+            const osc = c.createOscillator(), g = c.createGain();
+            osc.connect(g); g.connect(c.destination);
+            osc.type = type; osc.frequency.value = freq;
+            g.gain.setValueAtTime(vol, t);
+            g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+            osc.start(t); osc.stop(t + dur + 0.01);
+        } catch(e) {}
+    }
+    return {
+        click()    { tone(520,  0.055, 'square',   0.10); },
+        coin()     { tone(880,  0.09,  'sine',     0.22); tone(1100, 0.13, 'sine', 0.16, 0.07); },
+        success()  { [523,659,784].forEach((f,i) => tone(f, 0.12, 'sine', 0.22, i*0.07)); },
+        error()    { tone(220,  0.18,  'sawtooth', 0.20); tone(165, 0.26, 'sawtooth', 0.16, 0.13); },
+        levelUp()  { [523,587,659,784,880,1046].forEach((f,i) => tone(f, 0.14, 'sine', 0.24, i*0.07)); },
+        contract() { [349,440,523].forEach((f,i) => tone(f, 0.10, 'sine', 0.20, i*0.06)); },
+        ruin()     { [220,196,165].forEach((f,i) => tone(f, 0.22, 'sawtooth', 0.22, i*0.11)); },
+        hire()     { tone(440,  0.08,  'sine',     0.18); tone(554, 0.14, 'sine', 0.15, 0.07); },
+        fire()     { tone(330,  0.10,  'triangle', 0.18); tone(220, 0.18, 'triangle', 0.14, 0.09); },
+    };
+})();
+// Unlock AudioContext on first user touch (iOS/Safari requirement)
+document.addEventListener('pointerdown', () => { try { SFX.click(); } catch(e){} }, { once: true });
+
+// ── Ripple effect on all buttons ──────────────────────────────────
+document.addEventListener('pointerdown', e => {
+    const btn = e.target.closest('.btn');
+    if (!btn || btn.disabled) return;
+    const rw = document.createElement('span');
+    rw.className = 'ripple-wave';
+    const sz = Math.max(btn.offsetWidth, btn.offsetHeight);
+    const rc = btn.getBoundingClientRect();
+    rw.style.cssText = `width:${sz}px;height:${sz}px;left:${e.clientX-rc.left-sz/2}px;top:${e.clientY-rc.top-sz/2}px;`;
+    btn.appendChild(rw);
+    rw.addEventListener('animationend', () => rw.remove());
+}, true);
+
+// ── Float text ────────────────────────────────────────────────────
+function floatText(text, color, anchorEl) {
+    const el = document.createElement('div');
+    el.className = 'float-text';
+    el.textContent = text;
+    el.style.color = color;
+    const src  = anchorEl || document.getElementById('treasury-box') || document.body;
+    const rect = src.getBoundingClientRect();
+    el.style.left = (rect.left + rect.width / 2 - 32) + 'px';
+    el.style.top  = Math.max(60, rect.top + 8) + 'px';
+    document.body.appendChild(el);
+    el.addEventListener('animationend', () => el.remove());
+}
+
+// ── Animated treasury counter ─────────────────────────────────────
+let _lastTreasury = null;
+function animateTreasury(newVal) {
+    const el  = document.getElementById('treasury-display');
+    const box = document.getElementById('treasury-box');
+    if (!el || !box) return;
+    const from = _lastTreasury ?? newVal;
+    if (_lastTreasury !== null && from !== newVal) {
+        const diff = newVal - from;
+        floatText((diff >= 0 ? '+' : '') + diff.toLocaleString() + ' 點', diff >= 0 ? 'var(--green)' : 'var(--red)');
+        box.classList.remove('flash-pos', 'flash-neg');
+        void box.offsetWidth; // force reflow to restart animation
+        box.classList.add(diff >= 0 ? 'flash-pos' : 'flash-neg');
+        setTimeout(() => box.classList.remove('flash-pos', 'flash-neg'), 900);
+        if (diff > 0) SFX.coin();
+    }
+    _lastTreasury = newVal;
+    const start = performance.now();
+    const dur   = Math.min(700, Math.abs(newVal - from) * 2 + 180);
+    (function step(ts) {
+        const p    = Math.min(1, (ts - start) / dur);
+        const ease = 1 - Math.pow(1 - p, 3);
+        el.textContent = Math.round(from + (newVal - from) * ease).toLocaleString();
+        if (p < 1) requestAnimationFrame(step);
+    })(performance.now());
+}
+
+// ── Sparkle burst ─────────────────────────────────────────────────
+function spawnSparkles(cx, cy) {
+    const emojis = ['✨','💫','⭐','🌟','💰','🎊'];
+    for (let i = 0; i < 8; i++) {
+        setTimeout(() => {
+            const s = document.createElement('div');
+            s.className = 'float-text';
+            s.textContent = emojis[i % emojis.length];
+            s.style.left = (cx + (Math.random() - 0.5) * 130) + 'px';
+            s.style.top  = (cy + (Math.random() - 0.5) * 60 - 10) + 'px';
+            s.style.fontSize = (13 + Math.random() * 13) + 'px';
+            document.body.appendChild(s);
+            s.addEventListener('animationend', () => s.remove());
+        }, i * 70);
+    }
+}
+
+// ── Level-up overlay ──────────────────────────────────────────────
+function showLevelUpOverlay(lvData) {
+    const ov = document.getElementById('lvup-overlay');
+    const icons = { 1:'🌱', 2:'🚀', 3:'🏭', 4:'👑' };
+    document.getElementById('lvup-emoji').textContent = icons[lvData.lv] || '🎉';
+    document.getElementById('lvup-name').textContent  = `Lv.${lvData.lv} ${lvData.label}`;
+    ov.style.display = 'flex';
+    // Confetti rain
+    for (let i = 0; i < 22; i++) {
+        setTimeout(() => {
+            const c = document.createElement('div');
+            c.style.cssText = `position:fixed;left:${Math.random()*100}vw;top:-28px;font-size:${14+Math.random()*14}px;z-index:700;animation:confettiK ${1.3+Math.random()*0.9}s ease forwards;pointer-events:none;`;
+            c.textContent = ['🎊','🎉','⭐','✨','💫'][Math.floor(Math.random()*5)];
+            document.body.appendChild(c);
+            c.addEventListener('animationend', () => c.remove());
+        }, i * 85);
+    }
 }
 </script>
 </body>
