@@ -130,6 +130,18 @@ body{ font-family:-apple-system,BlinkMacSystemFont,sans-serif; background:radial
 
 /* competitor card */
 .comp-row{ display:flex; justify-content:space-between; align-items:center; padding:12px 14px; background:rgba(22,26,42,0.5); border:1px solid var(--border); border-radius:14px; margin-bottom:8px; }
+
+/* macro phase */
+.macro-box{ display:flex; align-items:center; gap:14px; padding:14px 16px; border-radius:16px; border:1px solid var(--macro-color, rgba(255,255,255,0.1)); background:rgba(22,26,42,0.5); }
+.macro-icon{ font-size:32px; flex-shrink:0; }
+.macro-info{ flex:1; }
+.macro-phase-name{ font-size:16px; font-weight:900; }
+.macro-desc{ font-size:11px; color:var(--muted); margin-top:2px; }
+.macro-badges{ display:flex; gap:8px; margin-top:8px; flex-wrap:wrap; }
+.macro-badge{ font-size:11px; font-weight:700; padding:3px 10px; border-radius:8px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1); }
+.macro-badge.neg{ background:rgba(248,113,113,0.10); border-color:rgba(248,113,113,0.3); color:var(--red); }
+.macro-badge.pos{ background:rgba(74,222,128,0.10); border-color:rgba(74,222,128,0.3); color:var(--green); }
+.macro-badge.neu{ background:rgba(136,144,168,0.10); border-color:rgba(136,144,168,0.3); color:var(--muted); }
 </style>
 </head>
 <body>
@@ -231,6 +243,22 @@ body{ font-family:-apple-system,BlinkMacSystemFont,sans-serif; background:radial
                 <div class="treasury-lbl" style="margin-top:2px;">點</div>
             </div>
 
+            <!-- macro phase -->
+            <div id="macro-phase-section" style="display:none; margin-bottom:4px;">
+                <div class="sec-label">大環境景氣</div>
+                <div class="macro-box" id="macro-box">
+                    <div class="macro-icon" id="macro-icon">--</div>
+                    <div class="macro-info">
+                        <div class="macro-phase-name" id="macro-phase-name">--</div>
+                        <div class="macro-desc" id="macro-desc">--</div>
+                        <div class="macro-badges">
+                            <span class="macro-badge" id="macro-mult-badge">收入倍率 --</span>
+                            <span class="macro-badge neu" id="macro-days-badge">剩餘 -- 天</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- today stats -->
             <div id="today-stats" style="display:none;">
                 <div class="sec-label">今日狀況</div>
@@ -252,6 +280,8 @@ body{ font-family:-apple-system,BlinkMacSystemFont,sans-serif; background:radial
                     <div class="pl-row"><span>📥 今日收入</span><span style="color:var(--green);" id="today-income">--</span></div>
                     <div class="pl-row"><span>📤 薪資支出</span><span style="color:var(--red);" id="today-expenses">--</span></div>
                     <div class="pl-row" style="font-weight:800;"><span>淨損益</span><span id="today-net">--</span></div>
+                    <div class="pl-row" id="weekly-tax-row" style="display:none;"><span>🏛️ 本週企業稅（20%）</span><span style="color:var(--red);" id="today-weekly-tax">--</span></div>
+                    <div class="pl-row" id="audit-row" style="display:none;"><span>🔍 稅務稽查（+10%）</span><span style="color:var(--red);" id="today-audit-tax">--</span></div>
                 </div>
             </div>
 
@@ -442,6 +472,16 @@ const CONTRACT_POOL = [
     { title:'客戶服務優化',   base:155, icon:'💬' },
 ];
 
+// ── Macro economic cycle ───────────────────────────────────────────
+const MACRO_CYCLE = [
+    { phase:'繁榮', icon:'🚀', mult:1.25, days:7,  color:'rgba(74,222,128,0.35)',  desc:'經濟蓬勃，各行各業欣欣向榮' },
+    { phase:'正常', icon:'😐', mult:1.00, days:5,  color:'rgba(136,144,168,0.25)', desc:'市場平穩，正常運作' },
+    { phase:'衰退', icon:'📉', mult:0.75, days:6,  color:'rgba(248,113,113,0.30)', desc:'景氣下滑，客戶緊縮預算' },
+    { phase:'蕭條', icon:'🌧️', mult:0.50, days:4, color:'rgba(239,68,68,0.35)',   desc:'市場低迷，生意難做' },
+    { phase:'復甦', icon:'🌤️', mult:0.85, days:5, color:'rgba(252,211,77,0.30)', desc:'景氣逐漸好轉，曙光乍現' },
+];
+const MACRO_EPOCH = '2026-04-07'; // 固定起點（週一）
+
 const MARKET_EVENTS = [
     { type:'boom',    icon:'📈', desc:'景氣大好！商業活動熱絡',   mult:1.20, label:'+20%' },
     { type:'bust',    icon:'📉', desc:'景氣低迷，客戶預算緊縮',   mult:0.80, label:'-20%' },
@@ -550,6 +590,27 @@ function calcDailyExpenses(company) {
     return emps * EMP_SALARY;
 }
 
+function getWeekKey() {
+    const d = new Date();
+    const day = d.getDay();
+    const diff = d.getDate() - day + (day === 0 ? -6 : 1); // 調到週一
+    const mon = new Date(d); mon.setDate(diff);
+    return `${mon.getFullYear()}-${String(mon.getMonth()+1).padStart(2,'0')}-${String(mon.getDate()).padStart(2,'0')}`;
+}
+
+function getCurrentMacroPhase() {
+    const epoch = new Date(MACRO_EPOCH);
+    const today = new Date(dateStr());
+    const elapsed = Math.floor((today - epoch) / 86400000);
+    const total = MACRO_CYCLE.reduce((s, p) => s + p.days, 0);
+    let day = ((elapsed % total) + total) % total;
+    for (const p of MACRO_CYCLE) {
+        if (day < p.days) return { ...p, daysLeft: p.days - day };
+        day -= p.days;
+    }
+    return { ...MACRO_CYCLE[0], daysLeft: MACRO_CYCLE[0].days };
+}
+
 function calcContractReward(base, company) {
     const rdLv = (company.departments?.rd?.level) || 0;
     const lv   = getCompanyLevel(company.reputation || 0).lv;
@@ -623,18 +684,21 @@ async function processDailyIfNeeded() {
     // Process pending bid from yesterday
     await resolvePendingBid(dateStrOf(-1));
 
+    // Macro economic phase
+    const macro = getCurrentMacroPhase();
+
     // Calculate P&L (only if company has employees)
     const emps = Object.keys(companyData.employees || {}).length;
     let income = 0, expenses = 0;
     if (emps > 0) {
-        income   = calcDailyIncome(companyData, efficiency, event.mult);
+        income   = Math.round(calcDailyIncome(companyData, efficiency, event.mult) * macro.mult);
         expenses = calcDailyExpenses(companyData);
     }
     const net = income - expenses;
 
-    // Reputation gain
+    // Reputation gain（蕭條期聲譽額外 -1）
     const mktLv = (companyData.departments?.mkt?.level) || 0;
-    const repGain = 1 + DEPT_MULTIPLIER.mkt[mktLv] + (efficiency < 1 ? -1 : 0);
+    const repGain = 1 + DEPT_MULTIPLIER.mkt[mktLv] + (efficiency < 1 ? -1 : 0) + (macro.mult <= 0.5 ? -1 : 0);
 
     // Update treasury + reputation atomically
     const updates = {};
@@ -643,10 +707,42 @@ async function processDailyIfNeeded() {
     updates[`company/${ME}/daily/${today}/expenses`]    = expenses;
     updates[`company/${ME}/daily/${today}/net`]         = net;
     updates[`company/${ME}/daily/${today}/eventMult`]   = event.mult;
+    updates[`company/${ME}/daily/${today}/macroMult`]   = macro.mult;
+    updates[`company/${ME}/daily/${today}/macroPhase`]  = macro.phase;
     await db.ref().update(updates);
 
     await db.ref(`company/${ME}/treasury`).transaction(t => (t || 0) + net);
     await db.ref(`company/${ME}/reputation`).transaction(r => Math.max(0, (r || 0) + repGain));
+
+    // ── 週稅（每週 20%，每週只扣一次）──
+    const weekKey = getWeekKey();
+    const weekTaxSnap = await db.ref(`company/${ME}/weekly/${weekKey}/taxPaid`).once('value');
+    let weeklyTax = 0;
+    if (!weekTaxSnap.val()) {
+        const taxTx = await db.ref(`company/${ME}/weekly/${weekKey}/taxPaid`).transaction(v => v ? undefined : true);
+        if (taxTx.committed) {
+            const curT = (await db.ref(`company/${ME}/treasury`).once('value')).val() || 0;
+            weeklyTax = Math.floor(curT * 0.20);
+            if (weeklyTax > 0) {
+                await db.ref(`company/${ME}/treasury`).transaction(t => Math.max(0, (t||0) - weeklyTax));
+            }
+            await db.ref(`company/${ME}/weekly/${weekKey}`).update({ taxPaid:true, taxAmount:weeklyTax, taxDate:today });
+            await db.ref(`company/${ME}/daily/${today}/weeklyTax`).set(weeklyTax);
+        }
+    }
+
+    // ── 稅務稽查（15% 機率，額外扣 10%）──
+    const auditRng = seededRngSeq(dateSeed(today + ME + 'audit'), 1)[0];
+    let auditTax = 0;
+    if (auditRng < 0.15) {
+        const curT = (await db.ref(`company/${ME}/treasury`).once('value')).val() || 0;
+        auditTax = Math.floor(curT * 0.10);
+        if (auditTax > 0) {
+            await db.ref(`company/${ME}/treasury`).transaction(t => Math.max(0, (t||0) - auditTax));
+            await db.ref(`company/${ME}/daily/${today}/auditTax`).set(auditTax);
+            toast(`🔍 稅務稽查！額外被收走 ${auditTax} 點`);
+        }
+    }
 
     // Check crisis：讀 Firebase 最新值，不用 stale companyData
     const freshSnap = await db.ref(`company/${ME}`).once('value');
@@ -803,6 +899,23 @@ async function renderOverview() {
         crisisBanner.style.display = 'none';
     }
 
+    // ── 景氣循環（永遠顯示，不需等 processed）──
+    if (co.name) {
+        const macro = getCurrentMacroPhase();
+        const multPct = Math.round((macro.mult - 1) * 100);
+        const multTxt = (multPct >= 0 ? '+' : '') + multPct + '%';
+        const badgeCls = macro.mult > 1 ? 'pos' : macro.mult < 1 ? 'neg' : 'neu';
+        document.getElementById('macro-phase-section').style.display = 'block';
+        document.getElementById('macro-box').style.setProperty('--macro-color', macro.color);
+        document.getElementById('macro-icon').textContent       = macro.icon;
+        document.getElementById('macro-phase-name').textContent = macro.phase;
+        document.getElementById('macro-phase-name').style.color = macro.mult >= 1 ? 'var(--green)' : 'var(--red)';
+        document.getElementById('macro-desc').textContent       = macro.desc;
+        document.getElementById('macro-mult-badge').textContent = `收入倍率 ${multTxt}`;
+        document.getElementById('macro-mult-badge').className   = `macro-badge ${badgeCls}`;
+        document.getElementById('macro-days-badge').textContent = `剩餘 ${macro.daysLeft} 天`;
+    }
+
     // Today stats
     const today = dateStr();
     const todaySnap = await db.ref(`company/${ME}/daily/${today}`).once('value');
@@ -833,6 +946,21 @@ async function renderOverview() {
         const netEl = document.getElementById('today-net');
         netEl.textContent = (net >= 0 ? '+' : '') + net + ' 點';
         netEl.style.color = net >= 0 ? 'var(--green)' : 'var(--red)';
+
+        // 週稅
+        const wtRow = document.getElementById('weekly-tax-row');
+        if (todayData.weeklyTax > 0) {
+            wtRow.style.display = 'flex';
+            document.getElementById('today-weekly-tax').textContent = `-${todayData.weeklyTax} 點`;
+        } else { wtRow.style.display = 'none'; }
+
+        // 稅務稽查
+        const auRow = document.getElementById('audit-row');
+        if (todayData.auditTax > 0) {
+            auRow.style.display = 'flex';
+            document.getElementById('today-audit-tax').textContent = `-${todayData.auditTax} 點`;
+        } else { auRow.style.display = 'none'; }
+
     } else {
         document.getElementById('today-stats').style.display = 'none';
     }
