@@ -293,7 +293,7 @@ body{ font-family:-apple-system,BlinkMacSystemFont,sans-serif; background:radial
                         <button class="btn btn-sm" id="hire-dept-mkt" onclick="selectHireDept('mkt')" style="flex:1;">📣 行銷</button>
                     </div>
                 </div>
-                <button class="btn btn-primary" onclick="hireEmployee()">➕ 招募（100 點）</button>
+                <button class="btn btn-primary" id="hire-btn" onclick="hireEmployee()">➕ 招募（100 點）</button>
             </div>
         </div>
     </div>
@@ -856,15 +856,16 @@ function renderEmployees() {
         const canUp = lv < maxLv;
         const cost  = canUp ? DEPT_UPGRADE_COST[lv] : 0;
         const stars = '★'.repeat(lv) + '☆'.repeat(maxLv - lv);
-        const effects = [
-            `Lv1: ${key==='mkt'?'+2 聲譽/日':key==='rd'?'+15% 合約獎勵':'+20% 基礎收入'}`,
-            `Lv2: ${key==='mkt'?'+4 聲譽/日':key==='rd'?'+35% 合約獎勵':'+45% 基礎收入'}`,
-            `Lv3: ${key==='mkt'?'+7 聲譽/日':key==='rd'?'+65% 合約獎勵':'+75% 基礎收入'}`,
+        const currentEffects = [
+            '尚未升級',
+            `當前 Lv1: ${key==='mkt'?'+2 聲譽/日':key==='rd'?'+15% 合約獎勵':'+20% 基礎收入'}`,
+            `當前 Lv2: ${key==='mkt'?'+4 聲譽/日':key==='rd'?'+35% 合約獎勵':'+45% 基礎收入'}`,
+            `當前 Lv3: ${key==='mkt'?'+7 聲譽/日':key==='rd'?'+65% 合約獎勵':'+75% 基礎收入'}`,
         ];
         return `<div class="dept-card">
             <div>
                 <div style="font-weight:800; font-size:15px;">${info.label}</div>
-                <div style="font-size:11px; color:var(--muted); margin-top:2px;">${effects[Math.min(lv, 2)]}</div>
+                <div style="font-size:11px; color:var(--muted); margin-top:2px;">${currentEffects[lv]}</div>
                 <div class="dept-stars" style="margin-top:4px; color:${info.color};">${stars.split('').map(s => `<span style="opacity:${s==='★'?1:0.25}">${s}</span>`).join('')}</div>
             </div>
             ${canUp
@@ -893,10 +894,11 @@ function renderEmployees() {
         }).join('');
     }
 
-    // Hire button state
+    // Hire button state（用 id 避免選到部門升級按鈕）
     const isFull = empArr.length >= lvData.maxEmp;
-    document.querySelector('#panel-employees .btn-primary').disabled = isFull;
-    document.querySelector('#panel-employees .btn-primary').textContent = isFull ? `🔒 員工已滿（Lv${lvData.lv}上限）` : '➕ 招募（100 點）';
+    const hireBtn = document.getElementById('hire-btn');
+    hireBtn.disabled = isFull;
+    hireBtn.textContent = isFull ? `🔒 員工已滿（升聲譽至 ${COMPANY_LEVEL.find(l=>l.lv===lvData.lv+1)?.repNeeded??'MAX'} 可擴編）` : '➕ 招募（100 點）';
 }
 
 // ── Render Contracts ──────────────────────────────────────────────
