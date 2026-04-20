@@ -195,6 +195,14 @@
         .feat-company:hover { box-shadow: 0 6px 20px rgba(118,166,104,0.12); border-color: rgba(118,166,104,0.5); }
 
         /* ── Changelog button ── */
+        .notif-row { display:none; align-items:center; gap:7px; font-size:12px; color:var(--muted); margin-top:10px; }
+        .notif-toggle { position:relative; display:inline-block; width:38px; height:22px; flex-shrink:0; }
+        .notif-toggle input { opacity:0; width:0; height:0; position:absolute; }
+        .notif-slider { position:absolute; cursor:pointer; inset:0; background:rgba(255,255,255,0.1); border-radius:22px; transition:background 0.3s; border:1px solid rgba(255,255,255,0.12); }
+        .notif-slider:before { position:absolute; content:""; height:16px; width:16px; left:2px; top:2px; background:#888; border-radius:50%; transition:transform 0.3s, background 0.3s; }
+        .notif-toggle input:checked + .notif-slider { background:rgba(255,179,64,0.25); border-color:rgba(255,179,64,0.4); }
+        .notif-toggle input:checked + .notif-slider:before { transform:translateX(16px); background:#FFB340; }
+        .notif-toggle input:disabled + .notif-slider { opacity:0.45; cursor:not-allowed; }
         .changelog-btn {
             position: relative;
             display: inline-flex;
@@ -338,7 +346,14 @@
             <span id="clock">載入中...</span>
         </div>
         <div style="display:flex; gap:8px; align-items:center;">
-            <button id="notif-btn" onclick="enableNotifications()" style="display:none; font-size:12px; padding:6px 12px; background:rgba(255,179,64,0.12); color:#FFB340; border:1px solid rgba(255,179,64,0.35); border-radius:20px; cursor:pointer; letter-spacing:0.3px;">🔔 啟用通知</button>
+            <div class="notif-row" id="notif-row">
+                <span id="notif-icon">🔔</span>
+                <span id="notif-label">通知</span>
+                <label class="notif-toggle">
+                    <input type="checkbox" id="notif-checkbox" onchange="onNotifToggle(this)">
+                    <span class="notif-slider"></span>
+                </label>
+            </div>
             <button class="changelog-btn" onclick="openChangelog()">
                 📋 更新記錄
                 <span class="changelog-dot" id="cl-dot"></span>
@@ -541,18 +556,40 @@
         initChangelog();
         if ('serviceWorker' in navigator && 'Notification' in window) {
             navigator.serviceWorker.register('./sw.js').catch(() => {});
-            const btn = document.getElementById('notif-btn');
-            if (Notification.permission !== 'granted') btn.style.display = 'block';
+            const row = document.getElementById('notif-row');
+            const cb  = document.getElementById('notif-checkbox');
+            row.style.display = 'flex';
+            cb.checked  = Notification.permission === 'granted';
+            cb.disabled = Notification.permission === 'denied';
+            if (Notification.permission === 'denied') {
+                document.getElementById('notif-icon').textContent  = '🔕';
+                document.getElementById('notif-label').textContent = '請至設定開啟';
+            }
         }
-        async function enableNotifications() {
-            const btn = document.getElementById('notif-btn');
+        async function onNotifToggle(cb) {
+            if (Notification.permission === 'granted') {
+                cb.checked = true;
+                document.getElementById('notif-label').textContent = '已開啟（設定可關閉）';
+                setTimeout(() => { document.getElementById('notif-label').textContent = '通知'; }, 2500);
+                return;
+            }
+            if (Notification.permission === 'denied') {
+                cb.checked = false; cb.disabled = true;
+                document.getElementById('notif-icon').textContent  = '🔕';
+                document.getElementById('notif-label').textContent = '請至設定開啟';
+                return;
+            }
             const perm = await Notification.requestPermission();
             if (perm === 'granted') {
-                btn.style.display = 'none';
+                cb.checked = true;
+                document.getElementById('notif-icon').textContent  = '🔔';
+                document.getElementById('notif-label').textContent = '通知已開啟！';
+                setTimeout(() => { document.getElementById('notif-label').textContent = '通知'; }, 2500);
             } else {
-                btn.textContent = '🔕 請至設定開啟通知';
-                btn.style.color = 'var(--muted)';
-                btn.onclick = null;
+                cb.checked = false;
+                cb.disabled = (perm === 'denied');
+                document.getElementById('notif-icon').textContent  = '🔕';
+                document.getElementById('notif-label').textContent = perm === 'denied' ? '請至設定開啟' : '通知';
             }
         }
     </script>

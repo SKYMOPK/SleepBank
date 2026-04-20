@@ -714,10 +714,11 @@
     </div>
 
     <!-- Single Pull Overlay -->
-    <div id="sp-overlay">
+    <div id="sp-overlay" onclick="_spOverlayTap()">
         <div id="sp-flash" style="position:absolute;inset:0;pointer-events:none;opacity:0;transition:none;"></div>
         <div class="sp-orb">❓</div>
         <div class="sp-label">命運正在轉動⋯</div>
+        <div id="sp-hint" style="font-size:11px;color:rgba(255,255,255,0.25);opacity:0;transition:opacity 0.8s;margin-top:4px;">點擊跳過</div>
     </div>
 
     <!-- Gacha Odds Modal -->
@@ -1449,7 +1450,7 @@
 
     let r=Math.random(), msg="";
     if(r<0.01){ db.ref('economy/'+ME).transaction(c=>(c||0)+50); logPoints(50, '✨ 精靈爆擊'); msg="💎 爆擊！精靈大方地給了你 50 點！"; }
-    else if(r<0.1){ const pl=['c_crystal','lucky_clover','c_gummy'], i=pl[Math.floor(Math.random()*pl.length)]; db.ref('users/'+ME+'/items/'+i).transaction(c=>(c||0)+1); msg=`🎁 精靈偷偷塞給你【${ITEMS[i].n}】x1！`; } 
+    else if(r<0.1){ const pl=['c_crystal','c_hourglass','c_gummy'], i=pl[Math.floor(Math.random()*pl.length)]; db.ref('users/'+ME+'/items/'+i).transaction(c=>(c||0)+1); msg=`🎁 精靈偷偷塞給你【${ITEMS[i].n}】x1！`; } 
     else if(r<0.4){ db.ref('users/'+ME+'/shards').transaction(c=>(c||0)+1); msg="🔹 精靈留下了一塊【水晶碎片】！"; } 
     else { const pts=Math.floor(Math.random()*3)+3; db.ref('economy/'+ME).transaction(c=>(c||0)+pts); logPoints(pts, '✨ 精靈掉落'); msg=`💰 精靈給了你 ${pts} 點零用錢！`; }
     playSound('success'); confetti({particleCount:60, spread:60, origin:{y:0.85, x:0.8}}); showModalMsg("✨ 抓到魔法精靈了！", msg, true);
@@ -1476,11 +1477,15 @@
                 btn.classList.toggle('active', btn.dataset.tab === tab);
             });
             const getObtain = (it) => {
+                if (it.expOnly) {
+                    if (it.n === '抽獎券') return '遠征掉落、黑市購買、保底獲得';
+                    return '遠征掉落';
+                }
                 if (it.t === 'u') return '幸運轉盤、黑市購買';
-                if (it.r === 'C') return '黑市、轉盤、盲盒、精靈';
+                if (it.r === 'C') return '轉盤、黑市、盲盒、精靈';
                 if (it.r === 'R') return '打卡掉落、轉盤、黑市、盲盒、突變';
-                if (it.r === 'E') return '打卡極低掉落、轉盤、黑市盲盒';
-                if (it.r === 'M') return '打卡極低掉落、轉盤大獎、黑市盲盒';
+                if (it.r === 'E') return '打卡掉落、轉盤、黑市';
+                if (it.r === 'M') return '打卡極低掉落、轉盤大獎';
                 return '—';
             };
             let html = '';
@@ -2608,9 +2613,15 @@
         }
 
         let _pullAnimEnd = 0;
+        function _spOverlayTap() {
+            if (Date.now() >= _pullAnimEnd) _hidePullAnim();
+        }
         function _showPullAnim() {
             _pullAnimEnd = Date.now() + 1900;
-            document.getElementById('sp-overlay').style.display = 'flex';
+            const ov = document.getElementById('sp-overlay');
+            ov.style.display = 'flex';
+            document.getElementById('sp-hint').style.opacity = '0';
+            setTimeout(() => { if (ov.style.display !== 'none') document.getElementById('sp-hint').style.opacity = '1'; }, 2500);
             // 蓄力音效：四段漸強
             _beep(260, 0.09, 'sine', 0.07);
             setTimeout(() => _beep(340, 0.09, 'sine', 0.09), 380);
@@ -2640,7 +2651,8 @@
             db.ref('economy/'+ME).once('value').then(ps=>{
                 let pts = ps.val()||0;
                 db.ref('users/'+ME).once('value').then(s=>{
-                    let d = s.val()||{}, up = {}, tail = "", isPaid = false; 
+                  try {
+                    let d = s.val()||{}, up = {}, tail = "", isPaid = false;
                     
                     if(m === "free"){
                         up.last_free_lottery = getLocalDateStr(new Date()); tail = "<br>(消耗每日首抽)";
@@ -2771,6 +2783,7 @@
                             if (ch) ch.classList.add('open');
                         }
                     }, 500);
+                  } catch(err) { _hidePullAnim(); showToast('抽獎失敗，請重試', 'error'); }
                 }).catch(() => { _hidePullAnim(); showToast('抽獎失敗，請重試', 'error'); });
             }).catch(() => { _hidePullAnim(); showToast('抽獎失敗，請重試', 'error'); });
         }
