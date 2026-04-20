@@ -336,7 +336,8 @@
             <div class="dot"></div>
             <span id="clock">載入中...</span>
         </div>
-        <div>
+        <div style="display:flex; gap:8px; align-items:center;">
+            <button id="notif-btn" onclick="enableNotifications()" style="display:none; font-size:12px; padding:6px 12px; background:rgba(255,179,64,0.12); color:#FFB340; border:1px solid rgba(255,179,64,0.35); border-radius:20px; cursor:pointer; letter-spacing:0.3px;">🔔 啟用通知</button>
             <button class="changelog-btn" onclick="openChangelog()">
                 📋 更新記錄
                 <span class="changelog-dot" id="cl-dot"></span>
@@ -537,10 +538,21 @@
         });
 
         initChangelog();
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('./sw.js').then(async () => {
-                if (Notification.permission === 'default') await Notification.requestPermission();
-            }).catch(() => {});
+        if ('serviceWorker' in navigator && 'Notification' in window) {
+            navigator.serviceWorker.register('./sw.js').catch(() => {});
+            const btn = document.getElementById('notif-btn');
+            if (Notification.permission !== 'granted') btn.style.display = 'block';
+        }
+        async function enableNotifications() {
+            const btn = document.getElementById('notif-btn');
+            const perm = await Notification.requestPermission();
+            if (perm === 'granted') {
+                btn.style.display = 'none';
+            } else {
+                btn.textContent = '🔕 請至設定開啟通知';
+                btn.style.color = 'var(--muted)';
+                btn.onclick = null;
+            }
         }
     </script>
 </body>

@@ -609,7 +609,7 @@ async function initSW() {
     try {
         _swReg = await navigator.serviceWorker.register('./sw.js');
         await navigator.serviceWorker.ready;
-        if (Notification.permission === 'default') await Notification.requestPermission();
+        // 權限由 index.html 的按鈕統一申請
     } catch(e) {}
 }
 function pushNotif(title, body, tag = 'sb') {
