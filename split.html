@@ -8,24 +8,24 @@
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
     <style>
         :root {
-            --bg: #0C0E16;
-            --card: #161A28;
-            --text: #EEEEF8;
-            --muted: #8890A8;
-            --border: rgba(255,255,255,0.09);
-            --orange: #F0C040;
-            --green: #4ADE80;
-            --red: #F87171;
-            --blue: #7B9CFF;
+            --bg: #1E1912;
+            --card: #2C2418;
+            --text: #F2EBD8;
+            --muted: #9E8F7C;
+            --border: rgba(200,160,100,0.22);
+            --orange: #C8A44A;
+            --green: #76A668;
+            --red: #C47070;
+            --blue: #8FAEC8;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
         ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb { background: rgba(200,160,100,0.2); border-radius: 3px; }
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-            background: radial-gradient(ellipse at top left, #1a1f35 0%, #0C0E16 60%);
+            background: radial-gradient(ellipse at top left, #302818 0%, #1E1912 60%);
             background-attachment: fixed;
             color: var(--text);
             min-height: 100vh;
@@ -36,17 +36,17 @@
 
         /* ===== Header ===== */
         .header {
-            background: rgba(20, 24, 42, 0.82);
+            background: rgba(28, 22, 14, 0.92);
             backdrop-filter: blur(24px);
             -webkit-backdrop-filter: blur(24px);
-            border-bottom: 1px solid rgba(255,255,255,0.07);
+            border-bottom: 1px solid var(--border);
             padding: 20px;
             text-align: center;
             position: sticky;
             top: 0;
             z-index: 100;
         }
-        .header-title { font-size: 18px; font-weight: 800; letter-spacing: 2px; color: var(--orange); }
+        .header-title { font-size: 18px; font-weight: 800; letter-spacing: 1px; color: var(--orange); }
         .header-back {
             position: absolute; left: 20px; top: 50%; transform: translateY(-50%);
             color: var(--muted); text-decoration: none; font-size: 14px; font-weight: bold;
@@ -65,14 +65,14 @@
         /* ===== 淨額大字 ===== */
         .balance-card {
             margin: 20px 16px 0;
-            background: rgba(22, 26, 42, 0.65);
+            background: rgba(44, 36, 22, 0.75);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255,255,255,0.1);
+            border: 1px solid var(--border);
             border-radius: 24px;
             padding: 30px 20px;
             text-align: center;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.35);
             position: relative;
             overflow: hidden;
             transition: box-shadow 0.3s;
@@ -80,42 +80,42 @@
         .balance-card::before {
             content: '';
             position: absolute; top: 0; left: 0; right: 0; height: 1px;
-            background: linear-gradient(90deg, transparent, rgba(255,179,64,0.35), transparent);
+            background: linear-gradient(90deg, transparent, rgba(200,160,80,0.30), transparent);
         }
-        .balance-label { font-size: 12px; color: var(--muted); letter-spacing: 1.5px; margin-bottom: 12px; text-transform: uppercase; }
+        .balance-label { font-size: 12px; color: var(--muted); letter-spacing: 1px; margin-bottom: 12px; }
         .balance-amount { font-size: 56px; font-weight: 900; line-height: 1; transition: color 0.4s; }
         .balance-desc { font-size: 14px; font-weight: 600; margin-top: 12px; transition: color 0.4s; opacity: 0.85; }
-        .balance-amount.owe { color: var(--red); filter: drop-shadow(0 4px 12px rgba(248,113,113,0.3)); }
-        .balance-amount.owed { color: var(--orange); filter: drop-shadow(0 4px 12px rgba(255,179,64,0.3)); }
-        .balance-amount.zero { color: var(--green); filter: drop-shadow(0 4px 12px rgba(74,222,128,0.25)); }
+        .balance-amount.owe { color: var(--red); filter: drop-shadow(0 4px 12px rgba(196,112,112,0.25)); }
+        .balance-amount.owed { color: var(--orange); filter: drop-shadow(0 4px 12px rgba(200,164,74,0.25)); }
+        .balance-amount.zero { color: var(--green); filter: drop-shadow(0 4px 12px rgba(118,166,104,0.20)); }
 
         /* ===== 輸入卡 ===== */
         .input-card {
             margin: 14px 16px 0;
-            background: rgba(22, 26, 42, 0.55);
+            background: rgba(44, 36, 22, 0.65);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255,255,255,0.09);
+            border: 1px solid var(--border);
             border-radius: 24px;
             padding: 24px 20px;
         }
-        .input-card-title { font-size: 12px; font-weight: bold; color: var(--muted); letter-spacing: 1.5px; margin-bottom: 16px; text-transform: uppercase; }
+        .input-card-title { font-size: 12px; font-weight: bold; color: var(--muted); letter-spacing: 0.5px; margin-bottom: 16px; }
         .amount-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
         .amount-group label { font-size: 12px; color: var(--muted); font-weight: bold; display: block; margin-bottom: 6px; letter-spacing: 0.5px; }
         .amount-input {
-            width: 100%; background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.08);
+            width: 100%; background: rgba(0,0,0,0.20); border: 1px solid rgba(200,160,100,0.12);
             border-radius: 12px; padding: 14px 12px; color: var(--text);
             font-size: 20px; font-weight: bold; text-align: center;
             outline: none; transition: border-color 0.2s, box-shadow 0.2s; -webkit-appearance: none;
         }
-        .amount-input:focus { border-color: rgba(255,179,64,0.5); box-shadow: 0 0 0 3px rgba(255,179,64,0.08); }
+        .amount-input:focus { border-color: rgba(200,164,74,0.5); box-shadow: 0 0 0 3px rgba(200,164,74,0.08); }
         .amount-input::placeholder { color: rgba(255,255,255,0.18); font-size: 16px; font-weight: normal; }
         .note-input {
-            width: 100%; background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.08);
+            width: 100%; background: rgba(0,0,0,0.20); border: 1px solid rgba(200,160,100,0.12);
             border-radius: 12px; padding: 12px 14px; color: var(--text);
             font-size: 15px; outline: none; margin-bottom: 14px; transition: border-color 0.2s, box-shadow 0.2s;
         }
-        .note-input:focus { border-color: rgba(255,179,64,0.5); box-shadow: 0 0 0 3px rgba(255,179,64,0.08); }
+        .note-input:focus { border-color: rgba(200,164,74,0.5); box-shadow: 0 0 0 3px rgba(200,164,74,0.08); }
         .note-input::placeholder { color: rgba(255,255,255,0.2); }
         .payer-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
         .payer-btn {
@@ -438,6 +438,22 @@
             playSound('click');
     });
 
+    // ── 通知工具 ──────────────────────────────────────────────────
+    let _swReg = null;
+    async function initSW() {
+        if (!('serviceWorker' in navigator) || !('Notification' in window)) return;
+        try {
+            _swReg = await navigator.serviceWorker.register('./sw.js');
+            await navigator.serviceWorker.ready;
+            if (Notification.permission === 'default') await Notification.requestPermission();
+        } catch(e) {}
+    }
+    function pushNotif(title, body, tag = 'sb') {
+        if (Notification.permission !== 'granted' || !_swReg) return;
+        _swReg.showNotification(title, { body, tag });
+    }
+    initSW();
+
     function showToast(msg, color = 'var(--green)') {
         if (color === 'var(--red)') playSound('error');
         const el = document.getElementById('toast');
@@ -685,6 +701,13 @@
         badge.innerText = unsettledCount;
         badge.style.display = unsettledCount > 0 ? 'inline-block' : 'none';
         if (currentView === 'unsettled' || currentView === 'settled') renderList();
+    });
+
+    const _splitInitTs = Date.now();
+    db.ref('split/records').on('child_added', snap => {
+        const r = snap.val();
+        if (!r || r.timestamp < _splitInitTs) return;
+        pushNotif('📒 帳本更新', `新增了一筆帳目${r.note ? `：${r.note}` : ''}`, 'split');
     });
 </script>
 

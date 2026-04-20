@@ -8,22 +8,22 @@
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js" crossorigin="anonymous"></script>
     <style>
         :root {
-            --bg: #0C0E16; --card: #161A28; --text: #EEEEF8; --muted: #8890A8;
-            --border: rgba(255,255,255,0.09); --gold: #F0C040; --green: #4ADE80;
-            --red: #F87171; --purple: #C084FC; --primary: #7B9CFF;
-            --quick: #4ADE80; --standard: #7B9CFF; --abyss: #C084FC;
+            --bg: #1E1912; --card: #2C2418; --text: #F2EBD8; --muted: #9E8F7C;
+            --border: rgba(200,160,100,0.22); --gold: #C8A44A; --green: #76A668;
+            --red: #C47070; --purple: #9680B8; --primary: #BF8F42;
+            --quick: #76A668; --standard: #BF8F42; --abyss: #9680B8;
         }
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
             font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-            background: radial-gradient(ellipse at top left, #1a1f35 0%, #0C0E16 60%);
+            background: radial-gradient(ellipse at top left, #302818 0%, #1E1912 60%);
             color: var(--text); min-height: 100vh; padding-bottom: 60px;
         }
 
         /* ── Top bar ── */
         .top-bar {
             display: flex; align-items: center; justify-content: space-between;
-            padding: 18px 20px; background: rgba(12,14,22,0.88);
+            padding: 18px 20px; background: rgba(28,22,14,0.92);
             backdrop-filter: blur(20px); border-bottom: 1px solid var(--border);
             position: sticky; top: 0; z-index: 50;
         }
@@ -43,13 +43,13 @@
         /* ── Layout ── */
         .content { padding: 14px 16px 0; max-width: 480px; margin: 0 auto; }
         .sec-label {
-            font-size: 11px; font-weight: 700; letter-spacing: 2.5px; color: var(--muted);
-            text-transform: uppercase; margin: 18px 0 10px;
+            font-size: 12px; font-weight: 600; letter-spacing: 0.5px; color: var(--muted);
+            margin: 18px 0 10px;
         }
 
         /* ── Box base ── */
         .box {
-            background: rgba(22,26,42,0.65); border: 1px solid var(--border);
+            background: rgba(44,36,22,0.75); border: 1px solid var(--border);
             border-radius: 20px; padding: 18px; margin-bottom: 10px;
         }
 
@@ -60,14 +60,14 @@
         .ps-btns { display: flex; gap: 12px; justify-content: center; }
         .ps-btn {
             flex: 1; max-width: 160px; padding: 20px 16px; border-radius: 20px;
-            border: 1px solid var(--border); background: rgba(22,26,42,0.7);
+            border: 1px solid var(--border); background: rgba(44,36,22,0.75);
             cursor: pointer; transition: all 0.2s; text-align: center;
         }
-        .ps-btn:hover { transform: translateY(-4px); filter: brightness(1.15); }
+        .ps-btn:hover { transform: translateY(-4px); filter: brightness(1.12); }
         .ps-btn .ps-ico { font-size: 36px; margin-bottom: 8px; }
         .ps-btn .ps-name { font-weight: 800; font-size: 16px; }
-        .ps-p1 { border-color: rgba(0,255,136,0.3); color: #00ff88; }
-        .ps-p2 { border-color: rgba(0,229,255,0.3); color: #00e5ff; }
+        .ps-p1 { border-color: rgba(141,200,122,0.3); color: #8DC87A; }
+        .ps-p2 { border-color: rgba(122,187,200,0.3); color: #7ABBC8; }
 
         /* ── Difficulty cards ── */
         .diff-card { cursor: pointer; transition: all 0.2s ease; user-select: none; }
@@ -84,6 +84,8 @@
             border-radius: 10px; white-space: nowrap; flex-shrink: 0;
         }
         .diff-range { display: flex; gap: 6px; flex-wrap: wrap; }
+        .diff-drops { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border); }
+        .drop-pill { font-size: 11px; color: var(--muted); background: rgba(255,255,255,0.04); border: 1px solid var(--border); border-radius: 8px; padding: 2px 8px; letter-spacing: 0.2px; }
         .rpill {
             font-size: 11px; padding: 3px 8px; border-radius: 8px;
             background: rgba(255,255,255,0.05); border: 1px solid var(--border); color: var(--muted);
@@ -104,6 +106,13 @@
             cursor: pointer; color: #fff; transition: all 0.2s ease;
             display: flex; justify-content: center; align-items: center; gap: 8px;
             background: rgba(255,255,255,0.05); margin-bottom: 8px;
+            position: relative; overflow: hidden;
+        }
+        .ripple-wave {
+            position: absolute; border-radius: 50%;
+            background: rgba(255,255,255,0.18);
+            transform: scale(0); animation: rippleKf 0.55s linear forwards;
+            pointer-events: none;
         }
         .btn:hover:not(:disabled) { filter: brightness(1.15); transform: translateY(-2px); }
         .btn:active:not(:disabled) { transform: scale(0.97); }
@@ -132,7 +141,7 @@
         .invite-btns .btn { margin-bottom: 0; }
 
         /* ── Active run ── */
-        .active-box { border-color: rgba(123,156,255,0.28); }
+        .active-box { border-color: rgba(123,156,255,0.35); animation: pulseGlow 2.5s ease-in-out infinite; }
         .countdown-txt {
             font-size: 36px; font-weight: 900; letter-spacing: 3px;
             margin: 8px 0; font-variant-numeric: tabular-nums;
@@ -148,22 +157,24 @@
         /* ── History ── */
         .hist-item {
             display: flex; align-items: center; gap: 12px; padding: 12px 14px;
-            background: rgba(22,26,42,0.5); border: 1px solid var(--border);
+            background: rgba(44,36,22,0.62); border: 1px solid var(--border);
             border-radius: 14px; margin-bottom: 8px;
         }
 
         /* ── Modal ── */
         .modal-bg {
-            display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.80);
+            display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75);
             backdrop-filter: blur(10px); z-index: 200;
             align-items: center; justify-content: center; padding: 20px;
         }
         .modal-bg.open { display: flex; }
+        .modal-bg.open .modal-box { animation: popIn 0.3s cubic-bezier(0.34,1.56,0.64,1) both; }
         .modal-box {
-            background: var(--card); border: 1px solid rgba(255,255,255,0.12);
+            background: var(--card); border: 1px solid rgba(200,160,100,0.18);
             border-radius: 24px; padding: 30px 22px;
             max-width: 340px; width: 100%; text-align: center;
         }
+        .modal-box.shake { animation: shakeX 0.45s ease both !important; }
 
         /* ── Help button ── */
         .help-btn {
@@ -202,15 +213,48 @@
             0%, 100% { transform: translateY(0); }
             50%       { transform: translateY(-8px); }
         }
+        @keyframes popIn {
+            from { transform: scale(0.88); opacity: 0; }
+            to   { transform: scale(1);    opacity: 1; }
+        }
+        @keyframes shakeX {
+            0%,100%{ transform:translateX(0); }
+            20%    { transform:translateX(-8px); }
+            40%    { transform:translateX(8px); }
+            60%    { transform:translateX(-6px); }
+            80%    { transform:translateX(6px); }
+        }
+        @keyframes fadeUp {
+            from { opacity:0; transform:translateY(14px); }
+            to   { opacity:1; transform:translateY(0); }
+        }
+        @keyframes pulseGlow {
+            0%,100%{ box-shadow: 0 0 0 0 rgba(123,156,255,0); }
+            50%    { box-shadow: 0 0 16px 4px rgba(123,156,255,0.16); }
+        }
+        @keyframes rippleKf {
+            to { transform: scale(2.5); opacity: 0; }
+        }
+
+        .diff-card { animation: fadeUp 0.38s ease both; }
+        #card-quick    { animation-delay: 0.04s; }
+        #card-standard { animation-delay: 0.11s; }
+        #card-abyss    { animation-delay: 0.18s; }
 
         /* ── Toast ── */
         #toast {
-            position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
-            background: rgba(22,26,42,0.96); border: 1px solid var(--border);
+            position: fixed; bottom: 24px; left: 50%;
+            transform: translateX(-50%) translateY(0);
+            background: rgba(24,18,12,0.96); border: 1px solid var(--border);
             padding: 11px 22px; border-radius: 12px; font-size: 14px; font-weight: bold;
-            z-index: 999; opacity: 0; transition: opacity 0.3s; pointer-events: none;
+            z-index: 999; opacity: 0;
+            transition: opacity 0.3s, transform 0.3s;
+            pointer-events: none;
             white-space: nowrap; max-width: 90vw; text-overflow: ellipsis; overflow: hidden;
         }
+        #toast.t-success { border-color: rgba(74,222,128,0.4);  color: var(--green); }
+        #toast.t-error   { border-color: rgba(248,113,113,0.4); color: var(--red);   }
+        #toast.t-gold    { border-color: rgba(240,192,64,0.4);  color: var(--gold);  }
     </style>
 </head>
 <body>
@@ -301,6 +345,11 @@
                 <span class="rpill">平手 ×1.00</span>
                 <span class="rpill good">最好 ×2.00</span>
             </div>
+            <div class="diff-drops">
+                <span class="drop-pill">🎟️ 40%</span>
+                <span class="drop-pill">🍀 15%</span>
+                <span class="drop-pill">🎫 5%</span>
+            </div>
         </div>
 
         <div class="box diff-card" id="card-standard" onclick="selectDiff('standard')">
@@ -316,6 +365,11 @@
                 <span class="rpill">平手 ×1.05</span>
                 <span class="rpill good">最好 ×2.50</span>
             </div>
+            <div class="diff-drops">
+                <span class="drop-pill">🎟️ 50%</span>
+                <span class="drop-pill">🍀 25%</span>
+                <span class="drop-pill">🎫 15%</span>
+            </div>
         </div>
 
         <div class="box diff-card" id="card-abyss" onclick="selectDiff('abyss')">
@@ -330,6 +384,11 @@
                 <span class="rpill bad">最差 ×0.60</span>
                 <span class="rpill">平手 ×1.08</span>
                 <span class="rpill good">最好 ×3.00 + 虛寶</span>
+            </div>
+            <div class="diff-drops">
+                <span class="drop-pill">🎟️ 60%</span>
+                <span class="drop-pill">🍀 35%</span>
+                <span class="drop-pill">🎫 25%</span>
             </div>
         </div>
 
@@ -353,8 +412,29 @@
         </div>
     </div>
 
+    <!-- Weekly Quest -->
+    <div class="sec-label" style="margin-top:14px;">每週任務</div>
+    <div class="box" id="wq-box">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;">
+            <div>
+                <div style="font-weight:800; font-size:15px;">🗡️ 遠征出動</div>
+                <div style="font-size:12px; color:var(--muted); margin-top:3px;">本週完成 6 次任意難度遠征</div>
+            </div>
+            <div style="text-align:right;">
+                <div style="font-size:22px; font-weight:900; color:var(--gold);" id="wq-count">0/6</div>
+                <div style="font-size:11px; color:var(--muted);" id="wq-reward-label">獎勵 +100 點</div>
+            </div>
+        </div>
+        <div class="prog-bg" style="height:8px; margin-bottom:12px;">
+            <div class="prog-fill" id="wq-bar" style="width:0%; background:linear-gradient(90deg, var(--gold), #E8C56A);"></div>
+        </div>
+        <button class="btn" id="wq-claim-btn" style="display:none; background:rgba(200,164,74,0.18); color:var(--gold); border:1.5px solid rgba(200,164,74,0.45); font-size:14px;" onclick="claimWeeklyReward()">🎁 領取 100 點獎勵</button>
+        <div id="wq-claimed-tag" style="display:none; text-align:center; font-size:13px; color:var(--muted); padding:6px 0; letter-spacing:0.3px;">✓ 本週已領取　·　下週一 00:00 重置</div>
+        <div style="font-size:11px; color:var(--muted); text-align:center;" id="wq-footer">每週一 00:00 重置</div>
+    </div>
+
     <!-- History -->
-    <div class="sec-label" style="margin-top:6px;">最近紀錄</div>
+    <div class="sec-label" style="margin-top:14px;">最近紀錄</div>
     <div id="hist-list">
         <div style="color:var(--muted); font-size:13px; text-align:center; padding:20px;">尚無紀錄</div>
     </div>
@@ -504,8 +584,14 @@ const DIFF = {
 
 const R_POOL = ['r_musicbox','r_moonstone','r_dreamcatcher','r_feather','r_owl','r_bear','r_cat','r_wine','r_blanket','r_rain','r_massage','r_incense','r_diary','r_star'];
 const E_POOL = ['e_bottle','e_gem','e_scale','e_projector','e_cloud','e_baku','e_sand','e_key','e_score'];
-const INAME  = {r_musicbox:'星空八音盒',r_moonstone:'靜謐月光石',r_dreamcatcher:'捕夢網殘骸',r_feather:'午睡精靈羽毛',r_owl:'深層睡眠貓頭鷹',r_bear:'守護泰迪熊',r_cat:'壓胸口的胖橘貓',r_wine:'微醺的熱紅酒',r_blanket:'重力被',r_rain:'白噪音雨滴',r_massage:'筋膜槍馬達',r_incense:'奇楠沉香',r_diary:'上鎖的夢境日記',r_star:'安眠流星',e_bottle:'極光琉璃瓶',e_gem:'織夢彩寶',e_scale:'沉睡巨龍鱗片',e_projector:'銀河投影燈',e_cloud:'雷雨雲碎片',e_baku:'食夢貘木雕',e_sand:'被遺忘的沙漏',e_key:'潛意識黃金鑰匙',e_score:'人魚安眠曲樂譜'};
-const IICON  = {r_musicbox:'🎶',r_moonstone:'🌕',r_dreamcatcher:'🕸️',r_feather:'🪶',r_owl:'🦉',r_bear:'🧸',r_cat:'🐈',r_wine:'🍷',r_blanket:'🛌',r_rain:'🌧️',r_massage:'💆',r_incense:'🌿',r_diary:'📓',r_star:'🌟',e_bottle:'🧪',e_gem:'🔮',e_scale:'🐉',e_projector:'✨',e_cloud:'🌩️',e_baku:'🐘',e_sand:'⌛',e_key:'🗝️',e_score:'🧜‍♀️'};
+const INAME  = {r_musicbox:'星空八音盒',r_moonstone:'靜謐月光石',r_dreamcatcher:'捕夢網殘骸',r_feather:'午睡精靈羽毛',r_owl:'深層睡眠貓頭鷹',r_bear:'守護泰迪熊',r_cat:'壓胸口的胖橘貓',r_wine:'微醺的熱紅酒',r_blanket:'重力被',r_rain:'白噪音雨滴',r_massage:'筋膜槍馬達',r_incense:'奇楠沉香',r_diary:'上鎖的夢境日記',r_star:'安眠流星',e_bottle:'極光琉璃瓶',e_gem:'織夢彩寶',e_scale:'沉睡巨龍鱗片',e_projector:'銀河投影燈',e_cloud:'雷雨雲碎片',e_baku:'食夢貘木雕',e_sand:'被遺忘的沙漏',e_key:'潛意識黃金鑰匙',e_score:'人魚安眠曲樂譜',flex_pass:'萬能作息券',lucky_clover:'保底幸運草',free_gacha_ticket:'抽獎券'};
+const IICON  = {r_musicbox:'🎶',r_moonstone:'🌕',r_dreamcatcher:'🕸️',r_feather:'🪶',r_owl:'🦉',r_bear:'🧸',r_cat:'🐈',r_wine:'🍷',r_blanket:'🛌',r_rain:'🌧️',r_massage:'💆',r_incense:'🌿',r_diary:'📓',r_star:'🌟',e_bottle:'🧪',e_gem:'🔮',e_scale:'🐉',e_projector:'✨',e_cloud:'🌩️',e_baku:'🐘',e_sand:'⌛',e_key:'🗝️',e_score:'🧜‍♀️',flex_pass:'🎫',lucky_clover:'🍀',free_gacha_ticket:'🎟️'};
+
+const EXP_DROPS = {
+    quick:    [{ key:'free_gacha_ticket', chance:0.40 }, { key:'lucky_clover', chance:0.15 }, { key:'flex_pass', chance:0.05 }],
+    standard: [{ key:'free_gacha_ticket', chance:0.50 }, { key:'lucky_clover', chance:0.25 }, { key:'flex_pass', chance:0.15 }],
+    abyss:    [{ key:'free_gacha_ticket', chance:0.60 }, { key:'lucky_clover', chance:0.35 }, { key:'flex_pass', chance:0.25 }],
+};
 
 let myPoints = 0, selectedDiff = null, investment = 100;
 let activeRun = null, tickTimer = null;
@@ -514,6 +600,35 @@ let _loaded = false, _claiming = false;
 
 // ── Helpers ──────────────────────────────────────────────────────
 const dateStr = () => { const d=new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; };
+
+// ── 通知工具 ──────────────────────────────────────────────────────
+let _swReg = null;
+const _notifTimers = {};
+async function initSW() {
+    if (!('serviceWorker' in navigator) || !('Notification' in window)) return;
+    try {
+        _swReg = await navigator.serviceWorker.register('./sw.js');
+        await navigator.serviceWorker.ready;
+        if (Notification.permission === 'default') await Notification.requestPermission();
+    } catch(e) {}
+}
+function pushNotif(title, body, tag = 'sb') {
+    if (Notification.permission !== 'granted' || !_swReg) return;
+    _swReg.showNotification(title, { body, tag });
+}
+function scheduleNotif(id, title, body, atMs) {
+    const delay = atMs - Date.now();
+    if (delay <= 0 || delay > 24 * 3600 * 1000) return;
+    clearTimeout(_notifTimers[id]);
+    _notifTimers[id] = setTimeout(() => pushNotif(title, body, id), delay);
+}
+function getWeekId() {
+    const d = new Date();
+    const day = d.getDay(); // 0=Sun
+    const mon = new Date(d);
+    mon.setDate(d.getDate() + (day === 0 ? -6 : 1 - day));
+    return `${mon.getFullYear()}-${String(mon.getMonth()+1).padStart(2,'0')}-${String(mon.getDate()).padStart(2,'0')}`;
+}
 
 if (!ME || (ME !== 'p1' && ME !== 'p2')) {
     document.getElementById('player-select').style.display = 'block';
@@ -541,22 +656,50 @@ function fmtTime(ms) {
     return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
 }
 
-function toast(msg, ms=2500) {
-    const el=document.getElementById('toast');
-    el.textContent=msg; el.style.opacity='1';
-    setTimeout(()=>el.style.opacity='0', ms);
+function toast(msg, type='', ms=2500) {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.className = type ? `t-${type}` : '';
+    el.style.opacity = '1';
+    el.style.transform = 'translateX(-50%) translateY(0)';
+    clearTimeout(el._t);
+    el._t = setTimeout(() => {
+        el.style.opacity = '0';
+        el.style.transform = 'translateX(-50%) translateY(6px)';
+    }, ms);
 }
 
+// ── Ripple ────────────────────────────────────────────────────────
+document.addEventListener('pointerdown', e => {
+    const btn = e.target.closest('.btn');
+    if (!btn || btn.disabled) return;
+    const r = document.createElement('span');
+    r.className = 'ripple-wave';
+    const rect = btn.getBoundingClientRect();
+    const size = Math.max(rect.width, rect.height);
+    r.style.cssText = `width:${size}px;height:${size}px;left:${e.clientX-rect.left-size/2}px;top:${e.clientY-rect.top-size/2}px`;
+    btn.appendChild(r);
+    r.addEventListener('animationend', () => r.remove());
+});
+
 // ── Sound ─────────────────────────────────────────────────────────
-const _AC = new (window.AudioContext || window.webkitAudioContext)();
+let _AC = null;
+function getAC() {
+    if (!_AC) _AC = new (window.AudioContext || window.webkitAudioContext)();
+    if (_AC.state === 'suspended') _AC.resume().catch(() => {});
+    return _AC;
+}
 function _beep(freq, dur, type='sine', vol=0.15, delay=0) {
-    const o = _AC.createOscillator(), g = _AC.createGain();
-    o.connect(g); g.connect(_AC.destination);
-    o.type = type; o.frequency.value = freq;
-    const t = _AC.currentTime + delay;
-    g.gain.setValueAtTime(vol, t);
-    g.gain.exponentialRampToValueAtTime(0.001, t + dur);
-    o.start(t); o.stop(t + dur);
+    try {
+        const ac = getAC();
+        const o = ac.createOscillator(), g = ac.createGain();
+        o.connect(g); g.connect(ac.destination);
+        o.type = type; o.frequency.value = freq;
+        const t = ac.currentTime + delay;
+        g.gain.setValueAtTime(vol, t);
+        g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+        o.start(t); o.stop(t + dur);
+    } catch(e) {}
 }
 // 出發音效：低→高 兩音
 function sfxDepart() { _beep(300,0.1); _beep(500,0.15,undefined,undefined,0.1); }
@@ -582,6 +725,9 @@ function initApp() {
     });
     db.ref(`expedition/${ME}/active`).on('value', s => {
         activeRun = s.val();
+        if (activeRun && activeRun.endAt > Date.now()) {
+            scheduleNotif('expedition', '⚔️ 遠征完成！', `${DIFF[activeRun.difficulty].label} 已結束，快去領取結果！`, activeRun.endAt);
+        }
         renderActive();
     });
     db.ref(`expedition/duo_invite/${ME}`).on('value', s => {
@@ -589,6 +735,8 @@ function initApp() {
     });
     renderDiffCards();
     loadHistory();
+    loadWeeklyQuest();
+    initSW();
 }
 
 // ── Diff cards ───────────────────────────────────────────────────
@@ -645,13 +793,14 @@ function adjInviteInvest(d) {
 // ── Increment daily count ────────────────────────────────────────
 async function incrementCount(player, diff) {
     await db.ref(`expedition/${player}/daily/${dateStr()}/${diff}`).transaction(c => (c||0)+1);
+    incrementWeeklyCount(player);
 }
 
 // ── Solo start ───────────────────────────────────────────────────
 async function startSolo() {
-    if (!selectedDiff)        { toast('請先選擇難度'); return; }
-    if (activeRun)             { toast('已有進行中的遠征'); return; }
-    if (myPoints < investment) { toast(`點數不足！（目前 ${myPoints} 點，需 ${investment} 點）`); return; }
+    if (!selectedDiff)        { toast('請先選擇難度', 'error'); return; }
+    if (activeRun)             { toast('已有進行中的遠征', 'error'); return; }
+    if (myPoints < investment) { toast(`點數不足！（目前 ${myPoints} 點，需 ${investment} 點）`, 'error'); return; }
     try {
 
     const seed     = (Math.random() * 0xFFFFFFFF) >>> 0;
@@ -663,29 +812,29 @@ async function startSolo() {
         if ((p||0) < investment) return undefined;
         return (p||0) - investment;
     });
-    if (!tx.committed) { toast('點數不足（交易失敗）'); return; }
+    if (!tx.committed) { toast('點數不足（交易失敗）', 'error'); return; }
     await db.ref(`expedition/${ME}/active`).set(run);
     await incrementCount(ME, selectedDiff);
-    // 清除送出給對方的邀請（若有）
     await db.ref(`expedition/duo_invite/${PARTNER}`).remove();
+    scheduleNotif('expedition', '⚔️ 遠征完成！', `${DIFF[selectedDiff].label} 已結束，快去領取結果！`, run.endAt);
 
     sfxDepart();
-    toast('遠征出發！');
+    toast('⚔️ 遠征出發！', 'success');
     document.getElementById('invest-box').style.display = 'none';
     document.getElementById('start-btns').style.display = 'none';
     selectedDiff = null;
     renderDiffCards();
-    } catch(e) { toast('錯誤：' + e.message); }
+    } catch(e) { toast('錯誤：' + e.message, 'error'); }
 }
 
 // ── Duo invite ───────────────────────────────────────────────────
 async function inviteDuo() {
-    if (!selectedDiff)        { toast('請先選擇難度'); return; }
-    if (activeRun)             { toast('已有進行中的遠征'); return; }
-    if (myPoints < investment) { toast(`點數不足！（目前 ${myPoints} 點，需 ${investment} 點）`); return; }
+    if (!selectedDiff)        { toast('請先選擇難度', 'error'); return; }
+    if (activeRun)             { toast('已有進行中的遠征', 'error'); return; }
+    if (myPoints < investment) { toast(`點數不足！（目前 ${myPoints} 點，需 ${investment} 點）`, 'error'); return; }
     try {
         const partnerActive = (await db.ref(`expedition/${PARTNER}/active`).once('value')).val();
-        if (partnerActive) { toast(`${NAMES[PARTNER]} 已有進行中的遠征`); return; }
+        if (partnerActive) { toast(`${NAMES[PARTNER]} 已有進行中的遠征`, 'error'); return; }
 
         await db.ref(`expedition/duo_invite/${PARTNER}`).set({
             from:ME, fromName:NAMES[ME],
@@ -693,8 +842,8 @@ async function inviteDuo() {
             hostInvest:investment, ts:Date.now(),
         });
         sfxInvite();
-        toast(`邀請已送出給 ${NAMES[PARTNER]}！`);
-    } catch(e) { toast('錯誤：' + e.message); }
+        toast(`🤝 邀請已送出給 ${NAMES[PARTNER]}！`, 'gold');
+    } catch(e) { toast('錯誤：' + e.message, 'error'); }
 }
 
 function renderInvite(inv) {
@@ -705,7 +854,7 @@ function renderInvite(inv) {
     if (Date.now() - (inv.ts || 0) > 3 * 60 * 1000) {
         box.style.display='none'; pendingInvite=null;
         db.ref(`expedition/duo_invite/${ME}`).remove();
-        toast('邀請已過期（超過 3 分鐘）');
+        toast('邀請已過期（超過 3 分鐘）', 'error');
         return;
     }
 
@@ -720,13 +869,13 @@ function renderInvite(inv) {
 
 async function acceptDuoInvite() {
     if (!pendingInvite) return;
-    if (activeRun)              { toast('已有進行中的遠征'); return; }
-    if (myPoints < inviteInvest){ toast('點數不足！'); return; }
+    if (activeRun)              { toast('已有進行中的遠征', 'error'); return; }
+    if (myPoints < inviteInvest){ toast('點數不足！', 'error'); return; }
 
     const inv = pendingInvite;
     const hostActive = (await db.ref(`expedition/${inv.from}/active`).once('value')).val();
     if (hostActive) {
-        toast('對方已有進行中的遠征，邀請失效');
+        toast('對方已有進行中的遠征，邀請失效', 'error');
         await db.ref(`expedition/duo_invite/${ME}`).remove(); return;
     }
 
@@ -735,7 +884,7 @@ async function acceptDuoInvite() {
         if ((pts||0) < inviteInvest) return undefined;
         return (pts||0) - inviteInvest;
     });
-    if (!guestTx.committed) { toast('點數不足！'); return; }
+    if (!guestTx.committed) { toast('點數不足！', 'error'); return; }
 
     // Deduct host points via transaction
     const tx = await db.ref(`economy/${inv.from}`).transaction(pts => {
@@ -744,7 +893,7 @@ async function acceptDuoInvite() {
     });
     if (!tx.committed) {
         await db.ref(`economy/${ME}`).transaction(p => (p||0) + inviteInvest);
-        toast('對方點數不足，邀請已失效');
+        toast('對方點數不足，邀請已失效', 'error');
         await db.ref(`expedition/duo_invite/${ME}`).remove(); return;
     }
 
@@ -762,8 +911,10 @@ async function acceptDuoInvite() {
         incrementCount(inv.from, inv.difficulty),
         db.ref(`expedition/duo_invite/${ME}`).remove(),
     ]);
+    const myRun = (await db.ref(`expedition/${ME}/active`).once('value')).val();
+    if (myRun) scheduleNotif('expedition', '⚔️ 遠征完成！', `${DIFF[inv.difficulty].label} 已結束，快去領取結果！`, myRun.endAt);
     sfxDepart();
-    toast('雙人遠征出發！');
+    toast('⚔️ 雙人遠征出發！', 'success');
 }
 
 async function declineDuoInvite() {
@@ -834,18 +985,23 @@ async function claimResult() {
 
         await db.ref(`economy/${ME}`).transaction(p => (p||0) + returned);
 
-        let itemKey = null;
-        if (run.difficulty === 'abyss' && ev.hasItem) itemKey = grantAbyssItem();
+        const grantedItems = [];
+        if (run.difficulty === 'abyss' && ev.hasItem) {
+            const ak = grantAbyssItem();
+            if (ak) grantedItems.push({ key: ak, qty: 1 });
+        }
+        const expItems = await tryGrantExpItem(run.difficulty);
+        grantedItems.push(...expItems);
 
         await db.ref(`expedition/${ME}/history`).push({
             ts:Date.now(), difficulty:run.difficulty, investment:run.investment,
-            eventName:ev.n, mult, returned, isDuo:run.isDuo, item:itemKey,
+            eventName:ev.n, mult, returned, isDuo:run.isDuo, item:grantedItems[0]?.key||null,
         });
         await db.ref(`expedition/${ME}/active`).remove();
 
-        showResult(ev, mult, run.investment, returned, profit, itemKey);
+        showResult(ev, mult, run.investment, returned, profit, grantedItems);
     } catch(e) {
-        toast('領取失敗：' + e.message);
+        toast('領取失敗：' + e.message, 'error');
         btn.disabled = false;
         btn.innerHTML = '🎁 領取結果';
     } finally {
@@ -860,31 +1016,117 @@ function grantAbyssItem() {
     return key;
 }
 
-function showResult(ev, mult, invest, returned, profit, itemKey) {
+function showResult(ev, mult, invest, returned, profit, grantedItems) {
     document.getElementById('res-icon').textContent   = ev.ico;
     document.getElementById('res-name').textContent   = ev.n;
     document.getElementById('res-desc').textContent   = ev.d;
     const profEl = document.getElementById('res-profit');
     profEl.textContent = (profit >= 0 ? '+' : '') + profit + ' 點';
     profEl.style.color = profit >= 0 ? 'var(--green)' : 'var(--red)';
+    // 大贏：利潤數字彈出
+    profEl.style.animation = 'none';
+    void profEl.offsetHeight;
+    if (profit > 0) profEl.style.animation = 'popIn 0.35s cubic-bezier(0.34,1.56,0.64,1) both';
     document.getElementById('res-detail').textContent =
         `×${mult.toFixed(2)} · 投入 ${invest} → 拿回 ${returned} 點`;
+    const items = Array.isArray(grantedItems) ? grantedItems : [];
     const itemEl = document.getElementById('res-item');
-    if (itemKey) {
+    if (items.length) {
         itemEl.style.display = 'block';
-        itemEl.textContent   = `🎁 獲得虛寶：${IICON[itemKey]||''} ${INAME[itemKey]||itemKey}`;
+        itemEl.innerHTML = items.map(item => {
+            const k = typeof item === 'string' ? item : item.key;
+            const qty = typeof item === 'object' && item.qty > 1 ? ` ×${item.qty}` : '';
+            return `🎁 ${IICON[k]||''} ${INAME[k]||k}${qty}`;
+        }).join('<br>');
         setTimeout(sfxItem, 200);
     } else {
         itemEl.style.display = 'none';
         setTimeout(profit >= 0 ? sfxWin : sfxLoss, 100);
     }
     document.getElementById('result-modal').classList.add('open');
+    // 虧損：modal 搖晃
+    if (profit < 0) {
+        const box = document.querySelector('#result-modal .modal-box');
+        setTimeout(() => {
+            box.classList.add('shake');
+            box.addEventListener('animationend', () => box.classList.remove('shake'), { once: true });
+        }, 120);
+    }
 }
 
 function closeResult() {
     document.getElementById('result-modal').classList.remove('open');
     loadHistory();
     renderDiffCards();
+}
+
+// ── Exp item drop ────────────────────────────────────────────────
+function rollTicketQty(difficulty) {
+    if (difficulty === 'quick') return 1;
+    if (difficulty === 'standard') return Math.random() < 0.5 ? 1 : 2;
+    const r = Math.random();
+    if (r < 0.40) return 1;
+    if (r < 0.70) return 2;
+    if (r < 0.88) return 3;
+    if (r < 0.96) return 4;
+    return 5;
+}
+
+async function tryGrantExpItem(difficulty) {
+    const drops = EXP_DROPS[difficulty] || [];
+    const results = [];
+    for (const drop of drops) {
+        if (Math.random() < drop.chance) {
+            const qty = drop.key === 'free_gacha_ticket' ? rollTicketQty(difficulty) : 1;
+            await db.ref(`users/${ME}/items/${drop.key}`).transaction(c => (c||0)+qty);
+            results.push({ key: drop.key, qty });
+        }
+    }
+    return results;
+}
+
+// ── Weekly quest ─────────────────────────────────────────────────
+function loadWeeklyQuest() {
+    const wid = getWeekId();
+    db.ref(`expedition/${ME}/weekly/${wid}`).on('value', snap => {
+        const data = snap.val() || { count:0, claimed:false };
+        const count   = Math.min(data.count || 0, 6);
+        const claimed = data.claimed || false;
+        const done    = count >= 6;
+
+        document.getElementById('wq-count').textContent = `${count}/6`;
+        document.getElementById('wq-bar').style.width   = `${Math.min(100, count/6*100)}%`;
+
+        document.getElementById('wq-claim-btn').style.display  = (done && !claimed) ? 'block' : 'none';
+        document.getElementById('wq-claimed-tag').style.display = claimed ? 'block' : 'none';
+        document.getElementById('wq-footer').style.display      = claimed ? 'none' : 'block';
+        document.getElementById('wq-reward-label').textContent  = claimed ? '已領取' : '獎勵 +100 點';
+    });
+}
+
+async function claimWeeklyReward() {
+    const wid = getWeekId();
+    const snap = await db.ref(`expedition/${ME}/weekly/${wid}`).once('value');
+    const data = snap.val() || {};
+    if ((data.count || 0) < 6) { toast('任務尚未完成！', 'error'); return; }
+    if (data.claimed)           { toast('本週已領取過', 'error'); return; }
+
+    const tx = await db.ref(`expedition/${ME}/weekly/${wid}/claimed`).transaction(v => {
+        if (v) return undefined;
+        return true;
+    });
+    if (!tx.committed) { toast('已領取過', 'error'); return; }
+
+    await db.ref(`economy/${ME}`).transaction(p => (p||0) + 100);
+    toast('🎁 領取 100 點！', 'success');
+}
+
+function incrementWeeklyCount(player) {
+    const wid = getWeekId();
+    db.ref(`expedition/${player}/weekly/${wid}/count`).transaction(c => {
+        if ((c||0) >= 6) return undefined;
+        return (c||0) + 1;
+    });
 }
 
 // ── History ──────────────────────────────────────────────────────

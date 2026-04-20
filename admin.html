@@ -371,36 +371,6 @@
         </div>
     </div>
 
-    <div class="section-card">
-        <div class="section-header" onclick="toggleSection('tomb-ctrl')">
-            <span class="section-header-icon">⚱️</span>
-            <span class="section-header-title">盜墓筆記 — 墓穴控制</span>
-            <span class="section-chevron" id="chevron-tomb-ctrl">▼</span>
-        </div>
-        <div class="section-body collapsed" id="body-tomb-ctrl">
-            <!-- 目前狀態 -->
-            <div style="display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.09);border-radius:12px;padding:14px 16px;">
-                <div>
-                    <div style="font-size:13px;font-weight:700;color:var(--text)">目前墓穴狀態</div>
-                    <div style="font-size:12px;color:var(--muted);margin-top:3px" id="tomb-status-label">載入中...</div>
-                </div>
-                <div id="tomb-status-dot" style="width:12px;height:12px;border-radius:50%;background:var(--muted)"></div>
-            </div>
-            <!-- 開關按鈕 -->
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-                <button class="action-btn" style="background:rgba(74,222,128,0.12);border-color:rgba(74,222,128,0.3);color:var(--green)" onclick="setTombAvailable(true)">
-                    ✅ 開放墓穴
-                </button>
-                <button class="action-btn" style="background:rgba(248,113,113,0.10);border-color:rgba(248,113,113,0.25);color:var(--red)" onclick="setTombAvailable(false)">
-                    🔒 關閉墓穴
-                </button>
-            </div>
-            <!-- 提示 -->
-            <div style="font-size:11px;color:var(--muted);line-height:1.7;padding:0 2px">
-                手動控制今日墓穴是否開放。關閉後玩家大廳會顯示冷卻中，無法開始新局。
-            </div>
-        </div>
-    </div>
 
 </div>
 
@@ -480,23 +450,6 @@
         const chev = document.getElementById('chevron-' + id);
         const collapsed = body.classList.toggle('collapsed');
         chev.style.transform = collapsed ? 'rotate(-90deg)' : 'rotate(0deg)';
-    }
-
-    // ===== 盜墓筆記控制 =====
-    db.ref('tomb/availability').on('value', snap => {
-        const d = snap.val() || {};
-        const available = !!d.isAvailable;
-        document.getElementById('tomb-status-label').textContent = available ? '⚱️ 開放中' : '🔒 冷卻中';
-        document.getElementById('tomb-status-dot').style.background = available ? 'var(--green)' : 'var(--red)';
-    });
-
-    async function setTombAvailable(val) {
-        await db.ref('tomb/availability').update({
-            isAvailable: val,
-            nextCheckAt: val ? 0 : Date.now() + 3600000,
-            lastClosedAt: val ? (await db.ref('tomb/availability/lastClosedAt').once('value')).val() : Date.now(),
-        });
-        showToast(val ? '✅ 墓穴已開放' : '🔒 墓穴已關閉');
     }
 
     // ===== 公告 =====

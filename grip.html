@@ -10,23 +10,23 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         :root {
-            --bg:           #0C0C12;
-            --card:         #15151E;
-            --card2:        #1C1C27;
-            --border:       rgba(255,255,255,0.07);
-            --accent:       #FF8C00;
-            --accent-lt:    #FFB347;
-            --accent-glow:  rgba(255, 140, 0, 0.18);
-            --text:         #F2F2F7;
-            --text2:        #8E8E9A;
-            --text3:        #3A3A45;
-            --green:        #34C759;
-            --red:          #FF453A;
-            --yellow:       #FFD60A;
+            --bg:           #1E1912;
+            --card:         #2C2418;
+            --card2:        #342C1E;
+            --border:       rgba(200,160,100,0.22);
+            --accent:       #C8883A;
+            --accent-lt:    #D4A455;
+            --accent-glow:  rgba(200, 136, 58, 0.20);
+            --text:         #F2EBD8;
+            --text2:        #9E8F7C;
+            --text3:        #4A4030;
+            --green:        #76A668;
+            --red:          #C47070;
+            --yellow:       #C8A44A;
         }
 
         body {
-            background: var(--bg);
+            background: radial-gradient(ellipse at top, #302818 0%, #1E1912 70%);
             color: var(--text);
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
             min-height: 100vh;
@@ -117,7 +117,7 @@
             justify-content: center;
             gap: 8px;
             padding: 12px 20px 20px;
-            background: rgba(12,12,18,0.92);
+            background: rgba(28,22,14,0.94);
             backdrop-filter: blur(20px);
             border-top: 1px solid var(--border);
             z-index: 100;
@@ -154,13 +154,34 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 20px 0 4px;
+            padding: 14px 16px;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            background: rgba(28,22,14,0.92);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            margin: 0 -16px;
         }
 
         .header-title {
-            font-size: 20px;
+            font-size: 18px;
             font-weight: 900;
         }
+
+        .back-btn {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text2);
+            text-decoration: none;
+            background: var(--card2);
+            border: 1px solid var(--border);
+            border-radius: 100px;
+            padding: 7px 13px;
+            transition: all 0.15s;
+        }
+        .back-btn:hover { border-color: var(--accent); color: var(--text); }
 
         .user-chip {
             background: var(--card2);
@@ -610,7 +631,7 @@
 <div id="app">
     <div class="header">
         <div style="display:flex;align-items:center;gap:10px">
-            <a href="index.html" style="background:var(--card2);border:1px solid var(--border);border-radius:100px;padding:7px 13px;font-size:13px;font-weight:600;color:var(--text2);text-decoration:none;transition:all 0.15s" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--text)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text2)'">← 首頁</a>
+            <a href="index.html" class="back-btn">← 首頁</a>
             <div class="header-title">🤜 握力日記</div>
         </div>
         <div class="user-chip" id="user-chip" onclick="switchUser()">— · 切換</div>
