@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="manifest" href="./manifest.json">
     <title>睡眠金庫</title>
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
@@ -2624,16 +2625,18 @@
                 setTimeout(() => { fl.style.animation = ''; fl.style.opacity = '0'; }, 560);
             }, 1500);
         }
+        function _hidePullAnim() {
+            document.getElementById('sp-overlay').style.display = 'none';
+        }
         function _lotteryModal(title, body, isGood) {
             const wait = Math.max(0, _pullAnimEnd - Date.now());
-            setTimeout(() => {
-                document.getElementById('sp-overlay').style.display = 'none';
-                showModalMsg(title, body, isGood);
-            }, wait);
+            setTimeout(() => { _hidePullAnim(); showModalMsg(title, body, isGood); }, wait);
         }
 
         function executeLottery(m) {
             _showPullAnim();
+            // 保底：6秒後若覆蓋層還在就強制關閉
+            setTimeout(_hidePullAnim, 6000);
             db.ref('economy/'+ME).once('value').then(ps=>{
                 let pts = ps.val()||0;
                 db.ref('users/'+ME).once('value').then(s=>{
@@ -2768,8 +2771,8 @@
                             if (ch) ch.classList.add('open');
                         }
                     }, 500);
-                });
-            });
+                }).catch(() => { _hidePullAnim(); showToast('抽獎失敗，請重試', 'error'); });
+            }).catch(() => { _hidePullAnim(); showToast('抽獎失敗，請重試', 'error'); });
         }
 
         // ===== 🎁 物品使用 =====
