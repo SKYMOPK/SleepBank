@@ -322,9 +322,9 @@ body{ font-family:-apple-system,BlinkMacSystemFont,sans-serif; background:radial
 
             <!-- treasury -->
             <div class="box treasury-box" id="treasury-box" style="display:none;">
-                <div class="treasury-lbl">公司金庫</div>
+                <div class="treasury-lbl">💼 企業幣金庫</div>
                 <div class="treasury-amt" id="treasury-display">0</div>
-                <div class="treasury-lbl" style="margin-top:2px;">點</div>
+                <div class="treasury-lbl" style="margin-top:2px;">💼 企業幣</div>
             </div>
 
             <!-- macro phase -->
@@ -372,17 +372,42 @@ body{ font-family:-apple-system,BlinkMacSystemFont,sans-serif; background:radial
 
             <!-- transfer -->
             <div id="transfer-section" style="display:none;">
-                <div class="sec-label">資金調度</div>
+                <div class="sec-label">個人點數 → 企業幣（注資）</div>
                 <div class="box">
-                    <div style="font-size:13px; color:var(--muted); margin-bottom:10px;">個人點數 ↔ 公司金庫</div>
-                    <div class="transfer-row" style="margin-bottom:8px;">
-                        <input class="transfer-input" id="inject-input" type="number" min="1" placeholder="注資金額">
+                    <div style="font-size:13px; color:var(--muted); margin-bottom:10px;">個人點數 1:1 轉入企業幣金庫</div>
+                    <div class="transfer-row">
+                        <input class="transfer-input" id="inject-input" type="number" min="1" placeholder="注資金額（點）">
                         <button class="btn btn-gold btn-sm" onclick="injectCapital()">注資 →</button>
                     </div>
-                    <div class="transfer-row">
-                        <input class="transfer-input" id="withdraw-input" type="number" min="1" placeholder="提領金額">
-                        <button class="btn btn-green btn-sm" onclick="withdrawProfit()">← 提領</button>
+                </div>
+            </div>
+
+            <!-- 兌換所 -->
+            <div id="exchange-section" style="display:none;">
+                <div class="sec-label">🏦 兌換所（企業幣 → 點數）</div>
+                <div class="box">
+                    <div style="font-size:13px; color:var(--muted); margin-bottom:12px;">兌換比例遞減，兩人共用每日池</div>
+                    <div style="margin-bottom:12px;">
+                        <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:4px;">
+                            <span style="color:var(--muted);">今日共用池</span>
+                            <span id="pool-display" style="font-weight:700;">讀取中...</span>
+                        </div>
+                        <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:6px;">
+                            <span style="color:var(--muted);">當前匯率</span>
+                            <span id="rate-display" style="font-weight:700; color:var(--gold);">--:1</span>
+                        </div>
+                        <div class="eff-bar-bg">
+                            <div class="eff-bar-fill" id="pool-bar" style="width:0%; background:var(--green);"></div>
+                        </div>
+                        <div style="display:flex; justify-content:space-between; font-size:10px; color:var(--muted); margin-top:3px;">
+                            <span>0</span><span>600（75:1）</span><span>1500（150:1）</span>
+                        </div>
                     </div>
+                    <div class="transfer-row" style="margin-bottom:8px;">
+                        <input class="transfer-input" id="exchange-input" type="number" min="1" placeholder="兌換企業幣數量" oninput="previewExchange(this.value)">
+                        <button class="btn btn-green btn-sm" onclick="confirmExchange()">兌換</button>
+                    </div>
+                    <div id="exchange-preview" style="font-size:13px; text-align:center; min-height:18px; color:var(--muted);"></div>
                 </div>
             </div>
         </div>
@@ -399,7 +424,7 @@ body{ font-family:-apple-system,BlinkMacSystemFont,sans-serif; background:radial
 
             <div class="sec-label">招募員工</div>
             <div class="box">
-                <div style="font-size:13px; color:var(--muted); margin-bottom:14px;">招募費 100 點（公司金庫），每日薪資 15 點</div>
+                <div style="font-size:13px; color:var(--muted); margin-bottom:14px;">招募費 100 💼（企業幣），每日薪資 15 💼</div>
                 <div style="margin-bottom:12px;">
                     <div style="font-size:12px; color:var(--muted); margin-bottom:8px;">部門</div>
                     <div style="display:flex; gap:8px;">
@@ -408,7 +433,7 @@ body{ font-family:-apple-system,BlinkMacSystemFont,sans-serif; background:radial
                         <button class="btn btn-sm" id="hire-dept-mkt" onclick="selectHireDept('mkt')" style="flex:1;">📣 行銷</button>
                     </div>
                 </div>
-                <button class="btn btn-primary" id="hire-btn" onclick="hireEmployee()">➕ 招募（100 點）</button>
+                <button class="btn btn-primary" id="hire-btn" onclick="hireEmployee()">➕ 招募（100 💼）</button>
             </div>
         </div>
     </div>
@@ -486,7 +511,7 @@ body{ font-family:-apple-system,BlinkMacSystemFont,sans-serif; background:radial
         <div style="font-size:18px; font-weight:900; margin-bottom:6px;">🏷️ 競標出價</div>
         <div style="font-size:13px; color:var(--muted); margin-bottom:6px;" id="bid-modal-title"></div>
         <div style="font-size:12px; color:var(--muted); margin-bottom:16px;" id="bid-modal-current"></div>
-        <input class="transfer-input" id="bid-input" type="number" min="1" placeholder="出價金額（從金庫扣）" style="margin-bottom:14px; width:100%; text-align:center;">
+        <input class="transfer-input" id="bid-input" type="number" min="1" placeholder="出價金額（💼 企業幣）" style="margin-bottom:14px; width:100%; text-align:center;">
         <button class="btn btn-gold" onclick="confirmBid()">確認出價</button>
         <button class="btn" onclick="document.getElementById('bid-modal').classList.remove('open')">取消</button>
     </div>
@@ -599,6 +624,7 @@ const dateStrOf = (offset) => { const d=new Date(); d.setDate(d.getDate()+offset
 let myPoints = 0, companyData = null, hireDept = 'ops', selectedTag = '科技';
 let marketData = null, bidContractIdx = null;
 let _appInitialized = false, _processingDaily = false;
+let _poolCache = 0;
 
 function choosePlayer(p) { location.href = `company.html?player=${p}`; }
 
@@ -799,6 +825,9 @@ async function generateDailyMarketIfNeeded(today) {
         event: { type:event.type, icon:event.icon, desc:event.desc, mult:event.mult, label:event.label },
         contracts: contracts,
     });
+
+    // Initialize exchange pool for today if not yet set
+    await db.ref(`exchange/daily/${today}/volume`).transaction(v => v === null ? 0 : undefined);
 }
 
 // ── Daily processing ───────────────────────────────────────────────
@@ -888,7 +917,7 @@ async function processDailyIfNeeded() {
         if (auditTax > 0) {
             await db.ref(`company/${ME}/treasury`).transaction(t => Math.max(0, (t||0) - auditTax));
             await db.ref(`company/${ME}/daily/${today}/auditTax`).set(auditTax);
-            toast(`🔍 稅務稽查！額外被收走 ${auditTax} 點`);
+            toast(`🔍 稅務稽查！額外被收走 ${auditTax} 💼`);
         }
     }
 
@@ -1007,6 +1036,12 @@ function initApp() {
             renderContracts();
         }
     });
+
+    // Exchange pool real-time listener
+    db.ref(`exchange/daily/${dateStr()}/volume`).on('value', s => {
+        _poolCache = s.val() || 0;
+        updateExchangeUI();
+    });
 }
 
 // ── Render Overview ───────────────────────────────────────────────
@@ -1020,6 +1055,7 @@ async function renderOverview() {
         document.getElementById('treasury-box').style.display = 'none';
         document.getElementById('today-stats').style.display = 'none';
         document.getElementById('transfer-section').style.display = 'none';
+        document.getElementById('exchange-section').style.display = 'none';
         document.getElementById('crisis-banner').style.display = 'none';
         return;
     }
@@ -1028,6 +1064,8 @@ async function renderOverview() {
     document.getElementById('company-header-box').style.display = 'block';
     document.getElementById('treasury-box').style.display = 'block';
     document.getElementById('transfer-section').style.display = 'block';
+    document.getElementById('exchange-section').style.display = 'block';
+    updateExchangeUI();
 
     // Header
     document.getElementById('co-name-display').textContent = co.name;
@@ -1099,27 +1137,27 @@ async function renderOverview() {
         const mktEvt  = mktSnap.val();
         if (mktEvt) document.getElementById('market-event-name').textContent = mktEvt.icon + ' ' + mktEvt.desc;
 
-        document.getElementById('today-income').textContent   = `+${todayData.income || 0} 點`;
+        document.getElementById('today-income').textContent   = `+${todayData.income || 0} 💼`;
         const salary = (todayData.expenses || 0) - (todayData.overhead || 0);
-        document.getElementById('today-expenses').textContent = `-${salary} 點`;
-        document.getElementById('today-overhead').textContent = `-${todayData.overhead || 0} 點`;
+        document.getElementById('today-expenses').textContent = `-${salary} 💼`;
+        document.getElementById('today-overhead').textContent = `-${todayData.overhead || 0} 💼`;
         const net = todayData.net || 0;
         const netEl = document.getElementById('today-net');
-        netEl.textContent = (net >= 0 ? '+' : '') + net + ' 點';
+        netEl.textContent = (net >= 0 ? '+' : '') + net + ' 💼';
         netEl.style.color = net >= 0 ? 'var(--green)' : 'var(--red)';
 
         // 週稅
         const wtRow = document.getElementById('weekly-tax-row');
         if (todayData.weeklyTax > 0) {
             wtRow.style.display = 'flex';
-            document.getElementById('today-weekly-tax').textContent = `-${todayData.weeklyTax} 點`;
+            document.getElementById('today-weekly-tax').textContent = `-${todayData.weeklyTax} 💼`;
         } else { wtRow.style.display = 'none'; }
 
         // 稅務稽查
         const auRow = document.getElementById('audit-row');
         if (todayData.auditTax > 0) {
             auRow.style.display = 'flex';
-            document.getElementById('today-audit-tax').textContent = `-${todayData.auditTax} 點`;
+            document.getElementById('today-audit-tax').textContent = `-${todayData.auditTax} 💼`;
         } else { auRow.style.display = 'none'; }
 
     } else {
@@ -1158,7 +1196,7 @@ function renderEmployees() {
                 <div class="dept-stars" style="margin-top:4px; color:${info.color};">${stars.split('').map(s => `<span style="opacity:${s==='★'?1:0.25}">${s}</span>`).join('')}</div>
             </div>
             ${canUp
-                ? `<button class="btn btn-sm btn-primary" onclick="upgradeDept('${key}')" style="flex-shrink:0;">升級 ${cost}點</button>`
+                ? `<button class="btn btn-sm btn-primary" onclick="upgradeDept('${key}')" style="flex-shrink:0;">升級 ${cost}💼</button>`
                 : `<div style="font-size:12px;color:var(--green);font-weight:700;">MAX</div>`
             }
         </div>`;
@@ -1187,7 +1225,7 @@ function renderEmployees() {
     const isFull = empArr.length >= lvData.maxEmp;
     const hireBtn = document.getElementById('hire-btn');
     hireBtn.disabled = isFull;
-    hireBtn.textContent = isFull ? `🔒 員工已滿（升聲譽至 ${COMPANY_LEVEL.find(l=>l.lv===lvData.lv+1)?.repNeeded??'MAX'} 可擴編）` : '➕ 招募（100 點）';
+    hireBtn.textContent = isFull ? `🔒 員工已滿（升聲譽至 ${COMPANY_LEVEL.find(l=>l.lv===lvData.lv+1)?.repNeeded??'MAX'} 可擴編）` : '➕ 招募（100 💼）';
 }
 
 // ── Render Contracts ──────────────────────────────────────────────
@@ -1229,17 +1267,17 @@ async function renderContracts() {
             } else if (claim === PARTNER) {
                 statusHtml = `<div style="font-size:12px;color:var(--muted);margin-top:8px;">已被 ${NAMES[PARTNER]} 接走</div>`;
             } else {
-                actionHtml = `<button class="btn btn-green btn-sm" onclick="claimOpenContract(${i})" style="margin-top:10px;">接案（押金 ${deposit} 點・${days}天後結算）</button>`;
+                actionHtml = `<button class="btn btn-green btn-sm" onclick="claimOpenContract(${i})" style="margin-top:10px;">接案（押金 ${deposit} 💼・${days}天後結算）</button>`;
             }
         } else if (c.type === 'bid') {
             if (myBid > 0) {
-                statusHtml = `<div style="font-size:12px;color:var(--gold);font-weight:700;margin-top:8px;">你已出價 ${myBid} 點${oppBid > 0 ? `，對方出價 ${oppBid} 點` : '，等待對方出價'}</div>`;
+                statusHtml = `<div style="font-size:12px;color:var(--gold);font-weight:700;margin-top:8px;">你已出價 ${myBid} 💼${oppBid > 0 ? `，對方出價 ${oppBid} 💼` : '，等待對方出價'}</div>`;
             } else {
-                actionHtml = `<button class="btn btn-gold btn-sm" onclick="openBidModal(${i},'${c.title}',${reward})" style="margin-top:10px;">出價競標（最高者得獎勵 ${reward} 點）</button>`;
+                actionHtml = `<button class="btn btn-gold btn-sm" onclick="openBidModal(${i},'${c.title}',${reward})" style="margin-top:10px;">出價競標（最高者得獎勵 ${reward} 💼）</button>`;
             }
             if (bids[i]?.resolved) {
                 const won = bids[i]?.winner === ME;
-                statusHtml = `<div style="font-size:12px;color:${won?'var(--green)':'var(--muted)'};font-weight:700;margin-top:8px;">${won ? `✓ 你贏得競標！+${reward} 點` : '競標失敗'}</div>`;
+                statusHtml = `<div style="font-size:12px;color:${won?'var(--green)':'var(--muted)'};font-weight:700;margin-top:8px;">${won ? `✓ 你贏得競標！+${reward} 💼` : '競標失敗'}</div>`;
             }
         } else if (c.type === 'joint') {
             const myAcc  = joints[i]?.[ME]?.accepted      || false;
@@ -1263,9 +1301,9 @@ async function renderContracts() {
             } else if (myAcc) {
                 statusHtml = `<div style="font-size:12px;color:var(--purple);font-weight:700;margin-top:8px;">✓ 已出押金，等待 ${NAMES[PARTNER]} 接受</div>`;
             } else if (oppAcc) {
-                actionHtml = `<button class="btn btn-purple btn-sm" onclick="openJointModal(${i},'${c.title}',${splitReward},${deposit})" style="margin-top:10px;">🤝 ${NAMES[PARTNER]} 邀請合作！接受（押金 ${deposit} 點）</button>`;
+                actionHtml = `<button class="btn btn-purple btn-sm" onclick="openJointModal(${i},'${c.title}',${splitReward},${deposit})" style="margin-top:10px;">🤝 ${NAMES[PARTNER]} 邀請合作！接受（押金 ${deposit} 💼）</button>`;
             } else {
-                actionHtml = `<button class="btn btn-purple btn-sm" onclick="proposeJoint(${i})" style="margin-top:10px;">邀請合作（押金 ${deposit} 點・各得約 ${splitReward} 點）</button>`;
+                actionHtml = `<button class="btn btn-purple btn-sm" onclick="proposeJoint(${i})" style="margin-top:10px;">邀請合作（押金 ${deposit} 💼・各得約 ${splitReward} 💼）</button>`;
             }
         }
 
@@ -1274,7 +1312,7 @@ async function renderContracts() {
         return `<div class="contract-card anim-enter" style="animation-delay:${i*0.07}s">
             <span class="contract-type ${typeCls}">${typeLabel}</span>
             <div class="contract-title">${c.icon} ${c.title}</div>
-            <div style="font-size:12px;color:var(--muted);margin-top:2px;">基礎獎勵 ${c.base} 點${(calcContractReward(c.base, co) !== c.base) ? ` → 你的獎勵 <strong style="color:var(--green)">${calcContractReward(c.base, co)} 點</strong>` : ''}</div>
+            <div style="font-size:12px;color:var(--muted);margin-top:2px;">基礎獎勵 ${c.base} 💼${(calcContractReward(c.base, co) !== c.base) ? ` → 你的獎勵 <strong style="color:var(--green)">${calcContractReward(c.base, co)} 💼</strong>` : ''}</div>
             ${statusHtml}${actionHtml}
         </div>`;
     }).join('');
@@ -1294,7 +1332,7 @@ async function renderContracts() {
                 <div style="display:flex;justify-content:space-between;align-items:flex-start;">
                     <div>
                         <div class="contract-title" style="font-size:14px;">${ct.icon} ${ct.title}</div>
-                        <div style="font-size:11px;color:var(--muted);margin-top:3px;">押金 ${ct.deposit} 點・預期 ${ct.reward} 點</div>
+                        <div style="font-size:11px;color:var(--muted);margin-top:3px;">押金 ${ct.deposit} 💼・預期 ${ct.reward} 💼</div>
                     </div>
                     <span style="font-size:11px;font-weight:700;color:${ready?'var(--green)':'var(--muted)'};">${ready?'可領取':`${daysLeft}天後`}</span>
                 </div>
@@ -1311,7 +1349,7 @@ async function renderContracts() {
     histSnap.forEach(c => histRows.unshift(c.val()));
     if (histRows.length > 0) {
         document.getElementById('contract-history').innerHTML = histRows.map(h => {
-            const netStr = h.net !== undefined ? ((h.net>=0?'+':'')+h.net+' 點') : `+${h.reward||0} 點`;
+            const netStr = h.net !== undefined ? ((h.net>=0?'+':'')+h.net+' 💼') : `+${h.reward||0} 💼`;
             const netColor = (h.net === undefined || h.net >= 0) ? 'var(--green)' : 'var(--red)';
             const outcomeHtml = h.outcomeCls ? `<span class="outcome-pill ${h.outcomeCls}">${h.icon} ${h.outcome}</span>` : '';
             return `<div class="comp-row" style="flex-wrap:wrap;gap:4px;">
@@ -1422,12 +1460,12 @@ function hireEmployee() {
     const emps   = Object.keys(companyData.employees || {}).length;
     const lvData = getCompanyLevel(companyData.reputation || 0);
     if (emps >= lvData.maxEmp) { toast('員工已滿，升級公司等級才能再招募'); return; }
-    if ((companyData.treasury || 0) < EMP_HIRE_COST) { toast(`公司金庫不足 ${EMP_HIRE_COST} 點`); return; }
+    if ((companyData.treasury || 0) < EMP_HIRE_COST) { toast(`企業幣不足 ${EMP_HIRE_COST} 💼`); return; }
 
     const deptInfo = DEPT_INFO[hireDept];
     const name = EMP_NAMES[Math.floor(Math.random() * EMP_NAMES.length)];
     document.getElementById('hire-modal-title').textContent = `招募至 ${deptInfo.label}`;
-    document.getElementById('hire-modal-desc').textContent  = `員工「${name}」將加入 ${deptInfo.label} 部門，每日薪資 ${EMP_SALARY} 點。招募費 ${EMP_HIRE_COST} 點從公司金庫扣除。`;
+    document.getElementById('hire-modal-desc').textContent  = `員工「${name}」將加入 ${deptInfo.label} 部門，每日薪資 ${EMP_SALARY} 💼。招募費 ${EMP_HIRE_COST} 💼 從企業幣金庫扣除。`;
     document.getElementById('hire-modal').classList.add('open');
     document.getElementById('hire-modal')._pendingName = name;
 }
@@ -1439,7 +1477,7 @@ async function confirmHire() {
         if ((t || 0) < EMP_HIRE_COST) return undefined;
         return (t || 0) - EMP_HIRE_COST;
     });
-    if (!tx.committed) { toast('公司金庫不足'); return; }
+    if (!tx.committed) { toast('企業幣不足'); return; }
     await db.ref(`company/${ME}/employees`).push({ name, salary: EMP_SALARY, dept: hireDept, hired: Date.now() });
     SFX.hire();
     toast(`✅ ${name} 加入了！`, 'success');
@@ -1467,12 +1505,12 @@ async function upgradeDept(key) {
     const lv   = (co.departments?.[key]?.level) || 0;
     if (lv >= 3) { toast('已達最高等級'); return; }
     const cost = DEPT_UPGRADE_COST[lv];
-    if ((co.treasury || 0) < cost) { toast(`公司金庫不足 ${cost} 點`); return; }
+    if ((co.treasury || 0) < cost) { toast(`企業幣不足 ${cost} 💼`); return; }
     const tx = await db.ref(`company/${ME}/treasury`).transaction(t => {
         if ((t||0) < cost) return undefined;
         return (t||0) - cost;
     });
-    if (!tx.committed) { toast('公司金庫不足'); return; }
+    if (!tx.committed) { toast('企業幣不足'); return; }
     await db.ref(`company/${ME}/departments/${key}/level`).transaction(l => (l||0) + 1);
     SFX.success();
     toast(`✅ ${DEPT_INFO[key].label} 升至 Lv.${lv + 1}`, 'success');
@@ -1490,22 +1528,101 @@ async function injectCapital() {
     await db.ref(`company/${ME}/treasury`).transaction(t => (t||0) + amt);
     document.getElementById('inject-input').value = '';
     SFX.coin();
-    toast(`✅ 已注資 ${amt} 點`, 'gold');
+    toast(`✅ 注資 ${amt} 點 → +${amt} 💼`, 'gold');
 }
 
-async function withdrawProfit() {
-    const amt = parseInt(document.getElementById('withdraw-input').value);
+// ── Exchange rate system ──────────────────────────────────────────
+function calcExchangePoints(amount, poolBefore, macroPhase) {
+    const macroMod = macroPhase === '繁榮' ? 0.8 : macroPhase === '蕭條' ? 2.0 : 1.0;
+    const tiers = [
+        { cap: 600,      rate: Math.round(50 * macroMod) },
+        { cap: 1500,     rate: Math.round(75 * macroMod) },
+        { cap: Infinity, rate: Math.round(150 * macroMod) },
+    ];
+    let remaining = amount, points = 0, pool = poolBefore;
+    for (const { cap, rate } of tiers) {
+        if (remaining <= 0) break;
+        if (pool >= cap) continue;
+        const take = Math.min(remaining, cap - pool);
+        points += take / rate;
+        pool += take;
+        remaining -= take;
+    }
+    return Math.floor(points);
+}
+
+function getCurrentTierRate(pool, macroPhase) {
+    const macroMod = macroPhase === '繁榮' ? 0.8 : macroPhase === '蕭條' ? 2.0 : 1.0;
+    if (pool < 600)  return Math.round(50 * macroMod);
+    if (pool < 1500) return Math.round(75 * macroMod);
+    return Math.round(150 * macroMod);
+}
+
+function updateExchangeUI() {
+    const poolEl = document.getElementById('pool-display');
+    const rateEl = document.getElementById('rate-display');
+    const barEl  = document.getElementById('pool-bar');
+    if (!poolEl || !rateEl || !barEl) return;
+
+    const macro = getCurrentMacroPhase();
+    const pool  = _poolCache;
+    const rate  = getCurrentTierRate(pool, macro.phase);
+
+    const seg = pool < 600 ? `${pool} / 600 企業幣（第一段 50:1）`
+              : pool < 1500 ? `${pool} / 1500 企業幣（第二段 75:1）`
+              : `${pool} 企業幣（第三段 150:1）`;
+    poolEl.textContent = seg;
+    rateEl.textContent = `${rate}:1`;
+    rateEl.style.color = rate <= 40 ? 'var(--green)' : rate <= 75 ? 'var(--gold)' : 'var(--red)';
+
+    const pct = Math.min(100, pool / 1500 * 100);
+    barEl.style.width = pct + '%';
+    barEl.style.background = pool < 600 ? 'var(--green)' : pool < 1500 ? 'var(--gold)' : 'var(--red)';
+
+    if (macro.phase === '繁榮' || macro.phase === '蕭條') {
+        rateEl.textContent += ` (${macro.phase === '繁榮' ? '繁榮×0.8' : '蕭條×2.0'})`;
+    }
+}
+
+function previewExchange(val) {
+    const amt = parseInt(val) || 0;
+    const el  = document.getElementById('exchange-preview');
+    if (amt <= 0) { el.textContent = ''; return; }
+    const pts = calcExchangePoints(amt, _poolCache, getCurrentMacroPhase().phase);
+    if (pts <= 0) {
+        el.textContent = '兌換量太少，得不到任何點數';
+        el.style.color = 'var(--red)';
+    } else {
+        el.textContent = `預計獲得 ${pts} 點（匯率 ${Math.ceil(amt / pts)}:1）`;
+        el.style.color = 'var(--green)';
+    }
+}
+
+async function confirmExchange() {
+    const amt = parseInt(document.getElementById('exchange-input').value);
     if (!amt || amt <= 0) { toast('請輸入有效金額'); return; }
-    if ((companyData?.treasury || 0) < amt) { toast('公司金庫不足'); return; }
+    if ((companyData?.treasury || 0) < amt) { toast('企業幣不足'); return; }
+
+    const macro = getCurrentMacroPhase();
+    const today = dateStr();
+    const poolSnap = await db.ref(`exchange/daily/${today}/volume`).once('value');
+    const poolBefore = poolSnap.val() || 0;
+    const pts = calcExchangePoints(amt, poolBefore, macro.phase);
+    if (pts <= 0) { toast('兌換量不足以獲得任何點數'); return; }
+
     const tx = await db.ref(`company/${ME}/treasury`).transaction(t => {
         if ((t||0) < amt) return undefined;
         return (t||0) - amt;
     });
-    if (!tx.committed) { toast('公司金庫不足'); return; }
-    await db.ref(`economy/${ME}`).transaction(p => (p||0) + amt);
-    document.getElementById('withdraw-input').value = '';
+    if (!tx.committed) { toast('企業幣不足'); return; }
+
+    await db.ref(`economy/${ME}`).transaction(p => (p||0) + pts);
+    await db.ref(`exchange/daily/${today}/volume`).transaction(v => (v||0) + amt);
+
+    document.getElementById('exchange-input').value = '';
+    document.getElementById('exchange-preview').textContent = '';
     SFX.coin();
-    toast(`✅ 已提領 ${amt} 點`, 'gold');
+    toast(`✅ 兌換 ${amt} 💼 → +${pts} 點`, 'gold');
 }
 
 async function rescueCompany() {
@@ -1524,7 +1641,7 @@ async function rescueCompany() {
         await db.ref(`company/${ME}/crisis_since`).set(null);
         SFX.success(); toast('✅ 公司已從危機中救回！', 'success');
     } else {
-        toast(`✅ 已注資 ${amt} 點`);
+        toast(`✅ 注資 ${amt} 點 → +${amt} 💼`);
     }
     document.getElementById('rescue-input').value = '';
 }
@@ -1540,7 +1657,7 @@ async function claimOpenContract(idx) {
     const days    = contractDuration(c.base);
 
     if ((companyData?.treasury || 0) < deposit) {
-        toast(`金庫不足！需押金 ${deposit} 點`); return;
+        toast(`企業幣不足！需押金 ${deposit} 💼`); return;
     }
 
     const tx = await db.ref(`market/daily/${today}/claims/${idx}`).transaction(v => {
@@ -1565,7 +1682,7 @@ async function claimOpenContract(idx) {
     });
 
     SFX.contract();
-    toast(`📝 已接案！押金 -${deposit} 點，${days} 天後可領`, 'purple');
+    toast(`📝 已接案！押金 -${deposit} 💼，${days} 天後可領`, 'purple');
     renderContracts();
 }
 
@@ -1596,7 +1713,7 @@ async function collectContract(key) {
 
     const netStr = (net >= 0 ? '+' : '') + net;
     const _tType = outcome.mult >= 1.5 ? 'gold' : outcome.mult >= 1.0 ? 'success' : 'error';
-    toast(`${outcome.icon} ${outcome.label}！領回 ${payout} 點，淨利 ${netStr} 點`, _tType);
+    toast(`${outcome.icon} ${outcome.label}！領回 ${payout} 💼，淨利 ${netStr} 💼`, _tType);
     if (outcome.mult >= 1.0) { SFX.success(); const _r = document.getElementById('treasury-box').getBoundingClientRect(); spawnSparkles(_r.left + _r.width/2, _r.top + _r.height/2); }
     else SFX.ruin();
     renderContracts();
@@ -1605,7 +1722,7 @@ async function collectContract(key) {
 function openBidModal(idx, title, reward) {
     bidContractIdx = idx;
     document.getElementById('bid-modal-title').textContent  = title;
-    document.getElementById('bid-modal-current').textContent = `預計獎勵：${reward} 點（明日結算）`;
+    document.getElementById('bid-modal-current').textContent = `預計獎勵：${reward} 💼（明日結算）`;
     document.getElementById('bid-input').value = '';
     document.getElementById('bid-modal').classList.add('open');
 }
@@ -1613,7 +1730,7 @@ function openBidModal(idx, title, reward) {
 async function confirmBid() {
     const amt = parseInt(document.getElementById('bid-input').value);
     if (!amt || amt <= 0) { toast('請輸入出價金額'); return; }
-    if ((companyData?.treasury || 0) < amt) { toast('公司金庫不足'); return; }
+    if ((companyData?.treasury || 0) < amt) { toast('企業幣不足'); return; }
 
     const today = dateStr();
     // Deduct bid from treasury
@@ -1621,11 +1738,11 @@ async function confirmBid() {
         if ((t||0) < amt) return undefined;
         return (t||0) - amt;
     });
-    if (!tx.committed) { toast('公司金庫不足'); return; }
+    if (!tx.committed) { toast('企業幣不足'); return; }
     await db.ref(`market/daily/${today}/bids/${bidContractIdx}/${ME}`).set(amt);
     document.getElementById('bid-modal').classList.remove('open');
     SFX.contract();
-    toast(`✅ 已出價 ${amt} 點，明日結算`, 'gold');
+    toast(`✅ 已出價 ${amt} 💼，明日結算`, 'gold');
     renderContracts();
 }
 
@@ -1635,18 +1752,18 @@ async function proposeJoint(idx) {
     const c = mktSnap.val();
     const splitReward = Math.round(calcContractReward(c.base, companyData) * 0.65);
     const deposit = Math.floor(splitReward * 0.20);
-    if ((companyData?.treasury || 0) < deposit) { toast(`金庫不足！需押金 ${deposit} 點`); return; }
+    if ((companyData?.treasury || 0) < deposit) { toast(`企業幣不足！需押金 ${deposit} 💼`); return; }
     await db.ref(`company/${ME}/treasury`).transaction(t => (t||0) - deposit);
     await db.ref(`market/daily/${today}/joint/${idx}/${ME}`).set({ accepted:true, deposit });
     SFX.contract();
-    toast(`✅ 已邀請合作！押金 -${deposit} 點，等待 ${NAMES[PARTNER]}`, 'purple');
+    toast(`✅ 已邀請合作！押金 -${deposit} 💼，等待 ${NAMES[PARTNER]}`, 'purple');
     renderContracts();
 }
 
 function openJointModal(idx, title, splitReward, deposit) {
     document.getElementById('joint-modal-title').textContent  = title;
     document.getElementById('joint-modal-desc').textContent   = `${NAMES[PARTNER]} 邀請你一起承接這個合約`;
-    document.getElementById('joint-modal-reward').textContent = `各得約 ${splitReward} 點・押金 ${deposit} 點`;
+    document.getElementById('joint-modal-reward').textContent = `各得約 ${splitReward} 💼・押金 ${deposit} 💼`;
     document.getElementById('joint-modal')._idx = idx;
     document.getElementById('joint-modal').classList.add('open');
 }
@@ -1661,7 +1778,7 @@ async function acceptJoint() {
     const c = mktSnap.val();
     const splitReward = Math.round(calcContractReward(c.base, companyData) * 0.65);
     const deposit = Math.floor(splitReward * 0.20);
-    if ((companyData?.treasury || 0) < deposit) { toast(`金庫不足！需押金 ${deposit} 點`); return; }
+    if ((companyData?.treasury || 0) < deposit) { toast(`企業幣不足！需押金 ${deposit} 💼`); return; }
 
     await db.ref(`company/${ME}/treasury`).transaction(t => (t||0) - deposit);
     await db.ref(`market/daily/${today}/joint/${idx}/${ME}`).set({ accepted:true, deposit });
@@ -1677,7 +1794,7 @@ async function acceptJoint() {
     });
 
     SFX.contract();
-    toast(`🤝 合作開始！押金 -${deposit} 點，${days} 天後可領`, 'purple');
+    toast(`🤝 合作開始！押金 -${deposit} 💼，${days} 天後可領`, 'purple');
     renderContracts();
 }
 
@@ -1712,7 +1829,7 @@ async function collectJointContract(marketDate, contractIdx) {
 
     const netStr = (net >= 0 ? '+' : '') + net;
     const _jType = outcome.mult >= 1.5 ? 'gold' : outcome.mult >= 1.0 ? 'success' : 'error';
-    toast(`${outcome.icon} ${outcome.label}！領回 ${payout} 點，淨利 ${netStr} 點`, _jType);
+    toast(`${outcome.icon} ${outcome.label}！領回 ${payout} 💼，淨利 ${netStr} 💼`, _jType);
     if (outcome.mult >= 1.0) { SFX.success(); const _jr = document.getElementById('treasury-box').getBoundingClientRect(); spawnSparkles(_jr.left + _jr.width/2, _jr.top + _jr.height/2); }
     else SFX.ruin();
     renderContracts();
@@ -1788,7 +1905,7 @@ function animateTreasury(newVal) {
     const from = _lastTreasury ?? newVal;
     if (_lastTreasury !== null && from !== newVal) {
         const diff = newVal - from;
-        floatText((diff >= 0 ? '+' : '') + diff.toLocaleString() + ' 點', diff >= 0 ? 'var(--green)' : 'var(--red)');
+        floatText((diff >= 0 ? '+' : '') + diff.toLocaleString() + ' 💼', diff >= 0 ? 'var(--green)' : 'var(--red)');
         box.classList.remove('flash-pos', 'flash-neg');
         void box.offsetWidth; // force reflow to restart animation
         box.classList.add(diff >= 0 ? 'flash-pos' : 'flash-neg');
