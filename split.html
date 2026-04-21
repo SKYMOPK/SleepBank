@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <link rel="manifest" href="./manifest.json">
     <title>宿舍帳本</title>
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
@@ -439,21 +438,6 @@
             playSound('click');
     });
 
-    // ── 通知工具 ──────────────────────────────────────────────────
-    let _swReg = null;
-    async function initSW() {
-        if (!('serviceWorker' in navigator) || !('Notification' in window)) return;
-        try {
-            _swReg = await navigator.serviceWorker.register('./sw.js');
-            await navigator.serviceWorker.ready;
-            // 權限由 index.html 的按鈕統一申請
-        } catch(e) {}
-    }
-    function pushNotif(title, body, tag = 'sb') {
-        if (Notification.permission !== 'granted' || !_swReg) return;
-        _swReg.showNotification(title, { body, tag });
-    }
-    initSW();
 
     function showToast(msg, color = 'var(--green)') {
         if (color === 'var(--red)') playSound('error');
@@ -704,12 +688,6 @@
         if (currentView === 'unsettled' || currentView === 'settled') renderList();
     });
 
-    const _splitInitTs = Date.now();
-    db.ref('split/records').on('child_added', snap => {
-        const r = snap.val();
-        if (!r || r.timestamp < _splitInitTs) return;
-        pushNotif('📒 帳本更新', `新增了一筆帳目${r.note ? `：${r.note}` : ''}`, 'split');
-    });
 </script>
 
 </body>

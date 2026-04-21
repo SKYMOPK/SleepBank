@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="manifest" href="./manifest.json">
     <title>睡眠金庫</title>
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
@@ -714,11 +713,10 @@
     </div>
 
     <!-- Single Pull Overlay -->
-    <div id="sp-overlay" onclick="_spOverlayTap()">
+    <div id="sp-overlay">
         <div id="sp-flash" style="position:absolute;inset:0;pointer-events:none;opacity:0;transition:none;"></div>
         <div class="sp-orb">❓</div>
         <div class="sp-label">命運正在轉動⋯</div>
-        <div id="sp-hint" style="font-size:11px;color:rgba(255,255,255,0.25);opacity:0;transition:opacity 0.8s;margin-top:4px;">點擊跳過</div>
     </div>
 
     <!-- Gacha Odds Modal -->
@@ -873,43 +871,8 @@
         
         let myInventory = {}, myShards = 0, myPoints = 0;
         let myLastSpriteCatch = "", myLastDate = "", myFlexActive = false, oppData = {};
+        let myCloverActive = false, myCloverCount = 0;
 
-        // ── 通知工具 ──────────────────────────────────────────────
-        let _swReg = null;
-        const _notifTimers = {};
-        async function initSW() {
-            if (!('serviceWorker' in navigator) || !('Notification' in window)) return;
-            try {
-                _swReg = await navigator.serviceWorker.register('./sw.js');
-                await navigator.serviceWorker.ready;
-                // 權限由 index.html 的按鈕統一申請
-            } catch(e) {}
-        }
-        function pushNotif(title, body, tag = 'sb') {
-            if (Notification.permission !== 'granted' || !_swReg) return;
-            _swReg.showNotification(title, { body, tag });
-        }
-        function scheduleNotif(id, title, body, atMs) {
-            const delay = atMs - Date.now();
-            if (delay <= 0 || delay > 24 * 3600 * 1000) return;
-            clearTimeout(_notifTimers[id]);
-            _notifTimers[id] = setTimeout(() => pushNotif(title, body, id), delay);
-        }
-        function scheduleCheckinNotif() {
-            const now = new Date(), h = now.getHours();
-            if (h >= 0 && h < 2) return; // 打卡窗口已開，不通知
-            const midnight = new Date(now);
-            if (h >= 2) midnight.setDate(midnight.getDate() + 1);
-            midnight.setHours(0, 0, 0, 0);
-            scheduleNotif('checkin', '🌙 可以打卡了！', '睡前別忘了記錄今天的睡眠，領取點數！', midnight.getTime());
-        }
-        function scheduleMarketNotif() {
-            const now = new Date();
-            const next = new Date(now);
-            next.setMinutes(60, 0, 0);
-            scheduleNotif('market', '🏪 黑市已刷新', '神秘商人帶來了新商品！', next.getTime());
-        }
-        initSW().then(() => { scheduleCheckinNotif(); scheduleMarketNotif(); });
         let gachaPity = 0; // 保底計數器
         let myGachaEnergy = 0; // 抽獎能量
         let isSpriteForced = false;
@@ -1321,6 +1284,8 @@
             myFlexActive = d.flex_active||false;
             gachaPity = d.gacha_pity||0;
             myGachaEnergy = d.gacha_energy||0;
+            myCloverActive = d.clover_active||false;
+            myCloverCount = d.clover_count||0;
             const energyEl = document.getElementById('gacha-energy-display');
             if (energyEl) energyEl.innerText = myGachaEnergy;
 
@@ -1427,7 +1392,7 @@
             if(rng()<0.3 && myLastSpriteCatch!==hs){
                 const wasHidden = c.style.display === 'none' || c.style.display === '';
                 c.style.display='block'; h>=2&&h<8?o.classList.add('asleep'):o.classList.remove('asleep');
-                if (wasHidden) pushNotif('🧚‍♂️ 魔法精靈出現了！', '快點進來抓住它！', 'sprite');
+
             } else { c.style.display='none'; }
         }
         
@@ -1584,7 +1549,7 @@
             const slots = [];
             // 固定 2 格抽獎券（qty 1-3）
             for (let t = 0; t < 2; t++) {
-                slots.push({ key: 'free_gacha_ticket', qty: 1, price: allNewPrices['free_gacha_ticket'] });
+                slots.push({ key: 'free_gacha_ticket', qty: 1, price: 20 });
             }
             // 其餘 18 格隨機抽取（不重複）
             for (let i = 0; i < count - 2; i++) {
@@ -2490,7 +2455,20 @@
                 document.getElementById('pity_bar').style.width = `${(gachaPity/10)*100}%`;
 
                 playSound('coin');
-                showTenPullResult(results, ticketsEarned);
+
+                // 神話出金預警
+                if (results.some(r => r.rarity === 'M')) {
+                    const warn = document.createElement('div');
+                    warn.style.cssText = 'position:fixed;inset:0;z-index:600;backdrop-filter:blur(22px);transition:opacity 0.5s;background:radial-gradient(ellipse at center, rgba(255,200,20,0.28) 0%, rgba(0,0,0,0.97) 72%);';
+                    document.body.appendChild(warn);
+                    [260,330,415,520,660,830,1050].forEach((f, i) => setTimeout(() => _tone(f, 0.07 + i * 0.02, 0, 0.18), i * 130));
+                    setTimeout(() => {
+                        warn.style.opacity = '0';
+                        setTimeout(() => { warn.remove(); showTenPullResult(results, ticketsEarned); }, 500);
+                    }, 1900);
+                } else {
+                    showTenPullResult(results, ticketsEarned);
+                }
             });
         }
 
@@ -2612,180 +2590,158 @@
             });
         }
 
-        let _pullAnimEnd = 0;
-        function _spOverlayTap() {
-            if (Date.now() >= _pullAnimEnd) _hidePullAnim();
-        }
+        let _hideTimer = null;
         function _showPullAnim() {
-            _pullAnimEnd = Date.now() + 1900;
             const ov = document.getElementById('sp-overlay');
+            if (!ov) return;
             ov.style.display = 'flex';
-            document.getElementById('sp-hint').style.opacity = '0';
-            setTimeout(() => { if (ov.style.display !== 'none') document.getElementById('sp-hint').style.opacity = '1'; }, 2500);
-            // 蓄力音效：四段漸強
-            _beep(260, 0.09, 'sine', 0.07);
-            setTimeout(() => _beep(340, 0.09, 'sine', 0.09), 380);
-            setTimeout(() => _beep(460, 0.09, 'sine', 0.11), 760);
-            setTimeout(() => _beep(640, 0.1,  'sine', 0.13), 1140);
-            setTimeout(() => _beep(920, 0.28, 'sine', 0.20), 1500);
-            // 閃光在 1.5s
+            // 蓄力音效：三段漸強
+            _tone(300, 0.09, 0, 0.08);
+            setTimeout(() => _tone(500, 0.1, 0, 0.12), 280);
+            setTimeout(() => _tone(880, 0.28, 0, 0.20), 560);
+            // 閃光在 600ms
             setTimeout(() => {
                 const fl = document.getElementById('sp-flash');
+                if (!fl) return;
                 fl.style.background = 'radial-gradient(ellipse at center, rgba(255,220,100,0.55) 0%, rgba(200,140,40,0.2) 50%, transparent 72%)';
                 fl.style.animation = 'spFlash 0.55s ease-out forwards';
                 setTimeout(() => { fl.style.animation = ''; fl.style.opacity = '0'; }, 560);
-            }, 1500);
+            }, 600);
+            _hideTimer = setTimeout(_hidePullAnim, 800);
         }
         function _hidePullAnim() {
-            document.getElementById('sp-overlay').style.display = 'none';
+            const el = document.getElementById('sp-overlay');
+            if (!el) return;
+            el.style.display = 'none';
+            el.style.background = '';
+            const orb = el.querySelector('.sp-orb');
+            if (orb) { orb.textContent = '❓'; orb.style.filter = ''; }
         }
-        function _lotteryModal(title, body, isGood) {
-            const wait = Math.max(0, _pullAnimEnd - Date.now());
-            setTimeout(() => { _hidePullAnim(); showModalMsg(title, body, isGood); }, wait);
+        function _lotteryModal(title, body, isGood, rarity) {
+            if (rarity === 'M') {
+                const ov = document.getElementById('sp-overlay');
+                if (ov) {
+                    clearTimeout(_hideTimer);
+                    // 背景金色光暈
+                    ov.style.background = 'radial-gradient(ellipse at center, rgba(255,200,20,0.22) 0%, rgba(0,0,0,0.97) 72%)';
+                    // 問號換成金星（無文字變更）
+                    const orb = ov.querySelector('.sp-orb');
+                    if (orb) { orb.textContent = '⭐'; orb.style.filter = 'drop-shadow(0 0 18px gold)'; }
+                    // 上行音階
+                    [260,330,415,520,660,830,1050].forEach((f, i) => setTimeout(() => _tone(f, 0.07 + i * 0.02, 0, 0.18), i * 130));
+                    // 金色閃光
+                    setTimeout(() => {
+                        const fl = document.getElementById('sp-flash');
+                        if (!fl) return;
+                        fl.style.background = 'radial-gradient(ellipse at center, rgba(255,220,50,0.75) 0%, rgba(255,180,0,0.3) 45%, transparent 72%)';
+                        fl.style.animation = 'spFlash 1.5s ease-out forwards';
+                        setTimeout(() => { fl.style.animation = ''; fl.style.opacity = '0'; }, 1500);
+                    }, 750);
+                    _hideTimer = setTimeout(_hidePullAnim, 2200);
+                }
+            }
+            showModalMsg(title, body, isGood);
         }
 
         function executeLottery(m) {
+            try {
             _showPullAnim();
-            // 保底：6秒後若覆蓋層還在就強制關閉
-            setTimeout(_hidePullAnim, 6000);
-            db.ref('economy/'+ME).once('value').then(ps=>{
-                let pts = ps.val()||0;
-                db.ref('users/'+ME).once('value').then(s=>{
-                  try {
-                    let d = s.val()||{}, up = {}, tail = "", isPaid = false;
-                    
-                    if(m === "free"){
-                        up.last_free_lottery = getLocalDateStr(new Date()); tail = "<br>(消耗每日首抽)";
-                    } else if(m === "ticket"){
-                        up.free_gacha_active = false; tail = "<br>(消耗抽獎券)";
-                        isPaid = true;
-                    } else if(m === "energy") {
-                        // 能量已在 drawChoiceExecute 中預先扣除
-                        tail = "<br>(消耗 100 能量)";
-                        isPaid = true;
-                    } else {
-                        // 舊的 paid 模式（直接花10點）保留做向下兼容，正常不會觸發
-                        if(pts < 10) { playSound('error'); return showToast("❌ 點數不足 10 點！", 'error'); }
-                        db.ref('economy/'+ME).set(pts-10);
-                        logPoints(-10, '🎰 抽獎扣款');
-                        isPaid = true;
-                    }
-                    
-                    // 幸運草防槓龜機制 (如果在 85~100 的槓龜區間，強制改為其他獎項)
-                    let luck = Math.random() * 100; 
-                    if(d.clover_active){
-                        if(luck > 85) luck = Math.random() * 85;
-                        const remaining = (d.clover_count || 1) - 1;
-                        up.clover_count = remaining;
-                        up.clover_active = remaining > 0;
-                        tail += "<br>(🍀 保底幸運草發動：防槓龜" + (remaining > 0 ? `，剩餘 ${remaining} 層` : '，已耗盡') + ")";
-                    }
-                    
-                    // 保底機制計算
-                    let newPity = d.gacha_pity || 0;
-                    let pityTriggered = false;
-                    if(isPaid) {
-                        newPity++;
-                        if(newPity >= 10) {
-                            newPity = 0;
-                            pityTriggered = true;
-                            up['items/free_gacha_ticket'] = (d.items && d.items['free_gacha_ticket'] ? d.items['free_gacha_ticket'] : 0) + 1;
-                        }
-                        up.gacha_pity = newPity;
-                    }
+                // 使用本地 cache（由 .on('value') 即時同步），完全不做 Firebase read
+                let up = {}, tail = "", isPaid = false;
+                if (m === "free") {
+                    up.last_free_lottery = getLocalDateStr(new Date()); tail = "<br>(消耗每日首抽)";
+                } else if (m === "ticket") {
+                    up.free_gacha_active = false; tail = "<br>(消耗抽獎券)"; isPaid = true;
+                } else if (m === "energy") {
+                    tail = "<br>(消耗 100 能量)"; isPaid = true;
+                } else {
+                    if (myPoints < 10) { _hidePullAnim(); return showToast("❌ 點數不足 10 點！", 'error'); }
+                    db.ref('economy/'+ME).set(myPoints - 10); logPoints(-10, '🎰 抽獎扣款'); isPaid = true;
+                }
 
-                    db.ref('users/'+ME).update(up); 
-                    
-                    // 分發獎勵
-                    let getPool = (r, t='g') => Object.keys(ITEMS).filter(k => ITEMS[k].r === r && ITEMS[k].t === t);
-                    
-                    if (luck <= 1) { // 1% 神話/100點
-                        let pool = [...getPool('M'), '100_pts'];
-                        let won = getWeightedItem(pool);
-                        playSound('coin'); confetti({particleCount:150, spread:100});
-                        if (won === '100_pts') {
-                            db.ref('economy/'+ME).transaction(c=>(c||0)+100);
-                            logPoints(100, '🏆 抽獎頭獎');
-                            logGachaResult('M', '100 點頭獎', '🏆');
-                            _lotteryModal("🏆 終極頭獎！", "太爽了吧！獲得 <strong style='color:var(--gold)'>100 點</strong>！"+tail+(pityTriggered?"\n\n🎉 滿10抽保底：獲得【抽獎券】x1":""), true);
-                        } else {
-                            db.ref('users/'+ME+'/items/'+won).transaction(c=>(c||0)+1);
-                            logGachaResult('M', ITEMS[won].n, ITEMS[won].i);
-                            _lotteryModal("🏆 終極頭獎！", `不可思議！你抽中了神話級寶物：<br><br><span style="font-size:48px;">${ITEMS[won].i}</span><br><strong style='color:var(--gold)'>${ITEMS[won].n}</strong>！`+tail+(pityTriggered?"\n\n🎉 滿10抽保底：獲得【抽獎券】x1":""), true);
-                        }
+                let luck = Math.random() * 100;
+                if (myCloverActive) {
+                    if (luck > 85) luck = Math.random() * 85;
+                    const remaining = Math.max(0, myCloverCount - 1);
+                    up.clover_count = remaining; up.clover_active = remaining > 0;
+                    tail += "<br>(🍀 保底幸運草發動：防槓龜" + (remaining > 0 ? `，剩餘 ${remaining} 層` : '，已耗盡') + ")";
+                }
+
+                let newPity = gachaPity, pityTriggered = false;
+                if (isPaid) {
+                    newPity++;
+                    if (newPity >= 10) {
+                        newPity = 0; pityTriggered = true;
+                        up['items/free_gacha_ticket'] = (myInventory['free_gacha_ticket'] || 0) + 1;
                     }
-                    else if (luck <= 3) { // 2% 史詩 (E)
-                        let won = getWeightedItem(getPool('E'));
-                        db.ref('users/'+ME+'/items/'+won).transaction(c=>(c||0)+1);
-                        logGachaResult('E', ITEMS[won].n, ITEMS[won].i);
-                        playSound('success'); confetti();
-                        _lotteryModal("✨ 史詩掉落！", `金光一閃！獲得史詩級寶物：<br><br><span style="font-size:48px;">${ITEMS[won].i}</span><br><strong style='color:var(--purple)'>${ITEMS[won].n}</strong>！`+tail+(pityTriggered?"\n\n🎉 滿10抽保底：獲得【抽獎券】x1":""), true);
+                    up.gacha_pity = newPity;
+                }
+                db.ref('users/'+ME).update(up);
+
+                const PT = pityTriggered ? "\n\n🎉 滿10抽保底：獲得【抽獎券】x1" : "";
+                const getPool = (r, t='g') => Object.keys(ITEMS).filter(k => ITEMS[k].r === r && ITEMS[k].t === t);
+
+                if (luck <= 1) {
+                    const pool = [...getPool('M'), '100_pts'], won = getWeightedItem(pool);
+                    if (won === '100_pts') {
+                        db.ref('economy/'+ME).transaction(c=>(c||0)+100); logPoints(100, '🏆 抽獎頭獎'); logGachaResult('M', '100 點頭獎', '🏆');
+                        _lotteryModal("🏆 終極頭獎！", "太爽了吧！獲得 <strong style='color:var(--gold)'>100 點</strong>！"+tail+PT, true, 'M');
+                    } else {
+                        db.ref('users/'+ME+'/items/'+won).transaction(c=>(c||0)+1); logGachaResult('M', ITEMS[won].n, ITEMS[won].i);
+                        _lotteryModal("🏆 終極頭獎！", `不可思議！你抽中了神話級寶物：<br><br><span style="font-size:48px;">${ITEMS[won].i}</span><br><strong style='color:var(--gold)'>${ITEMS[won].n}</strong>！`+tail+PT, true, 'M');
                     }
-                    else if (luck <= 10) { // 7% 稀有 (R)
-                        let won = getWeightedItem(getPool('R'));
-                        db.ref('users/'+ME+'/items/'+won).transaction(c=>(c||0)+1);
-                        logGachaResult('R', ITEMS[won].n, ITEMS[won].i);
-                        playSound('success');
-                        _lotteryModal("💎 稀有掉落！", `運氣不錯！獲得稀有寶物：<br><span style="font-size:24px;">${ITEMS[won].i}</span> <strong style='color:var(--primary)'>${ITEMS[won].n}</strong>！`+tail+(pityTriggered?"\n\n🎉 滿10抽保底：獲得【抽獎券】x1":""), true);
+                } else if (luck <= 3) {
+                    const won = getWeightedItem(getPool('E'));
+                    db.ref('users/'+ME+'/items/'+won).transaction(c=>(c||0)+1); logGachaResult('E', ITEMS[won].n, ITEMS[won].i);
+                    _lotteryModal("✨ 史詩掉落！", `金光一閃！獲得史詩級寶物：<br><br><span style="font-size:48px;">${ITEMS[won].i}</span><br><strong style='color:var(--purple)'>${ITEMS[won].n}</strong>！`+tail+PT, true, 'E');
+                } else if (luck <= 10) {
+                    const won = getWeightedItem(getPool('R'));
+                    db.ref('users/'+ME+'/items/'+won).transaction(c=>(c||0)+1); logGachaResult('R', ITEMS[won].n, ITEMS[won].i);
+                    playSound('success');
+                    _lotteryModal("💎 稀有掉落！", `運氣不錯！獲得稀有寶物：<br><span style="font-size:24px;">${ITEMS[won].i}</span> <strong style='color:var(--primary)'>${ITEMS[won].n}</strong>！`+tail+PT, true, 'R');
+                } else if (luck <= 20) {
+                    const won = getWeightedItem(Object.keys(ITEMS).filter(k => ITEMS[k].t === 'u' && !ITEMS[k].expOnly));
+                    db.ref('users/'+ME+'/items/'+won).transaction(c=>(c||0)+1); logGachaResult('U', ITEMS[won].n, ITEMS[won].i);
+                    playSound('success');
+                    _lotteryModal("🎒 實用道具！", `抽中了實用的功能卡片：<br><span style="font-size:24px;">${ITEMS[won].i}</span> <strong style='color:var(--green)'>${ITEMS[won].n}</strong>！`+tail+PT, true);
+                } else if (luck <= 35) {
+                    const won = getWeightedItem(getPool('C'));
+                    db.ref('users/'+ME+'/items/'+won).transaction(c=>(c||0)+1); logGachaResult('C', ITEMS[won].n, ITEMS[won].i);
+                    playSound('success');
+                    _lotteryModal("📦 普通收集品", `獲得了一件普通收集品：<br><span style="font-size:24px;">${ITEMS[won].i}</span> <strong>${ITEMS[won].n}</strong>`+tail+PT, true);
+                } else if (luck <= 40) {
+                    const p = Math.floor(Math.random()*5)+16;
+                    db.ref('economy/'+ME).transaction(c=>(c||0)+p); playSound('coin'); logPoints(p, '🎰 抽獎得獎'); logGachaResult('pts', `${p} 點`, '💰');
+                    _lotteryModal("💰 大獎金！", `手氣真好！獲得 <strong style='color:var(--gold)'>${p} 點</strong>！`+tail+PT, true);
+                } else if (luck <= 50) {
+                    const p = Math.floor(Math.random()*10)+6;
+                    db.ref('economy/'+ME).transaction(c=>(c||0)+p); playSound('coin'); logPoints(p, '🎰 抽獎得獎'); logGachaResult('pts', `${p} 點`, '🪙');
+                    _lotteryModal("🪙 小回本", `拿回了 ${p} 點！`+tail+PT, true);
+                } else if (luck <= 70) {
+                    const p = Math.floor(Math.random()*5)+1;
+                    db.ref('economy/'+ME).transaction(c=>(c||0)+p); playSound('coin'); logPoints(p, '🎰 抽獎得獎'); logGachaResult('pts', `${p} 點`, '🍬');
+                    _lotteryModal("🍬 小補貼", `獲得 ${p} 點零錢。`+tail+PT, true);
+                } else if (luck <= 85) {
+                    const amt = Math.random() < 0.5 ? 1 : 2;
+                    db.ref('users/'+ME+'/shards').transaction(c=>(c||0)+amt); playSound('success'); logGachaResult('shard', `碎片 x${amt}`, '🔹');
+                    _lotteryModal("🔹 碎片", `稍微安慰一下，獲得 ${amt} 個水晶碎片。`+tail+PT, true);
+                } else {
+                    logGachaResult('miss', '槓龜', '💀'); playSound('error');
+                    _lotteryModal("💀 槓龜", "什麼都沒有，點數被系統沒收了。"+tail+PT, false);
+                }
+
+                setTimeout(() => {
+                    loadGachaHistory();
+                    const histBody = document.getElementById('gacha-history-body');
+                    if (histBody && !histBody.classList.contains('open')) {
+                        histBody.classList.add('open');
+                        const ch = histBody.previousElementSibling?.querySelector('.prob-chevron');
+                        if (ch) ch.classList.add('open');
                     }
-                    else if (luck <= 20) { // 10% 實用道具 (U)
-                        let won = getWeightedItem(Object.keys(ITEMS).filter(k => ITEMS[k].t === 'u' && !ITEMS[k].expOnly));
-                        db.ref('users/'+ME+'/items/'+won).transaction(c=>(c||0)+1);
-                        logGachaResult('U', ITEMS[won].n, ITEMS[won].i);
-                        playSound('success');
-                        _lotteryModal("🎒 實用道具！", `抽中了實用的功能卡片：<br><span style="font-size:24px;">${ITEMS[won].i}</span> <strong style='color:var(--green)'>${ITEMS[won].n}</strong>！`+tail+(pityTriggered?"\n\n🎉 滿10抽保底：獲得【抽獎券】x1":""), true);
-                    }
-                    else if (luck <= 35) { // 15% 普通寶物 (C)
-                        let won = getWeightedItem(getPool('C'));
-                        db.ref('users/'+ME+'/items/'+won).transaction(c=>(c||0)+1);
-                        logGachaResult('C', ITEMS[won].n, ITEMS[won].i);
-                        playSound('success');
-                        _lotteryModal("📦 普通收集品", `獲得了一件普通收集品：<br><span style="font-size:24px;">${ITEMS[won].i}</span> <strong>${ITEMS[won].n}</strong>`+tail+(pityTriggered?"\n\n🎉 滿10抽保底：獲得【抽獎券】x1":""), true);
-                    }
-                    else if (luck <= 40) { // 5% 大點數 (16-20)
-                        let p = Math.floor(Math.random()*5)+16;
-                        db.ref('economy/'+ME).transaction(c=>(c||0)+p); playSound('coin');
-                        logPoints(p, '🎰 抽獎得獎');
-                        logGachaResult('pts', `${p} 點`, '💰');
-                        _lotteryModal("💰 大獎金！", `手氣真好！獲得 <strong style='color:var(--gold)'>${p} 點</strong>！`+tail+(pityTriggered?"\n\n🎉 滿10抽保底：獲得【抽獎券】x1":""), true);
-                    }
-                    else if (luck <= 50) { // 10% 中點數 (6-15)
-                        let p = Math.floor(Math.random()*10)+6;
-                        db.ref('economy/'+ME).transaction(c=>(c||0)+p); playSound('coin');
-                        logPoints(p, '🎰 抽獎得獎');
-                        logGachaResult('pts', `${p} 點`, '🪙');
-                        _lotteryModal("🪙 小回本", `拿回了 ${p} 點！`+tail+(pityTriggered?"\n\n🎉 滿10抽保底：獲得【抽獎券】x1":""), true);
-                    }
-                    else if (luck <= 70) { // 20% 小點數 (1-5)
-                        let p = Math.floor(Math.random()*5)+1;
-                        db.ref('economy/'+ME).transaction(c=>(c||0)+p); playSound('coin');
-                        logPoints(p, '🎰 抽獎得獎');
-                        logGachaResult('pts', `${p} 點`, '🍬');
-                        _lotteryModal("🍬 小補貼", `獲得 ${p} 點零錢。`+tail+(pityTriggered?"\n\n🎉 滿10抽保底：獲得【抽獎券】x1":""), true);
-                    }
-                    else if (luck <= 85) { // 15% 碎片 (1-2)
-                        let amt = Math.random() < 0.5 ? 1 : 2;
-                        db.ref('users/'+ME+'/shards').transaction(c=>(c||0)+amt); playSound('success');
-                        logGachaResult('shard', `碎片 x${amt}`, '🔹');
-                        _lotteryModal("🔹 碎片", `稍微安慰一下，獲得 ${amt} 個水晶碎片。`+tail+(pityTriggered?"\n\n🎉 滿10抽保底：獲得【抽獎券】x1":""), true);
-                    }
-                    else { // 15% 槓龜
-                        logGachaResult('miss', '槓龜', '💀');
-                        playSound('error');
-                        _lotteryModal("💀 槓龜", "什麼都沒有，點數被系統沒收了。"+tail+(pityTriggered?"\n\n🎉 滿10抽保底：獲得【抽獎券】x1":""), false);
-                    } 
-                    setTimeout(() => {
-                        loadGachaHistory();
-                        const histBody = document.getElementById('gacha-history-body');
-                        if (histBody && !histBody.classList.contains('open')) {
-                            histBody.classList.add('open');
-                            const ch = histBody.previousElementSibling.querySelector('.prob-chevron');
-                            if (ch) ch.classList.add('open');
-                        }
-                    }, 500);
-                  } catch(err) { _hidePullAnim(); showToast('抽獎失敗，請重試', 'error'); }
-                }).catch(() => { _hidePullAnim(); showToast('抽獎失敗，請重試', 'error'); });
-            }).catch(() => { _hidePullAnim(); showToast('抽獎失敗，請重試', 'error'); });
+                }, 500);
+            } catch(err) {
+                _hidePullAnim(); showToast('抽獎發生錯誤，請重試', 'error');
+            }
         }
 
         // ===== 🎁 物品使用 =====
