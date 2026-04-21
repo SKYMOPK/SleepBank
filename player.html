@@ -2691,7 +2691,7 @@
                 } else if (m === "ticket") {
                     up.free_gacha_active = false; tail = "<br>(消耗抽獎券)"; isPaid = true;
                 } else if (m === "energy") {
-                    tail = "<br>(消耗 100 能量)"; isPaid = true;
+                    tail = "<br>(消耗 80 能量)"; isPaid = true;
                 } else {
                     if (myPoints < 10) { _hidePullAnim(); return showToast("❌ 點數不足 10 點！", 'error'); }
                     db.ref('economy/'+ME).set(myPoints - 10); logPoints(-10, '🎰 抽獎扣款'); isPaid = true;
