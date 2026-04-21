@@ -2299,11 +2299,6 @@
             const hasTicket = ticketHave >= ticketNeed;
             const hasEnergy = myGachaEnergy >= energyNeed;
 
-            if (!hasTicket && !hasEnergy) {
-                showToast(`❌ 需要 ${ticketNeed} 張抽獎券 或 ${energyNeed} 點能量`, 'error');
-                return;
-            }
-
             document.getElementById('drawChoiceTitle').innerText = isTen ? '🎰 10連抽方式' : '🎰 單抽方式';
             document.getElementById('drawChoiceSubtitle').innerText = isTen
                 ? '必觸發一次保底，獲得【抽獎券】x1'
