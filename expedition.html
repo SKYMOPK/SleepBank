@@ -349,6 +349,7 @@
                 <span class="drop-pill">🎟️ 40%</span>
                 <span class="drop-pill">🍀 15%</span>
                 <span class="drop-pill">🎫 5%</span>
+                <span class="drop-pill">🔄 15%</span>
             </div>
         </div>
 
@@ -369,6 +370,8 @@
                 <span class="drop-pill">🎟️ 50%</span>
                 <span class="drop-pill">🍀 25%</span>
                 <span class="drop-pill">🎫 15%</span>
+                <span class="drop-pill">🔄 20%</span>
+                <span class="drop-pill">💸 12%</span>
             </div>
         </div>
 
@@ -389,6 +392,9 @@
                 <span class="drop-pill">🎟️ 60%</span>
                 <span class="drop-pill">🍀 35%</span>
                 <span class="drop-pill">🎫 25%</span>
+                <span class="drop-pill">🔄 25%</span>
+                <span class="drop-pill">💸 18%</span>
+                <span class="drop-pill">🔒 10%</span>
             </div>
         </div>
 
@@ -584,13 +590,13 @@ const DIFF = {
 
 const R_POOL = ['r_musicbox','r_moonstone','r_dreamcatcher','r_feather','r_owl','r_bear','r_cat','r_wine','r_blanket','r_rain','r_massage','r_incense','r_diary','r_star'];
 const E_POOL = ['e_bottle','e_gem','e_scale','e_projector','e_cloud','e_baku','e_sand','e_key','e_score'];
-const INAME  = {r_musicbox:'星空八音盒',r_moonstone:'靜謐月光石',r_dreamcatcher:'捕夢網殘骸',r_feather:'午睡精靈羽毛',r_owl:'深層睡眠貓頭鷹',r_bear:'守護泰迪熊',r_cat:'壓胸口的胖橘貓',r_wine:'微醺的熱紅酒',r_blanket:'重力被',r_rain:'白噪音雨滴',r_massage:'筋膜槍馬達',r_incense:'奇楠沉香',r_diary:'上鎖的夢境日記',r_star:'安眠流星',e_bottle:'極光琉璃瓶',e_gem:'織夢彩寶',e_scale:'沉睡巨龍鱗片',e_projector:'銀河投影燈',e_cloud:'雷雨雲碎片',e_baku:'食夢貘木雕',e_sand:'被遺忘的沙漏',e_key:'潛意識黃金鑰匙',e_score:'人魚安眠曲樂譜',flex_pass:'萬能作息券',lucky_clover:'保底幸運草',free_gacha_ticket:'抽獎券'};
-const IICON  = {r_musicbox:'🎶',r_moonstone:'🌕',r_dreamcatcher:'🕸️',r_feather:'🪶',r_owl:'🦉',r_bear:'🧸',r_cat:'🐈',r_wine:'🍷',r_blanket:'🛌',r_rain:'🌧️',r_massage:'💆',r_incense:'🌿',r_diary:'📓',r_star:'🌟',e_bottle:'🧪',e_gem:'🔮',e_scale:'🐉',e_projector:'✨',e_cloud:'🌩️',e_baku:'🐘',e_sand:'⌛',e_key:'🗝️',e_score:'🧜‍♀️',flex_pass:'🎫',lucky_clover:'🍀',free_gacha_ticket:'🎟️'};
+const INAME  = {r_musicbox:'星空八音盒',r_moonstone:'靜謐月光石',r_dreamcatcher:'捕夢網殘骸',r_feather:'午睡精靈羽毛',r_owl:'深層睡眠貓頭鷹',r_bear:'守護泰迪熊',r_cat:'壓胸口的胖橘貓',r_wine:'微醺的熱紅酒',r_blanket:'重力被',r_rain:'白噪音雨滴',r_massage:'筋膜槍馬達',r_incense:'奇楠沉香',r_diary:'上鎖的夢境日記',r_star:'安眠流星',e_bottle:'極光琉璃瓶',e_gem:'織夢彩寶',e_scale:'沉睡巨龍鱗片',e_projector:'銀河投影燈',e_cloud:'雷雨雲碎片',e_baku:'食夢貘木雕',e_sand:'被遺忘的沙漏',e_key:'潛意識黃金鑰匙',e_score:'人魚安眠曲樂譜',flex_pass:'萬能作息券',lucky_clover:'保底幸運草',free_gacha_ticket:'抽獎券',market_refresh:'黑市刷新券',heist:'劫奪令',seal:'封印'};
+const IICON  = {r_musicbox:'🎶',r_moonstone:'🌕',r_dreamcatcher:'🕸️',r_feather:'🪶',r_owl:'🦉',r_bear:'🧸',r_cat:'🐈',r_wine:'🍷',r_blanket:'🛌',r_rain:'🌧️',r_massage:'💆',r_incense:'🌿',r_diary:'📓',r_star:'🌟',e_bottle:'🧪',e_gem:'🔮',e_scale:'🐉',e_projector:'✨',e_cloud:'🌩️',e_baku:'🐘',e_sand:'⌛',e_key:'🗝️',e_score:'🧜‍♀️',flex_pass:'🎫',lucky_clover:'🍀',free_gacha_ticket:'🎟️',market_refresh:'🔄',heist:'💸',seal:'🔒'};
 
 const EXP_DROPS = {
-    quick:    [{ key:'free_gacha_ticket', chance:0.40 }, { key:'lucky_clover', chance:0.15 }, { key:'flex_pass', chance:0.05 }],
-    standard: [{ key:'free_gacha_ticket', chance:0.50 }, { key:'lucky_clover', chance:0.25 }, { key:'flex_pass', chance:0.15 }],
-    abyss:    [{ key:'free_gacha_ticket', chance:0.60 }, { key:'lucky_clover', chance:0.35 }, { key:'flex_pass', chance:0.25 }],
+    quick:    [{ key:'free_gacha_ticket', chance:0.40 }, { key:'lucky_clover', chance:0.15 }, { key:'flex_pass', chance:0.05 }, { key:'market_refresh', chance:0.15 }],
+    standard: [{ key:'free_gacha_ticket', chance:0.50 }, { key:'lucky_clover', chance:0.25 }, { key:'flex_pass', chance:0.15 }, { key:'market_refresh', chance:0.20 }, { key:'heist', chance:0.12 }],
+    abyss:    [{ key:'free_gacha_ticket', chance:0.60 }, { key:'lucky_clover', chance:0.35 }, { key:'flex_pass', chance:0.25 }, { key:'market_refresh', chance:0.25 }, { key:'heist', chance:0.18 }, { key:'seal', chance:0.10 }],
 };
 
 let myPoints = 0, selectedDiff = null, investment = 100;

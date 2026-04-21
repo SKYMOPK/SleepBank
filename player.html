@@ -542,11 +542,13 @@
                 <button class="market-tab" id="market-tab-sell" onclick="switchMarketTab('sell')">💰 高價收購 <span style="font-size:11px; opacity:0.6;">扣5%手續費</span></button>
             </div>
             <div id="market-section-buy" class="market-section active">
-                <div style="display:flex; gap:6px; margin-bottom:10px; flex-wrap:wrap;">
+                <div id="market-seal-banner" style="display:none; background:rgba(248,113,113,0.12); border:1px solid rgba(248,113,113,0.35); border-radius:12px; padding:10px 14px; font-size:13px; color:#F87171; margin-bottom:10px; text-align:center;"></div>
+                <div style="display:flex; gap:6px; margin-bottom:10px; flex-wrap:wrap; align-items:center;">
                     <span style="font-size:11px; color:var(--muted); align-self:center; margin-right:2px;">排序：</span>
                     <button class="market-sort-btn active" id="msort-rarity" onclick="setMarketSort('rarity')">稀有度</button>
                     <button class="market-sort-btn" id="msort-price" onclick="setMarketSort('price')">價格</button>
                     <button class="market-sort-btn" id="msort-qty" onclick="setMarketSort('qty')">數量</button>
+                    <span id="market-refreshed-by" style="display:none; margin-left:auto; font-size:11px; color:var(--muted);"></span>
                 </div>
                 <div id="market-shop-list" class="data-grid"></div>
             </div>
@@ -819,6 +821,9 @@
             shard_jar: { n: "濃縮碎片罐", i: "💎", t: "u", b: 15, d: "立刻獲得 2~3 個【水晶碎片】來加速突變合成" },
             rewind_watch: { n: "時光倒流懷錶", i: "⏪", t: "u", b: 35, d: "若昨天忘記打卡導致連勝中斷，使用它可恢復連勝紀錄！" },
             sync_dream: { n: "共鳴發財夢", i: "🎉", t: "u", b: 40, d: "自己立刻獲得 25 點，並發送 25 點禮物信件給夥伴！" },
+            market_refresh: { n: "黑市刷新券", i: "🔄", t: "u", b: 50, d: "立刻刷新黑市，並在市場留下你的名號（遠征限定）", expOnly: true },
+            heist:          { n: "劫奪令",     i: "💸", t: "u", b: 80, d: "從對手點數中奪走 15%（遠征限定）", expOnly: true },
+            seal:           { n: "封印",       i: "🔒", t: "u", b: 80, d: "封印對手這個小時與下個小時的黑市購買權（遠征限定）", expOnly: true },
 
             // === [C] 普通級 (12個) ===
             c_gummy: { n: "褪黑激素軟糖", i: "🍬", t: "g", r: "C", b: 3, d: "便宜的助眠物" },
@@ -1564,7 +1569,7 @@
             return slots;
         }
 
-        async function generateAndSaveMarket(hourEpoch) {
+        async function generateAndSaveMarket(hourEpoch, refreshedBy = null) {
             // A. 讀取最近 2 小時歷史
             const histSnap = await db.ref('market_price_history').orderByKey().limitToLast(2).once('value');
             const histArr = [];
@@ -1586,6 +1591,7 @@
             updates['market_current/generatedAt'] = hourEpoch;
             updates['market_current/items']       = slots;
             updates['market_current/prices']      = allNewPrices;
+            updates['market_current/refreshedBy'] = refreshedBy || null;
             updates[`market_price_history/${hourEpoch}`] = { prices: allNewPrices };
             await db.ref().update(updates);
 
@@ -1609,6 +1615,12 @@
         // 監聽黑市即時資料（取代舊 market_purchases listener）
         db.ref('market_current').on('value', snap => {
             currentMarket = snap.val();
+            if (document.getElementById('page-market').classList.contains('active')) renderMarket();
+        });
+
+        let myMarketSeal = null;
+        db.ref('market_seal/'+ME).on('value', snap => {
+            myMarketSeal = snap.val();
             if (document.getElementById('page-market').classList.contains('active')) renderMarket();
         });
         
@@ -1639,6 +1651,30 @@
         }
 
         function renderMarket() {
+            // 封印橫幅
+            const sealBanner = document.getElementById('market-seal-banner');
+            if (sealBanner) {
+                if (myMarketSeal && myMarketSeal.until > Date.now()) {
+                    const remMs = myMarketSeal.until - Date.now();
+                    const remH  = Math.floor(remMs / 3600000);
+                    const remM  = Math.floor((remMs % 3600000) / 60000);
+                    sealBanner.style.display = 'block';
+                    sealBanner.innerHTML = `🔒 你的黑市被 <strong>${myMarketSeal.by}</strong> 封印，剩 ${remH}h${remM}m 解除`;
+                } else {
+                    sealBanner.style.display = 'none';
+                }
+            }
+            // 刷新人標記
+            const refreshTag = document.getElementById('market-refreshed-by');
+            if (refreshTag) {
+                if (currentMarket?.refreshedBy) {
+                    refreshTag.style.display = 'inline';
+                    refreshTag.textContent   = `🔄 ${currentMarket.refreshedBy} 手動刷新`;
+                } else {
+                    refreshTag.style.display = 'none';
+                }
+            }
+
             // 更新商人語錄（每次渲染隨機）
             const bossQuotes = [
                 ...CFG.bossQuotesPersonal,
@@ -1749,6 +1785,9 @@
         // 舊 market_purchases 已由 market_current 取代
 
         function buyMarketItem(slotIdx, k, marketPrice) {
+            if (myMarketSeal && myMarketSeal.until > Date.now()) {
+                showToast(`🔒 你的黑市被${myMarketSeal.by}封印了，無法購買！`, 'error'); return;
+            }
             const buyPrice = Math.ceil(marketPrice * 1.05);
             // Step 1: 樂觀鎖 — 扣減庫存 qty
             db.ref(`market_current/items/${slotIdx}/qty`).transaction(c => {
@@ -1806,6 +1845,10 @@
         }
 
         function doMarketBuyQty() {
+            if (myMarketSeal && myMarketSeal.until > Date.now()) {
+                closeModal();
+                showToast(`🔒 你的黑市被${myMarketSeal.by}封印了，無法購買！`, 'error'); return;
+            }
             closeModal();
             const qty = marketBuyQty;
             const k = marketBuyKey;
@@ -2886,7 +2929,36 @@
                     db.ref('mailbox/'+OPP).push({ title:"🎁 收到【共鳴發財夢】的祝福！", msg:`${CFG.myName}剛剛使用了共鳴發財夢，與你分享這份好運！快收下這 25 點吧！`, points:25, claimed:false, timestamp:Date.now() });
                     playSound('coin'); showModalMsg("🎉 共鳴成功", `你獲得了 <strong style='color:var(--gold)'>25 點</strong>！\n禮物信件也已經同步發送給${CFG.oppName}囉！`, true); return;
                 }
-            }); 
+
+                if(k === 'market_refresh') {
+                    generateAndSaveMarket(getHourStart(), CFG.myName);
+                    playSound('success');
+                    showModalMsg('🔄 黑市刷新', `刷新令發動！黑市商品正在重新上架，<br>並留下了你的刷新紀錄。`, true); return;
+                }
+
+                if(k === 'heist') {
+                    let stealAmt = 0;
+                    db.ref('economy/'+OPP).transaction(v => {
+                        stealAmt = Math.round((v||0) * 0.15);
+                        return Math.max(0, (v||0) - stealAmt);
+                    }, (err2, committed2) => {
+                        if (!committed2 || stealAmt <= 0) { showToast('❌ 劫奪失敗', 'error'); return; }
+                        db.ref('economy/'+ME).transaction(v => (v||0) + stealAmt);
+                        logPoints(stealAmt, `💸 劫奪 ${CFG.oppName}`);
+                        db.ref('mailbox/'+OPP).push({ title:`💸 你被【劫奪令】洗劫！`, msg:`${CFG.myName}對你使用了劫奪令，從你口袋裡搶走了 ${stealAmt} 點！`, points:0, claimed:true, timestamp:Date.now() });
+                        playSound('coin');
+                        showModalMsg('💸 劫奪成功！', `你從${CFG.oppName}的口袋中搶走了 <strong style="color:var(--gold)">${stealAmt} 點</strong>！`, true);
+                    }); return;
+                }
+
+                if(k === 'seal') {
+                    const sealUntil = getHourStart() + 2 * 3600 * 1000;
+                    db.ref('market_seal/'+OPP).set({ until: sealUntil, by: CFG.myName });
+                    db.ref('mailbox/'+OPP).push({ title:`🔒 你的黑市被封印了！`, msg:`${CFG.myName}對你使用了封印，接下來 2 小時內你無法在黑市購買任何物品！`, points:0, claimed:true, timestamp:Date.now() });
+                    playSound('success');
+                    showModalMsg('🔒 封印成功！', `${CFG.oppName}的黑市已被封印，<br>接下來 2 小時內無法購買任何物品。`, true); return;
+                }
+            });
         }
 
         // ===== 💸 現實支出 =====
