@@ -299,7 +299,7 @@
         #sp-overlay { display:none; position:fixed; inset:0; z-index:500; background:rgba(0,0,0,0.94); backdrop-filter:blur(18px); flex-direction:column; align-items:center; justify-content:center; gap:22px; }
         @keyframes spFloat  { 0%,100%{transform:translateY(0) scale(1)} 50%{transform:translateY(-16px) scale(1.1)} }
         @keyframes spPulse  { 0%,100%{filter:drop-shadow(0 0 14px rgba(200,160,80,0.3))} 50%{filter:drop-shadow(0 0 38px rgba(255,210,80,0.75))} }
-        @keyframes spFlash  { 0%{opacity:0} 20%{opacity:1} 100%{opacity:0} }
+        @keyframes spFlash  { 0%{opacity:0} 38%{opacity:1} 100%{opacity:0} }
         @keyframes spDots   { 0%{opacity:0.3} 50%{opacity:1} 100%{opacity:0.3} }
         .sp-orb   { font-size:88px; animation: spFloat 1.8s ease-in-out infinite, spPulse 1.8s ease-in-out infinite; }
         .sp-label { font-size:13px; color:var(--muted); letter-spacing:2.5px; animation: spDots 1.2s ease-in-out infinite; }
@@ -490,7 +490,7 @@
                     <span class="prob-chevron">▼</span>
                 </div>
                 <div class="prob-body" id="energy-section-body">
-                    <div style="color:var(--muted); font-size:12px; padding:4px 2px 10px;">分解虛寶可獲得能量，累積後可消耗能量進行抽獎（單抽100 / 10連抽900）<br>普通 +10 · 稀有 +20 · 史詩 +50　｜　神話與道具不可分解</div>
+                    <div style="color:var(--muted); font-size:12px; padding:4px 2px 10px;">分解虛寶可獲得能量，累積後可消耗能量進行抽獎（單抽80 / 10連抽700）<br>普通 +10 · 稀有 +20 · 史詩 +50　｜　神話與道具不可分解</div>
                     <div style="display:flex; gap:8px; flex-wrap:wrap; font-size:11px; color:var(--muted); margin-bottom:12px; background:rgba(255,255,255,0.03); border-radius:10px; padding:8px 12px;">
                         <span style="color:#A0A0A5;">📦 普通=10</span>
                         <span style="color:#7B9CFF;">💎 稀有=20</span>
@@ -2337,7 +2337,7 @@
             _drawChoiceType = type;
             const isTen = (type === 'ten');
             const ticketNeed = isTen ? 10 : 1;
-            const energyNeed = isTen ? 900 : 100;
+            const energyNeed = isTen ? 700 : 80;
             const ticketHave = myInventory['free_gacha_ticket'] || 0;
             const hasTicket = ticketHave >= ticketNeed;
             const hasEnergy = myGachaEnergy >= energyNeed;
@@ -2369,10 +2369,10 @@
                     });
                 } else {
                     db.ref('users/'+ME+'/gacha_energy').transaction(c => {
-                        if (!c || c < 100) return undefined;
-                        return c - 100;
+                        if (!c || c < 80) return undefined;
+                        return c - 80;
                     }, (e, com) => {
-                        if (!com) return showToast('❌ 能量不足 100 點', 'error');
+                        if (!com) return showToast('❌ 能量不足 80 點', 'error');
                         executeLottery('energy');
                     });
                 }
@@ -2439,10 +2439,10 @@
                 });
             } else { // energy
                 db.ref('users/'+ME+'/gacha_energy').transaction(c => {
-                    if (!c || c < 900) return undefined;
-                    return c - 900;
+                    if (!c || c < 700) return undefined;
+                    return c - 700;
                 }, (err, committed) => {
-                    if (!committed) { playSound('error'); return showToast('❌ 能量不足 900 點！', 'error'); }
+                    if (!committed) { playSound('error'); return showToast('❌ 能量不足 700 點！', 'error'); }
                     _doTenPull('energy');
                 });
             }
@@ -2480,7 +2480,7 @@
                 // 抽中的點數直接加入
                 if (totalPts > 0) {
                     db.ref('economy/'+ME).transaction(c => (c||0) + totalPts);
-                    logPoints(totalPts, `🎰 10連抽得獎（${mode==='ticket'?'10券':'900能量'}）`);
+                    logPoints(totalPts, `🎰 10連抽得獎（${mode==='ticket'?'10券':'700能量'}）`);
                 }
                 if (totalShards > 0) db.ref('users/'+ME+'/shards').transaction(c => (c||0) + totalShards);
 
@@ -2637,15 +2637,15 @@
             _tone(300, 0.09, 0, 0.08);
             setTimeout(() => _tone(500, 0.1, 0, 0.12), 280);
             setTimeout(() => _tone(880, 0.28, 0, 0.20), 560);
-            // 閃光在 600ms
+            // 閃光在 450ms，更長更柔和
             setTimeout(() => {
                 const fl = document.getElementById('sp-flash');
                 if (!fl) return;
-                fl.style.background = 'radial-gradient(ellipse at center, rgba(255,220,100,0.55) 0%, rgba(200,140,40,0.2) 50%, transparent 72%)';
-                fl.style.animation = 'spFlash 0.55s ease-out forwards';
-                setTimeout(() => { fl.style.animation = ''; fl.style.opacity = '0'; }, 560);
-            }, 600);
-            _hideTimer = setTimeout(_hidePullAnim, 800);
+                fl.style.background = 'radial-gradient(ellipse at center, rgba(255,220,100,0.40) 0%, rgba(200,140,40,0.14) 52%, transparent 82%)';
+                fl.style.animation = 'spFlash 1.5s ease-in-out forwards';
+                setTimeout(() => { fl.style.animation = ''; fl.style.opacity = '0'; }, 1500);
+            }, 450);
+            _hideTimer = setTimeout(_hidePullAnim, 1900);
         }
         function _hidePullAnim() {
             const el = document.getElementById('sp-overlay');
