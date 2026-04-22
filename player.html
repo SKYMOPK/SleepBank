@@ -214,6 +214,50 @@
         .market-section { display: none; }
         .market-section.active { display: block; }
 
+        /* ── 首頁雙欄佈局（桌面）─────────────────────────────── */
+        @media (min-width: 769px) {
+            .home-grid {
+                display: grid;
+                grid-template-columns: 1fr 320px;
+                grid-template-areas:
+                    "countdown feed"
+                    "hero      feed"
+                    "actions   feed"
+                    "log       feed";
+                column-gap: 24px;
+                align-items: start;
+            }
+            .home-countdown { grid-area: countdown; }
+            .home-hero      { grid-area: hero; }
+            .home-actions   { grid-area: actions; }
+            .home-log       { grid-area: log; }
+            .home-feed {
+                grid-area: feed;
+                position: sticky;
+                top: 0;
+                align-self: start;
+            }
+            .home-feed .card {
+                max-height: calc(100vh - 130px);
+                overflow-y: auto;
+                margin-bottom: 0;
+            }
+            .home-feed .event-feed-title {
+                position: sticky;
+                top: 0;
+                background: rgba(44,36,22,0.95);
+                backdrop-filter: blur(12px);
+                padding-bottom: 8px;
+                margin-bottom: 4px;
+                z-index: 1;
+            }
+            /* 桌面版右欄卡片不做 hover 上移（sticky 內避免跳動）*/
+            .home-feed .card:hover { transform: none; box-shadow: 0 8px 32px rgba(0,0,0,0.4); }
+            /* 左欄各區塊間距 */
+            .home-hero .hero-card   { margin-bottom: 20px; }
+            .home-actions .action-grid { margin-bottom: 20px; }
+            .home-log .card         { margin-bottom: 0; }
+        }
 
         @media (max-width: 768px) {
             body { display: flex; flex-direction: column; overflow-y: auto; overflow-x: hidden; }
@@ -234,6 +278,13 @@
             .card { padding: 20px; border-radius: 20px; }
             .point-display { font-size: 52px; }
             #checkinBtn { grid-column: span 2 !important; }
+            /* 手機版 home-grid 回到單欄，各區塊補間距 */
+            .home-grid { display: flex; flex-direction: column; }
+            .home-hero   { margin-bottom: 16px; }
+            .home-actions { margin-bottom: 16px; }
+            .home-feed   { margin-bottom: 16px; }
+            .home-log    { margin-bottom: 16px; }
+            .home-feed .card { max-height: none; overflow-y: visible; }
             .gallery-header { padding: 20px; flex-direction: column; gap: 15px; }
             .gallery-header .btn { width: 100%; }
             .gallery-tabs { padding: 12px 16px 0; gap: 6px; }
@@ -350,6 +401,18 @@
         .bottom-nav-badge { position: absolute; top: 4px; right: 22%; width: 8px; height: 8px; background: var(--red); border-radius: 50%; box-shadow: 0 0 6px var(--red); display: none; }
         .anno-type-btn { padding: 10px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.03); color: var(--muted); font-size: 13px; font-weight: bold; cursor: pointer; text-align: center; transition: all 0.2s; }
         .anno-type-btn.selected { border-color: rgba(200,160,100,0.4); background: rgba(191,143,66,0.12); color: var(--primary); }
+
+        /* ── 事件卷軸 ── */
+        .event-feed-card { margin-bottom: 20px; }
+        .event-feed-title { font-size: 12px; font-weight: 700; color: var(--muted); letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+        .event-item { display: flex; align-items: flex-start; gap: 10px; padding: 8px 0; border-bottom: 1px solid rgba(200,160,100,0.07); animation: feedIn 0.4s ease-out; }
+        .event-item:last-child { border-bottom: none; }
+        @keyframes feedIn { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
+        .event-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+        .event-body { flex: 1; min-width: 0; }
+        .event-msg { font-size: 13px; color: var(--text); line-height: 1.4; }
+        .event-meta { font-size: 11px; color: var(--muted); margin-top: 3px; }
+        .event-empty { color: var(--muted); font-size: 13px; text-align: center; padding: 16px 0; }
     </style>
 </head>
 <body>
@@ -395,63 +458,81 @@
 
         <!-- 🏠 主頁 -->
         <div id="page-home" class="page-content active">
-            
-            <!-- ⏰ 打卡倒數 Banner -->
-            <div id="checkin-countdown-banner" style="display:none; align-items:center; gap:12px; margin-bottom:16px; padding:14px 20px; border-radius:16px; border:1px solid rgba(240,192,64,0.3); background:rgba(240,192,64,0.07); animation: slideDown 0.4s ease-out;">
-                <span style="font-size:20px;" id="countdown-icon">⏰</span>
-                <div style="flex:1;">
-                    <div style="font-weight:bold; font-size:14px; color:var(--gold);" id="countdown-title">打卡時段即將開始</div>
-                    <div style="font-size:13px; color:rgba(255,255,255,0.6); margin-top:2px;" id="countdown-text">計算中...</div>
-                </div>
-            </div>
+            <div class="home-grid">
 
-
-            <!-- Hero 卡片：資產 + 連勝 -->
-            <div class="hero-card card">
-                <div class="hero-left">
-                    <div>
-                        <div style="color:var(--muted); font-size:11px; letter-spacing:1.5px; text-transform:uppercase; margin-bottom:4px;" id="hero-name-label">我的資產</div>
-                        <div class="point-display" id="my_points" style="font-size:64px;">0</div>
-                    </div>
-                </div>
-                <div class="hero-right">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-                        <span style="color:var(--gold); font-weight:bold; font-size:15px;">🔥 連勝進度</span>
-                        <div style="display:flex; align-items:center; gap:10px;">
-                            <span style="font-size:11px; color:var(--muted);">🏆 最高 <span id="best_streak_text" style="color:var(--gold); font-weight:bold;">—</span></span>
-                            <span id="streak_text" style="color:var(--text); font-weight:bold; font-size:14px;">載入中...</span>
+                <!-- ⏰ 打卡倒數 Banner -->
+                <div class="home-countdown">
+                    <div id="checkin-countdown-banner" style="display:none; align-items:center; gap:12px; margin-bottom:16px; padding:14px 20px; border-radius:16px; border:1px solid rgba(240,192,64,0.3); background:rgba(240,192,64,0.07); animation: slideDown 0.4s ease-out;">
+                        <span style="font-size:20px;" id="countdown-icon">⏰</span>
+                        <div style="flex:1;">
+                            <div style="font-weight:bold; font-size:14px; color:var(--gold);" id="countdown-title">打卡時段即將開始</div>
+                            <div style="font-size:13px; color:rgba(255,255,255,0.6); margin-top:2px;" id="countdown-text">計算中...</div>
                         </div>
                     </div>
-                    <div class="streak-bar-bg" style="margin-top:8px; margin-bottom:14px;"><div class="streak-bar-fill" id="streak_bar"></div></div>
-                    <div class="reward-milestones">
-                        <div class="milestone-badge"><span class="milestone-day">基本</span><span class="milestone-pts" style="font-size:13px;">10 pt</span></div>
-                        <div class="milestone-badge" style="border-color:rgba(50,215,75,0.2); background:rgba(50,215,75,0.05);"><span class="milestone-day">第 3 天</span><span class="milestone-pts" id="m3-pts" style="color:var(--green); font-size:13px;"></span></div>
-                        <div class="milestone-badge" style="border-color:rgba(255,214,10,0.2); background:rgba(255,214,10,0.05);"><span class="milestone-day">第 7 天</span><span class="milestone-pts" id="m7-pts" style="color:var(--gold); font-size:13px;"></span></div>
+                </div>
+
+                <!-- Hero 卡片：資產 + 連勝 -->
+                <div class="home-hero">
+                    <div class="hero-card card">
+                        <div class="hero-left">
+                            <div>
+                                <div style="color:var(--muted); font-size:11px; letter-spacing:1.5px; text-transform:uppercase; margin-bottom:4px;" id="hero-name-label">我的資產</div>
+                                <div class="point-display" id="my_points" style="font-size:64px;">0</div>
+                            </div>
+                        </div>
+                        <div class="hero-right">
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                                <span style="color:var(--gold); font-weight:bold; font-size:15px;">🔥 連勝進度</span>
+                                <div style="display:flex; align-items:center; gap:10px;">
+                                    <span style="font-size:11px; color:var(--muted);">🏆 最高 <span id="best_streak_text" style="color:var(--gold); font-weight:bold;">—</span></span>
+                                    <span id="streak_text" style="color:var(--text); font-weight:bold; font-size:14px;">載入中...</span>
+                                </div>
+                            </div>
+                            <div class="streak-bar-bg" style="margin-top:8px; margin-bottom:14px;"><div class="streak-bar-fill" id="streak_bar"></div></div>
+                            <div class="reward-milestones">
+                                <div class="milestone-badge"><span class="milestone-day">基本</span><span class="milestone-pts" style="font-size:13px;">10 pt</span></div>
+                                <div class="milestone-badge" style="border-color:rgba(50,215,75,0.2); background:rgba(50,215,75,0.05);"><span class="milestone-day">第 3 天</span><span class="milestone-pts" id="m3-pts" style="color:var(--green); font-size:13px;"></span></div>
+                                <div class="milestone-badge" style="border-color:rgba(255,214,10,0.2); background:rgba(255,214,10,0.05);"><span class="milestone-day">第 7 天</span><span class="milestone-pts" id="m7-pts" style="color:var(--gold); font-size:13px;"></span></div>
+                            </div>
+                            <div id="buff_status" style="margin-top:10px; font-size:12px; color:var(--primary); font-weight:600; line-height:1.6;"></div>
+                        </div>
                     </div>
-                    <div id="buff_status" style="margin-top:10px; font-size:12px; color:var(--primary); font-weight:600; line-height:1.6;"></div>
                 </div>
-            </div>
 
-            <!-- 📒 點數流水帳 -->
-            <div class="card" style="margin-bottom:20px;">
-                <div class="prob-toggle" onclick="togglePointsLog(this)">
-                    <span>📒 點數流水帳</span><span class="prob-chevron">▼</span>
+                <!-- 操作按鈕 -->
+                <div class="home-actions">
+                    <div class="action-grid">
+                        <button class="btn btn-primary" id="checkinBtn" onclick="doCheckIn()" style="grid-column: span 4; padding:18px; flex-direction:column; gap:6px;">
+                            <div id="checkinBtnText" style="font-size:20px;">🛌 睡覺打卡</div>
+                            <div id="checkinCountdown" style="font-size:12px; font-weight:normal; opacity:0.7; letter-spacing:1px;">載入中...</div>
+                        </button>
+                        <button class="btn" style="flex-direction:column; gap:8px; background:rgba(255,214,10,0.08); color:var(--gold); border-color:rgba(255,214,10,0.25);" onclick="document.querySelectorAll('.nav-item')[1].click()"><span style="font-size:24px;">🎰</span><span style="font-size:13px;">轉盤</span></button>
+                        <button class="btn" style="flex-direction:column; gap:8px;" onclick="openTransferModal()"><span style="font-size:24px;">💌</span><span style="font-size:13px;">支援</span></button>
+                        <button class="btn" style="flex-direction:column; gap:8px;" onclick="openModal('giftModal')"><span style="font-size:24px;">🎁</span><span style="font-size:13px;">序號</span></button>
+                        <button class="btn" style="flex-direction:column; gap:8px; background:rgba(255,69,58,0.08); color:var(--red); border-color:rgba(255,69,58,0.2);" onclick="openModal('spendModal')"><span style="font-size:24px;">🥤</span><span style="font-size:13px;">扣款</span></button>
+                    </div>
                 </div>
-                <div class="prob-body" id="points-log-body" style="max-height:0;">
-                    <div id="points-log-list" style="margin-top:8px;"></div>
-                </div>
-            </div>
 
-            <!-- 操作按鈕 -->
-            <div class="action-grid">
-                <button class="btn btn-primary" id="checkinBtn" onclick="doCheckIn()" style="grid-column: span 4; padding:18px; flex-direction:column; gap:6px;">
-                    <div id="checkinBtnText" style="font-size:20px;">🛌 睡覺打卡</div>
-                    <div id="checkinCountdown" style="font-size:12px; font-weight:normal; opacity:0.7; letter-spacing:1px;">載入中...</div>
-                </button>
-                <button class="btn" style="flex-direction:column; gap:8px; background:rgba(255,214,10,0.08); color:var(--gold); border-color:rgba(255,214,10,0.25);" onclick="document.querySelectorAll('.nav-item')[1].click()"><span style="font-size:24px;">🎰</span><span style="font-size:13px;">轉盤</span></button>
-                <button class="btn" style="flex-direction:column; gap:8px;" onclick="openTransferModal()"><span style="font-size:24px;">💌</span><span style="font-size:13px;">支援</span></button>
-                <button class="btn" style="flex-direction:column; gap:8px;" onclick="openModal('giftModal')"><span style="font-size:24px;">🎁</span><span style="font-size:13px;">序號</span></button>
-                <button class="btn" style="flex-direction:column; gap:8px; background:rgba(255,69,58,0.08); color:var(--red); border-color:rgba(255,69,58,0.2);" onclick="openModal('spendModal')"><span style="font-size:24px;">🥤</span><span style="font-size:13px;">扣款</span></button>
+                <!-- 📜 重大事件卷軸（桌面右欄 / 手機在按鈕下方）-->
+                <div class="home-feed">
+                    <div class="card event-feed-card">
+                        <div class="event-feed-title">📜 重大消息</div>
+                        <div id="event-feed-list"><div class="event-empty">暫無動態</div></div>
+                    </div>
+                </div>
+
+                <!-- 📒 點數流水帳 -->
+                <div class="home-log">
+                    <div class="card">
+                        <div class="prob-toggle" onclick="togglePointsLog(this)">
+                            <span>📒 點數流水帳</span><span class="prob-chevron">▼</span>
+                        </div>
+                        <div class="prob-body" id="points-log-body" style="max-height:0;">
+                            <div id="points-log-list" style="margin-top:8px;"></div>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </div>
 
@@ -2496,6 +2577,7 @@
 
                 // 神話出金預警
                 if (results.some(r => r.rarity === 'M')) {
+                    results.filter(r => r.rarity === 'M').forEach(r => logEvent('⭐', `${CFG.myName} 10連抽出神話：${r.icon}【${r.label}】！`));
                     const warn = document.createElement('div');
                     warn.style.cssText = 'position:fixed;inset:0;z-index:600;backdrop-filter:blur(22px);transition:opacity 0.5s;background:radial-gradient(ellipse at center, rgba(255,200,20,0.28) 0%, rgba(0,0,0,0.97) 72%);';
                     document.body.appendChild(warn);
@@ -2723,9 +2805,11 @@
                     const pool = [...getPool('M'), '100_pts'], won = getWeightedItem(pool);
                     if (won === '100_pts') {
                         db.ref('economy/'+ME).transaction(c=>(c||0)+100); logPoints(100, '🏆 抽獎頭獎'); logGachaResult('M', '100 點頭獎', '🏆');
+                        logEvent('⭐', `${CFG.myName} 抽中神話頭獎：🏆 100 點！`);
                         _lotteryModal("🏆 終極頭獎！", "太爽了吧！獲得 <strong style='color:var(--gold)'>100 點</strong>！"+tail+PT, true, 'M');
                     } else {
                         db.ref('users/'+ME+'/items/'+won).transaction(c=>(c||0)+1); logGachaResult('M', ITEMS[won].n, ITEMS[won].i);
+                        logEvent('⭐', `${CFG.myName} 抽出神話級道具：${ITEMS[won].i}【${ITEMS[won].n}】！`);
                         _lotteryModal("🏆 終極頭獎！", `不可思議！你抽中了神話級寶物：<br><br><span style="font-size:48px;">${ITEMS[won].i}</span><br><strong style='color:var(--gold)'>${ITEMS[won].n}</strong>！`+tail+PT, true, 'M');
                     }
                 } else if (luck <= 3) {
@@ -2875,6 +2959,7 @@
                             msg:`${CFG.myName}一次使用了 ${qty} 個共鳴發財夢，大方地分享好運！快收下這 ${total} 點吧！`,
                             points: total, claimed: false, timestamp: Date.now()
                         });
+                        logEvent('🎉', `${CFG.myName} 使用共鳴發財夢 ×${qty}，雙方各得 ${total} 點！`);
                         playSound('coin');
                         showModalMsg(`🎉 共鳴 ×${qty}`, `你獲得了 <strong style="color:var(--gold)">${total} 點</strong>！<br>禮物信件（${total} 點）已同步發送給${CFG.oppName}！`, true);
                     }
@@ -2898,7 +2983,7 @@
             db.ref('users/'+ME+'/items/'+k).transaction(c=>(c&&c>0)?c-1:undefined, (e,com)=>{ 
                 if(!com) return showToast("❌ 道具不足", 'error'); 
                 
-                if(k==='flex_pass') db.ref('users/'+ME+'/flex_active').set(true); 
+                if(k==='flex_pass') { db.ref('users/'+ME+'/flex_active').set(true); logEvent('🎫', `${CFG.myName} 使用了萬能作息券，今日可無視時間打卡！`); }
                 if(k==='lucky_clover'){ db.ref('users/'+ME+'/clover_active').set(true); db.ref('users/'+ME+'/clover_count').transaction(c=>(c||0)+1); }
                 if(k==='free_gacha_ticket') db.ref('users/'+ME+'/free_gacha_active').set(true); 
                 if(k==='double_pillow'){ let t=new Date(); if(t.getHours()>=2)t.setDate(t.getDate()+1); db.ref('users/'+ME+'/pillow_target').set(getLocalDateStr(t)); } 
@@ -2927,11 +3012,13 @@
                 if(k === 'sync_dream') {
                     db.ref('economy/'+ME).transaction(v=>(v||0)+25);
                     db.ref('mailbox/'+OPP).push({ title:"🎁 收到【共鳴發財夢】的祝福！", msg:`${CFG.myName}剛剛使用了共鳴發財夢，與你分享這份好運！快收下這 25 點吧！`, points:25, claimed:false, timestamp:Date.now() });
+                    logEvent('🎉', `${CFG.myName} 使用共鳴發財夢，雙方各得 25 點！`);
                     playSound('coin'); showModalMsg("🎉 共鳴成功", `你獲得了 <strong style='color:var(--gold)'>25 點</strong>！\n禮物信件也已經同步發送給${CFG.oppName}囉！`, true); return;
                 }
 
                 if(k === 'market_refresh') {
                     generateAndSaveMarket(getHourStart(), CFG.myName);
+                    logEvent('🔄', `${CFG.myName} 使用了黑市刷新券，黑市商品全面換新！`);
                     playSound('success');
                     showModalMsg('🔄 黑市刷新', `刷新令發動！黑市商品正在重新上架，<br>並留下了你的刷新紀錄。`, true); return;
                 }
@@ -2946,6 +3033,7 @@
                         db.ref('economy/'+ME).transaction(v => (v||0) + stealAmt);
                         logPoints(stealAmt, `💸 劫奪 ${CFG.oppName}`);
                         db.ref('mailbox/'+OPP).push({ title:`💸 你被【劫奪令】洗劫！`, msg:`${CFG.myName}對你使用了劫奪令，從你口袋裡搶走了 ${stealAmt} 點！`, points:0, claimed:true, timestamp:Date.now() });
+                        logEvent('💸', `${CFG.myName} 對 ${CFG.oppName} 使用劫奪令，掠走 ${stealAmt} 點！`);
                         playSound('coin');
                         showModalMsg('💸 劫奪成功！', `你從${CFG.oppName}的口袋中搶走了 <strong style="color:var(--gold)">${stealAmt} 點</strong>！`, true);
                     }); return;
@@ -2955,6 +3043,7 @@
                     const sealUntil = getHourStart() + 2 * 3600 * 1000;
                     db.ref('market_seal/'+OPP).set({ until: sealUntil, by: CFG.myName });
                     db.ref('mailbox/'+OPP).push({ title:`🔒 你的黑市被封印了！`, msg:`${CFG.myName}對你使用了封印，接下來 2 小時內你無法在黑市購買任何物品！`, points:0, claimed:true, timestamp:Date.now() });
+                    logEvent('🔒', `${CFG.myName} 對 ${CFG.oppName} 施放封印！黑市封鎖 2 小時！`);
                     playSound('success');
                     showModalMsg('🔒 封印成功！', `${CFG.oppName}的黑市已被封印，<br>接下來 2 小時內無法購買任何物品。`, true); return;
                 }
@@ -3059,15 +3148,16 @@
                 let dropKey = null;
                 if (luck < 0.002) dropKey = getGem('M'); else if (luck < 0.052) dropKey = getGem('E'); else if (luck < 0.152) dropKey = getGem('R'); 
                 
-                if(dropKey) { updates['items/'+dropKey] = (d.items && d.items[dropKey] ? d.items[dropKey] : 0) + 1; dropMsg = `\n🎁 額外掉落：【${ITEMS[dropKey].n}】x1`; } 
+                if(dropKey) { updates['items/'+dropKey] = (d.items && d.items[dropKey] ? d.items[dropKey] : 0) + 1; dropMsg = `\n🎁 額外掉落：【${ITEMS[dropKey].n}】x1`; }
                 db.ref('economy/'+ME).transaction(c => (c||0) + reward); db.ref('users/'+ME).update(updates);
-                logPoints(reward, `🛌 打卡獎勵${isP?' (雙倍)':''}`); 
-                playSound('coin'); confetti({particleCount:100, spread:70, origin:{y:0.6}}); 
-                
-                let msg = `打卡成功！連續 ${newStreak} 天！\n總共獲得 ${reward} 點！\n🔹 獲得 1 個【水晶碎片】`; 
-                if(isP) msg += "\n(🌙 好夢枕點數翻倍)"; if(d.flex_active) msg += "\n(🎫 萬能券消耗)"; msg += dropMsg; 
-                showModalMsg("成功！", msg, true); 
-            }); 
+                logPoints(reward, `🛌 打卡獎勵${isP?' (雙倍)':''}`);
+                if ([7,14,30,50].includes(newStreak)) logEvent('🛌', `連勝里程碑！${CFG.myName} 已連續打卡 ${newStreak} 天！`);
+                playSound('coin'); confetti({particleCount:100, spread:70, origin:{y:0.6}});
+
+                let msg = `打卡成功！連續 ${newStreak} 天！\n總共獲得 ${reward} 點！\n🔹 獲得 1 個【水晶碎片】`;
+                if(isP) msg += "\n(🌙 好夢枕點數翻倍)"; if(d.flex_active) msg += "\n(🎫 萬能券消耗)"; msg += dropMsg;
+                showModalMsg("成功！", msg, true);
+            });
         }
 
         // ===== 打卡倒數計時 =====
@@ -3118,6 +3208,47 @@
             const target = e.target.closest('.btn, .nav-item, .bottom-nav-item, .market-tab, .tab-btn');
             if (target && !target.classList.contains('disabled')) playSound('click');
         });
+
+        // ===== 📜 事件卷軸 =====
+        function fmtTimeAgo(ts) {
+            const diff = Date.now() - ts;
+            if (diff < 60000)  return '剛剛';
+            if (diff < 3600000) return `${Math.floor(diff / 60000)} 分鐘前`;
+            if (diff < 86400000) return `${Math.floor(diff / 3600000)} 小時前`;
+            return `${Math.floor(diff / 86400000)} 天前`;
+        }
+
+        function logEvent(icon, msg) {
+            db.ref('events').push({ icon, msg, by: CFG.myName, ts: Date.now() });
+        }
+
+        let _eventCache = [];
+        db.ref('events').orderByChild('ts').limitToLast(20).on('value', snap => {
+            _eventCache = [];
+            snap.forEach(c => _eventCache.push(c.val()));
+            _eventCache.reverse();
+            renderEventFeed();
+        });
+
+        function renderEventFeed() {
+            const el = document.getElementById('event-feed-list');
+            if (!el) return;
+            if (_eventCache.length === 0) {
+                el.innerHTML = '<div class="event-empty">暫無動態</div>';
+                return;
+            }
+            el.innerHTML = _eventCache.map(ev => `
+                <div class="event-item">
+                    <div class="event-icon">${ev.icon || '📌'}</div>
+                    <div class="event-body">
+                        <div class="event-msg">${ev.msg || ''}</div>
+                        <div class="event-meta">${ev.by || ''} · ${fmtTimeAgo(ev.ts || 0)}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        setInterval(renderEventFeed, 60000);
 
     </script>
 

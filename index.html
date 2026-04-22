@@ -160,6 +160,46 @@
         .card-p2 { border-color: rgba(122,187,200,0.3); color: var(--p2); }
         .card-p2:hover { box-shadow: 0 8px 24px rgba(122,187,200,0.12); border-color: rgba(122,187,200,0.5); }
 
+        /* ── Hover Dashboard Panel ── */
+        .hp-panel {
+            position: absolute;
+            bottom: calc(100% + 8px);
+            left: -1px; right: -1px;
+            background: rgba(20,16,10,0.97);
+            border: 1px solid rgba(200,160,100,0.28);
+            border-radius: 16px;
+            padding: 10px 14px;
+            overflow: hidden;
+            max-height: 0;
+            opacity: 0;
+            pointer-events: none;
+            transform: translateY(8px);
+            transition: max-height 0.42s cubic-bezier(0.4,0,0.2,1),
+                        opacity   0.30s ease,
+                        transform 0.36s cubic-bezier(0.4,0,0.2,1);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            z-index: 20;
+            box-shadow: 0 -6px 28px rgba(0,0,0,0.5);
+        }
+        .player-card:hover .hp-panel {
+            max-height: 200px;
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .hp-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 5px 0;
+            border-bottom: 1px solid rgba(200,160,100,0.08);
+            font-size: 12px;
+            gap: 8px;
+        }
+        .hp-row:last-child { border-bottom: none; }
+        .hp-lbl { color: var(--muted); font-weight: 500; white-space: nowrap; }
+        .hp-val { font-weight: 700; color: var(--text); text-align: right; }
+
         /* ── Feature grid (2×2) ── */
         .feature-grid {
             display: grid;
@@ -361,11 +401,23 @@
         <div class="section-label">選擇身分</div>
         <div class="player-grid">
             <a href="player.html?player=p1" class="player-card card-p1">
+                <div class="hp-panel" id="hp-p1">
+                    <div class="hp-row"><span class="hp-lbl">💰 點數</span><span class="hp-val" id="hp-pts-p1">—</span></div>
+                    <div class="hp-row"><span class="hp-lbl">🔥 連勝</span><span class="hp-val" id="hp-str-p1">—</span></div>
+                    <div class="hp-row"><span class="hp-lbl">💌 未讀</span><span class="hp-val" id="hp-mail-p1">—</span></div>
+                    <div class="hp-row" id="hp-exp-row-p1" style="display:none;"><span class="hp-lbl">⚔️ 遠征</span><span class="hp-val" style="color:#FF8C00;" id="hp-exp-p1">—</span></div>
+                </div>
                 <div class="p-ico">👦🏻</div>
                 <div class="p-name">至凱</div>
                 <div class="p-sub">睡眠金庫</div>
             </a>
             <a href="player.html?player=p2" class="player-card card-p2">
+                <div class="hp-panel" id="hp-p2">
+                    <div class="hp-row"><span class="hp-lbl">💰 點數</span><span class="hp-val" id="hp-pts-p2">—</span></div>
+                    <div class="hp-row"><span class="hp-lbl">🔥 連勝</span><span class="hp-val" id="hp-str-p2">—</span></div>
+                    <div class="hp-row"><span class="hp-lbl">💌 未讀</span><span class="hp-val" id="hp-mail-p2">—</span></div>
+                    <div class="hp-row" id="hp-exp-row-p2" style="display:none;"><span class="hp-lbl">⚔️ 遠征</span><span class="hp-val" style="color:#FF8C00;" id="hp-exp-p2">—</span></div>
+                </div>
                 <div class="p-ico">👦🏼</div>
                 <div class="p-name">柏致</div>
                 <div class="p-sub">睡眠金庫</div>
@@ -444,9 +496,38 @@
         // 新版本加在陣列最前面，isNew 設 true，其他改 false
         const CHANGELOG = [
             {
+                version: 'v1.2',
+                date: '2026-04-22',
+                isNew: true,
+                groups: [
+                    {
+                        icon: '🏠',
+                        title: '首頁儀表板',
+                        items: [
+                            '新增懸停面板：電腦版滑鼠移上玩家卡片，向上展開資訊欄（max-height + opacity 動畫）',
+                            '面板顯示：💰 點數、🔥 連勝天數、💌 未讀信件數、⚔️ 遠征倒數（進行中才顯示）',
+                            '點數與連勝透過 Firebase 即時同步，遠征倒數每分鐘自動刷新',
+                        ]
+                    },
+                    {
+                        icon: '📜',
+                        title: '重大事件卷軸',
+                        items: [
+                            '首頁新增「📜 重大消息」卡片，顯示最近 20 則全系統重大動態，Firebase 即時推送',
+                            '時間戳記自動格式化（剛剛 / N 分鐘前 / N 小時前 / N 天前）',
+                            '觸發事件：🛌 連勝里程碑（第 7 / 14 / 30 / 50 天）',
+                            '觸發事件：⭐ 神話出金（單抽 100pt 頭獎、神話道具、10連抽神話）',
+                            '觸發事件：🎉 共鳴發財夢使用（單次與批次）',
+                            '觸發事件：🔄 黑市刷新券、💸 劫奪令、🔒 封印、🎫 萬能作息券',
+                            '觸發事件：🏛️ 深淵遠征神廟現世（掉落稀有/史詩虛寶時）',
+                        ]
+                    }
+                ]
+            },
+            {
                 version: 'v1.1',
                 date: '2026-04-21',
-                isNew: true,
+                isNew: false,
                 groups: [
                     {
                         icon: '🎰',
@@ -600,6 +681,54 @@
         document.getElementById('cl-overlay').addEventListener('click', e => {
             if (e.target === e.currentTarget) closeChangelog();
         });
+
+        // ── Hover Panel ────────────────────────────────────────
+        const _hp = { p1: {}, p2: {} };
+
+        function _updateHoverPanel(p) {
+            const d = _hp[p];
+            const ptsEl  = document.getElementById(`hp-pts-${p}`);
+            const strEl  = document.getElementById(`hp-str-${p}`);
+            const mailEl = document.getElementById(`hp-mail-${p}`);
+            const expRow = document.getElementById(`hp-exp-row-${p}`);
+            const expEl  = document.getElementById(`hp-exp-${p}`);
+            if (ptsEl)  ptsEl.textContent  = d.points != null ? `${d.points} 點` : '—';
+            if (strEl)  strEl.textContent  = d.streak  != null ? `${d.streak} 天`  : '—';
+            if (mailEl) mailEl.textContent = d.unread  != null ? (d.unread > 0 ? `${d.unread} 封` : '無') : '—';
+            if (expRow && expEl) {
+                if (d.expEndAt && d.expEndAt > Date.now()) {
+                    expRow.style.display = 'flex';
+                    const rem = d.expEndAt - Date.now();
+                    expEl.textContent = `${Math.floor(rem / 3600000)}h ${Math.floor((rem % 3600000) / 60000)}m 後可領`;
+                } else {
+                    expRow.style.display = 'none';
+                }
+            }
+        }
+
+        ['p1', 'p2'].forEach(p => {
+            db.ref(`economy/${p}`).on('value', s => {
+                _hp[p].points = s.val() || 0;
+                _updateHoverPanel(p);
+            });
+            db.ref(`users/${p}/streak`).on('value', s => {
+                _hp[p].streak = s.val() || 0;
+                _updateHoverPanel(p);
+            });
+            db.ref(`mailbox/${p}`).on('value', s => {
+                let u = 0;
+                s.forEach(c => { if (!c.val().claimed) u++; });
+                _hp[p].unread = u;
+                _updateHoverPanel(p);
+            });
+            db.ref(`expedition/${p}/active`).on('value', s => {
+                const a = s.val();
+                _hp[p].expEndAt = a ? a.endAt : null;
+                _updateHoverPanel(p);
+            });
+        });
+
+        setInterval(() => ['p1', 'p2'].forEach(_updateHoverPanel), 60000);
 
         initChangelog();
     </script>

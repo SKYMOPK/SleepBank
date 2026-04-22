@@ -558,6 +558,11 @@ function choosePlayer(p) {
 const PARTNER = ME === 'p1' ? 'p2' : 'p1';
 const NAMES   = { p1:'至凱', p2:'柏致' };
 
+function logEvent(icon, msg) {
+    if (!db || !ME) return;
+    db.ref('events').push({ icon, msg, by: NAMES[ME] || ME, ts: Date.now() });
+}
+
 const EVENTS = {
     quick: [
         { p:.20, n:'地圖有誤', d:'繞遠路才發現目標早被搶先',   m:0.50, ico:'🗺️' },
@@ -969,7 +974,10 @@ async function claimResult() {
         const grantedItems = [];
         if (run.difficulty === 'abyss' && ev.hasItem) {
             const ak = grantAbyssItem();
-            if (ak) grantedItems.push({ key: ak, qty: 1 });
+            if (ak) {
+                grantedItems.push({ key: ak, qty: 1 });
+                logEvent('🏛️', `神廟現世！${NAMES[ME] || ME} 深淵遠征觸發神廟，獲得 ${IICON[ak] || ''}【${INAME[ak] || ak}】！`);
+            }
         }
         const expItems = await tryGrantExpItem(run.difficulty);
         grantedItems.push(...expItems);

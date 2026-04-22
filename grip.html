@@ -1327,9 +1327,8 @@ document.getElementById('grip-input-l').addEventListener('keydown', e => {
     if (e.key === 'Enter') document.getElementById('grip-input-r').focus();
 });
 
-// ── Auto-login ────────────────────────────────────────────────────────
-const saved = localStorage.getItem('grip_user');
-if (saved === 'p1' || saved === 'p2') selectUser(saved);
+// 每次進入都顯示帳號選擇畫面（不自動登入）
+localStorage.removeItem('grip_user');
 </script>
 </body>
 </html>
