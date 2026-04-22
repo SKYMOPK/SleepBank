@@ -982,6 +982,9 @@ async function claimResult() {
         const expItems = await tryGrantExpItem(run.difficulty);
         grantedItems.push(...expItems);
 
+        // 遠征完成 → 重大消息
+        logEvent('⚔️', `${NAMES[ME] || ME} 完成了遠征，平安歸來！`);
+
         await db.ref(`expedition/${ME}/history`).push({
             ts:Date.now(), difficulty:run.difficulty, investment:run.investment,
             eventName:ev.n, mult, returned, isDuo:run.isDuo, item:grantedItems[0]?.key||null,

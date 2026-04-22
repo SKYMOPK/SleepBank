@@ -234,7 +234,7 @@
             .home-feed {
                 grid-area: feed;
                 position: sticky;
-                top: 0;
+                top: 90px;
                 align-self: start;
             }
             .home-feed .card {
@@ -1414,7 +1414,7 @@
                 btn.innerHTML="🎰 幸運抽獎";
                 btn.dataset.mode="normal";
                 const hasTicket = (d.items && d.items['free_gacha_ticket'] > 0);
-                const hasEnergy = (d.gacha_energy || 0) >= 100;
+                const hasEnergy = (d.gacha_energy || 0) >= 80;
                 btn.style.animation = (hasTicket || hasEnergy)
                     ? 'lotteryPulse 2s ease-in-out infinite, buffPulse 1.5s ease-in-out infinite'
                     : 'lotteryPulse 2s ease-in-out infinite';
@@ -3027,9 +3027,13 @@
                     let stealAmt = 0;
                     db.ref('economy/'+OPP).transaction(v => {
                         stealAmt = Math.round((v||0) * 0.15);
-                        return Math.max(0, (v||0) - stealAmt);
+                        if (stealAmt <= 0) return undefined; // 對手沒點數，abort 不寫入
+                        return (v||0) - stealAmt;
                     }, (err2, committed2) => {
-                        if (!committed2 || stealAmt <= 0) { showToast('❌ 劫奪失敗', 'error'); return; }
+                        if (!committed2) {
+                            db.ref('users/'+ME+'/items/heist').transaction(c => (c||0)+1); // 退還道具
+                            showToast('❌ 劫奪失敗（對手身無分文！）', 'error'); return;
+                        }
                         db.ref('economy/'+ME).transaction(v => (v||0) + stealAmt);
                         logPoints(stealAmt, `💸 劫奪 ${CFG.oppName}`);
                         db.ref('mailbox/'+OPP).push({ title:`💸 你被【劫奪令】洗劫！`, msg:`${CFG.myName}對你使用了劫奪令，從你口袋裡搶走了 ${stealAmt} 點！`, points:0, claimed:true, timestamp:Date.now() });
@@ -3111,43 +3115,49 @@
         }
 
         // ===== ✨ 合成系統 =====
-        function doSynthesize() { 
-            db.ref('users/'+ME).once('value').then(s=>{ 
-                let d=s.val()||{}, sh=d.shards||0; if(sh<5)return; 
-                let isMut=Math.random()<0.1; let itm=isMut?"r_moonstone":"c_crystal"; 
-                db.ref('users/'+ME+'/shards').set(sh-5); db.ref('users/'+ME+'/items/'+itm).transaction(c=>(c||0)+1); 
-                playSound('success'); 
-                if(isMut){ confetti({particleCount:200, spread:100, origin:{y:0.6}}); showModalMsg("✨ 突變發生！", "水晶融合時產生了劇烈反應...\n恭喜獲得稀有【靜謐月光石】！", true); }
-                else{ showModalMsg("成功", "碎片合成完畢！\n獲得【夢境水晶】x1", true); } 
-            }); 
+        function doSynthesize() {
+            db.ref('users/'+ME+'/shards').transaction(c => {
+                if (!c || c < 5) return undefined;
+                return c - 5;
+            }, (e, committed) => {
+                if (!committed) return showModalMsg("失敗", "水晶碎片不足 5 個！", false);
+                let isMut = Math.random() < 0.1; let itm = isMut ? "r_moonstone" : "c_crystal";
+                db.ref('users/'+ME+'/items/'+itm).transaction(c => (c||0)+1);
+                playSound('success');
+                if (isMut) { confetti({particleCount:200, spread:100, origin:{y:0.6}}); showModalMsg("✨ 突變發生！", "水晶融合時產生了劇烈反應...\n恭喜獲得稀有【靜謐月光石】！", true); }
+                else { showModalMsg("成功", "碎片合成完畢！\n獲得【夢境水晶】x1", true); }
+            });
         }
 
         // ===== 🛌 打卡系統 =====
-        function doCheckIn() { 
+        let _checkingIn = false;
+        function doCheckIn() {
+            if (_checkingIn) return;
+            _checkingIn = true;
             const now = new Date(), h = now.getHours(), todayStr = getLocalDateStr(now); 
             let min = String(now.getMinutes()).padStart(2, '0'), timeStr = String(h).padStart(2, '0') + ":" + min;
             
-            db.ref('users/'+ME).once('value').then(snap => { 
-                let d = snap.val() || {last_date:"", streak: 0}; 
-                if(d.last_date === todayStr) return showModalMsg("提示", "今天打過卡囉！", false); 
-                if(!d.flex_active && !(h >= 0 && h < 2)) return showModalMsg("失敗", "非指定時段 (00:00-02:00)！\n(可使用萬能作息券解除限制)", false); 
-                
-                let y = new Date(now); y.setDate(now.getDate() - 1); let yStr = getLocalDateStr(y); 
-                let newStreak = (d.last_date === yStr) ? (d.streak || 0) + 1 : 1; 
-                let cyc = newStreak % 7; if (cyc === 0 && newStreak > 0) cyc = 7; 
-                
+            db.ref('users/'+ME).once('value').then(snap => {
+                let d = snap.val() || {last_date:"", streak: 0};
+                if(d.last_date === todayStr) { _checkingIn = false; return showModalMsg("提示", "今天打過卡囉！", false); }
+                if(!d.flex_active && !(h >= 0 && h < 2)) { _checkingIn = false; return showModalMsg("失敗", "非指定時段 (00:00-02:00)！\n(可使用萬能作息券解除限制)", false); }
+
+                let y = new Date(now); y.setDate(now.getDate() - 1); let yStr = getLocalDateStr(y);
+                let newStreak = (d.last_date === yStr) ? (d.streak || 0) + 1 : 1;
+                let cyc = newStreak % 7; if (cyc === 0 && newStreak > 0) cyc = 7;
+
                 let extraReward = (cyc === 3) ? CFG.streak3Bonus : (cyc === 7) ? CFG.streak7Bonus : 0;
-                let reward = 10 + extraReward, isP = false; 
-                let updates = { last_date: todayStr, last_time: timeStr, streak: newStreak, shards: (d.shards||0) + 1 }; 
-                
-                if (d.pillow_target && !(todayStr > d.pillow_target || (todayStr === d.pillow_target && h >= 2))) { reward *= 2; updates.pillow_target = null; isP = true; } 
-                if(d.flex_active) updates.flex_active = false; 
-                
-                let dropMsg = "", luck = Math.random(); 
-                let getGem = (r) => { let p = Object.keys(ITEMS).filter(k => ITEMS[k].r === r && ITEMS[k].t === 'g'); return p[Math.floor(Math.random() * p.length)]; }; 
+                let reward = 10 + extraReward, isP = false;
+                let updates = { last_date: todayStr, last_time: timeStr, streak: newStreak, shards: (d.shards||0) + 1 };
+
+                if (d.pillow_target && !(todayStr > d.pillow_target || (todayStr === d.pillow_target && h >= 2))) { reward *= 2; updates.pillow_target = null; isP = true; }
+                if(d.flex_active) updates.flex_active = false;
+
+                let dropMsg = "", luck = Math.random();
+                let getGem = (r) => { let p = Object.keys(ITEMS).filter(k => ITEMS[k].r === r && ITEMS[k].t === 'g'); return p[Math.floor(Math.random() * p.length)]; };
                 let dropKey = null;
-                if (luck < 0.002) dropKey = getGem('M'); else if (luck < 0.052) dropKey = getGem('E'); else if (luck < 0.152) dropKey = getGem('R'); 
-                
+                if (luck < 0.002) dropKey = getGem('M'); else if (luck < 0.052) dropKey = getGem('E'); else if (luck < 0.152) dropKey = getGem('R');
+
                 if(dropKey) { updates['items/'+dropKey] = (d.items && d.items[dropKey] ? d.items[dropKey] : 0) + 1; dropMsg = `\n🎁 額外掉落：【${ITEMS[dropKey].n}】x1`; }
                 db.ref('economy/'+ME).transaction(c => (c||0) + reward); db.ref('users/'+ME).update(updates);
                 logPoints(reward, `🛌 打卡獎勵${isP?' (雙倍)':''}`);
@@ -3157,7 +3167,7 @@
                 let msg = `打卡成功！連續 ${newStreak} 天！\n總共獲得 ${reward} 點！\n🔹 獲得 1 個【水晶碎片】`;
                 if(isP) msg += "\n(🌙 好夢枕點數翻倍)"; if(d.flex_active) msg += "\n(🎫 萬能券消耗)"; msg += dropMsg;
                 showModalMsg("成功！", msg, true);
-            });
+            }).finally(() => { _checkingIn = false; });
         }
 
         // ===== 打卡倒數計時 =====
@@ -3225,7 +3235,7 @@
         let _eventCache = [];
         db.ref('events').orderByChild('ts').limitToLast(20).on('value', snap => {
             _eventCache = [];
-            snap.forEach(c => _eventCache.push(c.val()));
+            snap.forEach(c => { const v = c.val(); if (v) _eventCache.push(v); });
             _eventCache.reverse();
             renderEventFeed();
         });
