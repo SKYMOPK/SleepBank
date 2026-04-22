@@ -3151,7 +3151,21 @@
                 let updates = { last_date: todayStr, last_time: timeStr, streak: newStreak, shards: (d.shards||0) + 1 };
 
                 if (d.pillow_target && !(todayStr > d.pillow_target || (todayStr === d.pillow_target && h >= 2))) { reward *= 2; updates.pillow_target = null; isP = true; }
-                if(d.flex_active) updates.flex_active = false;
+                let flexRefunded = false;
+                if(d.flex_active) {
+                    updates.flex_active = false;
+                    if (h >= 0 && h < 2) {
+                        flexRefunded = true;
+                        db.ref('mailbox/'+ME).push({
+                            title: '🎫 萬能作息券退回',
+                            msg: '你在正常時段 (00:00-02:00) 內打卡，萬能作息券已自動退回！',
+                            items: { flex_pass: 1 },
+                            points: 0,
+                            claimed: false,
+                            timestamp: Date.now()
+                        });
+                    }
+                }
 
                 let dropMsg = "", luck = Math.random();
                 let getGem = (r) => { let p = Object.keys(ITEMS).filter(k => ITEMS[k].r === r && ITEMS[k].t === 'g'); return p[Math.floor(Math.random() * p.length)]; };
@@ -3165,7 +3179,7 @@
                 playSound('coin'); confetti({particleCount:100, spread:70, origin:{y:0.6}});
 
                 let msg = `打卡成功！連續 ${newStreak} 天！\n總共獲得 ${reward} 點！\n🔹 獲得 1 個【水晶碎片】`;
-                if(isP) msg += "\n(🌙 好夢枕點數翻倍)"; if(d.flex_active) msg += "\n(🎫 萬能券消耗)"; msg += dropMsg;
+                if(isP) msg += "\n(🌙 好夢枕點數翻倍)"; if(d.flex_active) msg += flexRefunded ? "\n(🎫 萬能券已退回信箱)" : "\n(🎫 萬能券消耗)"; msg += dropMsg;
                 showModalMsg("成功！", msg, true);
             }).finally(() => { _checkingIn = false; });
         }
