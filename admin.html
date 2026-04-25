@@ -115,18 +115,6 @@
         .target-btn.selected { border-color: rgba(123,156,255,0.4); background: rgba(123,156,255,0.12); color: var(--primary); }
 
         /* ===== 道具選擇器 ===== */
-        .item-cat-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin-bottom: 4px; }
-        .item-cat-btn {
-            padding: 8px 4px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.08);
-            background: rgba(255,255,255,0.03); color: var(--muted);
-            font-size: 12px; font-weight: bold; cursor: pointer; transition: all 0.2s; text-align: center;
-        }
-        .item-cat-btn:hover { background: rgba(255,255,255,0.07); }
-        .item-cat-btn.sel-U { border-color: rgba(123,156,255,0.4); background: rgba(123,156,255,0.1); color: var(--primary); }
-        .item-cat-btn.sel-C { border-color: rgba(160,160,165,0.4); background: rgba(160,160,165,0.08); color: #A0A0A5; }
-        .item-cat-btn.sel-R { border-color: rgba(123,156,255,0.4); background: rgba(123,156,255,0.1); color: var(--primary); }
-        .item-cat-btn.sel-E { border-color: rgba(192,132,252,0.4); background: rgba(192,132,252,0.1); color: var(--purple); }
-        .item-cat-btn.sel-M { border-color: rgba(240,192,64,0.4); background: rgba(240,192,64,0.1); color: var(--gold); }
 
         .item-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 8px; max-height: 280px; overflow-y: auto; padding: 2px; }
         .item-option {
@@ -284,24 +272,27 @@
                     <div class="target-btn" data-target="both" onclick="selectTarget('reward', this)">👥 兩人</div>
                 </div>
             </div>
-            <div>
-                <label>💰 點數（選填，0 = 不含點數）</label>
-                <input type="number" id="reward-points" placeholder="0" min="0" max="9999" value="0">
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+                <div>
+                    <label>💰 點數</label>
+                    <input type="number" id="reward-points" placeholder="0" min="0" max="9999" value="0">
+                </div>
+                <div>
+                    <label>🔹 造型碎片</label>
+                    <input type="number" id="reward-shards" placeholder="0" min="0" max="9999" value="0">
+                </div>
             </div>
             <div>
                 <label>🎁 道具（點擊加入清單，可多選）</label>
-                <div class="item-cat-row" id="mail-cat-row">
-                    <div class="item-cat-btn sel-U selected" data-cat="U" onclick="selectMailItemCat(this)">🔧 道具</div>
-                    <div class="item-cat-btn" data-cat="C" onclick="selectMailItemCat(this)">⚪ C</div>
-                    <div class="item-cat-btn" data-cat="R" onclick="selectMailItemCat(this)">🔵 R</div>
-                    <div class="item-cat-btn" data-cat="E" onclick="selectMailItemCat(this)">🟣 E</div>
-                    <div class="item-cat-btn" data-cat="M" onclick="selectMailItemCat(this)">🟡 M</div>
-                </div>
-                <div class="item-grid" id="mail-item-grid" style="margin-top:8px;"></div>
+                <div class="item-grid" id="mail-item-grid" style="margin-top:6px;"></div>
             </div>
             <div>
                 <label>已選道具清單</label>
                 <div class="cart-list" id="mail-cart"><div class="cart-empty">尚未選擇任何道具</div></div>
+            </div>
+            <div>
+                <label>🎨 解鎖造型（點選即附加）</label>
+                <div class="item-grid" id="mail-cosm-grid" style="margin-top:6px;"></div>
             </div>
             <div>
                 <label>信件說明（選填）</label>
@@ -326,19 +317,18 @@
                     <button class="btn btn-sm" onclick="genCode()" style="white-space:nowrap;">🎲 隨機</button>
                 </div>
             </div>
-            <div>
-                <label>💰 點數（選填，0 或空白 = 不含點數）</label>
-                <input type="number" id="code-points" placeholder="0" min="0" max="9999" value="0">
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+                <div>
+                    <label>💰 點數</label>
+                    <input type="number" id="code-points" placeholder="0" min="0" max="9999" value="0">
+                </div>
+                <div>
+                    <label>🔹 造型碎片</label>
+                    <input type="number" id="code-shards" placeholder="0" min="0" max="9999" value="0">
+                </div>
             </div>
             <div style="display:flex; flex-direction:column; gap:10px;">
                 <label>🎁 道具（選填，點擊加入清單，可多選）</label>
-                <div class="item-cat-row" id="code-cat-row">
-                    <div class="item-cat-btn sel-U selected" data-cat="U" onclick="selectCodeItemCat(this)">🔧 道具</div>
-                    <div class="item-cat-btn" data-cat="C" onclick="selectCodeItemCat(this)">⚪ C</div>
-                    <div class="item-cat-btn" data-cat="R" onclick="selectCodeItemCat(this)">🔵 R</div>
-                    <div class="item-cat-btn" data-cat="E" onclick="selectCodeItemCat(this)">🟣 E</div>
-                    <div class="item-cat-btn" data-cat="M" onclick="selectCodeItemCat(this)">🟡 M</div>
-                </div>
                 <div class="item-grid" id="code-item-grid"></div>
                 <label>已選道具清單</label>
                 <div class="cart-list" id="code-cart"><div class="cart-empty">尚未選擇任何道具</div></div>
@@ -380,61 +370,21 @@
     const db = firebase.database();
 
     const ITEMS = {
-        // [U] 實用道具
-        flex_pass: { n: "萬能作息券", i: "🎫", t: "u", r: "U", b: 30 },
-        lucky_clover: { n: "保底幸運草", i: "🍀", t: "u", r: "U", b: 40 },
-        double_pillow: { n: "雙倍好夢枕", i: "🌙", t: "u", r: "U", b: 30 },
-        free_gacha_ticket: { n: "抽獎券", i: "🎟️", t: "u", r: "U", b: 10 },
-        piggy_bank: { n: "陶瓷小豬撲滿", i: "🐷", t: "u", r: "U", b: 15 },
-        mystery_box: { n: "神祕的快遞箱", i: "📦", t: "u", r: "U", b: 20 },
-        sprite_bait: { n: "精靈誘餌", i: "🧚‍♂️", t: "u", r: "U", b: 20 },
-        shard_jar: { n: "濃縮碎片罐", i: "💎", t: "u", r: "U", b: 15 },
-        rewind_watch: { n: "時光倒流懷錶", i: "⏪", t: "u", r: "U", b: 35 },
-        sync_dream: { n: "共鳴發財夢", i: "🎉", t: "u", r: "U", b: 40 },
-        // [C] 普通級
-        c_gummy: { n: "褪黑激素軟糖", i: "🍬", t: "g", r: "C", b: 3 },
-        c_hourglass: { n: "瞌睡沙漏", i: "⏳", t: "g", r: "C", b: 4 },
-        c_crystal: { n: "夢境水晶", i: "💎", t: "g", r: "C", b: 4 },
-        c_bubble: { n: "打呼泡泡", i: "🫧", t: "g", r: "C", b: 2 },
-        c_sheep: { n: "數羊計數器", i: "🐑", t: "g", r: "C", b: 3 },
-        c_milk: { n: "溫牛奶空罐", i: "🥛", t: "g", r: "C", b: 4 },
-        c_phone: { n: "砸臉上的手機", i: "📱", t: "g", r: "C", b: 3 },
-        c_mosquito: { n: "半夜打死的蚊子", i: "🦟", t: "g", r: "C", b: 1 },
-        c_earbuds: { n: "單耳藍牙耳機", i: "🎧", t: "g", r: "C", b: 4 },
-        c_socks: { n: "臭襪子", i: "🧦", t: "g", r: "C", b: 2 },
-        c_drool: { n: "流口水的枕頭套", i: "💧", t: "g", r: "C", b: 3 },
-        c_alarm: { n: "按掉五次的鬧鐘", i: "⏰", t: "g", r: "C", b: 4 },
-        // [R] 稀有級
-        r_musicbox: { n: "星空八音盒", i: "🎶", t: "g", r: "R", b: 12 },
-        r_moonstone: { n: "靜謐月光石", i: "🌕", t: "g", r: "R", b: 14 },
-        r_dreamcatcher: { n: "捕夢網殘骸", i: "🕸️", t: "g", r: "R", b: 13 },
-        r_feather: { n: "午睡精靈羽毛", i: "🪶", t: "g", r: "R", b: 15 },
-        r_owl: { n: "深層睡眠貓頭鷹", i: "🦉", t: "g", r: "R", b: 15 },
-        r_bear: { n: "守護泰迪熊", i: "🧸", t: "g", r: "R", b: 12 },
-        r_cat: { n: "壓胸口的胖橘貓", i: "🐈", t: "g", r: "R", b: 14 },
-        r_wine: { n: "微醺的熱紅酒", i: "🍷", t: "g", r: "R", b: 10 },
-        r_blanket: { n: "重力被", i: "🛌", t: "g", r: "R", b: 15 },
-        r_rain: { n: "白噪音雨滴", i: "🌧️", t: "g", r: "R", b: 11 },
-        r_massage: { n: "筋膜槍馬達", i: "💆", t: "g", r: "R", b: 9 },
-        r_incense: { n: "奇楠沉香", i: "🌿", t: "g", r: "R", b: 13 },
-        r_diary: { n: "上鎖的夢境日記", i: "📓", t: "g", r: "R", b: 8 },
-        r_star: { n: "安眠流星", i: "🌟", t: "g", r: "R", b: 15 },
-        // [E] 史詩級
-        e_bottle: { n: "極光琉璃瓶", i: "🧪", t: "g", r: "E", b: 35 },
-        e_gem: { n: "織夢彩寶", i: "🔮", t: "g", r: "E", b: 40 },
-        e_scale: { n: "沉睡巨龍鱗片", i: "🐉", t: "g", r: "E", b: 45 },
-        e_projector: { n: "銀河投影燈", i: "✨", t: "g", r: "E", b: 38 },
-        e_cloud: { n: "雷雨雲碎片", i: "🌩️", t: "g", r: "E", b: 35 },
-        e_baku: { n: "食夢貘木雕", i: "🐘", t: "g", r: "E", b: 45 },
-        e_sand: { n: "被遺忘的沙漏", i: "⌛", t: "g", r: "E", b: 30 },
-        e_key: { n: "潛意識黃金鑰匙", i: "🗝️", t: "g", r: "E", b: 40 },
-        e_score: { n: "人魚安眠曲樂譜", i: "🧜‍♀️", t: "g", r: "E", b: 38 },
-        // [M] 神話級
-        m_diamond: { n: "幻夜星鑽", i: "💠", t: "g", r: "M", b: 200 },
-        m_crown: { n: "黑帝斯王冠", i: "👑", t: "g", r: "M", b: 250 },
-        m_tears: { n: "月神之淚", i: "💧", t: "g", r: "M", b: 220 },
-        m_cap: { n: "全知之眼睡帽", i: "👁️", t: "g", r: "M", b: 180 },
-        m_galaxy: { n: "銀河縮影懷錶", i: "🧭", t: "g", r: "M", b: 250 }
+        point_thief: { n: "點數小偷",  i: "🦹", t: "u", d: "偷取對手20%的點數" },
+        style_shard: { n: "造型碎片袋", i: "✨", t: "u", d: "隨機獲得 1~3 個造型碎片" },
+        heart_quest: { n: "心之所向",  i: "🎯", t: "u", d: "啟動5天準時打卡任務，完成獲得碎片" },
+        iron_wall:   { n: "銅牆鐵壁",  i: "🛡️", t: "u", d: "被動護盾，自動阻擋一次點數小偷" },
+        dual_exp:    { n: "雙重體驗",  i: "💫", t: "u", d: "當日雙方都打卡，各獲得 10 點" },
+        point_burn:  { n: "點數燃燒",  i: "🔥", t: "u", d: "給對手發布消費任務" },
+    };
+
+    const COSMETICS = {
+        cat_color:    { n: "貓咪萌系・主題色",   i: "🎨", limited: true  },
+        cat_effect:   { n: "貓咪萌系・打卡特效", i: "🐱", limited: true  },
+        cat_message:  { n: "貓咪萌系・訊息樣式", i: "💬", limited: true  },
+        star_color:   { n: "深夜星空・主題色",   i: "🌌", limited: false },
+        star_effect:  { n: "深夜星空・打卡特效", i: "🌠", limited: false },
+        star_message: { n: "深夜星空・訊息樣式", i: "🌙", limited: false },
     };
 
     // ===== 工具 =====
@@ -534,67 +484,73 @@
     }
 
     // ===== 道具網格（購物車模式）=====
-    const currentCat = { mail: 'U', code: 'U' };
-
     function renderItemGridCart(gridId, cartType) {
-        const cat = currentCat[cartType];
         const grid = document.getElementById(gridId);
-        const filtered = Object.entries(ITEMS).filter(([, v]) => v.r === cat);
-        grid.innerHTML = filtered.map(([k, v]) => `
+        grid.innerHTML = Object.entries(ITEMS).map(([k, v]) => `
             <div class="item-option ${carts[cartType][k] ? 'in-cart' : ''}" onclick="addToCart('${cartType}', '${k}')">
                 <span class="item-icon">${v.i}</span>
                 <span class="item-name">${v.n}</span>
-                <span class="item-rarity">${v.r} · ${v.b}pt${carts[cartType][k] ? ' ✓' : ''}</span>
+                <span class="item-rarity">道具${carts[cartType][k] ? ' ✓' : ''}</span>
             </div>`).join('');
     }
 
-    function selectMailItemCat(el) {
-        el.closest('.item-cat-row').querySelectorAll('.item-cat-btn').forEach(b => {
-            b.classList.remove('selected', 'sel-U', 'sel-C', 'sel-R', 'sel-E', 'sel-M');
-        });
-        el.classList.add('selected', 'sel-' + el.dataset.cat);
-        currentCat.mail = el.dataset.cat;
-        renderItemGridCart('mail-item-grid', 'mail');
+    // 造型網格（信件用，多選切換）
+    const selectedCosmetics = { mail: new Set() };
+    function renderCosmGrid(gridId) {
+        const grid = document.getElementById(gridId);
+        if (!grid) return;
+        grid.innerHTML = Object.entries(COSMETICS).map(([k, c]) => {
+            const sel = selectedCosmetics.mail.has(k);
+            return `<div class="item-option ${sel ? 'in-cart' : ''}" onclick="toggleCosm('${k}')">
+                <span class="item-icon">${c.i}</span>
+                <span class="item-name">${c.n.split('・')[1]||c.n}</span>
+                <span class="item-rarity">${c.limited ? '✦ 限定' : '◈ 常駐'}${sel ? ' ✓' : ''}</span>
+            </div>`;
+        }).join('');
+    }
+    function toggleCosm(key) {
+        if (selectedCosmetics.mail.has(key)) selectedCosmetics.mail.delete(key);
+        else selectedCosmetics.mail.add(key);
+        renderCosmGrid('mail-cosm-grid');
     }
 
     // ===== 發放獎勵 =====
-    function buildRewardMsg(pts, items) {
+    function buildRewardMsg(pts, shards, items, cosms) {
         const parts = [];
         if (pts > 0) parts.push(`${pts} 點`);
+        if (shards > 0) parts.push(`${shards} 碎片`);
         Object.entries(items).forEach(([k, qty]) => { const it = ITEMS[k]; if (it) parts.push(`${it.i}${it.n} x${qty}`); });
+        if (cosms && cosms.length) cosms.forEach(k => { const c = COSMETICS[k]; if (c) parts.push(`🎨${c.n}`); });
         return '管理員發放：' + (parts.join('、') || '（空）');
     }
 
     function sendReward() {
         const pts = parseInt(document.getElementById('reward-points').value) || 0;
+        const shards = parseInt(document.getElementById('reward-shards').value) || 0;
         const note = document.getElementById('reward-note').value.trim() || '管理員發放';
         const hasItems = Object.keys(carts.mail).length > 0;
-        if (pts === 0 && !hasItems) return showToast('請填入點數或選擇道具', 'var(--red)');
+        const cosms = [...selectedCosmetics.mail];
+        if (pts === 0 && shards === 0 && !hasItems && cosms.length === 0) return showToast('請至少填入一項內容', 'var(--red)');
         const targets = targetState.reward === 'both' ? ['p1', 'p2'] : [targetState.reward];
         const now = Date.now();
-        const mailData = { title: note, msg: buildRewardMsg(pts, carts.mail), timestamp: now, claimed: false };
+        const mailData = { title: note, msg: buildRewardMsg(pts, shards, carts.mail, cosms), timestamp: now, claimed: false };
         if (pts > 0) mailData.points = pts;
+        if (shards > 0) mailData.shards = shards;
         if (hasItems) mailData.items = { ...carts.mail };
+        if (cosms.length) mailData.cosmetics = cosms;
         targets.forEach(p => { db.ref('mailbox/' + p).push(mailData); });
-        const summary = buildRewardMsg(pts, carts.mail).replace('管理員發放：', '');
-        showToast(`✅ 已發送：${summary}`);
+        showToast(`✅ 已發送：${buildRewardMsg(pts, shards, carts.mail, cosms).replace('管理員發放：', '')}`);
         carts.mail = {};
+        selectedCosmetics.mail.clear();
         renderCart('mail');
         renderItemGridCart('mail-item-grid', 'mail');
+        renderCosmGrid('mail-cosm-grid');
         document.getElementById('reward-points').value = '0';
+        document.getElementById('reward-shards').value = '0';
         document.getElementById('reward-note').value = '';
     }
 
     // ===== 序號 =====
-    function selectCodeItemCat(el) {
-        el.closest('.item-cat-row').querySelectorAll('.item-cat-btn').forEach(b => {
-            b.classList.remove('selected', 'sel-U', 'sel-C', 'sel-R', 'sel-E', 'sel-M');
-        });
-        el.classList.add('selected', 'sel-' + el.dataset.cat);
-        currentCat.code = el.dataset.cat;
-        renderItemGridCart('code-item-grid', 'code');
-    }
-
     function genCode() {
         const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
         let code = '';
@@ -607,15 +563,18 @@
         if (!key) return showToast('請輸入序號', 'var(--red)');
         const maxUses = parseInt(document.getElementById('code-max-uses').value) || 0;
         const pts = parseInt(document.getElementById('code-points').value) || 0;
+        const shards = parseInt(document.getElementById('code-shards').value) || 0;
         const hasItems = Object.keys(carts.code).length > 0;
-        if (pts === 0 && !hasItems) return showToast('請至少填入點數或選擇道具', 'var(--red)');
+        if (pts === 0 && shards === 0 && !hasItems) return showToast('請至少填入一項內容', 'var(--red)');
         const reward = {};
         if (pts > 0) reward.points = pts;
+        if (shards > 0) reward.shards = shards;
         if (hasItems) reward.items = { ...carts.code };
         db.ref('gift_codes/' + key).set({ reward, max_uses: maxUses, used_count: 0, created: Date.now() });
         showToast(`✅ 序號 ${key} 已建立！`);
         document.getElementById('code-key').value = '';
         document.getElementById('code-points').value = '0';
+        document.getElementById('code-shards').value = '0';
         carts.code = {};
         renderCart('code');
         renderItemGridCart('code-item-grid', 'code');
@@ -637,6 +596,7 @@
             const rw = v.reward || {};
             const parts = [];
             if (rw.points) parts.push(`💰 ${rw.points} 點`);
+            if (rw.shards) parts.push(`🔹 ${rw.shards} 碎片`);
             if (rw.items) Object.entries(rw.items).forEach(([ik, qty]) => { const it = ITEMS[ik]; parts.push(it ? `${it.i}${it.n} x${qty}` : `? x${qty}`); });
             // backward compat for old format
             if (!parts.length && rw.amount) parts.push(`💰 ${rw.amount} 點`);
@@ -766,6 +726,7 @@
     // 初始化
     renderItemGridCart('mail-item-grid', 'mail');
     renderItemGridCart('code-item-grid', 'code');
+    renderCosmGrid('mail-cosm-grid');
     loadOverview();
 </script>
 </body>
