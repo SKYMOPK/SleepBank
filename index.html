@@ -228,32 +228,6 @@
         .feat-split:hover  { box-shadow: 0 6px 20px rgba(200,164,74,0.12); border-color: rgba(200,164,74,0.5); }
         .feat-grip     { border-color: rgba(196,140,80,0.3);  color: #C48C50; }
         .feat-grip:hover   { box-shadow: 0 6px 20px rgba(196,140,80,0.12); border-color: rgba(196,140,80,0.5); }
-        .feat-exp      { border-color: rgba(196,112,112,0.3); color: #C47070; }
-        .feat-exp:hover    { box-shadow: 0 6px 20px rgba(196,112,112,0.12); border-color: rgba(196,112,112,0.5); }
-        .feat-company  { border-color: rgba(118,166,104,0.3); color: #76A668; }
-        .feat-company:hover { box-shadow: 0 6px 20px rgba(118,166,104,0.12); border-color: rgba(118,166,104,0.5); }
-
-        /* ── 鎖定卡片 ── */
-        .feat-locked {
-            opacity: 0.42;
-            cursor: not-allowed;
-            pointer-events: none;
-            position: relative;
-            filter: grayscale(0.3);
-        }
-        .feat-locked::after {
-            content: '🔒';
-            position: absolute;
-            top: 10px; right: 12px;
-            font-size: 14px;
-            opacity: 0.7;
-        }
-        .feat-locked .f-sub::after {
-            content: ' · 開發中';
-            color: var(--muted);
-            font-style: italic;
-        }
-
         /* ── Changelog button ── */
         .changelog-btn {
             position: relative;
@@ -426,7 +400,6 @@
                     <div class="hp-row"><span class="hp-lbl">💰 點數</span><span class="hp-val" id="hp-pts-p1">—</span></div>
                     <div class="hp-row"><span class="hp-lbl">🔥 連勝</span><span class="hp-val" id="hp-str-p1">—</span></div>
                     <div class="hp-row"><span class="hp-lbl">💌 未讀</span><span class="hp-val" id="hp-mail-p1">—</span></div>
-                    <div class="hp-row" id="hp-exp-row-p1" style="display:none;"><span class="hp-lbl">⚔️ 遠征</span><span class="hp-val" style="color:#FF8C00;" id="hp-exp-p1">—</span></div>
                 </div>
                 <div class="p-ico">👦🏻</div>
                 <div class="p-name">至凱</div>
@@ -437,7 +410,6 @@
                     <div class="hp-row"><span class="hp-lbl">💰 點數</span><span class="hp-val" id="hp-pts-p2">—</span></div>
                     <div class="hp-row"><span class="hp-lbl">🔥 連勝</span><span class="hp-val" id="hp-str-p2">—</span></div>
                     <div class="hp-row"><span class="hp-lbl">💌 未讀</span><span class="hp-val" id="hp-mail-p2">—</span></div>
-                    <div class="hp-row" id="hp-exp-row-p2" style="display:none;"><span class="hp-lbl">⚔️ 遠征</span><span class="hp-val" style="color:#FF8C00;" id="hp-exp-p2">—</span></div>
                 </div>
                 <div class="p-ico">👦🏼</div>
                 <div class="p-name">柏致</div>
@@ -460,16 +432,6 @@
                 <div class="f-name">握力日記</div>
                 <div class="f-sub">訓練紀錄與趨勢</div>
             </a>
-            <div class="feature-card feat-exp feat-locked">
-                <div class="f-ico">⚔️</div>
-                <div class="f-name">聯合遠征</div>
-                <div class="f-sub">雙人冒險投資</div>
-            </div>
-            <div class="feature-card feat-company feat-locked">
-                <div class="f-ico">🏢</div>
-                <div class="f-name">創業模擬</div>
-                <div class="f-sub">經營你的公司</div>
-            </div>
         </div>
     </div>
 
@@ -526,8 +488,8 @@
                         title: '首頁儀表板',
                         items: [
                             '新增懸停面板：電腦版滑鼠移上玩家卡片，向上展開資訊欄（max-height + opacity 動畫）',
-                            '面板顯示：💰 點數、🔥 連勝天數、💌 未讀信件數、⚔️ 遠征倒數（進行中才顯示）',
-                            '點數與連勝透過 Firebase 即時同步，遠征倒數每分鐘自動刷新',
+                            '面板顯示：💰 點數、🔥 連勝天數、💌 未讀信件數',
+                            '點數與連勝透過 Firebase 即時同步',
                         ]
                     },
                     {
@@ -540,7 +502,6 @@
                             '觸發事件：⭐ 神話出金（單抽 100pt 頭獎、神話道具、10連抽神話）',
                             '觸發事件：🎉 共鳴發財夢使用（單次與批次）',
                             '觸發事件：🔄 黑市刷新券、💸 劫奪令、🔒 封印、🎫 萬能作息券',
-                            '觸發事件：🏛️ 深淵遠征神廟現世（掉落稀有/史詩虛寶時）',
                         ]
                     }
                 ]
@@ -711,20 +672,9 @@
             const ptsEl  = document.getElementById(`hp-pts-${p}`);
             const strEl  = document.getElementById(`hp-str-${p}`);
             const mailEl = document.getElementById(`hp-mail-${p}`);
-            const expRow = document.getElementById(`hp-exp-row-${p}`);
-            const expEl  = document.getElementById(`hp-exp-${p}`);
             if (ptsEl)  ptsEl.textContent  = d.points != null ? `${d.points} 點` : '—';
             if (strEl)  strEl.textContent  = d.streak  != null ? `${d.streak} 天`  : '—';
             if (mailEl) mailEl.textContent = d.unread  != null ? (d.unread > 0 ? `${d.unread} 封` : '無') : '—';
-            if (expRow && expEl) {
-                if (d.expEndAt && d.expEndAt > Date.now()) {
-                    expRow.style.display = 'flex';
-                    const rem = d.expEndAt - Date.now();
-                    expEl.textContent = `${Math.floor(rem / 3600000)}h ${Math.floor((rem % 3600000) / 60000)}m 後可領`;
-                } else {
-                    expRow.style.display = 'none';
-                }
-            }
         }
 
         ['p1', 'p2'].forEach(p => {
@@ -740,11 +690,6 @@
                 let u = 0;
                 s.forEach(c => { if (!c.val().claimed) u++; });
                 _hp[p].unread = u;
-                _updateHoverPanel(p);
-            });
-            db.ref(`expedition/${p}/active`).on('value', s => {
-                const a = s.val();
-                _hp[p].expEndAt = a ? a.endAt : null;
                 _updateHoverPanel(p);
             });
         });

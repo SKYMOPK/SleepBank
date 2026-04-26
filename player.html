@@ -257,6 +257,37 @@
             background: rgba(255,255,255,0.03); border: 1px solid transparent;
         }
         .ghi-date { font-size: 10px; color: var(--muted); flex-shrink: 0; }
+        /* 抽獎貨幣切換 */
+        .gacha-curr-row { display: flex; gap: 8px; justify-content: center; margin-bottom: 10px; }
+        .gacha-curr-btn {
+            flex: 1; max-width: 160px; padding: 9px 14px; border-radius: 12px;
+            border: 1px solid var(--border); background: rgba(255,255,255,0.03);
+            color: var(--muted); cursor: pointer; font-size: 13px; font-weight: 700;
+            transition: all 0.2s;
+        }
+        .gacha-curr-btn:hover { background: rgba(255,255,255,0.07); }
+        .gacha-curr-btn.active {
+            background: rgba(255,214,10,0.12); border-color: rgba(255,214,10,0.35);
+            color: var(--gold); box-shadow: 0 0 10px rgba(255,214,10,0.15);
+        }
+        /* 打卡活動格子 */
+        .activity-slot {
+            background: rgba(255,255,255,0.03); border: 1px solid var(--border);
+            border-radius: 14px; padding: 12px 6px; text-align: center;
+            display: flex; flex-direction: column; align-items: center; gap: 6px;
+            transition: all 0.2s;
+        }
+        .activity-slot .act-icon { font-size: 24px; line-height: 1; }
+        .activity-slot .act-label { font-size: 11px; color: var(--muted); font-weight: bold; }
+        .activity-slot .act-num { font-size: 10px; color: var(--muted); }
+        .activity-slot.unlocked { border-color: rgba(255,214,10,0.4); background: rgba(255,214,10,0.07); cursor: pointer; }
+        .activity-slot.unlocked:hover { transform: translateY(-3px); box-shadow: 0 6px 18px rgba(255,214,10,0.2); }
+        .activity-slot.ticket-slot { border-color: rgba(123,156,255,0.35); background: rgba(123,156,255,0.05); }
+        .activity-slot.ticket-slot.unlocked { border-color: rgba(167,139,250,0.5); background: rgba(167,139,250,0.1); cursor: pointer; }
+        .activity-slot.ticket-slot.unlocked:hover { box-shadow: 0 6px 18px rgba(167,139,250,0.25); }
+        .activity-slot.claimed { opacity: 0.42; filter: grayscale(0.7); cursor: default; pointer-events: none; }
+        .activity-slot .act-check { font-size: 16px; color: var(--green); font-weight: 900; }
+
         /* 黑市 Tab */
         .market-tabs { display: flex; gap: 10px; margin-bottom: 20px; }
         .market-tab { flex: 1; padding: 12px; border-radius: 14px; border: 1px solid var(--border); background: rgba(255,255,255,0.03); color: var(--muted); font-size: 14px; font-weight: bold; cursor: pointer; transition: all 0.2s; }
@@ -956,70 +987,116 @@
         /* ── 打卡特效：雷霆閃電條 ── */
         .lightning-bolt {
             position: absolute; top: -2%; pointer-events: none; z-index: 9001;
-            width: 70px; height: 210px;
+            width: 72px; height: 290px;
             clip-path: polygon(62% 0%,100% 0%,42% 52%,78% 52%,18% 100%,0% 100%,58% 48%,22% 48%);
-            background: linear-gradient(to bottom, rgba(255,255,255,0.98), rgba(210,180,255,0.9), rgba(139,92,246,0.7));
-            box-shadow: 0 0 22px rgba(167,139,250,0.9), 0 0 60px rgba(139,92,246,0.55);
-            animation: lightningStrike 0.55s ease-out forwards;
+            background: linear-gradient(to bottom, rgba(255,255,255,1.0), rgba(230,210,255,0.95), rgba(167,139,250,0.85), rgba(124,58,237,0.65));
+            box-shadow: 0 0 28px rgba(255,255,255,0.6), 0 0 50px rgba(167,139,250,0.9), 0 0 90px rgba(124,58,237,0.5);
+            animation: lightningStrike 0.62s ease-out forwards;
+        }
+        .lightning-bolt-thin {
+            position: absolute; top: -2%; pointer-events: none; z-index: 9001;
+            width: 42px; height: 230px;
+            clip-path: polygon(58% 0%,100% 0%,46% 50%,80% 50%,22% 100%,0% 100%,54% 50%,18% 50%);
+            background: linear-gradient(to bottom, rgba(255,255,255,0.9), rgba(196,181,253,0.8), rgba(109,40,217,0.5));
+            box-shadow: 0 0 16px rgba(196,181,253,0.8), 0 0 40px rgba(124,58,237,0.4);
+            animation: lightningStrike 0.5s ease-out forwards;
         }
         @keyframes lightningStrike {
             0%   { opacity:0; transform:scaleY(0); transform-origin:top center; }
-            6%   { opacity:1; transform:scaleY(1); }
-            65%  { opacity:0.85; }
+            5%   { opacity:1; transform:scaleY(1); }
+            60%  { opacity:0.9; }
             100% { opacity:0; }
         }
+        /* 雷霆衝擊波 */
+        .thunder-shockwave {
+            position:fixed; pointer-events:none; z-index:9000;
+            left:50vw; top:38vh;
+            width:12px; height:12px; border-radius:50%;
+            border:4px solid rgba(196,181,253,0.95);
+            box-shadow:0 0 22px rgba(167,139,250,0.85), 0 0 55px rgba(124,58,237,0.55);
+            transform:translate(-50%,-50%);
+            animation:thunderShockwave 0.72s cubic-bezier(0.08,0.6,0.25,1) forwards;
+        }
+        @keyframes thunderShockwave {
+            0%   { width:12px; height:12px; opacity:1; border-width:4px; }
+            40%  { opacity:0.65; }
+            100% { width:min(120vw,120vh); height:min(120vw,120vh); opacity:0; border-width:1px; }
+        }
+        /* 畫面震動 */
+        @keyframes thunderShake {
+            0%   { transform:translate(0,0); }
+            14%  { transform:translate(-6px,3px); }
+            28%  { transform:translate(6px,-4px); }
+            42%  { transform:translate(-4px,3px); }
+            57%  { transform:translate(3px,-2px); }
+            72%  { transform:translate(-2px,2px); }
+            86%  { transform:translate(1px,-1px); }
+            100% { transform:translate(0,0); }
+        }
+        .thunder-shake { animation:thunderShake 0.4s ease-out !important; }
 
         /* ── 打卡特效：抹茶墨滴中心 ── */
         .matcha-drop {
             position: absolute; top:50%; left:50%;
-            width:10px; height:10px; border-radius:50%;
-            background: radial-gradient(circle, rgba(134,239,172,0.95), rgba(52,211,153,0.7));
-            box-shadow: 0 0 20px rgba(74,222,128,0.85), 0 0 50px rgba(52,211,153,0.5);
+            width:20px; height:20px; border-radius:50%;
+            background: radial-gradient(circle, rgba(187,247,208,0.98), rgba(74,222,128,0.85));
+            box-shadow: 0 0 30px rgba(74,222,128,0.95), 0 0 70px rgba(52,211,153,0.65), 0 0 120px rgba(34,197,94,0.3);
             transform: translate(-50%,-50%);
-            animation: matchaDrop 0.75s cubic-bezier(0.22,0.61,0.36,1) forwards;
+            animation: matchaDrop 0.68s cubic-bezier(0.1,0.68,0.2,1) forwards;
         }
         @keyframes matchaDrop {
-            0%   { width:10px; height:10px; opacity:0.95; }
-            45%  { width:60px; height:60px; opacity:0.8; }
-            100% { width:140px; height:140px; opacity:0; }
+            0%   { width:20px;  height:20px;  opacity:1; }
+            28%  { width:115px; height:115px; opacity:0.88; }
+            100% { width:230px; height:230px; opacity:0; }
         }
         /* ── 打卡特效：抹茶漣漪 ── */
         .matcha-ripple {
             position: absolute; top:50%; left:50%;
-            width:12px; height:12px; border-radius:50%;
+            width:16px; height:16px; border-radius:50%;
             background: transparent;
             border: 2px solid transparent;
-            box-shadow: 0 0 0 2px rgba(74,222,128,0.7), 0 0 18px rgba(74,222,128,0.45), 0 0 40px rgba(52,211,153,0.2);
+            box-shadow: 0 0 0 2.5px rgba(74,222,128,0.88), 0 0 22px rgba(74,222,128,0.58), 0 0 52px rgba(52,211,153,0.28);
             transform: translate(-50%,-50%);
             animation: matchaRipple 2.0s ease-out forwards;
         }
         @keyframes matchaRipple {
-            0%   { width:12px; height:12px; opacity:0.95; box-shadow:0 0 0 3px rgba(74,222,128,0.85), 0 0 20px rgba(74,222,128,0.5); }
-            100% { width:min(92vw,92vh); height:min(92vw,92vh); opacity:0; box-shadow:0 0 0 1px rgba(74,222,128,0.15), 0 0 10px rgba(74,222,128,0.1); }
+            0%   { width:16px; height:16px; opacity:1; box-shadow:0 0 0 3px rgba(74,222,128,0.95), 0 0 28px rgba(74,222,128,0.65), 0 0 60px rgba(52,211,153,0.35); }
+            100% { width:min(105vw,105vh); height:min(105vw,105vh); opacity:0; box-shadow:0 0 0 1px rgba(74,222,128,0.1), 0 0 8px rgba(74,222,128,0.06); }
         }
         /* ── 打卡特效：抹茶蒸氣 ── */
         .matcha-steam {
             position: absolute; border-radius:50%; pointer-events:none;
-            background: radial-gradient(circle, rgba(187,247,208,0.7), rgba(74,222,128,0.3));
+            background: radial-gradient(circle, rgba(187,247,208,0.75), rgba(74,222,128,0.32));
             animation: matchaSteam var(--sdur,1.4s) ease-out var(--sdelay,0s) forwards;
         }
         @keyframes matchaSteam {
-            0%   { opacity:0.75; transform:translate(var(--sx,0px), 0px) scale(1); }
-            100% { opacity:0;    transform:translate(calc(var(--sx,0px)*1.3), -120px) scale(0.4); }
+            0%   { opacity:0.82; transform:translate(var(--sx,0px), 0px) scale(1); }
+            100% { opacity:0;    transform:translate(calc(var(--sx,0px)*1.3), -130px) scale(0.35); }
         }
 
         /* ── 游標特效：電光殘影（雷霆限定軌跡）── */
         .cursor-spark {
             position: fixed; pointer-events: none; z-index: 9999;
             height: 2px;
-            background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.95) 35%, rgba(196,181,253,0.9) 65%, transparent 100%);
-            box-shadow: 0 0 6px rgba(255,255,255,0.7), 0 0 16px rgba(139,92,246,0.85);
+            background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.98) 30%, rgba(216,180,254,0.92) 60%, rgba(124,58,237,0.5) 85%, transparent 100%);
+            box-shadow: 0 0 4px rgba(255,255,255,0.9), 0 0 12px rgba(196,181,253,0.85), 0 0 24px rgba(124,58,237,0.5);
             border-radius: 1px;
             animation: cursorSparkFade 0.42s ease-out forwards;
         }
         @keyframes cursorSparkFade {
             0%   { opacity:1;   transform:translate(-50%,-50%) rotate(var(--srot,0deg)) scaleX(1); }
-            100% { opacity:0;   transform:translate(-50%,-50%) rotate(var(--srot,0deg)) scaleX(0.3); }
+            100% { opacity:0;   transform:translate(-50%,-50%) rotate(var(--srot,0deg)) scaleX(0.25); }
+        }
+        .cursor-spark-dot {
+            position: fixed; pointer-events: none; z-index: 10000;
+            width: 5px; height: 5px; border-radius: 50%;
+            background: rgba(255,255,255,0.98);
+            box-shadow: 0 0 6px rgba(255,255,255,0.9), 0 0 16px rgba(196,181,253,0.95), 0 0 30px rgba(124,58,237,0.7);
+            animation: cursorDotFade 0.28s ease-out forwards;
+        }
+        @keyframes cursorDotFade {
+            0%   { opacity:1; transform:translate(-50%,-50%) scale(1.4); }
+            100% { opacity:0; transform:translate(-50%,-50%) scale(0.2); }
         }
 
         /* ── 造型背包區塊 ── */
@@ -1055,6 +1132,7 @@
             <div class="nav-item" onclick="switchPage('gacha', this); toggleSidebar();">🎰 幸運轉盤</div>
             <div class="nav-item" onclick="switchPage('market', this); toggleSidebar();">🏪 睡眠黑市</div>
             <div class="nav-item" onclick="switchPage('inventory', this); toggleSidebar();">🎒 空間背包</div>
+            <div class="nav-item" onclick="openActivityModal(); toggleSidebar();">🎁 打卡活動</div>
         </div>
         <div style="border-top: 1px solid var(--border); padding-top: 20px;">
             <div class="nav-item" onclick="openModal('mailboxModal'); toggleSidebar();">
@@ -1190,6 +1268,12 @@
                     <!-- 當前池造型預覽 -->
                     <div id="pool-preview" style="margin-bottom:14px;"></div>
 
+                    <!-- 貨幣模式切換 -->
+                    <div class="gacha-curr-row">
+                        <button id="curr-points-btn" class="gacha-curr-btn active" onclick="setGachaCurrency('points')">💰 點數模式</button>
+                        <button id="curr-ticket-btn" class="gacha-curr-btn" onclick="setGachaCurrency('ticket')">🎟️ 抽獎券模式</button>
+                    </div>
+                    <div id="ticket-count-display" style="display:none; font-size:12px; color:var(--muted); margin-bottom:6px;">持有：<strong id="gacha-ticket-count" style="color:var(--gold)">0</strong> 張抽獎券</div>
                     <button id="mainLotteryBtn" class="btn" style="width:100%; max-width:320px; margin:0 auto; padding:20px; font-size:20px; background:rgba(255,214,10,0.18); color:var(--gold); border:2px solid rgba(255,214,10,0.4); box-shadow:0 0 20px rgba(255,214,10,0.2);" onclick="handleLottery()">載入中...</button>
                     <div style="text-align:center; margin-top:8px;">
                         <button onclick="openOddsModal()" style="background:none; border:none; color:var(--muted); font-size:12px; cursor:pointer; letter-spacing:0.3px;">📊 獎池機率一覽</button>
@@ -1253,9 +1337,12 @@
 
         <!-- 🎒 背包 -->
         <div id="page-inventory" class="page-content">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 25px; padding: 0 5px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 25px; padding: 0 5px; flex-wrap:wrap; gap:8px;">
                 <h2 style="margin:0; font-size:22px; letter-spacing: 1px;">🎒 空間背包</h2>
-                <div id="shard_ui" style="font-size:12px; font-weight:bold; background:rgba(255,255,255,0.05); border:1px solid var(--border); padding:8px 14px; border-radius:12px; color:var(--muted);">🔹 碎片: 0</div>
+                <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                    <div id="ticket_ui" style="font-size:12px; font-weight:bold; background:rgba(255,255,255,0.05); border:1px solid var(--border); padding:8px 14px; border-radius:12px; color:var(--muted);">🎟️ 抽獎券：<strong style="color:var(--gold)">0</strong> 張</div>
+                    <div id="shard_ui" style="font-size:12px; font-weight:bold; background:rgba(255,255,255,0.05); border:1px solid var(--border); padding:8px 14px; border-radius:12px; color:var(--muted);">🔹 碎片: 0</div>
+                </div>
             </div>
             <div id="inventory-list" class="data-grid"></div>
 
@@ -1452,7 +1539,7 @@
             matcha_cursor:  { n: "抹茶靜心・游標特效", i: "✦",  limited: false, type: "cursor", active: false, d: "點擊爆出翠綠菱形粒子，清爽克制" },
         };
 
-        let myInventory = {}, myShards = 0, myPoints = 0;
+        let myInventory = {}, myShards = 0, myPoints = 0, myTickets = 0;
         let myLastDate = "", oppData = {};
         let myCosmetics = {};
         let myEquipped = { color: null, effect: null, cursor: null };
@@ -1461,6 +1548,21 @@
         let gachaPity = 0;         // 共用保底計數（三池共享）
         let gachaLost5050 = false; // 共用 50/50 狀態
         let selectedPool = 'color';
+        let gachaCurrencyMode = 'points'; // 'points' | 'ticket'
+
+        let activityData = { count: 0, claimed: {}, initialized: false };
+        const ACTIVITY_REWARDS = [
+            { label: '碎片 ×1',   icon: '🔹', type: 'shard',  amount: 1 },
+            { label: '碎片 ×2',   icon: '🔹', type: 'shard',  amount: 2 },
+            { label: '碎片 ×3',   icon: '🔹', type: 'shard',  amount: 3 },
+            { label: '碎片 ×4',   icon: '🔹', type: 'shard',  amount: 4 },
+            { label: '抽獎券 ×5', icon: '🎟️', type: 'ticket', amount: 5 },
+            { label: '碎片 ×1',   icon: '🔹', type: 'shard',  amount: 1 },
+            { label: '碎片 ×2',   icon: '🔹', type: 'shard',  amount: 2 },
+            { label: '碎片 ×3',   icon: '🔹', type: 'shard',  amount: 3 },
+            { label: '碎片 ×4',   icon: '🔹', type: 'shard',  amount: 4 },
+            { label: '抽獎券 ×5', icon: '🎟️', type: 'ticket', amount: 5 },
+        ];
 
         // ===== 🛠️ 工具函數 =====
         const getLocalDateStr = d => d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
@@ -2027,9 +2129,10 @@
                     : 'lotteryPulse 2s ease-in-out infinite';
             }
             
-            myInventory = d.items||{}; myShards = d.shards||0;
+            myInventory = d.items||{}; myShards = d.shards||0; myTickets = d.tickets||0;
             myEquipped = Object.assign({ color:null, effect:null, cursor:null }, d.equipped||{});
             document.getElementById('shard_ui').innerHTML=`🔹 碎片：<strong style="color:var(--gold)">${myShards}</strong>`;
+            updateTicketUI();
             renderInventory();
             renderCosmetics();
             applyTheme();
@@ -2177,20 +2280,32 @@
         let _cursorListeners = null;
 
         function _spawnThunderSpark(x, y) {
-            // 計算移動方向角
             let moveAngle = _lastTrailPos
                 ? Math.atan2(y - _lastTrailPos.y, x - _lastTrailPos.x) * 180 / Math.PI
                 : Math.random() * 180;
             _lastTrailPos = { x, y };
-            // 主火花 + 1 條叉火花（±60~90°）
-            [0, 1].forEach(i => {
+
+            // 中心亮點
+            const dot = document.createElement('div');
+            dot.className = 'cursor-spark-dot';
+            dot.style.cssText = `left:${x}px; top:${y}px;`;
+            document.body.appendChild(dot);
+            setTimeout(() => dot.remove(), 310);
+
+            // 主幹 + 雙叉固定出現 + 35% 機率第四條短殘光
+            const sparks = [
+                { len: 28 + Math.random() * 20, scatter: (Math.random() - 0.5) * 20, life: 450 },
+                { len: 13 + Math.random() * 12, scatter:  68 + (Math.random() - 0.5) * 18, life: 290 },
+                { len: 12 + Math.random() * 10, scatter: -68 + (Math.random() - 0.5) * 18, life: 270 },
+            ];
+            if (Math.random() < 0.35) sparks.push({ len: 7 + Math.random() * 9, scatter: (Math.random() - 0.5) * 165, life: 190 });
+
+            sparks.forEach(({ len, scatter, life }) => {
                 const el = document.createElement('div');
-                const len = i === 0 ? (20 + Math.random() * 18) : (10 + Math.random() * 12);
-                const scatter = (Math.random() - 0.5) * 40 + (i === 1 ? (Math.random() > 0.5 ? 75 : -75) : 0);
                 el.className = 'cursor-spark';
                 el.style.cssText = `left:${x}px; top:${y}px; width:${len}px; --srot:${moveAngle + scatter}deg;`;
                 document.body.appendChild(el);
-                setTimeout(() => el.remove(), i === 0 ? 420 : 280);
+                setTimeout(() => el.remove(), life);
             });
         }
 
@@ -2286,11 +2401,12 @@
 
             const isCat = cursor === 'cat_cursor';
             const hasTrail = isCat || cursor === 'thunder_cursor';
+            const trailInterval = cursor === 'thunder_cursor' ? 45 : 65;
 
             const onMove = e => {
                 if (!hasTrail) return;
                 const now = Date.now();
-                if (now - _trailThrottle < 65) return;
+                if (now - _trailThrottle < trailInterval) return;
                 _trailThrottle = now;
                 _spawnTrail(e.clientX, e.clientY, isCat);
             };
@@ -2298,7 +2414,7 @@
             const onTMove = e => {
                 if (!hasTrail) return;
                 const now = Date.now();
-                if (now - _trailThrottle < 65) return;
+                if (now - _trailThrottle < trailInterval) return;
                 _trailThrottle = now;
                 const t = e.touches[0];
                 _spawnTrail(t.clientX, t.clientY, isCat);
@@ -2456,99 +2572,139 @@
             } else if (eff === 'thunder_effect') {
                 playSound('thunder');
 
-                // ── 強白閃
+                // ── 超強白閃（瞬間衝入）
                 const flash = document.createElement('div');
-                flash.style.cssText = 'position:fixed;inset:0;background:rgba(230,210,255,0.88);pointer-events:none;z-index:8997;opacity:0;transition:opacity 0.04s;';
+                flash.style.cssText = 'position:fixed;inset:0;background:rgba(240,220,255,0.97);pointer-events:none;z-index:8999;opacity:0;transition:opacity 0.03s;';
                 document.body.appendChild(flash);
                 requestAnimationFrame(() => requestAnimationFrame(() => { flash.style.opacity = '1'; }));
-                setTimeout(() => { flash.style.transition = 'opacity 0.28s'; flash.style.opacity = '0'; setTimeout(() => flash.remove(), 300); }, 55);
-                // 二次殘光
+                setTimeout(() => { flash.style.transition = 'opacity 0.22s'; flash.style.opacity = '0'; setTimeout(() => flash.remove(), 240); }, 42);
+
+                // ── 畫面震動
+                const _mc = document.querySelector('.main-content');
+                if (_mc) { _mc.classList.add('thunder-shake'); setTimeout(() => _mc.classList.remove('thunder-shake'), 420); }
+
+                // ── 衝擊波（兩環）
+                setTimeout(() => {
+                    const sw = document.createElement('div');
+                    sw.className = 'thunder-shockwave';
+                    document.body.appendChild(sw);
+                    setTimeout(() => sw.remove(), 800);
+                }, 28);
+                setTimeout(() => {
+                    const sw2 = document.createElement('div');
+                    sw2.className = 'thunder-shockwave';
+                    sw2.style.cssText = 'position:fixed;pointer-events:none;z-index:9000;left:50vw;top:38vh;width:12px;height:12px;border-radius:50%;border:3px solid rgba(139,92,246,0.7);box-shadow:0 0 14px rgba(109,40,217,0.6);transform:translate(-50%,-50%);animation:thunderShockwave 0.92s cubic-bezier(0.08,0.6,0.25,1) forwards;';
+                    document.body.appendChild(sw2);
+                    setTimeout(() => sw2.remove(), 980);
+                }, 140);
+
+                // ── 二次電紫殘光
                 setTimeout(() => {
                     const f2 = document.createElement('div');
-                    f2.style.cssText = 'position:fixed;inset:0;background:rgba(167,139,250,0.38);pointer-events:none;z-index:8997;opacity:0;transition:opacity 0.02s;';
+                    f2.style.cssText = 'position:fixed;inset:0;background:rgba(139,92,246,0.45);pointer-events:none;z-index:8997;opacity:0;transition:opacity 0.02s;';
                     document.body.appendChild(f2);
                     requestAnimationFrame(() => requestAnimationFrame(() => { f2.style.opacity = '1'; }));
-                    setTimeout(() => { f2.style.transition = 'opacity 0.22s'; f2.style.opacity = '0'; setTimeout(() => f2.remove(), 240); }, 38);
-                }, 145);
+                    setTimeout(() => { f2.style.transition = 'opacity 0.2s'; f2.style.opacity = '0'; setTimeout(() => f2.remove(), 220); }, 30);
+                }, 130);
 
-                // ── 閃電柱（1~2條）
-                const boltCount = Math.random() < 0.45 ? 2 : 1;
-                for (let i = 0; i < boltCount; i++) {
+                // ── 三次尾波（低飽和深紫）
+                setTimeout(() => {
+                    const f3 = document.createElement('div');
+                    f3.style.cssText = 'position:fixed;inset:0;background:rgba(109,40,217,0.24);pointer-events:none;z-index:8996;opacity:0;transition:opacity 0.02s;';
+                    document.body.appendChild(f3);
+                    requestAnimationFrame(() => requestAnimationFrame(() => { f3.style.opacity = '1'; }));
+                    setTimeout(() => { f3.style.transition = 'opacity 0.38s'; f3.style.opacity = '0'; setTimeout(() => f3.remove(), 400); }, 25);
+                }, 320);
+
+                // ── 閃電柱（3~4條，分散畫面）
+                const boltCount = Math.random() < 0.5 ? 4 : 3;
+                const _boltPos = [10, 30, 55, 78].sort(() => Math.random() - 0.5).slice(0, boltCount);
+                _boltPos.forEach((pos, i) => {
                     setTimeout(() => {
                         const bolt = document.createElement('div');
-                        bolt.className = 'lightning-bolt';
-                        bolt.style.left = `${25 + Math.random() * 50}vw`;
+                        bolt.className = i === 0 ? 'lightning-bolt' : 'lightning-bolt-thin';
+                        bolt.style.left = `${pos + (Math.random() - 0.5) * 6}vw`;
                         ov.appendChild(bolt);
-                        setTimeout(() => bolt.remove(), 620);
-                    }, i * 140);
-                }
+                        setTimeout(() => bolt.remove(), i === 0 ? 720 : 590);
+                    }, i * 75);
+                });
 
-                // ── 電弧粒子從閃電落點散射
+                // ── 電弧粒子大爆散（28顆，更遠）
                 setTimeout(() => {
-                    for (let i = 0; i < 18; i++) {
+                    for (let i = 0; i < 28; i++) {
                         const sp = document.createElement('div');
                         const angle = Math.random() * Math.PI * 2;
-                        const dist = 40 + Math.random() * 120;
+                        const dist = 55 + Math.random() * 170;
                         const tx = Math.cos(angle) * dist, ty = Math.sin(angle) * dist;
-                        const size = 3 + Math.random() * 4;
-                        const dur = 0.3 + Math.random() * 0.25;
+                        const size = 3 + Math.random() * 5;
+                        const dur = 0.26 + Math.random() * 0.32;
                         sp.className = 'cursor-burst cursor-burst-star';
-                        sp.style.cssText = `left:50vw; top:38vh; width:${size}px; height:${size}px; --tx:${tx}px; --ty:${ty}px; --cdur:${dur}s; background:hsl(${255+Math.random()*30},85%,78%);`;
+                        sp.style.cssText = `left:50vw;top:38vh;width:${size}px;height:${size}px;--tx:${tx}px;--ty:${ty}px;--cdur:${dur}s;background:hsl(${255+Math.random()*28},90%,80%);`;
                         document.body.appendChild(sp);
-                        setTimeout(() => sp.remove(), dur * 1000 + 60);
+                        setTimeout(() => sp.remove(), dur * 1000 + 80);
                     }
-                }, 80);
-                // ── 電光紫 confetti
-                setTimeout(() => confetti({ particleCount:90, spread:105, origin:{y:0.35}, colors:['#a78bfa','#c4b5fd','#ede9fe','#7c3aed','#fff','#ddd6fe'] }), 80);
-                setTimeout(() => confetti({ particleCount:45, spread:65, angle:60, origin:{x:0.08,y:0.45}, colors:['#a78bfa','#c4b5fd','#fff'] }), 380);
-                setTimeout(() => confetti({ particleCount:45, spread:65, angle:120, origin:{x:0.92,y:0.45}, colors:['#a78bfa','#c4b5fd','#fff'] }), 380);
+                }, 60);
 
-                // ── 紫色暈光持續
+                // ── 電光紫 confetti（四波）
+                setTimeout(() => confetti({ particleCount:130, spread:120, origin:{y:0.28}, colors:['#a78bfa','#c4b5fd','#ede9fe','#7c3aed','#fff','#ddd6fe','#6d28d9'] }), 65);
+                setTimeout(() => confetti({ particleCount:70, spread:75, angle:52, origin:{x:0.04,y:0.42}, colors:['#a78bfa','#c4b5fd','#fff','#7c3aed'] }), 310);
+                setTimeout(() => confetti({ particleCount:70, spread:75, angle:128, origin:{x:0.96,y:0.42}, colors:['#a78bfa','#c4b5fd','#fff','#7c3aed'] }), 310);
+                setTimeout(() => confetti({ particleCount:55, spread:95, origin:{y:0.52}, colors:['#8b5cf6','#ddd6fe','#fff','#ede9fe'] }), 660);
+
+                // ── 紫色暈光持續（更強、更深）
                 const ambience = document.createElement('div');
-                ambience.style.cssText = 'position:fixed;inset:0;background:radial-gradient(ellipse at 50% 30%, rgba(100,40,200,0.28) 0%, rgba(60,20,140,0.18) 50%, transparent 75%);pointer-events:none;z-index:8998;opacity:0;transition:opacity 0.4s;';
+                ambience.style.cssText = 'position:fixed;inset:0;background:radial-gradient(ellipse at 50% 26%, rgba(109,40,200,0.42) 0%, rgba(60,20,140,0.25) 46%, transparent 70%);pointer-events:none;z-index:8998;opacity:0;transition:opacity 0.32s;';
                 document.body.appendChild(ambience);
                 requestAnimationFrame(() => requestAnimationFrame(() => { ambience.style.opacity = '1'; }));
-                setTimeout(() => { ambience.style.opacity = '0'; setTimeout(() => ambience.remove(), 430); }, 2600);
+                setTimeout(() => { ambience.style.opacity = '0'; setTimeout(() => ambience.remove(), 420); }, 2800);
 
             } else if (eff === 'matcha_effect') {
                 playSound('matcha');
 
-                // ── 深綠氛圍覆蓋
+                // ── 深綠氛圍覆蓋（快速浮現、更飽和）
                 const ambience = document.createElement('div');
-                ambience.style.cssText = 'position:fixed;inset:0;background:radial-gradient(ellipse at 50% 60%, rgba(20,80,40,0.38) 0%, rgba(10,50,25,0.2) 55%, transparent 78%);pointer-events:none;z-index:8998;opacity:0;transition:opacity 0.65s;';
+                ambience.style.cssText = 'position:fixed;inset:0;background:radial-gradient(ellipse at 50% 55%, rgba(22,101,52,0.50) 0%, rgba(15,60,30,0.3) 50%, transparent 75%);pointer-events:none;z-index:8998;opacity:0;transition:opacity 0.3s;';
                 document.body.appendChild(ambience);
                 requestAnimationFrame(() => requestAnimationFrame(() => { ambience.style.opacity = '1'; }));
                 setTimeout(() => { ambience.style.opacity = '0'; setTimeout(() => ambience.remove(), 660); }, 2800);
 
-                // ── 墨滴中心擴散
+                // ── 墨滴中心爆發（更快更大）
                 const drop = document.createElement('div');
                 drop.className = 'matcha-drop';
                 ov.appendChild(drop);
-                setTimeout(() => drop.remove(), 800);
+                setTimeout(() => drop.remove(), 730);
 
-                // ── 漣漪3波
-                for (let i = 0; i < 3; i++) {
+                // ── 漣漪4波（第一波快猛，後三波漸慢）
+                const _ripples = [
+                    { delay: 0,    dur: '1.1s',  ease: 'cubic-bezier(0.1,0.65,0.2,1)' },
+                    { delay: 290,  dur: '1.8s',  ease: 'ease-out' },
+                    { delay: 640,  dur: '2.3s',  ease: 'ease-out' },
+                    { delay: 1050, dur: '2.7s',  ease: 'ease-out' },
+                ];
+                _ripples.forEach(({ delay, dur, ease }) => {
                     setTimeout(() => {
                         const ring = document.createElement('div');
                         ring.className = 'matcha-ripple';
+                        ring.style.animationDuration = dur;
+                        ring.style.animationTimingFunction = ease;
                         ov.appendChild(ring);
-                        setTimeout(() => ring.remove(), 2200);
-                    }, i * 440);
-                }
+                        setTimeout(() => ring.remove(), parseFloat(dur) * 1000 + 120);
+                    }, delay);
+                });
 
-                // ── 蒸氣粒子向上飄
-                for (let i = 0; i < 22; i++) {
+                // ── 蒸氣粒子（更多，集中在前 480ms）
+                for (let i = 0; i < 30; i++) {
                     setTimeout(() => {
                         const st = document.createElement('div');
                         st.className = 'matcha-steam';
-                        const size = 6 + Math.random() * 12;
-                        const sx = (Math.random() - 0.5) * 160;
-                        const startY = 40 + Math.random() * 25;
-                        const dur = 1.1 + Math.random() * 0.8;
-                        st.style.cssText = `left:calc(50% + ${sx}px); top:${startY}vh; width:${size}px; height:${size}px; --sx:${sx * 0.4}px; --sdur:${dur}s;`;
+                        const size = 6 + Math.random() * 14;
+                        const sx = (Math.random() - 0.5) * 148;
+                        const startY = 38 + Math.random() * 22;
+                        const dur = 1.0 + Math.random() * 0.95;
+                        st.style.cssText = `left:calc(50% + ${sx}px); top:${startY}vh; width:${size}px; height:${size}px; --sx:${sx * 0.35}px; --sdur:${dur}s;`;
                         ov.appendChild(st);
                         setTimeout(() => st.remove(), dur * 1000 + 100);
-                    }, Math.random() * 600);
+                    }, Math.random() * 480);
                 }
             }
         }
@@ -2870,15 +3026,29 @@
                 openConfirmModal('🆓 確認首抽', '確定要使用今日的【免費首抽】嗎？', () => executeLottery('free'));
                 return;
             }
+            if (gachaCurrencyMode === 'ticket') {
+                if (myTickets < 1) return showToast('❌ 抽獎券不足！', 'error');
+                openConfirmModal('🎟️ 確認單抽',
+                    `消耗 <strong style="color:var(--gold)">1 張</strong>抽獎券進行一次抽獎<br><small style="color:var(--muted)">計入保底次數（50 抽必出造型）</small>`,
+                    () => executeLottery('ticket'));
+                return;
+            }
             openConfirmModal('🎰 確認單抽',
                 `花費 <strong style="color:var(--gold)">8 點</strong> 進行一次抽獎<br><small style="color:var(--muted)">計入保底次數（50 抽必出造型）</small>`,
                 () => executeLottery('points'));
         }
 
         function handleTenPull() {
+            if (gachaCurrencyMode === 'ticket') {
+                if (myTickets < 10) return showToast('❌ 抽獎券不足 10 張！', 'error');
+                openConfirmModal('🎟️ 確認 10 連抽',
+                    `消耗 <strong style="color:var(--gold)">10 張</strong>抽獎券進行 10 連抽<br><small style="color:var(--muted)">10 連中至少 1 個道具；50 抽內必出造型</small>`,
+                    () => executeTenPull('ticket'));
+                return;
+            }
             openConfirmModal('🎰 確認 10 連抽',
                 `花費 <strong style="color:var(--gold)">80 點</strong> 進行 10 連抽<br><small style="color:var(--muted)">10 連中至少 1 個道具；50 抽內必出造型</small>`,
-                () => executeTenPull());
+                () => executeTenPull('points'));
         }
 
         // 單次抽獎結果（純計算，不含 Firebase）
@@ -2920,7 +3090,19 @@
             return { cosmKey: key, isLimited: COSMETICS[key].limited };
         }
 
-        function executeTenPull() {
+        function executeTenPull(mode) {
+            if (mode === 'ticket') {
+                db.ref('users/'+ME+'/tickets').transaction(v => {
+                    if ((v||0) < 10) return undefined;
+                    return (v||0) - 10;
+                }, (err, committed) => {
+                    if (!committed) { playSound('error'); return showToast('❌ 抽獎券不足 10 張！', 'error'); }
+                    myTickets = Math.max(0, myTickets - 10);
+                    updateTicketUI();
+                    _doTenPull();
+                });
+                return;
+            }
             db.ref('economy/'+ME).transaction(v => {
                 if ((v||0) < 80) return undefined;
                 return (v||0) - 80;
@@ -3170,6 +3352,15 @@
                 if (m === "free") {
                     up.last_free_lottery = getLocalDateStr(new Date());
                     tail = "<br>(消耗每日首抽)";
+                } else if (m === "ticket") {
+                    // 扣 1 張抽獎券
+                    if (myTickets < 1) { _hidePullAnim(); return showToast('❌ 抽獎券不足！', 'error'); }
+                    db.ref('users/'+ME+'/tickets').transaction(v => (v&&v>=1) ? v-1 : undefined, (e, com) => {
+                        if (!com) { _hidePullAnim(); return showToast('❌ 抽獎券不足！', 'error'); }
+                    });
+                    myTickets = Math.max(0, myTickets - 1);
+                    updateTicketUI();
+                    tail = "<br>(消耗 1 張抽獎券)";
                 } else {
                     // 扣 8 點
                     if (myPoints < 8) { _hidePullAnim(); return showToast('❌ 點數不足 8 點！', 'error'); }
@@ -3482,6 +3673,9 @@
 
                 let dropMsg = "";
                 db.ref('economy/'+ME).transaction(c => (c||0) + reward); db.ref('users/'+ME).update(updates);
+                // 活動打卡計數
+                const _periodKey = getCurrentPeriodKey();
+                db.ref('activity/'+ME+'/'+_periodKey+'/count').transaction(v => (v||0) + 1);
                 logPoints(reward, `🛌 打卡獎勵`);
                 if ([7,14,30,50].includes(newStreak)) logEvent('🛌', `連勝里程碑！${CFG.myName} 已連續打卡 ${newStreak} 天！`);
                 playSound('coin');
@@ -3655,6 +3849,151 @@
 
         setInterval(renderEventFeed, 60000);
 
+        // ===== 🎟️ 抽獎券 UI =====
+        function updateTicketUI() {
+            const el = document.getElementById('ticket_ui');
+            if (el) el.innerHTML = `🎟️ 抽獎券：<strong style="color:var(--gold)">${myTickets}</strong> 張`;
+            const gc = document.getElementById('gacha-ticket-count');
+            if (gc) gc.innerText = myTickets;
+        }
+
+        function setGachaCurrency(mode) {
+            gachaCurrencyMode = mode;
+            document.getElementById('curr-points-btn').classList.toggle('active', mode === 'points');
+            document.getElementById('curr-ticket-btn').classList.toggle('active', mode === 'ticket');
+            const tcd = document.getElementById('ticket-count-display');
+            if (tcd) tcd.style.display = mode === 'ticket' ? 'block' : 'none';
+            // 更新按鈕文字（若主按鈕當前是 normal 模式）
+            const mainBtn = document.getElementById('mainLotteryBtn');
+            const tenBtn = document.getElementById('tenPullBtn');
+            if (mainBtn && mainBtn.dataset.mode !== 'free') {
+                mainBtn.innerHTML = mode === 'ticket' ? '🎟️ 1 張單抽' : '🎰 幸運抽獎';
+            }
+            if (tenBtn) {
+                tenBtn.innerHTML = mode === 'ticket' ? '🎟️ 10 張連抽' : '🎰 10連抽';
+            }
+        }
+
+        // ===== 🎁 打卡活動 =====
+        function getCurrentPeriodKey() {
+            const now = new Date();
+            const d = now.getDate(), m = now.getMonth(), y = now.getFullYear();
+            if (d >= 26) {
+                return `${y}-${String(m + 1).padStart(2, '0')}-26`;
+            } else {
+                const pm = m === 0 ? 11 : m - 1;
+                const py = m === 0 ? y - 1 : y;
+                return `${py}-${String(pm + 1).padStart(2, '0')}-26`;
+            }
+        }
+
+        function openActivityModal() {
+            openModal('activityModal');
+            renderActivityModal(); // 先用現有資料立即渲染
+            _initActivityPeriod()
+                .then(() => renderActivityModal())
+                .catch(e => { console.error('Activity init error:', e); });
+        }
+
+        async function _initActivityPeriod() {
+            const periodKey = getCurrentPeriodKey();
+            const snap = await db.ref('activity/'+ME+'/'+periodKey).once('value');
+            const data = snap.val() || {};
+
+            if (!data.initialized) {
+                // 回溯：掃 points_log 計算本期打卡次數
+                const parts = periodKey.split('-');
+                const periodStart = new Date(+parts[0], +parts[1]-1, +parts[2], 0, 0, 0, 0);
+                const startTs = periodStart.getTime();
+
+                const logSnap = await db.ref('points_log/'+ME).once('value');
+                let retroCount = 0;
+                logSnap.forEach(c => {
+                    const v = c.val();
+                    if (v && v.ts >= startTs && v.reason === '🛌 打卡獎勵') retroCount++;
+                });
+
+                const finalCount = Math.max(retroCount, data.count || 0);
+                const updateObj = { count: finalCount, initialized: true };
+                // Firebase 不接受空物件值，只在有 claimed 資料時才寫入
+                const claimedData = data.claimed;
+                if (claimedData && typeof claimedData === 'object' && Object.keys(claimedData).length > 0) {
+                    updateObj.claimed = claimedData;
+                }
+                await db.ref('activity/'+ME+'/'+periodKey).update(updateObj);
+                activityData = { count: finalCount, claimed: claimedData || {}, initialized: true };
+            } else {
+                activityData = { count: data.count || 0, claimed: data.claimed || {}, initialized: true };
+            }
+        }
+
+        function renderActivityModal() {
+            const periodKey = getCurrentPeriodKey();
+            const [y, mo, dd] = periodKey.split('-');
+            const nextMo = +mo === 12 ? 1 : +mo + 1;
+            const nextY  = +mo === 12 ? +y + 1 : +y;
+
+            document.getElementById('activity-period-label').textContent =
+                `${y}/${mo}/${dd} — ${nextY}/${String(nextMo).padStart(2,'0')}/25`;
+            document.getElementById('activity-checkin-count').textContent =
+                `累積打卡 ${activityData.count} 次`;
+
+            const grid = document.getElementById('activity-grid');
+            if (!grid) return;
+            grid.innerHTML = ACTIVITY_REWARDS.map((r, i) => {
+                const slotNum = i + 1;
+                const isTicket = r.type === 'ticket';
+                const claimed  = !!(activityData.claimed && activityData.claimed[i]);
+                const unlocked = activityData.count >= slotNum;
+
+                let cls = 'activity-slot';
+                if (isTicket) cls += ' ticket-slot';
+                if (claimed)  cls += ' claimed';
+                else if (unlocked) cls += ' unlocked';
+
+                const clickAttr = (!claimed && unlocked)
+                    ? `onclick="claimActivityReward(${i})"`
+                    : '';
+
+                return `<div class="${cls}" ${clickAttr}>
+                    <div class="act-icon">${r.icon}</div>
+                    <div class="act-label">${isTicket ? `×${r.amount} 券` : `×${r.amount} 碎片`}</div>
+                    <div class="act-num">${slotNum}次打卡</div>
+                    ${claimed ? '<div class="act-check">✓</div>' : ''}
+                    ${!claimed && unlocked ? '<div style="font-size:9px;color:var(--gold);font-weight:bold;">點擊領取</div>' : ''}
+                </div>`;
+            }).join('');
+        }
+
+        async function claimActivityReward(idx) {
+            if (activityData.claimed && activityData.claimed[idx]) return;
+            if (activityData.count < idx + 1) return;
+
+            const r = ACTIVITY_REWARDS[idx];
+            const periodKey = getCurrentPeriodKey();
+
+            // 寫入 claimed
+            await db.ref('activity/'+ME+'/'+periodKey+'/claimed/'+idx).set(true);
+            activityData.claimed[idx] = true;
+
+            // 發放獎勵
+            if (r.type === 'shard') {
+                db.ref('users/'+ME+'/shards').transaction(v => (v||0) + r.amount);
+                myShards += r.amount;
+                document.getElementById('shard_ui').innerHTML =
+                    `🔹 碎片：<strong style="color:var(--gold)">${myShards}</strong>`;
+                showToast(`🔹 獲得 ${r.amount} 個造型碎片！`, 'success');
+            } else if (r.type === 'ticket') {
+                db.ref('users/'+ME+'/tickets').transaction(v => (v||0) + r.amount);
+                myTickets += r.amount;
+                updateTicketUI();
+                showToast(`🎟️ 獲得 ${r.amount} 張抽獎券！`, 'success');
+            }
+
+            playSound('coin');
+            renderActivityModal();
+        }
+
     </script>
 
     <!-- 底部導航列（手機版）-->
@@ -3678,5 +4017,20 @@
             </div>
         </div>
     </nav>
+
+    <!-- 🎁 打卡活動 Modal -->
+    <div id="activityModal" class="modal-overlay" onclick="if(event.target===this)closeModal()">
+        <div class="modal-content" style="max-width:500px; padding:30px 24px; text-align:left;">
+            <div style="text-align:center; margin-bottom:22px;">
+                <div style="font-size:36px; margin-bottom:6px;">🎁</div>
+                <h3 style="margin:0; font-size:19px; color:var(--text);">打卡活動</h3>
+                <div id="activity-period-label" style="font-size:11px; color:var(--muted); margin-top:4px;"></div>
+                <div id="activity-checkin-count" style="font-size:14px; color:var(--gold); font-weight:bold; margin-top:6px;">累積打卡 0 次</div>
+            </div>
+            <div style="font-size:11px; color:var(--muted); margin-bottom:10px; text-align:center;">每完成一次打卡，解鎖下一格獎勵（手動領取）</div>
+            <div id="activity-grid" style="display:grid; grid-template-columns:repeat(5,1fr); gap:8px; margin-bottom:20px;"></div>
+            <button class="btn" style="background:rgba(255,255,255,0.05);" onclick="closeModal()">關閉</button>
+        </div>
+    </div>
 </body>
 </html>
