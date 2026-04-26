@@ -233,6 +233,27 @@
         .feat-company  { border-color: rgba(118,166,104,0.3); color: #76A668; }
         .feat-company:hover { box-shadow: 0 6px 20px rgba(118,166,104,0.12); border-color: rgba(118,166,104,0.5); }
 
+        /* ── 鎖定卡片 ── */
+        .feat-locked {
+            opacity: 0.42;
+            cursor: not-allowed;
+            pointer-events: none;
+            position: relative;
+            filter: grayscale(0.3);
+        }
+        .feat-locked::after {
+            content: '🔒';
+            position: absolute;
+            top: 10px; right: 12px;
+            font-size: 14px;
+            opacity: 0.7;
+        }
+        .feat-locked .f-sub::after {
+            content: ' · 開發中';
+            color: var(--muted);
+            font-style: italic;
+        }
+
         /* ── Changelog button ── */
         .changelog-btn {
             position: relative;
@@ -439,16 +460,16 @@
                 <div class="f-name">握力日記</div>
                 <div class="f-sub">訓練紀錄與趨勢</div>
             </a>
-            <a href="expedition.html" class="feature-card feat-exp">
+            <div class="feature-card feat-exp feat-locked">
                 <div class="f-ico">⚔️</div>
                 <div class="f-name">聯合遠征</div>
                 <div class="f-sub">雙人冒險投資</div>
-            </a>
-            <a href="company.html" class="feature-card feat-company">
+            </div>
+            <div class="feature-card feat-company feat-locked">
                 <div class="f-ico">🏢</div>
                 <div class="f-name">創業模擬</div>
                 <div class="f-sub">經營你的公司</div>
-            </a>
+            </div>
         </div>
     </div>
 

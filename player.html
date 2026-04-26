@@ -192,6 +192,70 @@
         .ghi-icon { font-size: 20px; flex-shrink: 0; width: 28px; text-align: center; }
         .ghi-label { flex: 1; font-size: 13px; font-weight: 600; }
         .ghi-badge { font-size: 10px; font-weight: bold; padding: 3px 8px; border-radius: 8px; background: rgba(255,255,255,0.06); color: var(--item-color, var(--muted)); flex-shrink: 0; }
+        /* ── 游標特效 ── */
+        /* 貓咪爪印軌跡 */
+        .cursor-paw { position: fixed; pointer-events: none; z-index: 9999; animation: cursorPawFade 1.3s ease-out forwards; }
+        .paw-wrap { position: relative; width: 30px; height: 25px; }
+        .paw-main {
+            position: absolute; bottom: 0; left: 7px;
+            width: 16px; height: 12px;
+            border-radius: 50% 50% 50% 50% / 58% 58% 42% 42%;
+            background: rgba(249,168,212,0.92);
+            box-shadow: 0 0 10px 2px rgba(249,168,212,0.6), 0 0 20px rgba(192,132,252,0.4);
+        }
+        .paw-toe {
+            position: absolute; width: 7px; height: 7px; border-radius: 50%;
+            background: rgba(249,168,212,0.92);
+            box-shadow: 0 0 6px rgba(249,168,212,0.55);
+        }
+        @keyframes cursorPawFade {
+            0%   { opacity: 0; }
+            10%  { opacity: 0.88; }
+            70%  { opacity: 0.65; }
+            100% { opacity: 0; }
+        }
+        .cursor-burst {
+            position: fixed; pointer-events: none; z-index: 9999;
+            transform: translate(-50%, -50%);
+            animation: cursorBurstFly var(--cdur, 0.45s) ease-out forwards;
+        }
+        .cursor-burst-cat  { clip-path: polygon(50% 0%,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%); }
+        .cursor-burst-star { clip-path: polygon(50% 0%,100% 50%,50% 100%,0% 50%); }
+        @keyframes cursorBurstFly {
+            0%   { opacity: 1; transform: translate(-50%,-50%) scale(1.1) rotate(0deg); }
+            100% { opacity: 0; transform: translate(calc(-50% + var(--tx,0px)), calc(-50% + var(--ty,0px))) scale(0.15) rotate(130deg); }
+        }
+        .cursor-center-flash {
+            position: fixed; width: 18px; height: 18px; border-radius: 50%;
+            pointer-events: none; z-index: 9999; transform: translate(-50%,-50%);
+            background: radial-gradient(circle, rgba(255,255,255,0.95), rgba(249,168,212,0.7));
+            box-shadow: 0 0 14px rgba(249,168,212,0.9), 0 0 28px rgba(192,132,252,0.5);
+            animation: cursorCenterFlash 0.38s ease-out forwards;
+        }
+        @keyframes cursorCenterFlash {
+            0%   { opacity: 1; transform: translate(-50%,-50%) scale(0.2); }
+            35%  { opacity: 1; transform: translate(-50%,-50%) scale(1.35); }
+            100% { opacity: 0; transform: translate(-50%,-50%) scale(0.5); }
+        }
+
+        /* 獎池切換 */
+        .pool-tabs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 14px; }
+        .pool-tab {
+            padding: 10px 6px; border-radius: 12px;
+            border: 1px solid var(--border); background: rgba(255,255,255,0.03);
+            color: var(--muted); cursor: pointer; font-size: 12px; font-weight: 700;
+            transition: all 0.2s; display: flex; flex-direction: column; align-items: center; gap: 4px;
+        }
+        .pool-tab:hover { background: rgba(255,255,255,0.06); }
+        .pool-tab.active {
+            background: rgba(255,214,10,0.12); border-color: rgba(255,214,10,0.4);
+            color: var(--gold); box-shadow: 0 0 12px rgba(255,214,10,0.15);
+        }
+        .pool-preview-item {
+            display: flex; align-items: center; gap: 10px;
+            padding: 8px 12px; border-radius: 10px; margin-bottom: 6px;
+            background: rgba(255,255,255,0.03); border: 1px solid transparent;
+        }
         .ghi-date { font-size: 10px; color: var(--muted); flex-shrink: 0; }
         /* 黑市 Tab */
         .market-tabs { display: flex; gap: 10px; margin-bottom: 20px; }
@@ -451,6 +515,57 @@
         body.theme-star .card:hover { box-shadow: 0 16px 48px rgba(0,0,0,0.65), 0 0 24px rgba(90,140,200,0.1); }
         body.theme-star .sidebar { background: rgba(6,12,30,0.97); border-right-color: rgba(90,140,200,0.18); }
         body.theme-star .nav-item.active { background: rgba(90,140,200,0.14); border-color: rgba(90,140,200,0.35); }
+
+        /* ── 造型主題：雷霆（限定）── */
+        body.theme-thunder {
+            --primary: #7C3AED; --gold: #A78BFA; --green: #6EE7B7;
+            --border: rgba(124,58,237,0.3);
+            background: linear-gradient(145deg,
+                #0E0420 0%, #1A0640 22%,
+                #090215 42%, #220855 62%,
+                #0C0320 80%, #160538 100%
+            );
+            background-size: 400% 400%;
+            animation: thunderBreath 9s ease-in-out infinite;
+        }
+        @keyframes thunderBreath {
+            0%   { background-position: 0%   0%;   }
+            20%  { background-position: 90%  30%;  }
+            40%  { background-position: 60%  100%; }
+            60%  { background-position: 10%  80%;  }
+            80%  { background-position: 80%  10%;  }
+            100% { background-position: 0%   0%;   }
+        }
+        body.theme-thunder .app-title {
+            background: linear-gradient(90deg, #ede9fe, #a78bfa, #ffffff, #7c3aed, #c4b5fd, #ede9fe);
+            background-size: 400% 100%;
+            -webkit-background-clip: text; color: transparent;
+            animation: catTitleShimmer 3.5s linear infinite;
+        }
+        body.theme-thunder .card { border-color: rgba(124,58,237,0.22); background: rgba(18,8,40,0.72); }
+        body.theme-thunder .card:hover { box-shadow: 0 16px 48px rgba(0,0,0,0.75), 0 0 28px rgba(124,58,237,0.18); }
+        body.theme-thunder .sidebar { background: rgba(8,3,20,0.98); border-right-color: rgba(124,58,237,0.25); }
+        body.theme-thunder .nav-item.active { background: rgba(124,58,237,0.18); border-color: rgba(167,139,250,0.45); color: #c4b5fd; }
+
+        /* ── 造型主題：抹茶靜心（常駐）── */
+        body.theme-matcha {
+            --primary: #4ADE80; --gold: #86EFAC; --green: #34D399;
+            --border: rgba(74,222,128,0.22);
+            background:
+                radial-gradient(ellipse at 30% 20%, rgba(20,60,35,0.85) 0%, transparent 55%),
+                radial-gradient(ellipse at 75% 80%, rgba(10,45,25,0.6) 0%, transparent 50%),
+                #050D07;
+        }
+        body.theme-matcha .app-title {
+            background: linear-gradient(90deg, #86efac, #4ade80, #d1fae5, #6ee7b7, #86efac);
+            background-size: 300% 100%;
+            -webkit-background-clip: text; color: transparent;
+            animation: catTitleShimmer 5s linear infinite;
+        }
+        body.theme-matcha .card { border-color: rgba(74,222,128,0.18); }
+        body.theme-matcha .card:hover { box-shadow: 0 16px 48px rgba(0,0,0,0.65), 0 0 24px rgba(74,222,128,0.1); }
+        body.theme-matcha .sidebar { background: rgba(3,8,5,0.97); border-right-color: rgba(74,222,128,0.18); }
+        body.theme-matcha .nav-item.active { background: rgba(74,222,128,0.12); border-color: rgba(74,222,128,0.38); color: #4ade80; }
 
         /* ── 打卡特效覆蓋層 ── */
         #effect-overlay { position:fixed; inset:0; pointer-events:none; z-index:9000; overflow:hidden; }
@@ -793,6 +908,120 @@
         @keyframes starsBlink { 0%,100%{ opacity:0.55; } 50%{ opacity:1; } }
         @keyframes moonGlow { 0%,100%{ filter:drop-shadow(0 0 4px rgba(180,210,255,0.4)); } 50%{ filter:drop-shadow(0 0 10px rgba(180,210,255,0.9)); } }
 
+        /* ── 訊息樣式：雷霆（限定）── */
+        body.msg-thunder .toast {
+            background: rgba(10,7,22,0.97) !important;
+            border: 1px solid rgba(139,92,246,0.45) !important;
+            border-left: 4px solid #8B5CF6 !important;
+            border-radius: 10px !important;
+            box-shadow: 0 8px 32px rgba(60,20,160,0.35), 0 0 18px rgba(139,92,246,0.22) !important;
+            overflow: hidden;
+        }
+        body.msg-thunder .toast::before {
+            content: '';
+            position: absolute; inset: 0; pointer-events: none;
+            background: linear-gradient(135deg, rgba(139,92,246,0.1) 0%, transparent 55%);
+        }
+        body.msg-thunder .toast::after {
+            content: '⚡';
+            position: absolute; top: 8px; right: 12px;
+            font-size: 16px;
+            animation: thunderFlicker 2.5s ease-in-out infinite;
+        }
+        @keyframes thunderFlicker {
+            0%,100% { opacity:0.75; filter:drop-shadow(0 0 4px rgba(167,139,250,0.5)); }
+            45%     { opacity:0.3; }
+            50%     { opacity:1;   filter:drop-shadow(0 0 12px rgba(167,139,250,1)); }
+            55%     { opacity:0.55; }
+        }
+
+        /* ── 訊息樣式：抹茶靜心（常駐）── */
+        body.msg-matcha .toast {
+            background: rgba(3,10,6,0.97) !important;
+            border: 1px solid rgba(74,222,128,0.35) !important;
+            border-left: 4px solid #4ADE80 !important;
+            border-radius: 14px !important;
+            box-shadow: 0 8px 32px rgba(10,60,30,0.3), 0 0 12px rgba(74,222,128,0.12) !important;
+        }
+        body.msg-matcha .toast::before {
+            content: '';
+            position: absolute; inset: 0; pointer-events: none;
+            background: radial-gradient(ellipse at bottom left, rgba(74,222,128,0.07) 0%, transparent 60%);
+        }
+        body.msg-matcha .toast::after {
+            content: '🍵'; position: absolute; top: 8px; right: 12px;
+            font-size: 16px; opacity: 0.85;
+        }
+
+        /* ── 打卡特效：雷霆閃電條 ── */
+        .lightning-bolt {
+            position: absolute; top: -2%; pointer-events: none; z-index: 9001;
+            width: 70px; height: 210px;
+            clip-path: polygon(62% 0%,100% 0%,42% 52%,78% 52%,18% 100%,0% 100%,58% 48%,22% 48%);
+            background: linear-gradient(to bottom, rgba(255,255,255,0.98), rgba(210,180,255,0.9), rgba(139,92,246,0.7));
+            box-shadow: 0 0 22px rgba(167,139,250,0.9), 0 0 60px rgba(139,92,246,0.55);
+            animation: lightningStrike 0.55s ease-out forwards;
+        }
+        @keyframes lightningStrike {
+            0%   { opacity:0; transform:scaleY(0); transform-origin:top center; }
+            6%   { opacity:1; transform:scaleY(1); }
+            65%  { opacity:0.85; }
+            100% { opacity:0; }
+        }
+
+        /* ── 打卡特效：抹茶墨滴中心 ── */
+        .matcha-drop {
+            position: absolute; top:50%; left:50%;
+            width:10px; height:10px; border-radius:50%;
+            background: radial-gradient(circle, rgba(134,239,172,0.95), rgba(52,211,153,0.7));
+            box-shadow: 0 0 20px rgba(74,222,128,0.85), 0 0 50px rgba(52,211,153,0.5);
+            transform: translate(-50%,-50%);
+            animation: matchaDrop 0.75s cubic-bezier(0.22,0.61,0.36,1) forwards;
+        }
+        @keyframes matchaDrop {
+            0%   { width:10px; height:10px; opacity:0.95; }
+            45%  { width:60px; height:60px; opacity:0.8; }
+            100% { width:140px; height:140px; opacity:0; }
+        }
+        /* ── 打卡特效：抹茶漣漪 ── */
+        .matcha-ripple {
+            position: absolute; top:50%; left:50%;
+            width:12px; height:12px; border-radius:50%;
+            background: transparent;
+            border: 2px solid transparent;
+            box-shadow: 0 0 0 2px rgba(74,222,128,0.7), 0 0 18px rgba(74,222,128,0.45), 0 0 40px rgba(52,211,153,0.2);
+            transform: translate(-50%,-50%);
+            animation: matchaRipple 2.0s ease-out forwards;
+        }
+        @keyframes matchaRipple {
+            0%   { width:12px; height:12px; opacity:0.95; box-shadow:0 0 0 3px rgba(74,222,128,0.85), 0 0 20px rgba(74,222,128,0.5); }
+            100% { width:min(92vw,92vh); height:min(92vw,92vh); opacity:0; box-shadow:0 0 0 1px rgba(74,222,128,0.15), 0 0 10px rgba(74,222,128,0.1); }
+        }
+        /* ── 打卡特效：抹茶蒸氣 ── */
+        .matcha-steam {
+            position: absolute; border-radius:50%; pointer-events:none;
+            background: radial-gradient(circle, rgba(187,247,208,0.7), rgba(74,222,128,0.3));
+            animation: matchaSteam var(--sdur,1.4s) ease-out var(--sdelay,0s) forwards;
+        }
+        @keyframes matchaSteam {
+            0%   { opacity:0.75; transform:translate(var(--sx,0px), 0px) scale(1); }
+            100% { opacity:0;    transform:translate(calc(var(--sx,0px)*1.3), -120px) scale(0.4); }
+        }
+
+        /* ── 游標特效：電光殘影（雷霆限定軌跡）── */
+        .cursor-spark {
+            position: fixed; pointer-events: none; z-index: 9999;
+            height: 2px;
+            background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.95) 35%, rgba(196,181,253,0.9) 65%, transparent 100%);
+            box-shadow: 0 0 6px rgba(255,255,255,0.7), 0 0 16px rgba(139,92,246,0.85);
+            border-radius: 1px;
+            animation: cursorSparkFade 0.42s ease-out forwards;
+        }
+        @keyframes cursorSparkFade {
+            0%   { opacity:1;   transform:translate(-50%,-50%) rotate(var(--srot,0deg)) scaleX(1); }
+            100% { opacity:0;   transform:translate(-50%,-50%) rotate(var(--srot,0deg)) scaleX(0.3); }
+        }
+
         /* ── 造型背包區塊 ── */
         .cosm-section-title { font-size:14px; font-weight:700; color:var(--muted); letter-spacing:1px; margin:30px 0 14px; padding-bottom:8px; border-bottom:1px solid var(--border); }
         .cosm-card { background:rgba(255,255,255,0.03); border:1px solid var(--border); border-radius:18px; padding:16px; display:flex; flex-direction:column; align-items:center; gap:8px; text-align:center; transition:all 0.2s; }
@@ -945,7 +1174,22 @@
                 </div>
 
                 <!-- 主操作卡 -->
-                <div class="card gacha-action-card">
+                <div class="card gacha-action-card" style="padding:20px 24px 28px;">
+                    <!-- 獎池選擇 -->
+                    <div class="pool-tabs">
+                        <button class="pool-tab active" id="pool-tab-color" onclick="selectPool('color')">
+                            <span style="font-size:20px">🎨</span><span>主題色</span>
+                        </button>
+                        <button class="pool-tab" id="pool-tab-effect" onclick="selectPool('effect')">
+                            <span style="font-size:20px">✨</span><span>打卡特效</span>
+                        </button>
+                        <button class="pool-tab" id="pool-tab-cursor" onclick="selectPool('cursor')">
+                            <span style="font-size:20px">🖱️</span><span>游標特效</span>
+                        </button>
+                    </div>
+                    <!-- 當前池造型預覽 -->
+                    <div id="pool-preview" style="margin-bottom:14px;"></div>
+
                     <button id="mainLotteryBtn" class="btn" style="width:100%; max-width:320px; margin:0 auto; padding:20px; font-size:20px; background:rgba(255,214,10,0.18); color:var(--gold); border:2px solid rgba(255,214,10,0.4); box-shadow:0 0 20px rgba(255,214,10,0.2);" onclick="handleLottery()">載入中...</button>
                     <div style="text-align:center; margin-top:8px;">
                         <button onclick="openOddsModal()" style="background:none; border:none; color:var(--muted); font-size:12px; cursor:pointer; letter-spacing:0.3px;">📊 獎池機率一覽</button>
@@ -1002,9 +1246,9 @@
             <div style="font-size:12px; font-weight:700; color:var(--muted); letter-spacing:0.5px; margin-bottom:10px;">🛍️ 道具商店</div>
             <div id="market-shop-list" class="data-grid"></div>
 
-            <div style="font-size:12px; font-weight:700; color:var(--gold); letter-spacing:0.5px; margin:22px 0 10px;">🎨 造型兌換所 <span style="font-weight:400; color:var(--muted); font-size:11px;">— 常駐造型 300 碎片・限定限抽獎</span></div>
+            <div style="font-size:12px; font-weight:700; color:var(--gold); letter-spacing:0.5px; margin:22px 0 10px;">🎨 造型兌換所 <span style="font-weight:400; color:var(--muted); font-size:11px;">— 常駐造型 300 碎片・限定僅抽獎</span></div>
             <div id="market-cosm-shards" style="font-size:13px; color:var(--muted); margin-bottom:12px;">載入中...</div>
-            <div id="market-cosm-list" style="display:grid; grid-template-columns: repeat(2, 1fr); gap:12px;"></div>
+            <div id="market-cosm-list"></div>
         </div>
 
         <!-- 🎒 背包 -->
@@ -1018,9 +1262,9 @@
             <div class="cosm-section-title">🎨 我的造型</div>
             <div id="cosm-equipped-bar" style="display:none; background:rgba(200,164,74,0.06); border:1px solid rgba(200,164,74,0.2); border-radius:14px; padding:12px 16px; margin-bottom:16px; font-size:13px; color:var(--muted); gap:16px; flex-wrap:wrap; align-items:center;">
                 <span style="color:var(--gold); font-weight:700;">⚡ 已裝備</span>
-                <span id="eq-color-label">主題色：<strong>無</strong></span>
+                <span id="eq-color-label">主題：<strong>無</strong></span>
                 <span id="eq-effect-label">打卡特效：<strong>無</strong></span>
-                <span id="eq-msg-label">訊息樣式：<strong>無</strong></span>
+                <span id="eq-cursor-label">游標特效：<strong>無</strong></span>
             </div>
             <div id="cosm-list" style="display:grid; grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:14px;"></div>
         </div>
@@ -1194,22 +1438,29 @@
         };
 
         const COSMETICS = {
-            cat_color:   { n: "貓咪萌系・主題色",   i: "🎨", limited: true,  type: "color",   d: "粉→紫→奶白動態漸變，整個 app 有呼吸感" },
-            cat_effect:  { n: "貓咪萌系・打卡特效", i: "🐱", limited: true,  type: "effect",  d: "貓咪從底部跳出慶祝的動畫角色" },
-            cat_message: { n: "貓咪萌系・訊息樣式", i: "💬", limited: true,  type: "message", d: "角落貓咪、浮動泡泡、特殊字體風格" },
-            star_color:  { n: "深夜星空・主題色",   i: "🌌", limited: false, type: "color",   d: "深藍夜空配銀白，沉靜神秘的質感配色" },
-            star_effect: { n: "深夜星空・打卡特效", i: "🌠", limited: false, type: "effect",  d: "流星劃過螢幕的白色拖尾粒子特效" },
-            star_message:{ n: "深夜星空・訊息樣式", i: "🌙", limited: false, type: "message", d: "月亮圖示、淡星點背景、星光文字裝飾" },
+            cat_color:  { n: "貓咪萌系・主題",     i: "🎨", limited: true,  type: "color",  d: "粉紫動態漸變背景 + 貓咪訊息樣式一體成型" },
+            cat_effect: { n: "貓咪萌系・打卡特效", i: "🐱", limited: true,  type: "effect", d: "貓咪從底部跳出慶祝的動畫角色" },
+            cat_cursor: { n: "貓咪萌系・游標特效", i: "🐾", limited: true,  type: "cursor", d: "點擊爆出粉色五芒星・移動留下輝光爪印軌跡" },
+            star_color: { n: "深夜星空・主題",     i: "🌌", limited: false, type: "color",  d: "深藍星空背景 + 月亮訊息樣式一體成型" },
+            star_effect:{ n: "深夜星空・打卡特效", i: "🌠", limited: false, type: "effect", d: "流星劃過螢幕的白色拖尾粒子特效" },
+            star_cursor:{ n: "深夜星空・游標特效", i: "✨", limited: false, type: "cursor", d: "點擊爆出冰藍菱形粒子，銳利而克制" },
+            thunder_color:  { n: "雷霆・主題",     i: "🌩️", limited: true,  type: "color",  active: false, d: "暴風雲層深炭紫背景，電光邊框訊息樣式" },
+            thunder_effect: { n: "雷霆・打卡特效", i: "⚡",  limited: true,  type: "effect", active: false, d: "閃電劈下的強光與電弧衝擊特效" },
+            thunder_cursor: { n: "雷霆・游標特效", i: "🔮", limited: true,  type: "cursor", active: false, d: "點擊爆出電弧粒子・移動留下電光殘影軌跡" },
+            matcha_color:   { n: "抹茶靜心・主題",     i: "🍵", limited: false, type: "color",  active: false, d: "深墨綠沉靜背景，水墨風格訊息樣式" },
+            matcha_effect:  { n: "抹茶靜心・打卡特效", i: "🌿", limited: false, type: "effect", active: false, d: "水墨漣漪向外擴散的靜心特效" },
+            matcha_cursor:  { n: "抹茶靜心・游標特效", i: "✦",  limited: false, type: "cursor", active: false, d: "點擊爆出翠綠菱形粒子，清爽克制" },
         };
 
         let myInventory = {}, myShards = 0, myPoints = 0;
         let myLastDate = "", oppData = {};
         let myCosmetics = {};
-        let myEquipped = { color: null, effect: null, message: null };
+        let myEquipped = { color: null, effect: null, cursor: null };
         let myMissions = {}, myDualExpData = null, cachedUserData = {};
 
-        let gachaPity = 0;        // 0-49，硬保底計數（50抽必出造型）
-        let gachaLost5050 = false; // 是否已歪，下次必限定
+        let gachaPity = 0;         // 共用保底計數（三池共享）
+        let gachaLost5050 = false; // 共用 50/50 狀態
+        let selectedPool = 'color';
 
         // ===== 🛠️ 工具函數 =====
         const getLocalDateStr = d => d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
@@ -1262,6 +1513,100 @@
             } else if (type === 'error') {
                 _tone(260, 0.09, 0,    0.18);   // C4
                 _tone(210, 0.07, 0.15, 0.26);   // 低一點（下行警示）
+            } else if (type === 'meow') {
+                if (_ac.state === 'suspended') _ac.resume();
+                const t = _ac.currentTime;
+                // ── 第一聲「喵∼」主體（triangle）
+                const mo1 = _ac.createOscillator(); const mg1 = _ac.createGain();
+                mo1.connect(mg1); mg1.connect(_ac.destination); mo1.type = 'triangle';
+                mo1.frequency.setValueAtTime(340, t);
+                mo1.frequency.linearRampToValueAtTime(920, t + 0.13);
+                mo1.frequency.linearRampToValueAtTime(540, t + 0.40);
+                mg1.gain.setValueAtTime(0, t);
+                mg1.gain.linearRampToValueAtTime(0.15, t + 0.025);
+                mg1.gain.setValueAtTime(0.15, t + 0.22);
+                mg1.gain.exponentialRampToValueAtTime(0.001, t + 0.52);
+                mo1.start(t); mo1.stop(t + 0.60);
+                // 和聲層（sine +4Hz），增添溫潤感
+                const mo2 = _ac.createOscillator(); const mg2 = _ac.createGain();
+                mo2.connect(mg2); mg2.connect(_ac.destination); mo2.type = 'sine';
+                mo2.frequency.setValueAtTime(344, t);
+                mo2.frequency.linearRampToValueAtTime(924, t + 0.13);
+                mo2.frequency.linearRampToValueAtTime(544, t + 0.40);
+                mg2.gain.setValueAtTime(0, t);
+                mg2.gain.linearRampToValueAtTime(0.06, t + 0.025);
+                mg2.gain.exponentialRampToValueAtTime(0.001, t + 0.48);
+                mo2.start(t); mo2.stop(t + 0.55);
+                // ── 第二聲短促「嗚∼」（0.58s 後）
+                const mo3 = _ac.createOscillator(); const mg3 = _ac.createGain();
+                mo3.connect(mg3); mg3.connect(_ac.destination); mo3.type = 'triangle';
+                mo3.frequency.setValueAtTime(480, t + 0.58);
+                mo3.frequency.linearRampToValueAtTime(680, t + 0.68);
+                mo3.frequency.linearRampToValueAtTime(500, t + 0.84);
+                mg3.gain.setValueAtTime(0, t + 0.58);
+                mg3.gain.linearRampToValueAtTime(0.09, t + 0.60);
+                mg3.gain.exponentialRampToValueAtTime(0.001, t + 0.86);
+                mo3.start(t + 0.58); mo3.stop(t + 0.92);
+                // ── 尾音：三顆高音鈴鐺上行（1.0s 後）
+                [[1760,1.00,0.35],[2093,1.10,0.30],[2637,1.20,0.26]].forEach(([freq,delay,dur]) => {
+                    const oc = _ac.createOscillator(); const gc = _ac.createGain();
+                    oc.connect(gc); gc.connect(_ac.destination); oc.type = 'sine';
+                    const ts = t + delay;
+                    gc.gain.setValueAtTime(0, ts);
+                    gc.gain.linearRampToValueAtTime(0.048, ts + 0.013);
+                    gc.gain.exponentialRampToValueAtTime(0.001, ts + dur);
+                    oc.frequency.value = freq; oc.start(ts); oc.stop(ts + dur + 0.05);
+                });
+            } else if (type === 'thunder') {
+                if (_ac.state === 'suspended') _ac.resume();
+                const t = _ac.currentTime;
+                // 電弧嗡鳴
+                const buzz = _ac.createOscillator(); const buzzG = _ac.createGain();
+                buzz.connect(buzzG); buzzG.connect(_ac.destination); buzz.type = 'sawtooth';
+                buzz.frequency.setValueAtTime(520, t); buzz.frequency.exponentialRampToValueAtTime(180, t + 0.09);
+                buzzG.gain.setValueAtTime(0.22, t); buzzG.gain.exponentialRampToValueAtTime(0.001, t + 0.09);
+                buzz.start(t); buzz.stop(t + 0.12);
+                // 雷劈爆裂
+                const crack = _ac.createOscillator(); const crackG = _ac.createGain();
+                crack.connect(crackG); crackG.connect(_ac.destination); crack.type = 'sawtooth';
+                crack.frequency.setValueAtTime(1600, t + 0.04); crack.frequency.exponentialRampToValueAtTime(60, t + 0.22);
+                crackG.gain.setValueAtTime(0, t + 0.04); crackG.gain.linearRampToValueAtTime(0.32, t + 0.06);
+                crackG.gain.exponentialRampToValueAtTime(0.001, t + 0.22);
+                crack.start(t + 0.04); crack.stop(t + 0.25);
+                // 低頻轟鳴
+                const rumble = _ac.createOscillator(); const rumbleG = _ac.createGain();
+                rumble.connect(rumbleG); rumbleG.connect(_ac.destination); rumble.type = 'triangle';
+                rumble.frequency.setValueAtTime(65, t + 0.08); rumble.frequency.linearRampToValueAtTime(28, t + 1.1);
+                rumbleG.gain.setValueAtTime(0, t + 0.08); rumbleG.gain.linearRampToValueAtTime(0.2, t + 0.15);
+                rumbleG.gain.exponentialRampToValueAtTime(0.001, t + 1.1);
+                rumble.start(t + 0.08); rumble.stop(t + 1.2);
+            } else if (type === 'matcha') {
+                if (_ac.state === 'suspended') _ac.resume();
+                const t = _ac.currentTime;
+                // 抹茶缽缽音：基音 + 泛音
+                [[220, 0, 0.055, 2.0],[440, 0.01, 0.035, 1.5],[660, 0.02, 0.02, 1.0]].forEach(([freq, delay, peak, dur]) => {
+                    const osc = _ac.createOscillator(); const gn = _ac.createGain();
+                    osc.connect(gn); gn.connect(_ac.destination); osc.type = 'sine';
+                    const st = t + delay;
+                    gn.gain.setValueAtTime(0, st);
+                    gn.gain.linearRampToValueAtTime(peak, st + 0.02);
+                    gn.gain.exponentialRampToValueAtTime(0.001, st + dur);
+                    osc.frequency.value = freq;
+                    osc.start(st); osc.stop(st + dur + 0.05);
+                });
+            } else if (type === 'stardust') {
+                // 深夜星空：玲瓏高音鐘聲上行
+                if (_ac.state === 'suspended') _ac.resume();
+                [[1047,0,0.55],[1319,0.08,0.50],[1568,0.16,0.62],[2093,0.25,0.58],[1760,0.34,0.52]].forEach(([freq,delay,dur]) => {
+                    const osc = _ac.createOscillator(); const gn = _ac.createGain();
+                    osc.connect(gn); gn.connect(_ac.destination); osc.type = 'sine';
+                    const t = _ac.currentTime + delay;
+                    gn.gain.setValueAtTime(0, t);
+                    gn.gain.linearRampToValueAtTime(0.065, t + 0.015);
+                    gn.gain.exponentialRampToValueAtTime(0.001, t + dur);
+                    osc.frequency.value = freq;
+                    osc.start(t); osc.stop(t + dur + 0.05);
+                });
             }
         }
 
@@ -1443,7 +1788,7 @@
             const PITY = [
                 { label:'50 抽硬保底', desc:'必出造型（限定保底歪後下次必限定）' },
                 { label:'10 抽軟保底', desc:'10 連抽中至少 1 個道具或以上' },
-                { label:'重複造型補償', desc:'已擁有的造型替換為 🔹 碎片 ×5' },
+                { label:'造型補償', desc:'該池造型已全收時替換為 🔹 碎片 ×25' },
             ];
             document.getElementById('odds-can-draw').innerHTML =
                 ODDS.map(o => `<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 10px;background:rgba(255,255,255,0.04);border-radius:10px;font-size:13px;">
@@ -1640,8 +1985,8 @@
             const d = snap.val()||{}, now = new Date(), tStr = getLocalDateStr(now);
             document.getElementById('streak_text').classList.remove('skeleton');
             myLastDate = d.last_date||"";
-            gachaPity = d.gacha_pity||0;
-            gachaLost5050 = d.gacha_lost_5050||false;
+            gachaPity = d.gacha_pity || 0;
+            gachaLost5050 = d.gacha_lost_5050 || false;
             myCosmetics = d.cosmetics||{};
 
             let y = new Date(now); y.setDate(now.getDate()-1); 
@@ -1664,9 +2009,10 @@
             // 轉盤保底進度條更新
             document.getElementById('pity_text').innerText = `${gachaPity}/50`;
             document.getElementById('pity_bar').style.width = `${(gachaPity/50)*100}%`;
-            
+
             cachedUserData = d;
             renderBuffStatus();
+            renderPoolPreview();
             
             const btn = document.getElementById('mainLotteryBtn');
             if(d.last_free_lottery!==tStr) {
@@ -1682,7 +2028,7 @@
             }
             
             myInventory = d.items||{}; myShards = d.shards||0;
-            myEquipped = Object.assign({ color:null, effect:null, message:null }, d.equipped||{});
+            myEquipped = Object.assign({ color:null, effect:null, cursor:null }, d.equipped||{});
             document.getElementById('shard_ui').innerHTML=`🔹 碎片：<strong style="color:var(--gold)">${myShards}</strong>`;
             renderInventory();
             renderCosmetics();
@@ -1739,28 +2085,33 @@
         }
 
         // ===== 🎨 造型系統 =====
-        const COSM_TYPE_LABEL = { color: '主題色', effect: '打卡特效', message: '訊息樣式' };
+        const COSM_TYPE_LABEL = { color: '主題色', effect: '打卡特效', cursor: '游標特效' };
 
         function applyTheme() {
             const eq = myEquipped;
-            // color theme
-            document.body.classList.toggle('theme-cat', eq.color === 'cat_color');
-            document.body.classList.toggle('theme-star', eq.color === 'star_color');
-            // message theme
-            document.body.classList.toggle('msg-cat', eq.message === 'cat_message');
-            document.body.classList.toggle('msg-star', eq.message === 'star_message');
+            // color theme (message style is bundled into color slot)
+            document.body.classList.toggle('theme-cat',     eq.color === 'cat_color');
+            document.body.classList.toggle('theme-star',    eq.color === 'star_color');
+            document.body.classList.toggle('theme-thunder', eq.color === 'thunder_color');
+            document.body.classList.toggle('theme-matcha',  eq.color === 'matcha_color');
+            document.body.classList.toggle('msg-cat',     eq.color === 'cat_color');
+            document.body.classList.toggle('msg-star',    eq.color === 'star_color');
+            document.body.classList.toggle('msg-thunder', eq.color === 'thunder_color');
+            document.body.classList.toggle('msg-matcha',  eq.color === 'matcha_color');
+            // cursor effect
+            initCursorEffect();
         }
 
         function renderCosmetics() {
             const eq = myEquipped;
             // equipped bar
             const bar = document.getElementById('cosm-equipped-bar');
-            const hasAny = eq.color || eq.effect || eq.message;
+            const hasAny = eq.color || eq.effect || eq.cursor;
             bar.style.display = hasAny ? 'flex' : 'none';
             const eqLabel = k => k ? `<strong style="color:var(--gold)">${COSMETICS[k].i} ${COSMETICS[k].n.split('・')[1]||COSMETICS[k].n}</strong>` : '<strong>無</strong>';
             document.getElementById('eq-color-label').innerHTML = `主題色：${eqLabel(eq.color)}`;
             document.getElementById('eq-effect-label').innerHTML = `特效：${eqLabel(eq.effect)}`;
-            document.getElementById('eq-msg-label').innerHTML = `訊息：${eqLabel(eq.message)}`;
+            document.getElementById('eq-cursor-label').innerHTML = `游標：${eqLabel(eq.cursor)}`;
 
             let html = '';
             Object.entries(COSMETICS).forEach(([key, c]) => {
@@ -1822,12 +2173,157 @@
             });
         }
 
+        // ===== 🖱️ 游標特效系統 =====
+        let _cursorListeners = null;
+
+        function _spawnThunderSpark(x, y) {
+            // 計算移動方向角
+            let moveAngle = _lastTrailPos
+                ? Math.atan2(y - _lastTrailPos.y, x - _lastTrailPos.x) * 180 / Math.PI
+                : Math.random() * 180;
+            _lastTrailPos = { x, y };
+            // 主火花 + 1 條叉火花（±60~90°）
+            [0, 1].forEach(i => {
+                const el = document.createElement('div');
+                const len = i === 0 ? (20 + Math.random() * 18) : (10 + Math.random() * 12);
+                const scatter = (Math.random() - 0.5) * 40 + (i === 1 ? (Math.random() > 0.5 ? 75 : -75) : 0);
+                el.className = 'cursor-spark';
+                el.style.cssText = `left:${x}px; top:${y}px; width:${len}px; --srot:${moveAngle + scatter}deg;`;
+                document.body.appendChild(el);
+                setTimeout(() => el.remove(), i === 0 ? 420 : 280);
+            });
+        }
+
+        function _spawnTrail(x, y, isCat) {
+            const cursor = myEquipped.cursor;
+            if (cursor === 'thunder_cursor') { _spawnThunderSpark(x, y); return; }
+            if (!isCat) return;
+            // 貓咪爪印：計算移動方向
+            let angle = 0;
+            if (_lastTrailPos) {
+                const dx = x - _lastTrailPos.x, dy = y - _lastTrailPos.y;
+                if (Math.abs(dx) > 1 || Math.abs(dy) > 1)
+                    angle = Math.atan2(dy, dx) * 180 / Math.PI + 90;
+            }
+            _lastTrailPos = { x, y };
+            const scale = 0.55 + Math.random() * 0.25;
+            const el = document.createElement('div');
+            el.className = 'cursor-paw';
+            el.style.cssText = `left:${x}px; top:${y}px; transform:translate(-50%,-50%) rotate(${angle}deg) scale(${scale});`;
+            el.innerHTML = `<div class="paw-wrap">
+                <div class="paw-toe" style="left:0;top:4px"></div>
+                <div class="paw-toe" style="left:7px;top:1px"></div>
+                <div class="paw-toe" style="left:16px;top:1px"></div>
+                <div class="paw-toe" style="left:23px;top:4px"></div>
+                <div class="paw-main"></div>
+            </div>`;
+            document.body.appendChild(el);
+            setTimeout(() => el.remove(), 1400);
+        }
+
+        function _spawnClickBurst(x, y) {
+            const cursor = myEquipped.cursor;
+            const isCat     = cursor === 'cat_cursor';
+            const isStar    = cursor === 'star_cursor';
+            const isThunder = cursor === 'thunder_cursor';
+            const isMatcha  = cursor === 'matcha_cursor';
+            if (!isCat && !isStar && !isThunder && !isMatcha) return;
+
+            // center flash
+            const flash = document.createElement('div');
+            flash.className = 'cursor-center-flash';
+            flash.style.cssText = `left:${x}px; top:${y}px;`;
+            if (isStar) {
+                flash.style.background = 'radial-gradient(circle, rgba(255,255,255,0.95), rgba(147,197,253,0.7))';
+                flash.style.boxShadow = '0 0 14px rgba(147,197,253,0.9), 0 0 28px rgba(99,179,237,0.5)';
+            } else if (isThunder) {
+                flash.style.background = 'radial-gradient(circle, rgba(255,255,255,0.98), rgba(167,139,250,0.8))';
+                flash.style.boxShadow = '0 0 20px rgba(139,92,246,0.95), 0 0 45px rgba(167,139,250,0.55)';
+            } else if (isMatcha) {
+                flash.style.background = 'radial-gradient(circle, rgba(255,255,255,0.95), rgba(74,222,128,0.7))';
+                flash.style.boxShadow = '0 0 14px rgba(74,222,128,0.9), 0 0 28px rgba(52,211,153,0.45)';
+            }
+            document.body.appendChild(flash);
+            setTimeout(() => flash.remove(), 420);
+
+            // burst particles
+            const count = isCat ? 8 : 6;
+            const shapeClass = isCat ? 'cursor-burst-cat' : 'cursor-burst-star';
+            for (let i = 0; i < count; i++) {
+                const el = document.createElement('div');
+                const angle = (i / count) * Math.PI * 2 + Math.random() * 0.4;
+                const dist = (isThunder ? 34 : 28) + Math.random() * 24;
+                const tx = Math.cos(angle) * dist;
+                const ty = Math.sin(angle) * dist;
+                const size = isCat ? (9 + Math.random() * 5) : (8 + Math.random() * 4);
+                const dur = (isThunder ? 0.28 : 0.35) + Math.random() * 0.15;
+                let color;
+                if (isCat)         color = `hsl(${310+Math.random()*40},90%,75%)`;
+                else if (isStar)   color = `hsl(${195+Math.random()*25},85%,72%)`;
+                else if (isThunder)color = `hsl(${258+Math.random()*28},78%,72%)`;
+                else               color = `hsl(${130+Math.random()*30},72%,62%)`;
+                el.className = `cursor-burst ${shapeClass}`;
+                el.style.cssText = `left:${x}px; top:${y}px; width:${size}px; height:${size}px; --tx:${tx}px; --ty:${ty}px; --cdur:${dur}s; background:${color};`;
+                document.body.appendChild(el);
+                setTimeout(() => el.remove(), dur * 1000 + 50);
+            }
+        }
+
+        let _trailThrottle = 0;
+        let _lastTrailPos = null;
+        function initCursorEffect() {
+            // remove old listeners
+            if (_cursorListeners) {
+                document.removeEventListener('mousemove', _cursorListeners.move);
+                document.removeEventListener('click',     _cursorListeners.click);
+                document.removeEventListener('touchmove', _cursorListeners.tMove);
+                document.removeEventListener('touchstart',_cursorListeners.tStart);
+                _cursorListeners = null;
+            }
+
+            const cursor = myEquipped.cursor;
+            if (!cursor) return;
+
+            const isCat = cursor === 'cat_cursor';
+            const hasTrail = isCat || cursor === 'thunder_cursor';
+
+            const onMove = e => {
+                if (!hasTrail) return;
+                const now = Date.now();
+                if (now - _trailThrottle < 65) return;
+                _trailThrottle = now;
+                _spawnTrail(e.clientX, e.clientY, isCat);
+            };
+            const onClick = e => _spawnClickBurst(e.clientX, e.clientY);
+            const onTMove = e => {
+                if (!hasTrail) return;
+                const now = Date.now();
+                if (now - _trailThrottle < 65) return;
+                _trailThrottle = now;
+                const t = e.touches[0];
+                _spawnTrail(t.clientX, t.clientY, isCat);
+            };
+            const onTStart = e => {
+                const t = e.touches[0];
+                _spawnClickBurst(t.clientX, t.clientY);
+            };
+
+            document.addEventListener('mousemove',  onMove);
+            document.addEventListener('click',      onClick);
+            document.addEventListener('touchmove',  onTMove, { passive: true });
+            document.addEventListener('touchstart', onTStart, { passive: true });
+            _cursorListeners = { move: onMove, click: onClick, tMove: onTMove, tStart: onTStart };
+        }
+
         // 打卡特效
         function fireCheckinEffect() {
             const eff = myEquipped.effect;
             const ov = document.getElementById('effect-overlay');
 
             if (eff === 'cat_effect') {
+                // 貓咪落地時喵一聲
+                setTimeout(() => playSound('meow'), 720);
+
                 // ── ACT 1：玫瑰閃光開場（0ms）
                 const flash = document.createElement('div');
                 flash.style.cssText = 'position:fixed;inset:0;background:rgba(210,70,130,0.20);pointer-events:none;z-index:8997;opacity:0;transition:opacity 0.12s;';
@@ -1923,6 +2419,9 @@
                     gravity:0.32, scalar:0.78 }), 950);
 
             } else if (eff === 'star_effect') {
+                // 深夜星空鐘聲
+                playSound('stardust');
+
                 // 短暫深夜氛圍覆蓋
                 const ambience = document.createElement('div');
                 ambience.style.cssText = 'position:fixed;inset:0;background:rgba(4,8,22,0.6);pointer-events:none;z-index:8998;opacity:0;transition:opacity 0.35s;';
@@ -1953,11 +2452,110 @@
                     ov.appendChild(s);
                     setTimeout(() => s.remove(), 2200);
                 }
+
+            } else if (eff === 'thunder_effect') {
+                playSound('thunder');
+
+                // ── 強白閃
+                const flash = document.createElement('div');
+                flash.style.cssText = 'position:fixed;inset:0;background:rgba(230,210,255,0.88);pointer-events:none;z-index:8997;opacity:0;transition:opacity 0.04s;';
+                document.body.appendChild(flash);
+                requestAnimationFrame(() => requestAnimationFrame(() => { flash.style.opacity = '1'; }));
+                setTimeout(() => { flash.style.transition = 'opacity 0.28s'; flash.style.opacity = '0'; setTimeout(() => flash.remove(), 300); }, 55);
+                // 二次殘光
+                setTimeout(() => {
+                    const f2 = document.createElement('div');
+                    f2.style.cssText = 'position:fixed;inset:0;background:rgba(167,139,250,0.38);pointer-events:none;z-index:8997;opacity:0;transition:opacity 0.02s;';
+                    document.body.appendChild(f2);
+                    requestAnimationFrame(() => requestAnimationFrame(() => { f2.style.opacity = '1'; }));
+                    setTimeout(() => { f2.style.transition = 'opacity 0.22s'; f2.style.opacity = '0'; setTimeout(() => f2.remove(), 240); }, 38);
+                }, 145);
+
+                // ── 閃電柱（1~2條）
+                const boltCount = Math.random() < 0.45 ? 2 : 1;
+                for (let i = 0; i < boltCount; i++) {
+                    setTimeout(() => {
+                        const bolt = document.createElement('div');
+                        bolt.className = 'lightning-bolt';
+                        bolt.style.left = `${25 + Math.random() * 50}vw`;
+                        ov.appendChild(bolt);
+                        setTimeout(() => bolt.remove(), 620);
+                    }, i * 140);
+                }
+
+                // ── 電弧粒子從閃電落點散射
+                setTimeout(() => {
+                    for (let i = 0; i < 18; i++) {
+                        const sp = document.createElement('div');
+                        const angle = Math.random() * Math.PI * 2;
+                        const dist = 40 + Math.random() * 120;
+                        const tx = Math.cos(angle) * dist, ty = Math.sin(angle) * dist;
+                        const size = 3 + Math.random() * 4;
+                        const dur = 0.3 + Math.random() * 0.25;
+                        sp.className = 'cursor-burst cursor-burst-star';
+                        sp.style.cssText = `left:50vw; top:38vh; width:${size}px; height:${size}px; --tx:${tx}px; --ty:${ty}px; --cdur:${dur}s; background:hsl(${255+Math.random()*30},85%,78%);`;
+                        document.body.appendChild(sp);
+                        setTimeout(() => sp.remove(), dur * 1000 + 60);
+                    }
+                }, 80);
+                // ── 電光紫 confetti
+                setTimeout(() => confetti({ particleCount:90, spread:105, origin:{y:0.35}, colors:['#a78bfa','#c4b5fd','#ede9fe','#7c3aed','#fff','#ddd6fe'] }), 80);
+                setTimeout(() => confetti({ particleCount:45, spread:65, angle:60, origin:{x:0.08,y:0.45}, colors:['#a78bfa','#c4b5fd','#fff'] }), 380);
+                setTimeout(() => confetti({ particleCount:45, spread:65, angle:120, origin:{x:0.92,y:0.45}, colors:['#a78bfa','#c4b5fd','#fff'] }), 380);
+
+                // ── 紫色暈光持續
+                const ambience = document.createElement('div');
+                ambience.style.cssText = 'position:fixed;inset:0;background:radial-gradient(ellipse at 50% 30%, rgba(100,40,200,0.28) 0%, rgba(60,20,140,0.18) 50%, transparent 75%);pointer-events:none;z-index:8998;opacity:0;transition:opacity 0.4s;';
+                document.body.appendChild(ambience);
+                requestAnimationFrame(() => requestAnimationFrame(() => { ambience.style.opacity = '1'; }));
+                setTimeout(() => { ambience.style.opacity = '0'; setTimeout(() => ambience.remove(), 430); }, 2600);
+
+            } else if (eff === 'matcha_effect') {
+                playSound('matcha');
+
+                // ── 深綠氛圍覆蓋
+                const ambience = document.createElement('div');
+                ambience.style.cssText = 'position:fixed;inset:0;background:radial-gradient(ellipse at 50% 60%, rgba(20,80,40,0.38) 0%, rgba(10,50,25,0.2) 55%, transparent 78%);pointer-events:none;z-index:8998;opacity:0;transition:opacity 0.65s;';
+                document.body.appendChild(ambience);
+                requestAnimationFrame(() => requestAnimationFrame(() => { ambience.style.opacity = '1'; }));
+                setTimeout(() => { ambience.style.opacity = '0'; setTimeout(() => ambience.remove(), 660); }, 2800);
+
+                // ── 墨滴中心擴散
+                const drop = document.createElement('div');
+                drop.className = 'matcha-drop';
+                ov.appendChild(drop);
+                setTimeout(() => drop.remove(), 800);
+
+                // ── 漣漪3波
+                for (let i = 0; i < 3; i++) {
+                    setTimeout(() => {
+                        const ring = document.createElement('div');
+                        ring.className = 'matcha-ripple';
+                        ov.appendChild(ring);
+                        setTimeout(() => ring.remove(), 2200);
+                    }, i * 440);
+                }
+
+                // ── 蒸氣粒子向上飄
+                for (let i = 0; i < 22; i++) {
+                    setTimeout(() => {
+                        const st = document.createElement('div');
+                        st.className = 'matcha-steam';
+                        const size = 6 + Math.random() * 12;
+                        const sx = (Math.random() - 0.5) * 160;
+                        const startY = 40 + Math.random() * 25;
+                        const dur = 1.1 + Math.random() * 0.8;
+                        st.style.cssText = `left:calc(50% + ${sx}px); top:${startY}vh; width:${size}px; height:${size}px; --sx:${sx * 0.4}px; --sdur:${dur}s;`;
+                        ov.appendChild(st);
+                        setTimeout(() => st.remove(), dur * 1000 + 100);
+                    }, Math.random() * 600);
+                }
             }
         }
 
         // ===== 👁 造型預覽 =====
         let _previewTimer = null;
+        let _cursorPreviewOrig = undefined; // undefined = no cursor preview active
 
         function previewCosmetic(key) {
             const c = COSMETICS[key];
@@ -1969,9 +2567,11 @@
             banner.style.display = 'flex';
 
             if (c.type === 'color') {
-                document.body.classList.remove('theme-cat', 'theme-star');
-                if (key === 'cat_color') document.body.classList.add('theme-cat');
-                if (key === 'star_color') document.body.classList.add('theme-star');
+                document.body.classList.remove('theme-cat','theme-star','theme-thunder','theme-matcha','msg-cat','msg-star','msg-thunder','msg-matcha');
+                if (key === 'cat_color')     { document.body.classList.add('theme-cat',     'msg-cat'); }
+                if (key === 'star_color')    { document.body.classList.add('theme-star',    'msg-star'); }
+                if (key === 'thunder_color') { document.body.classList.add('theme-thunder', 'msg-thunder'); }
+                if (key === 'matcha_color')  { document.body.classList.add('theme-matcha',  'msg-matcha'); }
                 _previewTimer = setTimeout(endPreview, 8000);
             } else if (c.type === 'effect') {
                 const orig = myEquipped.effect;
@@ -1980,17 +2580,23 @@
                 myEquipped.effect = orig;
                 // banner stays for a moment
                 _previewTimer = setTimeout(endPreview, 2500);
-            } else if (c.type === 'message') {
-                document.body.classList.remove('msg-cat', 'msg-star');
-                if (key === 'cat_message') document.body.classList.add('msg-cat');
-                if (key === 'star_message') document.body.classList.add('msg-star');
-                showToast(`${c.i} 這是【${c.n}】的訊息樣式預覽`);
-                _previewTimer = setTimeout(endPreview, 5000);
+            } else if (c.type === 'cursor') {
+                _cursorPreviewOrig = myEquipped.cursor;
+                myEquipped.cursor = key;
+                initCursorEffect();
+                // demo burst at screen center
+                _spawnClickBurst(window.innerWidth / 2, window.innerHeight / 2);
+                showToast(`${c.i} 這是【${c.n}】的游標特效預覽`);
+                _previewTimer = setTimeout(endPreview, 6000);
             }
         }
 
         function endPreview(silent) {
             if (_previewTimer) { clearTimeout(_previewTimer); _previewTimer = null; }
+            if (_cursorPreviewOrig !== undefined) {
+                myEquipped.cursor = _cursorPreviewOrig;
+                _cursorPreviewOrig = undefined;
+            }
             document.getElementById('preview-banner').style.display = 'none';
             applyTheme(); // restore equipped theme
             if (!silent) showToast('預覽結束');
@@ -2047,11 +2653,18 @@
 
         function checkMarketFresh() {
             const currentDay = getDayStart();
-            db.ref('market_current/generatedAt').transaction(cur => {
-                if (!cur || cur < currentDay) return currentDay;
-                return undefined;
-            }, (err, committed) => {
-                if (committed) generateAndSaveMarket(currentDay);
+            db.ref('market_current').once('value', snap => {
+                const data = snap.val();
+                // 日期過期 → 重生
+                if (!data || !data.generatedAt || data.generatedAt < currentDay) {
+                    generateAndSaveMarket(currentDay); return;
+                }
+                // 有資料但 items 全部 key 都不在 ITEMS → 舊版殘留，強制重生
+                const items = data.items || [];
+                const hasValid = Array.isArray(items)
+                    ? items.some(s => s && ITEMS[s.key])
+                    : Object.values(items).some(s => s && ITEMS[s.key]);
+                if (!hasValid) generateAndSaveMarket(currentDay);
             });
         }
 
@@ -2108,46 +2721,46 @@
             });
             document.getElementById('market-shop-list').innerHTML = sHtml || `<div style="text-align:center; padding:40px; color:var(--muted);">暫無商品</div>`;
 
-            // 造型兌換所（限定限抽獎，常駐 300 點購買）
+            // 造型兌換所（常駐造型，按類型分區，限定不顯示）
             const shardsEl = document.getElementById('market-cosm-shards');
             if (shardsEl) shardsEl.innerHTML = `🔹 持有碎片：<strong style="color:var(--gold)">${myShards}</strong> 個`;
 
             const cosmList = document.getElementById('market-cosm-list');
             if (!cosmList) return;
-            let cHtml = '';
+
+            const TYPE_LABEL = { color: '🎨 主題色', effect: '✨ 打卡特效', cursor: '🖱️ 游標特效' };
+            const byType = { color: [], effect: [], cursor: [] };
             Object.entries(COSMETICS).forEach(([key, c]) => {
-                const owned = !!myCosmetics[key];
-                if (c.limited) {
-                    // 限定造型：只能從抽獎取得，顯示但鎖起來
-                    cHtml += `<div style="background:rgba(255,255,255,0.02); border:1px solid ${owned ? 'rgba(74,222,128,0.4)' : 'rgba(249,168,212,0.2)'}; border-radius:16px; padding:16px 12px; text-align:center; display:flex; flex-direction:column; gap:6px; align-items:center; opacity:${owned ? 1 : 0.7};">
-                        <span style="font-size:10px; color:#f9a8d4; background:rgba(249,168,212,0.12); border:1px solid rgba(249,168,212,0.3); border-radius:6px; padding:2px 6px;">✦ 限定</span>
-                        <div style="font-size:36px; margin:4px 0;">${c.i}</div>
-                        <div style="font-weight:bold; font-size:13px; line-height:1.3;">${c.n}</div>
-                        <div style="font-size:11px; color:var(--muted); line-height:1.4;">${c.d}</div>
-                        ${owned
-                            ? `<button class="btn" disabled style="background:rgba(74,222,128,0.12); color:var(--green); border-color:rgba(74,222,128,0.3); font-size:12px; margin-top:4px;">✓ 已擁有</button>`
-                            : `<button class="btn" disabled style="background:transparent; color:var(--muted); border-color:rgba(255,255,255,0.12); font-size:12px; margin-top:4px;">🔒 限定抽獎取得</button>`
-                        }
-                    </div>`;
-                } else {
-                    // 常駐造型：300 碎片購買
-                    const price = 300;
-                    const canAfford = myShards >= price;
-                    cHtml += `<div style="background:rgba(255,255,255,0.03); border:1px solid ${owned ? 'rgba(74,222,128,0.4)' : 'rgba(147,197,253,0.25)'}; border-radius:16px; padding:16px 12px; text-align:center; display:flex; flex-direction:column; gap:6px; align-items:center;">
-                        <span style="font-size:10px; color:#93c5fd; background:rgba(147,197,253,0.1); border:1px solid rgba(147,197,253,0.25); border-radius:6px; padding:2px 6px;">✧ 常駐</span>
-                        <div style="font-size:36px; margin:4px 0;">${c.i}</div>
-                        <div style="font-weight:bold; font-size:13px; line-height:1.3;">${c.n}</div>
-                        <div style="font-size:11px; color:var(--muted); line-height:1.4;">${c.d}</div>
-                        ${owned
-                            ? `<button class="btn" disabled style="background:rgba(74,222,128,0.12); color:var(--green); border-color:rgba(74,222,128,0.3); font-size:12px; margin-top:4px;">✓ 已擁有</button>`
-                            : `<button class="btn" ${canAfford ? '' : 'disabled'} onclick="buyCosmetic('${key}')"
-                                style="background:${canAfford ? 'rgba(240,192,64,0.15)' : 'transparent'}; color:${canAfford ? 'var(--gold)' : 'var(--muted)'}; border-color:${canAfford ? 'rgba(240,192,64,0.35)' : 'rgba(255,255,255,0.12)'}; font-size:12px; margin-top:4px;">
-                                🔹 300 碎片</button>`
-                        }
-                    </div>`;
-                }
+                if (c.limited) return;
+                if (c.active === false) return; // 下期造型尚未開放
+                if (byType[c.type]) byType[c.type].push([key, c]);
             });
-            cosmList.innerHTML = cHtml;
+
+            const COSM_PRICE = 300;
+            let cHtml = '';
+            Object.entries(byType).forEach(([type, items]) => {
+                if (!items.length) return;
+                const cards = items.map(([key, c]) => {
+                    const owned = !!myCosmetics[key];
+                    const canAfford = myShards >= COSM_PRICE;
+                    return `<div style="background:rgba(255,255,255,0.03); border:1px solid ${owned ? 'rgba(74,222,128,0.4)' : 'rgba(147,197,253,0.22)'}; border-radius:14px; padding:14px 10px; text-align:center; display:flex; flex-direction:column; gap:5px; align-items:center;">
+                        <div style="font-size:30px; margin:2px 0;">${c.i}</div>
+                        <div style="font-weight:700; font-size:12px; line-height:1.3; color:${owned ? 'var(--muted)' : 'var(--text)'};">${c.n}</div>
+                        <div style="font-size:10px; color:var(--muted); line-height:1.4;">${c.d}</div>
+                        ${owned
+                            ? `<button class="btn" disabled style="background:rgba(74,222,128,0.12); color:var(--green); border-color:rgba(74,222,128,0.3); font-size:11px; padding:5px 10px; margin-top:2px;">✓ 已擁有</button>`
+                            : `<button class="btn" ${canAfford ? '' : 'disabled'} onclick="buyCosmetic('${key}')"
+                                style="background:${canAfford ? 'rgba(240,192,64,0.15)' : 'transparent'}; color:${canAfford ? 'var(--gold)' : 'var(--muted)'}; border-color:${canAfford ? 'rgba(240,192,64,0.35)' : 'rgba(255,255,255,0.12)'}; font-size:11px; padding:5px 10px; margin-top:2px;">
+                                🔹 ${COSM_PRICE} 碎片</button>`
+                        }
+                    </div>`;
+                }).join('');
+                cHtml += `<div style="margin-bottom:16px;">
+                    <div style="font-size:11px; font-weight:700; color:var(--muted); letter-spacing:0.5px; margin-bottom:8px;">${TYPE_LABEL[type]}</div>
+                    <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(130px, 1fr)); gap:10px;">${cards}</div>
+                </div>`;
+            });
+            cosmList.innerHTML = cHtml || `<div style="text-align:center; color:var(--muted); padding:20px; font-size:13px;">暫無常駐造型</div>`;
         }
 
         function buyCosmetic(key) {
@@ -2214,6 +2827,40 @@
         }
 
         // ==========================================
+        // ===== 🎨 獎池選擇 =====
+        function selectPool(type) {
+            selectedPool = type;
+            ['color','effect','cursor'].forEach(t => {
+                const btn = document.getElementById('pool-tab-' + t);
+                if (btn) btn.classList.toggle('active', t === type);
+            });
+            renderPoolPreview();
+            document.getElementById('pity_text').innerText = `${gachaPity}/50`;
+            document.getElementById('pity_bar').style.width = `${(gachaPity/50)*100}%`;
+        }
+
+        function renderPoolPreview() {
+            const el = document.getElementById('pool-preview');
+            if (!el) return;
+            const items = Object.entries(COSMETICS).filter(([, v]) => v.type === selectedPool && v.active !== false);
+            el.innerHTML = items.map(([key, v]) => {
+                const owned = myCosmetics[key];
+                const borderCol = v.limited ? 'rgba(249,168,212,0.3)' : 'rgba(147,197,253,0.3)';
+                const badge = v.limited
+                    ? `<span style="font-size:10px;padding:2px 7px;border-radius:8px;background:rgba(249,168,212,0.12);color:#f9a8d4;border:1px solid rgba(249,168,212,0.3);flex-shrink:0">✦ 限定</span>`
+                    : `<span style="font-size:10px;padding:2px 7px;border-radius:8px;background:rgba(147,197,253,0.12);color:#93c5fd;border:1px solid rgba(147,197,253,0.3);flex-shrink:0">✧ 常駐</span>`;
+                const ownedBadge = owned ? `<span style="font-size:10px;color:var(--muted);flex-shrink:0;margin-left:4px">✓ 已擁有</span>` : '';
+                return `<div class="pool-preview-item" style="border-color:${borderCol};opacity:${owned?0.55:1}">
+                    <span style="font-size:22px">${v.i}</span>
+                    <div style="flex:1;min-width:0;text-align:left">
+                        <div style="font-size:12px;font-weight:700;color:${owned?'var(--muted)':'var(--text)'}">${v.n}</div>
+                        <div style="font-size:11px;color:var(--muted);line-height:1.4">${v.d}</div>
+                    </div>
+                    <div style="display:flex;flex-direction:column;align-items:flex-end;gap:3px">${badge}${ownedBadge}</div>
+                </div>`;
+            }).join('');
+        }
+
         // 🎰 全新幸運轉盤系統 (加權機率 + 獨立獎池 + 保底機制)
         // ==========================================
         
@@ -2256,16 +2903,19 @@
             return { type: 'shard', rarity: 'shard', amount: amt, icon: '🔹', label: `碎片 x${amt}` };
         }
 
-        // 決定抽到哪個造型（套用 50/50，排除已擁有）
-        // 回傳 { cosmKey, isLimited } 或 null（全部已擁有）
-        function pickCosmetic(guaranteedLimited) {
+        // 決定抽到哪個造型（套用 50/50，限定同池類型，排除已擁有）
+        // 回傳 { cosmKey, isLimited } 或 null（該池全擁有）
+        function pickCosmetic(guaranteedLimited, poolType) {
             const isLimited = guaranteedLimited || Math.random() < 0.5;
-            let pool = Object.keys(COSMETICS).filter(k => COSMETICS[k].limited === isLimited && !myCosmetics[k]);
+            let pool = Object.keys(COSMETICS).filter(k =>
+                COSMETICS[k].limited === isLimited && COSMETICS[k].type === poolType && !myCosmetics[k] && COSMETICS[k].active !== false
+            );
             if (pool.length === 0) {
-                // 這池全擁有，嘗試另一池（同時視為歪掉已修正）
-                pool = Object.keys(COSMETICS).filter(k => COSMETICS[k].limited !== isLimited && !myCosmetics[k]);
+                pool = Object.keys(COSMETICS).filter(k =>
+                    COSMETICS[k].limited !== isLimited && COSMETICS[k].type === poolType && !myCosmetics[k] && COSMETICS[k].active !== false
+                );
             }
-            if (pool.length === 0) return null; // 六個造型全擁有
+            if (pool.length === 0) return null; // 該池兩個都已擁有
             const key = pool[Math.floor(Math.random() * pool.length)];
             return { cosmKey: key, isLimited: COSMETICS[key].limited };
         }
@@ -2283,6 +2933,7 @@
         }
 
         function _doTenPull() {
+            const sp = selectedPool;
             let pity = gachaPity;
             let lost5050 = gachaLost5050;
             let results = [];
@@ -2298,10 +2949,10 @@
 
                 if (r.type === 'cosm') {
                     pity = 0;
-                    const picked = pickCosmetic(lost5050);
+                    const picked = pickCosmetic(lost5050, sp);
                     if (!picked) {
-                        // 六個全擁有，改碎片
-                        results.push({ rarity:'shard', type:'shard', amount:5, icon:'🔹', label:'碎片 x5（造型已全收）' });
+                        // 該池已全收（極少情況），補償碎片
+                        results.push({ rarity:'shard', type:'shard', amount:25, icon:'🔹', label:'碎片 x25（造型補償）' });
                     } else {
                         const { cosmKey, isLimited } = picked;
                         lost5050 = !isLimited;
@@ -2530,7 +3181,8 @@
                     tail = "<br>(消耗 8 點)";
                 }
 
-                // 保底計算（免費抽也計入）
+                // 保底計算（免費抽也計入，三池共享）
+                const sp = selectedPool;
                 let newPity = gachaPity + 1;
                 let forceHard = newPity >= 50;
                 if (forceHard) newPity = 0;
@@ -2539,14 +3191,14 @@
                 const result = rollResult(forceHard, false);
 
                 if (result.type === 'cosm') {
-                    const picked = pickCosmetic(gachaLost5050);
+                    const picked = pickCosmetic(gachaLost5050, sp);
                     if (!picked) {
-                        // 六個造型全擁有，改給碎片
-                        db.ref('users/'+ME+'/shards').transaction(c => (c||0) + 5);
+                        // 該池已全收（極少情況），補償碎片
+                        db.ref('users/'+ME+'/shards').transaction(c => (c||0) + 25);
                         db.ref('users/'+ME).update(up);
                         gachaPity = newPity;
-                        logGachaResult('shard', '碎片 x5（造型已全收）', '🔹');
-                        _lotteryModal("🔹 造型全收！", `所有造型已擁有！<br>獲得補償 🔹 造型碎片 ×5${tail}`, true);
+                        logGachaResult('shard', '碎片 x25（造型補償）', '🔹');
+                        _lotteryModal("🔹 造型補償", `此池造型已全收！<br>獲得補償 🔹 造型碎片 ×25${tail}`, true);
                     } else {
                         const { cosmKey, isLimited } = picked;
                         const newLost5050 = !isLimited;
