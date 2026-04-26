@@ -2022,6 +2022,7 @@
                     const pts = m.points || m.amount || 0;
                     if (pts > 0) rwParts.push(`${pts} 點`);
                     if (m.shards > 0) rwParts.push(`🔹 ${m.shards} 碎片`);
+                    if (m.tickets > 0) rwParts.push(`🎟️ 抽獎券 x${m.tickets}`);
                     if (m.items) Object.entries(m.items).forEach(([ik, qty]) => { const it = ITEMS[ik]; if(it) rwParts.push(`${it.i} ${it.n} x${qty}`); });
                     if (m.item && ITEMS[m.item.key]) rwParts.push(`${ITEMS[m.item.key].i} ${ITEMS[m.item.key].n} x${m.item.qty}`);
                     if (m.cosmetics) m.cosmetics.forEach(k => { const c = COSMETICS[k]; if(c) rwParts.push(`🎨 ${c.n}`); });
@@ -2045,6 +2046,7 @@
                     const pts = m.points || m.amount || 0;
                     if (pts > 0) { db.ref('economy/'+ME).transaction(v => (v||0)+pts); logPoints(pts, `📬 信箱領取`); }
                     if (m.shards > 0) db.ref('users/'+ME+'/shards').transaction(v => (v||0)+m.shards);
+                    if (m.tickets > 0) { db.ref('users/'+ME+'/tickets').transaction(v => (v||0)+m.tickets); myTickets += m.tickets; updateTicketUI(); }
                     // new multi-item format
                     if (m.items) Object.entries(m.items).forEach(([k, qty]) => db.ref('users/'+ME+'/items/'+k).transaction(v=>(v||0)+qty));
                     // old single-item format
@@ -2055,6 +2057,7 @@
                     const rwParts = [];
                     if (pts > 0) rwParts.push(`${pts} 點`);
                     if (m.shards > 0) rwParts.push(`🔹 ${m.shards} 碎片`);
+                    if (m.tickets > 0) rwParts.push(`🎟️ 抽獎券 x${m.tickets}`);
                     if (m.items) Object.entries(m.items).forEach(([k,qty])=>{const it=ITEMS[k];if(it)rwParts.push(`${it.n} x${qty}`);});
                     if (m.item && ITEMS[m.item.key]) rwParts.push(`${ITEMS[m.item.key].n} x${m.item.qty}`);
                     if (m.cosmetics) m.cosmetics.forEach(k => { const c = COSMETICS[k]; if(c) rwParts.push(`🎨 ${c.n}`); });
@@ -2800,8 +2803,8 @@
             document.getElementById('galleryList').innerHTML = html;
         }
 
-        // ===== 🏪 黑市新架構：每小時整點刷新，共用庫存 =====
-        let currentMarket = null; // { generatedAt, items:[{key,qty,price}×20] }
+        // ===== 🏪 黑市：每日午夜刷新，共用庫存 =====
+        let currentMarket = null; // { generatedAt, items:[{key,qty,price}×3] }
 
         function getDayStart() {
             const d = new Date(); d.setHours(0, 0, 0, 0); return d.getTime();
@@ -2848,7 +2851,7 @@
         function renderMarket() {
             const quoteEl = document.getElementById('market-quote');
             if (quoteEl && !quoteEl._locked) {
-                const bossQuotes = [...CFG.bossQuotesPersonal, "「機會只有一小時，手別太慢。」", "「道具是投資，不是消費。」"];
+                const bossQuotes = [...CFG.bossQuotesPersonal, "「道具是投資，不是消費。」", "「今日的商品，明日就不在了。」"];
                 quoteEl.innerText = bossQuotes[Math.floor(Math.random() * bossQuotes.length)];
                 quoteEl._locked = true;
             }
@@ -3345,35 +3348,10 @@
             showModalMsg(title, body, isGood);
         }
 
-        function executeLottery(m) {
+        function _doSinglePull(extraUp, tail) {
             try {
-                _showPullAnim();
-                let up = {}, tail = "";
-                if (m === "free") {
-                    up.last_free_lottery = getLocalDateStr(new Date());
-                    tail = "<br>(消耗每日首抽)";
-                } else if (m === "ticket") {
-                    // 扣 1 張抽獎券
-                    if (myTickets < 1) { _hidePullAnim(); return showToast('❌ 抽獎券不足！', 'error'); }
-                    db.ref('users/'+ME+'/tickets').transaction(v => (v&&v>=1) ? v-1 : undefined, (e, com) => {
-                        if (!com) { _hidePullAnim(); return showToast('❌ 抽獎券不足！', 'error'); }
-                    });
-                    myTickets = Math.max(0, myTickets - 1);
-                    updateTicketUI();
-                    tail = "<br>(消耗 1 張抽獎券)";
-                } else {
-                    // 扣 8 點
-                    if (myPoints < 8) { _hidePullAnim(); return showToast('❌ 點數不足 8 點！', 'error'); }
-                    db.ref('economy/'+ME).transaction(v => (v&&v>=8) ? v-8 : undefined, (e, com) => {
-                        if (!com) { _hidePullAnim(); return showToast('❌ 點數不足 8 點！', 'error'); }
-                        logPoints(-8, '🎰 單抽');
-                        trackPointBurnSpend(8);
-                    });
-                    tail = "<br>(消耗 8 點)";
-                }
-
-                // 保底計算（免費抽也計入，三池共享）
                 const sp = selectedPool;
+                let up = { ...extraUp };
                 let newPity = gachaPity + 1;
                 let forceHard = newPity >= 50;
                 if (forceHard) newPity = 0;
@@ -3384,7 +3362,6 @@
                 if (result.type === 'cosm') {
                     const picked = pickCosmetic(gachaLost5050, sp);
                     if (!picked) {
-                        // 該池已全收（極少情況），補償碎片
                         db.ref('users/'+ME+'/shards').transaction(c => (c||0) + 25);
                         db.ref('users/'+ME).update(up);
                         gachaPity = newPity;
@@ -3425,7 +3402,6 @@
                     _lotteryModal("🔹 碎片", `獲得 ${result.amount} 個造型碎片。${tail}`, true);
                 }
 
-                // 更新 pity bar
                 document.getElementById('pity_text').innerText = `${newPity}/50`;
                 document.getElementById('pity_bar').style.width = `${(newPity/50)*100}%`;
 
@@ -3440,6 +3416,29 @@
                 }, 500);
             } catch(err) {
                 _hidePullAnim(); showToast('抽獎發生錯誤，請重試', 'error');
+            }
+        }
+
+        function executeLottery(m) {
+            _showPullAnim();
+            if (m === "free") {
+                _doSinglePull({ last_free_lottery: getLocalDateStr(new Date()) }, "<br>(消耗每日首抽)");
+            } else if (m === "ticket") {
+                if (myTickets < 1) { _hidePullAnim(); return showToast('❌ 抽獎券不足！', 'error'); }
+                db.ref('users/'+ME+'/tickets').transaction(v => (v&&v>=1) ? v-1 : undefined, (e, com) => {
+                    if (!com) { _hidePullAnim(); return showToast('❌ 抽獎券不足！', 'error'); }
+                    myTickets = Math.max(0, myTickets - 1);
+                    updateTicketUI();
+                    _doSinglePull({}, "<br>(消耗 1 張抽獎券)");
+                });
+            } else {
+                if (myPoints < 8) { _hidePullAnim(); return showToast('❌ 點數不足 8 點！', 'error'); }
+                db.ref('economy/'+ME).transaction(v => (v&&v>=8) ? v-8 : undefined, (e, com) => {
+                    if (!com) { _hidePullAnim(); return showToast('❌ 點數不足 8 點！', 'error'); }
+                    logPoints(-8, '🎰 單抽');
+                    trackPointBurnSpend(8);
+                    _doSinglePull({}, "<br>(消耗 8 點)");
+                });
             }
         }
 
@@ -3642,6 +3641,7 @@
                             if(rw.points){ db.ref('economy/'+ME).transaction(v=>(v||0)+rw.points); logPoints(rw.points, '🎁 序號兌換'); mt+=`💰 獲得 ${rw.points} 點<br>`; }
                             if(rw.items){ Object.keys(rw.items).forEach(k=>{ let q=rw.items[k]; db.ref('users/'+ME+'/items/'+k).transaction(v=>(v||0)+q); mt+=`🎁 獲得【${ITEMS[k]?ITEMS[k].n:k}】x${q}<br>`; }); }
                             if(rw.shards){ db.ref('users/'+ME+'/shards').transaction(v=>(v||0)+rw.shards); mt+=`🔹 獲得 造型碎片 x${rw.shards}<br>`; }
+                            if(rw.tickets){ db.ref('users/'+ME+'/tickets').transaction(v=>(v||0)+rw.tickets); myTickets+=rw.tickets; updateTicketUI(); mt+=`🎟️ 獲得 抽獎券 x${rw.tickets}<br>`; }
                             if(rw.cosmetics){ rw.cosmetics.forEach(k=>{ db.ref('users/'+ME+'/cosmetics/'+k).set(true); const c=COSMETICS[k]; if(c) mt+=`🎨 解鎖【${c.n}】<br>`; }); }
                         }
                         playSound('success'); confetti({particleCount:150, spread:80, origin:{y:0.6}}); showModalMsg("🎉 兌換成功", mt, true);

@@ -272,7 +272,7 @@
                     <div class="target-btn" data-target="both" onclick="selectTarget('reward', this)">👥 兩人</div>
                 </div>
             </div>
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+            <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px;">
                 <div>
                     <label>💰 點數</label>
                     <input type="number" id="reward-points" placeholder="0" min="0" max="9999" value="0">
@@ -280,6 +280,10 @@
                 <div>
                     <label>🔹 造型碎片</label>
                     <input type="number" id="reward-shards" placeholder="0" min="0" max="9999" value="0">
+                </div>
+                <div>
+                    <label>🎟️ 抽獎券</label>
+                    <input type="number" id="reward-tickets" placeholder="0" min="0" max="99" value="0">
                 </div>
             </div>
             <div>
@@ -317,7 +321,7 @@
                     <button class="btn btn-sm" onclick="genCode()" style="white-space:nowrap;">🎲 隨機</button>
                 </div>
             </div>
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+            <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px;">
                 <div>
                     <label>💰 點數</label>
                     <input type="number" id="code-points" placeholder="0" min="0" max="9999" value="0">
@@ -325,6 +329,10 @@
                 <div>
                     <label>🔹 造型碎片</label>
                     <input type="number" id="code-shards" placeholder="0" min="0" max="9999" value="0">
+                </div>
+                <div>
+                    <label>🎟️ 抽獎券</label>
+                    <input type="number" id="code-tickets" placeholder="0" min="0" max="99" value="0">
                 </div>
             </div>
             <div style="display:flex; flex-direction:column; gap:10px;">
@@ -515,10 +523,11 @@
     }
 
     // ===== 發放獎勵 =====
-    function buildRewardMsg(pts, shards, items, cosms) {
+    function buildRewardMsg(pts, shards, tickets, items, cosms) {
         const parts = [];
         if (pts > 0) parts.push(`${pts} 點`);
         if (shards > 0) parts.push(`${shards} 碎片`);
+        if (tickets > 0) parts.push(`🎟️ 抽獎券 x${tickets}`);
         Object.entries(items).forEach(([k, qty]) => { const it = ITEMS[k]; if (it) parts.push(`${it.i}${it.n} x${qty}`); });
         if (cosms && cosms.length) cosms.forEach(k => { const c = COSMETICS[k]; if (c) parts.push(`🎨${c.n}`); });
         return '管理員發放：' + (parts.join('、') || '（空）');
@@ -527,19 +536,21 @@
     function sendReward() {
         const pts = parseInt(document.getElementById('reward-points').value) || 0;
         const shards = parseInt(document.getElementById('reward-shards').value) || 0;
+        const tickets = parseInt(document.getElementById('reward-tickets').value) || 0;
         const note = document.getElementById('reward-note').value.trim() || '管理員發放';
         const hasItems = Object.keys(carts.mail).length > 0;
         const cosms = [...selectedCosmetics.mail];
-        if (pts === 0 && shards === 0 && !hasItems && cosms.length === 0) return showToast('請至少填入一項內容', 'var(--red)');
+        if (pts === 0 && shards === 0 && tickets === 0 && !hasItems && cosms.length === 0) return showToast('請至少填入一項內容', 'var(--red)');
         const targets = targetState.reward === 'both' ? ['p1', 'p2'] : [targetState.reward];
         const now = Date.now();
-        const mailData = { title: note, msg: buildRewardMsg(pts, shards, carts.mail, cosms), timestamp: now, claimed: false };
+        const mailData = { title: note, msg: buildRewardMsg(pts, shards, tickets, carts.mail, cosms), timestamp: now, claimed: false };
         if (pts > 0) mailData.points = pts;
         if (shards > 0) mailData.shards = shards;
+        if (tickets > 0) mailData.tickets = tickets;
         if (hasItems) mailData.items = { ...carts.mail };
         if (cosms.length) mailData.cosmetics = cosms;
         targets.forEach(p => { db.ref('mailbox/' + p).push(mailData); });
-        showToast(`✅ 已發送：${buildRewardMsg(pts, shards, carts.mail, cosms).replace('管理員發放：', '')}`);
+        showToast(`✅ 已發送：${buildRewardMsg(pts, shards, tickets, carts.mail, cosms).replace('管理員發放：', '')}`);
         carts.mail = {};
         selectedCosmetics.mail.clear();
         renderCart('mail');
@@ -547,6 +558,7 @@
         renderCosmGrid('mail-cosm-grid');
         document.getElementById('reward-points').value = '0';
         document.getElementById('reward-shards').value = '0';
+        document.getElementById('reward-tickets').value = '0';
         document.getElementById('reward-note').value = '';
     }
 
@@ -564,17 +576,20 @@
         const maxUses = parseInt(document.getElementById('code-max-uses').value) || 0;
         const pts = parseInt(document.getElementById('code-points').value) || 0;
         const shards = parseInt(document.getElementById('code-shards').value) || 0;
+        const tickets = parseInt(document.getElementById('code-tickets').value) || 0;
         const hasItems = Object.keys(carts.code).length > 0;
-        if (pts === 0 && shards === 0 && !hasItems) return showToast('請至少填入一項內容', 'var(--red)');
+        if (pts === 0 && shards === 0 && tickets === 0 && !hasItems) return showToast('請至少填入一項內容', 'var(--red)');
         const reward = {};
         if (pts > 0) reward.points = pts;
         if (shards > 0) reward.shards = shards;
+        if (tickets > 0) reward.tickets = tickets;
         if (hasItems) reward.items = { ...carts.code };
         db.ref('gift_codes/' + key).set({ reward, max_uses: maxUses, used_count: 0, created: Date.now() });
         showToast(`✅ 序號 ${key} 已建立！`);
         document.getElementById('code-key').value = '';
         document.getElementById('code-points').value = '0';
         document.getElementById('code-shards').value = '0';
+        document.getElementById('code-tickets').value = '0';
         carts.code = {};
         renderCart('code');
         renderItemGridCart('code-item-grid', 'code');
@@ -597,6 +612,7 @@
             const parts = [];
             if (rw.points) parts.push(`💰 ${rw.points} 點`);
             if (rw.shards) parts.push(`🔹 ${rw.shards} 碎片`);
+            if (rw.tickets) parts.push(`🎟️ 抽獎券 x${rw.tickets}`);
             if (rw.items) Object.entries(rw.items).forEach(([ik, qty]) => { const it = ITEMS[ik]; parts.push(it ? `${it.i}${it.n} x${qty}` : `? x${qty}`); });
             // backward compat for old format
             if (!parts.length && rw.amount) parts.push(`💰 ${rw.amount} 點`);
@@ -641,6 +657,8 @@
                 const timeStr = `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
                 const rwParts = [];
                 if (m.points || m.amount) rwParts.push(`💰 ${m.points || m.amount} 點`);
+                if (m.shards > 0) rwParts.push(`🔹 ${m.shards} 碎片`);
+                if (m.tickets > 0) rwParts.push(`🎟️ 抽獎券 x${m.tickets}`);
                 if (m.items) Object.entries(m.items).forEach(([ik, qty]) => { const it = ITEMS[ik]; rwParts.push(it ? `${it.i}${it.n} x${qty}` : `? x${qty}`); });
                 if (m.item) { const it = ITEMS[m.item.key]; rwParts.push(it ? `${it.i}${it.n} x${m.item.qty}` : `? x${m.item.qty}`); }
                 const rewardText = rwParts.join('＋') || '未知獎勵';
