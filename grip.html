@@ -4,6 +4,38 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>握力日記</title>
+    <!--
+    ╔══════════════════════════════════════════╗
+    ║           握力日記  CHANGELOG            ║
+    ╠══════════════════════════════════════════╣
+    ║ v1.3  2026-04-27                         ║
+    ║   • 近期紀錄改為可展開 accordion         ║
+    ║   • 握力趨勢獨立彈出大視窗               ║
+    ║   • 圖表支援點擊節點顯示 tooltip         ║
+    ║   • 圖表加漸層面積填色 + 橫向格線        ║
+    ║   • PR 破紀錄當天金色光暈動畫            ║
+    ║   • 左右手 PR 分開追蹤，起算日 4/16      ║
+    ║   • 狀態卡雙手並排色塊顯示               ║
+    ║   • 統計格改為 2×2（左/右手 PR + 均值）  ║
+    ║   • Bug：isLegacy 誤判、圖表 0 值渲染    ║
+    ║         個人紀錄浮點數顯示問題 修復      ║
+    ╠══════════════════════════════════════════╣
+    ║ v1.2  —                                  ║
+    ║   • 統計頁數據分析（7日均、30日均、PR）  ║
+    ║   • 連續疲勞警告                         ║
+    ║   • 30日走勢折線圖                       ║
+    ╠══════════════════════════════════════════╣
+    ║ v1.1  —                                  ║
+    ║   • 左右手分開輸入與記錄                 ║
+    ║   • 舊版單值格式向下相容                 ║
+    ║   • 修改歷史紀錄功能                     ║
+    ╠══════════════════════════════════════════╣
+    ║ v1.0  —                                  ║
+    ║   • 初始版本，基礎握力記錄               ║
+    ║   • 至凱 / 柏致雙帳號                   ║
+    ║   • Firebase 即時同步                    ║
+    ╚══════════════════════════════════════════╝
+    -->
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
     <style>
@@ -385,7 +417,7 @@
         /* ── Stats Row ── */
         .stats-row {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(2, 1fr);
             gap: 10px;
         }
 
@@ -602,6 +634,169 @@
         .modal-btn-cancel:hover { color: var(--text); }
         .modal-btn-confirm { background: var(--accent); color: #fff; }
         .modal-btn-confirm:hover { background: var(--accent-lt); }
+
+        /* ── PR Glow ── */
+        @keyframes pr-glow {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(200,164,74,0); border-color: var(--border); }
+            50%       { box-shadow: 0 0 22px 5px rgba(200,164,74,0.28); border-color: rgba(200,164,74,0.55); }
+        }
+
+        .stat-box.pr-today {
+            animation: pr-glow 2.4s ease-in-out infinite;
+            background: rgba(200,164,74,0.07);
+        }
+
+        .stat-box.pr-today .stat-val { color: var(--yellow); }
+
+        /* ── Hand Chips ── */
+        .hand-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-top: 14px;
+        }
+
+        .hand-chip {
+            border-radius: 14px;
+            padding: 11px 14px;
+            text-align: center;
+        }
+
+        .hand-chip-l {
+            background: rgba(90,200,250,0.07);
+            border: 1px solid rgba(90,200,250,0.22);
+        }
+
+        .hand-chip-r {
+            background: rgba(255,140,0,0.08);
+            border: 1px solid rgba(255,140,0,0.22);
+        }
+
+        .hand-chip-label {
+            font-size: 11px;
+            color: var(--text2);
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .hand-chip-val {
+            font-size: 22px;
+            font-weight: 900;
+            letter-spacing: -0.5px;
+            line-height: 1;
+        }
+
+        .hand-chip-l .hand-chip-val { color: #5AC8FA; }
+        .hand-chip-r .hand-chip-val { color: #FF8C00; }
+
+        .hand-chip-unit {
+            font-size: 12px;
+            font-weight: 400;
+            color: var(--text2);
+            margin-left: 2px;
+        }
+
+        /* ── Records hover ── */
+        .rec-row { transition: background 0.15s; border-radius: 12px; margin: 0 -8px; padding: 12px 8px; }
+        .rec-row:hover { background: var(--card2); }
+
+        /* ── Accordion ── */
+        .accordion-card {
+            background: var(--card);
+            border-radius: 22px;
+            border: 1px solid var(--border);
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        .accordion-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 20px;
+            cursor: pointer;
+            user-select: none;
+            transition: background 0.15s;
+        }
+        .accordion-head:hover { background: var(--card2); }
+        .accordion-head-title { font-size: 13px; font-weight: 700; }
+        .accordion-arrow {
+            font-size: 13px;
+            color: var(--text2);
+            transition: transform 0.25s;
+        }
+        .accordion-arrow.open { transform: rotate(180deg); }
+        .accordion-body { max-height: 0; overflow: hidden; transition: max-height 0.32s ease; }
+        .accordion-body.open { max-height: 1000px; }
+
+        /* ── Expand chart button ── */
+        .expand-chart-btn {
+            background: var(--card2);
+            border: 1px solid var(--border);
+            border-radius: 100px;
+            padding: 5px 12px;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text2);
+            cursor: pointer;
+            transition: all 0.15s;
+            white-space: nowrap;
+        }
+        .expand-chart-btn:hover { border-color: var(--accent); color: var(--text); }
+
+        /* ── Chart Modal ── */
+        .chart-modal {
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.72);
+            backdrop-filter: blur(6px);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 900; padding: 16px;
+            opacity: 0; pointer-events: none; transition: opacity 0.22s;
+        }
+        .chart-modal.show { opacity: 1; pointer-events: all; }
+        .chart-modal-box {
+            background: var(--card);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 26px;
+            padding: 24px 20px 20px;
+            width: 100%; max-width: 520px;
+            transform: translateY(20px); transition: transform 0.25s;
+        }
+        .chart-modal.show .chart-modal-box { transform: translateY(0); }
+        .chart-modal-head {
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 14px;
+        }
+        .chart-modal-title { font-size: 17px; font-weight: 900; }
+        .chart-close-btn {
+            background: var(--card2); border: 1px solid var(--border);
+            border-radius: 100px; padding: 7px 16px;
+            font-size: 13px; font-weight: 600; color: var(--text2);
+            cursor: pointer; transition: all 0.15s;
+        }
+        .chart-close-btn:hover { border-color: var(--accent); color: var(--text); }
+        .chart-modal-legend {
+            display: flex; gap: 14px; font-size: 11px; color: var(--text2);
+            align-items: center; margin-bottom: 14px; flex-wrap: wrap;
+        }
+        .chart-modal-svg-wrap { position: relative; width: 100%; }
+
+        /* ── Chart Tooltip ── */
+        #chart-tt {
+            position: absolute;
+            background: var(--card2);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 8px 14px;
+            font-size: 12px;
+            pointer-events: none;
+            display: none;
+            transform: translateX(-50%);
+            white-space: nowrap;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.45);
+            z-index: 10;
+        }
+        .tt-date { font-size: 11px; color: var(--text2); font-weight: 600; margin-bottom: 5px; }
+        .tt-rows { display: flex; gap: 10px; align-items: center; }
     </style>
 </head>
 <body>
@@ -612,6 +807,7 @@
         <span class="logo-icon">🤜</span>
         <div class="logo-title">握力日記</div>
         <div class="logo-sub">記錄每日握力，見證你的進步</div>
+        <div style="margin-top:8px;font-size:11px;color:var(--text3);font-weight:600;letter-spacing:0.5px">v1.3</div>
     </div>
     <div class="user-cards">
         <div class="user-card" onclick="selectUser('p1')">
@@ -684,10 +880,15 @@
         <!-- Stats -->
         <div class="section-label">數據分析</div>
         <div class="stats-row">
-            <div class="stat-box">
-                <div class="stat-val" id="stat-pr">—</div>
-                <div class="stat-name">個人紀錄</div>
-                <div class="stat-extra" id="stat-pr-date"></div>
+            <div class="stat-box" id="stat-box-prl">
+                <div class="stat-val" id="stat-pr-l" style="color:#5AC8FA">—</div>
+                <div class="stat-name">🤜 左手 PR</div>
+                <div class="stat-extra" id="stat-pr-l-date"></div>
+            </div>
+            <div class="stat-box" id="stat-box-prr">
+                <div class="stat-val" id="stat-pr-r" style="color:#FF8C00">—</div>
+                <div class="stat-name">🤛 右手 PR</div>
+                <div class="stat-extra" id="stat-pr-r-date"></div>
             </div>
             <div class="stat-box">
                 <div class="stat-val" id="stat-7avg">—</div>
@@ -715,22 +916,33 @@
         <div class="chart-card">
             <div class="card-head">
                 <div class="card-title">握力趨勢</div>
-                <div class="legend">
-                    <span><span class="leg-line" style="background:#FF8C00"></span>右手</span>
-                    <span><span class="leg-line" style="background:#5AC8FA"></span>左手</span>
-                    <span><span class="leg-dash"></span>7日均</span>
+                <div style="display:flex;align-items:center;gap:10px">
+                    <div class="legend">
+                        <span><span class="leg-line" style="background:#FF8C00"></span>右手</span>
+                        <span><span class="leg-line" style="background:#5AC8FA"></span>左手</span>
+                        <span><span class="leg-dash"></span>7日均</span>
+                    </div>
+                    <button class="expand-chart-btn" onclick="openChartModal()">展開</button>
                 </div>
             </div>
             <svg id="chart-svg" class="chart-svg" viewBox="0 0 520 160"
                  preserveAspectRatio="none" style="height:160px"></svg>
         </div>
 
-        <!-- Recent records -->
-        <div class="section-label">近期紀錄</div>
-        <div class="records-card" id="records-card">
-            <div class="empty-state">
-                <div class="empty-icon">💪</div>
-                <div class="empty-text">開始你的第一次記錄吧！</div>
+        <!-- Recent records accordion -->
+        <div class="accordion-card">
+            <div class="accordion-head" onclick="toggleRecords()">
+                <span class="accordion-head-title">📋 近期紀錄</span>
+                <span class="accordion-arrow" id="records-arrow">▾</span>
+            </div>
+            <div class="accordion-body" id="records-body">
+                <div class="records-card" id="records-card"
+                     style="border-radius:0;border:none;border-top:1px solid var(--border);margin:0">
+                    <div class="empty-state">
+                        <div class="empty-icon">💪</div>
+                        <div class="empty-text">開始你的第一次記錄吧！</div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -768,6 +980,29 @@
     </div>
 </div>
 
+<!-- Chart Modal -->
+<div class="chart-modal" id="chart-modal" onclick="closeChartModal(event)">
+    <div class="chart-modal-box">
+        <div class="chart-modal-head">
+            <div class="chart-modal-title">📈 握力趨勢</div>
+            <button class="chart-close-btn" onclick="closeChartModal()">關閉</button>
+        </div>
+        <div class="chart-modal-legend">
+            <span><span class="leg-line" style="background:#FF8C00"></span>右手</span>
+            <span><span class="leg-line" style="background:#5AC8FA"></span>左手</span>
+            <span><span class="leg-dash"></span>7日均</span>
+        </div>
+        <div class="chart-modal-svg-wrap">
+            <svg id="chart-modal-svg" viewBox="0 0 600 240" preserveAspectRatio="none"
+                 style="height:240px;width:100%;display:block;overflow:visible;cursor:crosshair"></svg>
+            <div id="chart-tt">
+                <div class="tt-date" id="tt-date"></div>
+                <div class="tt-rows" id="tt-rows"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
 // ── Firebase ──────────────────────────────────────────────────────────
 const firebaseConfig = {
@@ -786,6 +1021,9 @@ const db = firebase.database();
 let ME = null;
 let records = {};
 let dbListener = null;
+let _sortedCache = [];
+let _chartModalState = null;
+let _chartTtActiveDate = null;
 
 // ── Helpers ───────────────────────────────────────────────────────────
 function todayStr() {
@@ -815,7 +1053,6 @@ function showToast(msg, dur = 2200) {
 // ── User ──────────────────────────────────────────────────────────────
 function selectUser(player) {
     ME = player;
-    localStorage.setItem('grip_user', player);
     document.getElementById('user-select').style.display = 'none';
     document.getElementById('app').style.display = 'block';
     document.getElementById('tab-bar').classList.add('visible');
@@ -920,6 +1157,7 @@ function rollingAvg7At(sorted, i) {
 // ── Render ────────────────────────────────────────────────────────────
 function render() {
     const sorted = getSorted();
+    _sortedCache = sorted;
     const today = todayStr();
     const todayVal = records[today];
     const hasToday = todayVal != null;
@@ -1012,8 +1250,6 @@ function renderStatusCard(sorted, today, hasToday) {
         return;
     }
 
-    extraEl.innerHTML = '';
-
     const pct  = (status.diff * 100).toFixed(1);
     const sign = status.diff >= 0 ? '+' : '';
 
@@ -1028,31 +1264,68 @@ function renderStatusCard(sorted, today, hasToday) {
     lblEl.textContent   = c.lbl;
     diffEl.textContent  = `${sign}${pct}% vs 7日均線（${status.avg7.toFixed(1)} kg）`;
     diffEl.className    = `status-diff ${c.cls}`;
-    // Show left/right breakdown if different
-    if (todayRec && todayRec.l !== todayRec.r) {
-        extraEl.innerHTML = `<div style="margin-top:10px; font-size:12px; color:var(--text2);">🤜 左手 <strong style="color:var(--text)">${todayRec.l} kg</strong> &nbsp;·&nbsp; 🤛 右手 <strong style="color:var(--text)">${todayRec.r} kg</strong></div>`;
+    const isNewFmt = records[today] !== null && typeof records[today] === 'object';
+    if (todayRec && isNewFmt && todayRec.l > 0 && todayRec.r > 0) {
+        extraEl.innerHTML = `<div class="hand-row">
+            <div class="hand-chip hand-chip-l">
+                <div class="hand-chip-label">🤜 左手</div>
+                <div class="hand-chip-val">${todayRec.l}<span class="hand-chip-unit">kg</span></div>
+            </div>
+            <div class="hand-chip hand-chip-r">
+                <div class="hand-chip-label">🤛 右手</div>
+                <div class="hand-chip-val">${todayRec.r}<span class="hand-chip-unit">kg</span></div>
+            </div>
+        </div>`;
+    } else {
+        extraEl.innerHTML = '';
     }
 }
 
 function renderStats(sorted) {
-    const prEl     = document.getElementById('stat-pr');
-    const prDate   = document.getElementById('stat-pr-date');
+    const prLEl    = document.getElementById('stat-pr-l');
+    const prLDate  = document.getElementById('stat-pr-l-date');
+    const prREl    = document.getElementById('stat-pr-r');
+    const prRDate  = document.getElementById('stat-pr-r-date');
     const avg7El   = document.getElementById('stat-7avg');
     const trendEl  = document.getElementById('stat-trend');
     const avg30El  = document.getElementById('stat-30avg');
     const daysEl   = document.getElementById('stat-days');
 
     if (sorted.length === 0) {
-        [prEl, avg7El, avg30El].forEach(e => e.textContent = '—');
-        prDate.innerHTML = trendEl.innerHTML = daysEl.innerHTML = '';
+        [prLEl, prREl, avg7El, avg30El].forEach(e => e.textContent = '—');
+        prLDate.innerHTML = prRDate.innerHTML = trendEl.innerHTML = daysEl.innerHTML = '';
         return;
     }
 
-    // PR
-    const pr = sorted.reduce((mx, r) => r.value > mx.value ? r : mx, sorted[0]);
-    const isToday = pr.date === todayStr();
-    prEl.textContent = pr.value;
-    prDate.innerHTML = `<span class="tag tag-orange">${isToday ? '今天！' : fmtShort(pr.date)}</span>`;
+    // Separate L / R PRs — only consider records from 4/16 onwards (split-hand tracking start)
+    const today = todayStr();
+    const PR_START = '2026-04-16';
+    const withL = sorted.filter(r => r.l > 0 && r.date >= PR_START);
+    const withR = sorted.filter(r => r.r > 0 && r.date >= PR_START);
+
+    if (withL.length) {
+        const prL = withL.reduce((mx, r) => r.l > mx.l ? r : mx, withL[0]);
+        const isTodayL = prL.date === today;
+        prLEl.textContent = prL.l.toFixed(1);
+        prLDate.innerHTML = isTodayL
+            ? `<span class="tag" style="background:rgba(90,200,250,0.15);color:#5AC8FA">✨ 今天！</span>`
+            : `<span class="tag tag-muted">${fmtShort(prL.date)}</span>`;
+        document.getElementById('stat-box-prl').classList.toggle('pr-today', isTodayL);
+    } else {
+        prLEl.textContent = '—'; prLDate.innerHTML = '';
+    }
+
+    if (withR.length) {
+        const prR = withR.reduce((mx, r) => r.r > mx.r ? r : mx, withR[0]);
+        const isTodayR = prR.date === today;
+        prREl.textContent = prR.r.toFixed(1);
+        prRDate.innerHTML = isTodayR
+            ? `<span class="tag" style="background:rgba(255,140,0,0.15);color:#FF8C00">✨ 今天！</span>`
+            : `<span class="tag tag-muted">${fmtShort(prR.date)}</span>`;
+        document.getElementById('stat-box-prr').classList.toggle('pr-today', isTodayR);
+    } else {
+        prREl.textContent = '—'; prRDate.innerHTML = '';
+    }
 
     // 7-day avg
     const last7 = sorted.slice(-7);
@@ -1087,11 +1360,13 @@ function buildLineSegs(data, xOf, yOf, valFn) {
     const segs = [];
     let cur = [];
     data.forEach((d, i) => {
+        const v = valFn(d);
         if (i > 0 && new Date(d.date) - new Date(data[i-1].date) > GAP_MS) {
             if (cur.length >= 2) segs.push(cur);
             cur = [];
         }
-        cur.push(`${xOf(d.date)},${yOf(valFn(d))}`);
+        if (v > 0) cur.push(`${xOf(d.date)},${yOf(v)}`);
+        else { if (cur.length >= 2) segs.push(cur); cur = []; }
     });
     if (cur.length >= 1) segs.push(cur);
     return segs;
@@ -1163,31 +1438,64 @@ function renderChart(sorted) {
     }).join('');
 
     // Dots for both hands
-    const dotsR = data.map(d => {
+    const dotsR = data.filter(d => d.r > 0).map(d => {
         const isT = d.date === today;
         return `<circle cx="${xOf(d.date)}" cy="${yOf(d.r)}"
             r="${isT ? 5 : 2.5}" fill="#FF8C00"
             stroke="${isT ? '#fff' : 'none'}" stroke-width="${isT ? 1.5 : 0}"/>`;
     }).join('');
-    const dotsL = data.map(d => {
+    const dotsL = data.filter(d => d.l > 0).map(d => {
         const isT = d.date === today;
         return `<circle cx="${xOf(d.date)}" cy="${yOf(d.l)}"
             r="${isT ? 5 : 2.5}" fill="#5AC8FA"
             stroke="${isT ? '#fff' : 'none'}" stroke-width="${isT ? 1.5 : 0}"/>`;
     }).join('');
 
+    const bottomY = PT + cH;
+    const areaR = segsR.map(pts => {
+        if (pts.length < 2) return '';
+        const firstX = parseFloat(pts[0].split(',')[0]);
+        const lastX  = parseFloat(pts[pts.length-1].split(',')[0]);
+        return `<polygon points="${[...pts, `${lastX},${bottomY}`, `${firstX},${bottomY}`].join(' ')}" fill="url(#gradR)"/>`;
+    }).join('');
+    const areaL = segsL.map(pts => {
+        if (pts.length < 2) return '';
+        const firstX = parseFloat(pts[0].split(',')[0]);
+        const lastX  = parseFloat(pts[pts.length-1].split(',')[0]);
+        return `<polygon points="${[...pts, `${lastX},${bottomY}`, `${firstX},${bottomY}`].join(' ')}" fill="url(#gradL)"/>`;
+    }).join('');
+
+    // subtle horizontal grid lines
+    const gridLines = [0.25, 0.5, 0.75].map(f => {
+        const gy = PT + cH * f;
+        return `<line x1="${PL}" y1="${gy}" x2="${W-PR}" y2="${gy}" stroke="#1C1C27" stroke-width="1"/>`;
+    }).join('');
+
     svg.innerHTML = `
-        <line x1="${PL}" y1="${PT}" x2="${PL}" y2="${PT+cH}" stroke="#1C1C27" stroke-width="1"/>
-        <line x1="${PL}" y1="${PT+cH}" x2="${W-PR}" y2="${PT+cH}" stroke="#1C1C27" stroke-width="1"/>
+        <defs>
+            <linearGradient id="gradR" x1="0" y1="${PT}" x2="0" y2="${bottomY}" gradientUnits="userSpaceOnUse">
+                <stop offset="0%"   stop-color="#FF8C00" stop-opacity="0.42"/>
+                <stop offset="100%" stop-color="#FF8C00" stop-opacity="0"/>
+            </linearGradient>
+            <linearGradient id="gradL" x1="0" y1="${PT}" x2="0" y2="${bottomY}" gradientUnits="userSpaceOnUse">
+                <stop offset="0%"   stop-color="#5AC8FA" stop-opacity="0.32"/>
+                <stop offset="100%" stop-color="#5AC8FA" stop-opacity="0"/>
+            </linearGradient>
+        </defs>
+        ${gridLines}
+        <line x1="${PL}" y1="${PT}" x2="${PL}" y2="${bottomY}" stroke="#1C1C27" stroke-width="1"/>
+        <line x1="${PL}" y1="${bottomY}" x2="${W-PR}" y2="${bottomY}" stroke="#1C1C27" stroke-width="1"/>
         ${yLabels}
         ${xLabels}
+        ${areaL}
+        ${areaR}
         ${baseSegs.map(pts =>
             `<polyline points="${pts}" fill="none" stroke="#3A3A52"
                 stroke-width="1.5" stroke-dasharray="5,3"/>`
         ).join('')}
         ${segsL.map(pts =>
             `<polyline points="${pts.join(' ')}" fill="none" stroke="#5AC8FA"
-                stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="0.8"/>`
+                stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="0.85"/>`
         ).join('')}
         ${segsR.map(pts =>
             `<polyline points="${pts.join(' ')}" fill="none" stroke="#FF8C00"
@@ -1215,7 +1523,7 @@ function renderList(sorted) {
     el.innerHTML = recent.map(r => {
         const idx = sorted.findIndex(s => s.date === r.date);
         const isT = r.date === todayStr();
-        const isLegacy = r.l === r.r; // both same → came from single-value legacy
+        const isLegacy = !(records[r.date] !== null && typeof records[r.date] === 'object');
 
         let deltaHTML = '';
         if (idx > 0) {
@@ -1318,6 +1626,176 @@ function submitToday() {
     db.ref(`grip/${ME}/records/${todayStr()}`).set({ l: finalL, r: finalR })
         .then(() => { sfxRecord(); showToast('✅ 今日握力已記錄！'); })
         .catch(() => { sfxError(); showToast('❌ 儲存失敗，請重試'); });
+}
+
+// ── Accordion ─────────────────────────────────────────────────────────
+function toggleRecords() {
+    const body  = document.getElementById('records-body');
+    const arrow = document.getElementById('records-arrow');
+    const open  = body.classList.toggle('open');
+    arrow.classList.toggle('open', open);
+}
+
+// ── Chart Modal ────────────────────────────────────────────────────────
+function openChartModal() {
+    document.getElementById('chart-modal').classList.add('show');
+    renderChartModal(_sortedCache);
+}
+
+function closeChartModal(e) {
+    if (e && e.target !== document.getElementById('chart-modal')) return;
+    document.getElementById('chart-modal').classList.remove('show');
+    document.getElementById('chart-tt').style.display = 'none';
+    _chartTtActiveDate = null;
+}
+
+function renderChartModal(sorted) {
+    const svg = document.getElementById('chart-modal-svg');
+    if (sorted.length < 2) {
+        svg.innerHTML = `<text x="300" y="120" text-anchor="middle" fill="#3A3A45"
+            font-size="14" font-family="-apple-system,sans-serif">需要更多數據（至少 2 筆）</text>`;
+        return;
+    }
+
+    const data  = sorted.slice(-30);
+    const n     = data.length;
+    const today = todayStr();
+    const W = 600, H = 240, PL = 40, PR = 12, PT = 16, PB = 34;
+    const cW = W - PL - PR, cH = H - PT - PB;
+    const bottomY = PT + cH;
+
+    const allVals = data.flatMap(d => [d.l, d.r]).filter(v => v > 0);
+    const minV = Math.min(...allVals), maxV = Math.max(...allVals);
+    const range = maxV - minV || 1;
+
+    const t0 = new Date(data[0].date).getTime();
+    const t1 = new Date(data[n-1].date).getTime();
+    const tSpan = t1 - t0 || 1;
+    const xOf = ds => PL + ((new Date(ds).getTime() - t0) / tSpan) * cW;
+    const yOf = v  => PT + cH - ((v - minV) / range) * cH;
+
+    _chartModalState = { data, xOf, yOf, W, H };
+
+    const segsR = buildLineSegs(data, xOf, yOf, d => d.r);
+    const segsL = buildLineSegs(data, xOf, yOf, d => d.l);
+
+    const mkArea = (segs, grad) => segs.map(pts => {
+        if (pts.length < 2) return '';
+        const fx = parseFloat(pts[0].split(',')[0]);
+        const lx = parseFloat(pts[pts.length-1].split(',')[0]);
+        return `<polygon points="${[...pts,`${lx},${bottomY}`,`${fx},${bottomY}`].join(' ')}" fill="url(#${grad})"/>`;
+    }).join('');
+
+    const GAP_MS = 86400000 * 1.5;
+    const baseSegs = []; let bSeg = [];
+    data.forEach((d, i) => {
+        if (i > 0 && new Date(d.date) - new Date(data[i-1].date) > GAP_MS) {
+            if (bSeg.length >= 2) baseSegs.push(bSeg.join(' ')); bSeg = [];
+        }
+        const gi = sorted.findIndex(r => r.date === d.date);
+        const avg = rollingAvg7At(sorted, gi);
+        if (avg !== null) bSeg.push(`${xOf(d.date)},${yOf(avg)}`);
+        else { if (bSeg.length >= 2) baseSegs.push(bSeg.join(' ')); bSeg = []; }
+    });
+    if (bSeg.length >= 2) baseSegs.push(bSeg.join(' '));
+
+    const gridLines = [0.25, 0.5, 0.75].map(f =>
+        `<line x1="${PL}" y1="${PT + cH*f}" x2="${W-PR}" y2="${PT + cH*f}" stroke="#1C1C27" stroke-width="1"/>`
+    ).join('');
+
+    const yLevels = [0, 0.25, 0.5, 0.75, 1].map(f => minV + range * f);
+    const yLabels = yLevels.map(v =>
+        `<text x="${PL-5}" y="${yOf(v)}" text-anchor="end" dominant-baseline="middle"
+            fill="#3A3A45" font-size="10" font-family="-apple-system,sans-serif">${Math.round(v)}</text>`
+    ).join('');
+
+    const step = Math.max(1, Math.floor(n / 8));
+    const xLabels = data.map((d, i) => {
+        if (i % step !== 0 && i !== n-1) return '';
+        return `<text x="${xOf(d.date)}" y="${H-6}" text-anchor="middle"
+            fill="#3A3A45" font-size="10" font-family="-apple-system,sans-serif">${fmtShort(d.date)}</text>`;
+    }).join('');
+
+    const mkDots = (hand, color) => data.filter(d => d[hand] > 0).map(d => {
+        const isT = d.date === today;
+        return `<circle cx="${xOf(d.date)}" cy="${yOf(d[hand])}"
+            r="${isT ? 6 : 4}" fill="${color}"
+            stroke="${isT ? '#fff' : 'none'}" stroke-width="${isT ? 2 : 0}"/>`;
+    }).join('');
+
+    svg.innerHTML = `
+        <defs>
+            <linearGradient id="mgradR" x1="0" y1="${PT}" x2="0" y2="${bottomY}" gradientUnits="userSpaceOnUse">
+                <stop offset="0%"   stop-color="#FF8C00" stop-opacity="0.42"/>
+                <stop offset="100%" stop-color="#FF8C00" stop-opacity="0"/>
+            </linearGradient>
+            <linearGradient id="mgradL" x1="0" y1="${PT}" x2="0" y2="${bottomY}" gradientUnits="userSpaceOnUse">
+                <stop offset="0%"   stop-color="#5AC8FA" stop-opacity="0.32"/>
+                <stop offset="100%" stop-color="#5AC8FA" stop-opacity="0"/>
+            </linearGradient>
+        </defs>
+        ${gridLines}
+        <line x1="${PL}" y1="${PT}"      x2="${PL}"   y2="${bottomY}" stroke="#1C1C27" stroke-width="1"/>
+        <line x1="${PL}" y1="${bottomY}" x2="${W-PR}" y2="${bottomY}" stroke="#1C1C27" stroke-width="1"/>
+        ${yLabels}${xLabels}
+        ${mkArea(segsL,'mgradL')}${mkArea(segsR,'mgradR')}
+        ${baseSegs.map(p => `<polyline points="${p}" fill="none" stroke="#3A3A52" stroke-width="1.5" stroke-dasharray="5,3"/>`).join('')}
+        ${segsL.map(p => `<polyline points="${p.join(' ')}" fill="none" stroke="#5AC8FA" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.9"/>`).join('')}
+        ${segsR.map(p => `<polyline points="${p.join(' ')}" fill="none" stroke="#FF8C00" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>`).join('')}
+        ${mkDots('l','#5AC8FA')}${mkDots('r','#FF8C00')}
+        <line id="tt-vline" x1="0" y1="${PT}" x2="0" y2="${bottomY}"
+              stroke="rgba(255,255,255,0.15)" stroke-width="1.5" stroke-dasharray="4,3" display="none"/>`;
+
+    // Reset tooltip state on re-render
+    _chartTtActiveDate = null;
+    document.getElementById('chart-tt').style.display = 'none';
+
+    // Interaction handler
+    svg.onclick = svg.ontouchstart = null;
+    function onInteract(clientX) {
+        if (!_chartModalState) return;
+        const { data, xOf, yOf, W, H } = _chartModalState;
+        const rect = svg.getBoundingClientRect();
+        const svgX = (clientX - rect.left) / rect.width * W;
+
+        let closest = null, minD = Infinity;
+        data.forEach(d => { const dx = Math.abs(xOf(d.date) - svgX); if (dx < minD) { minD = dx; closest = d; } });
+        if (!closest) return;
+
+        const tt = document.getElementById('chart-tt');
+        if (_chartTtActiveDate === closest.date) {
+            tt.style.display = 'none';
+            _chartTtActiveDate = null;
+            svg.querySelector('#tt-vline')?.setAttribute('display','none');
+            return;
+        }
+        _chartTtActiveDate = closest.date;
+
+        // Vertical indicator line
+        const vl = svg.querySelector('#tt-vline');
+        if (vl) { vl.setAttribute('x1', xOf(closest.date)); vl.setAttribute('x2', xOf(closest.date)); vl.removeAttribute('display'); }
+
+        // Content
+        const rows = [];
+        if (closest.l > 0) rows.push(`<span style="color:#5AC8FA;font-weight:700">🤜 ${closest.l} kg</span>`);
+        if (closest.r > 0) rows.push(`<span style="color:#FF8C00;font-weight:700">🤛 ${closest.r} kg</span>`);
+        document.getElementById('tt-date').textContent = fmtShort(closest.date);
+        document.getElementById('tt-rows').innerHTML = rows.join('<span style="color:var(--text3);margin:0 4px">·</span>');
+
+        // Position
+        const scaleX = rect.width / W;
+        const scaleY = rect.height / H;
+        const screenX = xOf(closest.date) * scaleX;
+        const minYSvg = Math.min(
+            closest.r > 0 ? yOf(closest.r) : H,
+            closest.l > 0 ? yOf(closest.l) : H
+        );
+        tt.style.display = 'block';
+        tt.style.left = `${Math.max(55, Math.min(rect.width - 55, screenX))}px`;
+        tt.style.top  = `${Math.max(4, minYSvg * scaleY - tt.offsetHeight - 10)}px`;
+    }
+    svg.onclick = e => onInteract(e.clientX);
+    svg.ontouchstart = e => { e.preventDefault(); onInteract(e.touches[0].clientX); };
 }
 
 document.getElementById('grip-input-r').addEventListener('keydown', e => {

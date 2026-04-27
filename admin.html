@@ -696,30 +696,38 @@
         const getLocalDateStr = d => d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
         const today = getLocalDateStr(new Date());
         const NAMES = { p1:'👦🏻 至凱', p2:'👦🏼 柏致' };
-        Promise.all([
+        Promise.allSettled([
             db.ref('economy').once('value'),
             db.ref('users/p1').once('value'),
-            db.ref('users/p2').once('value')
-        ]).then(([econSnap, u1Snap, u2Snap]) => {
-            const econ = econSnap.val() || {};
-            const users = { p1: u1Snap.val()||{}, p2: u2Snap.val()||{} };
+            db.ref('users/p2').once('value'),
+            db.ref('missions/p1').once('value'),
+            db.ref('missions/p2').once('value'),
+            db.ref('dual_exp/p1').once('value'),
+            db.ref('dual_exp/p2').once('value'),
+        ]).then(([econR, u1R, u2R, m1R, m2R, de1R, de2R]) => {
+            const val = r => r.status === 'fulfilled' ? (r.value.val()||{}) : {};
+            const econ = val(econR);
+            const users = { p1: val(u1R), p2: val(u2R) };
+            const missions = { p1: val(m1R), p2: val(m2R) };
+            const dualExp = { p1: val(de1R), p2: val(de2R) };
             grid.innerHTML = ['p1','p2'].map(pid => {
                 const u = users[pid], pts = econ[pid]||0;
-                const streak = u.streak||0, pity = u.gacha_pity||0, energy = u.gacha_energy||0;
+                const streak = u.streak||0, pity = u.gacha_pity||0;
                 const items = u.items||{};
                 const buffs = [];
-                if(u.flex_active) buffs.push('🎫 萬能作息券');
-                if(u.clover_active) buffs.push('🍀 幸運草');
-                if(u.pillow_target) buffs.push('🌙 好夢枕');
-                if(u.free_gacha_active) buffs.push('🎟️ 抽獎券待用');
+                if(u.iron_wall_active) buffs.push('🛡️ 銅牆鐵壁');
+                const de = dualExp[pid];
+                if(de && de.active && de.date === today) buffs.push('💫 雙重體驗');
+                const m = missions[pid];
+                if(m.heart_quest && m.heart_quest.active) buffs.push(`🎯 心之所向 ${m.heart_quest.progress||0}/${m.heart_quest.target||5}`);
+                if(m.point_burn && m.point_burn.active) buffs.push(`🔥 燃燒任務 ${m.point_burn.spent||0}/${m.point_burn.current_target||5}`);
                 const buffHtml = buffs.length
                     ? buffs.map(b=>`<span style="display:inline-block;padding:3px 7px;border-radius:10px;background:rgba(123,156,255,0.12);color:var(--primary);font-size:11px;margin:2px;">${b}</span>`).join('')
                     : '<span style="color:var(--muted);font-size:11px;">無</span>';
-                const rarityCount = {U:0,C:0,R:0,E:0,M:0};
-                Object.entries(items).forEach(([k,qty]) => { const it=ITEMS[k]; if(it&&qty>0) rarityCount[it.r]=(rarityCount[it.r]||0)+qty; });
-                const invHtml = Object.entries(rarityCount).filter(([,v])=>v>0)
-                    .map(([r,v])=>`<span style="font-size:11px;color:var(--muted);margin-right:6px;">${r}×${v}</span>`).join('')
-                    || '<span style="color:var(--muted);font-size:11px;">空</span>';
+                const invParts = Object.entries(items).filter(([k,qty]) => qty>0 && ITEMS[k]).map(([k,qty]) => `${ITEMS[k].i} ${ITEMS[k].n} ×${qty}`);
+                const invHtml = invParts.length
+                    ? invParts.map(s=>`<span style="font-size:11px;color:var(--muted);margin-right:6px;">${s}</span>`).join('')
+                    : '<span style="color:var(--muted);font-size:11px;">空</span>';
                 const checked = u.last_date === today;
                 const badge = checked
                     ? `<span style="font-size:11px;padding:2px 8px;border-radius:8px;background:rgba(74,222,128,0.12);color:var(--green);">💤 已打卡</span>`
@@ -729,15 +737,13 @@
                         <span style="font-weight:bold;font-size:14px;">${NAMES[pid]}</span>${badge}
                     </div>
                     <div style="font-size:26px;font-weight:900;color:var(--primary);margin-bottom:6px;">${pts} 點</div>
-                    <div style="font-size:12px;color:var(--muted);margin-bottom:6px;">🔥 連勝 ${streak} 天　🎟️ 保底 ${pity}/10　⚡ 能量 ${energy}</div>
-                    <div style="font-size:11px;color:var(--muted);font-weight:bold;margin-bottom:3px;">生效道具</div>
+                    <div style="font-size:12px;color:var(--muted);margin-bottom:6px;">🔥 連勝 ${streak} 天 ・ 保底 ${pity}/50 ・ 🔹 ${u.shards||0} 碎片 ・ 🎟️ ${u.tickets||0} 券</div>
+                    <div style="font-size:11px;color:var(--muted);font-weight:bold;margin-bottom:3px;">生效狀態</div>
                     <div style="display:flex;flex-wrap:wrap;gap:2px;margin-bottom:6px;">${buffHtml}</div>
                     <div style="font-size:11px;color:var(--muted);font-weight:bold;margin-bottom:3px;">背包</div>
                     <div>${invHtml}</div>
                 </div>`;
             }).join('');
-        }).catch(err => {
-            grid.innerHTML = `<div style="color:var(--red);font-size:13px;padding:10px;grid-column:1/-1;">載入失敗: ${err.message}</div>`;
         });
     }
 

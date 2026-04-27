@@ -358,9 +358,19 @@
         }
         .cl-item::before { content: '·'; position: absolute; left: 4px; color: var(--muted); }
         .cl-divider { height: 1px; background: rgba(200,160,100,0.14); }
+
+        #bg-canvas {
+            position: fixed;
+            inset: 0;
+            width: 100%; height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+        body > *:not(#bg-canvas):not(.cl-overlay) { position: relative; z-index: 1; }
     </style>
 </head>
 <body>
+<canvas id="bg-canvas"></canvas>
 
     <!-- Header -->
     <div class="header">
@@ -479,9 +489,48 @@
         // 新版本加在陣列最前面，isNew 設 true，其他改 false
         const CHANGELOG = [
             {
+                version: 'v1.3',
+                date: '2026-04-27',
+                isNew: true,
+                groups: [
+                    {
+                        icon: '🤜',
+                        title: '握力日記',
+                        items: [
+                            '左右手 PR 分開追蹤，各自獨立比較最高值，不再以均值計算',
+                            'PR 起算日改為 4/16（左右手分開記錄正式啟用後）',
+                            '破紀錄當天 PR 格子顯示金色光暈動畫',
+                            '統計頁改為 2×2 四格版面（左手 PR、右手 PR、7日均、30日均）',
+                            '狀態卡兩手都有記錄時，顯示藍橘並排色塊',
+                            '握力趨勢新增「展開」按鈕，彈出大視窗（600×240）',
+                            '大視窗圖表支援點擊節點顯示 tooltip（日期＋左右手數值），再點關閉',
+                            '圖表折線下方加半透明漸層填色＋橫向格線',
+                            '近期紀錄改為可展開／收合的 accordion，預設收合',
+                        ]
+                    },
+                    {
+                        icon: '🏠',
+                        title: '首頁',
+                        items: [
+                            '動態星空背景：130 顆緩移閃爍星點、22 顆浮動粒子（漸入漸出生命週期）',
+                            '不定時流星劃過（每 3.5–9 秒隨機），帶漸層尾跡',
+                        ]
+                    },
+                    {
+                        icon: '🐛',
+                        title: 'Bug 修復',
+                        items: [
+                            '握力日記：兩手相同數值被誤判為舊版格式，導致單值顯示',
+                            '握力日記：僅記錄單手時，另一手折線與節點位置錯誤',
+                            '握力日記：個人紀錄偶現浮點數雜訊',
+                        ]
+                    }
+                ]
+            },
+            {
                 version: 'v1.2',
                 date: '2026-04-22',
-                isNew: true,
+                isNew: false,
                 groups: [
                     {
                         icon: '🏠',
@@ -662,6 +711,145 @@
         setInterval(() => ['p1', 'p2'].forEach(_updateHoverPanel), 60000);
 
         initChangelog();
+    </script>
+
+    <script>
+    (function () {
+        const canvas = document.getElementById('bg-canvas');
+        const ctx = canvas.getContext('2d');
+
+        function resize() {
+            canvas.width  = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        resize();
+        window.addEventListener('resize', resize);
+
+        // ── 星點 ──────────────────────────────────────
+        const STAR_COUNT = 130;
+        const stars = Array.from({ length: STAR_COUNT }, () => ({
+            x: Math.random() * window.innerWidth,
+            y: Math.random() * window.innerHeight,
+            r: Math.random() * 1.1 + 0.25,
+            vx: (Math.random() - 0.5) * 0.06,
+            vy: (Math.random() - 0.5) * 0.06,
+            phase: Math.random() * Math.PI * 2,
+            speed: 0.012 + Math.random() * 0.018,
+            base:  0.25 + Math.random() * 0.5,
+        }));
+
+        // ── 浮動粒子 ──────────────────────────────────
+        const COLORS = ['rgba(242,217,138,', 'rgba(200,164,74,', 'rgba(141,200,122,', 'rgba(122,187,200,'];
+        const PART_COUNT = 22;
+        function mkParticle() {
+            return {
+                x: Math.random() * window.innerWidth,
+                y: window.innerHeight + 10,
+                r: 1.2 + Math.random() * 2,
+                vx: (Math.random() - 0.5) * 0.18,
+                vy: -(0.08 + Math.random() * 0.14),
+                alpha: 0,
+                peak: 0.25 + Math.random() * 0.35,
+                life: 0,
+                maxLife: 250 + Math.random() * 350,
+                color: COLORS[Math.floor(Math.random() * COLORS.length)],
+            };
+        }
+        const particles = Array.from({ length: PART_COUNT }, () => {
+            const p = mkParticle();
+            p.y = Math.random() * window.innerHeight;
+            p.life = Math.random() * p.maxLife;
+            p.alpha = p.peak * 0.5;
+            return p;
+        });
+
+        // ── 流星 ──────────────────────────────────────
+        let shooters = [];
+        let nextShoot = 2000 + Math.random() * 4000;
+
+        function spawnShooter() {
+            const angle = (22 + Math.random() * 28) * Math.PI / 180;
+            const spd   = 9 + Math.random() * 7;
+            return {
+                x:    Math.random() * window.innerWidth  * 0.75,
+                y:    Math.random() * window.innerHeight * 0.35,
+                vx:   Math.cos(angle) * spd,
+                vy:   Math.sin(angle) * spd,
+                tail: 90 + Math.random() * 80,
+                life: 0,
+                max:  55 + Math.floor(Math.random() * 20),
+            };
+        }
+
+        // ── 主循環 ────────────────────────────────────
+        let last = 0;
+        function frame(now) {
+            const dt = now - last; last = now;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // 星點
+            for (const s of stars) {
+                s.x += s.vx; s.y += s.vy; s.phase += s.speed;
+                if (s.x < 0) s.x = canvas.width;
+                if (s.x > canvas.width)  s.x = 0;
+                if (s.y < 0) s.y = canvas.height;
+                if (s.y > canvas.height) s.y = 0;
+                const a = s.base * (0.55 + 0.45 * Math.sin(s.phase));
+                ctx.beginPath();
+                ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(242,235,216,${a.toFixed(3)})`;
+                ctx.fill();
+            }
+
+            // 浮動粒子
+            for (let i = 0; i < particles.length; i++) {
+                const p = particles[i];
+                p.x += p.vx; p.y += p.vy; p.life++;
+                const prog = p.life / p.maxLife;
+                p.alpha = prog < 0.15 ? p.peak * (prog / 0.15)
+                        : prog > 0.75 ? p.peak * ((1 - prog) / 0.25)
+                        : p.peak;
+                if (p.life >= p.maxLife) {
+                    particles[i] = mkParticle();
+                    continue;
+                }
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+                ctx.fillStyle = p.color + p.alpha.toFixed(3) + ')';
+                ctx.fill();
+            }
+
+            // 流星計時
+            nextShoot -= dt;
+            if (nextShoot <= 0) {
+                shooters.push(spawnShooter());
+                nextShoot = 3500 + Math.random() * 5500;
+            }
+
+            // 流星繪製
+            shooters = shooters.filter(s => {
+                s.x += s.vx; s.y += s.vy; s.life++;
+                const a = Math.max(0, 1 - s.life / s.max);
+                const spd = Math.hypot(s.vx, s.vy);
+                const tx  = s.x - (s.vx / spd) * s.tail;
+                const ty  = s.y - (s.vy / spd) * s.tail;
+                const g = ctx.createLinearGradient(s.x, s.y, tx, ty);
+                g.addColorStop(0,   `rgba(255,240,200,${a.toFixed(3)})`);
+                g.addColorStop(0.3, `rgba(255,220,160,${(a * 0.5).toFixed(3)})`);
+                g.addColorStop(1,   'rgba(255,220,160,0)');
+                ctx.beginPath();
+                ctx.moveTo(s.x, s.y);
+                ctx.lineTo(tx, ty);
+                ctx.strokeStyle = g;
+                ctx.lineWidth = 1.8;
+                ctx.stroke();
+                return s.life < s.max;
+            });
+
+            requestAnimationFrame(frame);
+        }
+        requestAnimationFrame(frame);
+    })();
     </script>
 </body>
 </html>
