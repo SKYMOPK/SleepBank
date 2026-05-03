@@ -389,10 +389,10 @@
     const COSMETICS = {
         cat_color:    { n: "貓咪萌系・主題色",   i: "🎨", limited: true  },
         cat_effect:   { n: "貓咪萌系・打卡特效", i: "🐱", limited: true  },
-        cat_message:  { n: "貓咪萌系・訊息樣式", i: "💬", limited: true  },
+        cat_cursor:   { n: "貓咪萌系・游標特效", i: "🐾", limited: true  },
         star_color:   { n: "深夜星空・主題色",   i: "🌌", limited: false },
         star_effect:  { n: "深夜星空・打卡特效", i: "🌠", limited: false },
-        star_message: { n: "深夜星空・訊息樣式", i: "🌙", limited: false },
+        star_cursor:  { n: "深夜星空・游標特效", i: "✨", limited: false },
     };
 
     // ===== 工具 =====
@@ -549,17 +549,21 @@
         if (tickets > 0) mailData.tickets = tickets;
         if (hasItems) mailData.items = { ...carts.mail };
         if (cosms.length) mailData.cosmetics = cosms;
-        targets.forEach(p => { db.ref('mailbox/' + p).push(mailData); });
-        showToast(`✅ 已發送：${buildRewardMsg(pts, shards, tickets, carts.mail, cosms).replace('管理員發放：', '')}`);
-        carts.mail = {};
-        selectedCosmetics.mail.clear();
-        renderCart('mail');
-        renderItemGridCart('mail-item-grid', 'mail');
-        renderCosmGrid('mail-cosm-grid');
-        document.getElementById('reward-points').value = '0';
-        document.getElementById('reward-shards').value = '0';
-        document.getElementById('reward-tickets').value = '0';
-        document.getElementById('reward-note').value = '';
+        const rewardText = buildRewardMsg(pts, shards, tickets, carts.mail, cosms).replace('管理員發放：', '');
+        Promise.all(targets.map(p => db.ref('mailbox/' + p).push(mailData)))
+            .then(() => {
+                showToast(`✅ 已發送：${rewardText}`);
+                carts.mail = {};
+                selectedCosmetics.mail.clear();
+                renderCart('mail');
+                renderItemGridCart('mail-item-grid', 'mail');
+                renderCosmGrid('mail-cosm-grid');
+                document.getElementById('reward-points').value = '0';
+                document.getElementById('reward-shards').value = '0';
+                document.getElementById('reward-tickets').value = '0';
+                document.getElementById('reward-note').value = '';
+            })
+            .catch(() => showToast('發送失敗，請檢查網路或 Firebase 權限', 'var(--red)'));
     }
 
     // ===== 序號 =====
@@ -584,15 +588,18 @@
         if (shards > 0) reward.shards = shards;
         if (tickets > 0) reward.tickets = tickets;
         if (hasItems) reward.items = { ...carts.code };
-        db.ref('gift_codes/' + key).set({ reward, max_uses: maxUses, used_count: 0, created: Date.now() });
-        showToast(`✅ 序號 ${key} 已建立！`);
-        document.getElementById('code-key').value = '';
-        document.getElementById('code-points').value = '0';
-        document.getElementById('code-shards').value = '0';
-        document.getElementById('code-tickets').value = '0';
-        carts.code = {};
-        renderCart('code');
-        renderItemGridCart('code-item-grid', 'code');
+        db.ref('gift_codes/' + key).set({ reward, max_uses: maxUses, used_count: 0, created: Date.now() })
+            .then(() => {
+                showToast(`✅ 序號 ${key} 已建立！`);
+                document.getElementById('code-key').value = '';
+                document.getElementById('code-points').value = '0';
+                document.getElementById('code-shards').value = '0';
+                document.getElementById('code-tickets').value = '0';
+                carts.code = {};
+                renderCart('code');
+                renderItemGridCart('code-item-grid', 'code');
+            })
+            .catch(() => showToast('建立序號失敗，請檢查網路或 Firebase 權限', 'var(--red)'));
     }
 
     function deleteCode(key) {

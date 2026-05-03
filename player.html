@@ -2909,8 +2909,8 @@
                         <div style="font-size:10px; color:var(--muted); line-height:1.4;">${c.d}</div>
                         ${owned
                             ? `<button class="btn" disabled style="background:rgba(74,222,128,0.12); color:var(--green); border-color:rgba(74,222,128,0.3); font-size:11px; padding:5px 10px; margin-top:2px;">✓ 已擁有</button>`
-                            : `<button class="btn" ${canAfford ? '' : 'disabled'} onclick="buyCosmetic('${key}')"
-                                style="background:${canAfford ? 'rgba(240,192,64,0.15)' : 'transparent'}; color:${canAfford ? 'var(--gold)' : 'var(--muted)'}; border-color:${canAfford ? 'rgba(240,192,64,0.35)' : 'rgba(255,255,255,0.12)'}; font-size:11px; padding:5px 10px; margin-top:2px;">
+                            : `<button class="btn" onclick="buyCosmetic('${key}')"
+                                style="background:${canAfford ? 'rgba(240,192,64,0.15)' : 'transparent'}; color:${canAfford ? 'var(--gold)' : 'var(--muted)'}; border-color:${canAfford ? 'rgba(240,192,64,0.35)' : 'rgba(255,255,255,0.12)'}; font-size:11px; padding:5px 10px; margin-top:2px; cursor:pointer;">
                                 🔹 ${COSM_PRICE} 碎片</button>`
                         }
                     </div>`;
@@ -3614,7 +3614,24 @@
                 else { showToast("❌ 餘額不足", 'error'); }
             } else {
                 let it = ITEMS[selectedTransferType];
-                if(myInventory[selectedTransferType] >= a) { openConfirmModal("💌 支援道具", `確定要送出 <strong style="color:var(--primary)">${it.n} x${a}</strong> 給${CFG.oppName}嗎？`, ()=>{ db.ref('users/'+ME+'/items/'+selectedTransferType).transaction(v => (v||0) - a); db.ref('mailbox/'+OPP).push({ title:"🎁 收到夥伴道具支援！", msg:`${senderName} 派精靈送來了急救物資，快點收下吧！`, amount:0, item: { key: selectedTransferType, qty: a }, claimed:false, timestamp:Date.now() }); playSound('success'); showToast(`💌 支援成功！已送出 ${it.n} x${a}`); }); }
+                if(myInventory[selectedTransferType] >= a) { openConfirmModal("💌 支援道具", `確定要送出 <strong style="color:var(--primary)">${it.n} x${a}</strong> 給${CFG.oppName}嗎？`, ()=>{
+                    const itemKey = selectedTransferType;
+                    db.ref('users/'+ME+'/items/'+itemKey).transaction(v => {
+                        if ((v||0) < a) return undefined;
+                        return (v||0) - a;
+                    }, (err, committed) => {
+                        if (err || !committed) return showToast("❌ 道具數量不足", 'error');
+                        db.ref('mailbox/'+OPP).push({ title:"🎁 收到夥伴道具支援！", msg:`${senderName} 派精靈送來了急救物資，快點收下吧！`, amount:0, item: { key: itemKey, qty: a }, claimed:false, timestamp:Date.now() })
+                            .then(() => {
+                                playSound('success');
+                                showToast(`💌 支援成功！已送出 ${it.n} x${a}`);
+                            })
+                            .catch(() => {
+                                db.ref('users/'+ME+'/items/'+itemKey).transaction(v => (v||0) + a);
+                                showToast('❌ 支援失敗，已退回道具', 'error');
+                            });
+                    });
+                }); }
                 else { showToast("❌ 道具數量不足", 'error'); }
             }
         }
