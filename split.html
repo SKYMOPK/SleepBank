@@ -100,6 +100,42 @@
             padding: 24px 20px;
         }
         .input-card-title { font-size: 12px; font-weight: bold; color: var(--muted); letter-spacing: 0.5px; margin-bottom: 16px; }
+        .input-card-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
+        .input-card-header .input-card-title { margin-bottom: 0; }
+        .calc-toggle {
+            border: 1px solid rgba(200,164,74,0.22); background: rgba(200,164,74,0.08);
+            color: var(--orange); border-radius: 12px; padding: 8px 11px;
+            font-size: 12px; font-weight: bold; cursor: pointer; transition: all 0.2s;
+        }
+        .calc-toggle:hover, .calc-toggle.active { background: rgba(200,164,74,0.15); border-color: rgba(200,164,74,0.38); }
+        .calc-panel {
+            display: none; margin: -2px 0 14px; padding: 12px;
+            border: 1px solid rgba(200,160,100,0.12); border-radius: 16px;
+            background: rgba(0,0,0,0.16);
+        }
+        .calc-panel.open { display: block; animation: fadeInUp 0.2s ease-out; }
+        .calc-display-row { display: grid; grid-template-columns: 1fr 88px; gap: 8px; }
+        .calc-input, .calc-result {
+            min-width: 0; border: 1px solid rgba(200,160,100,0.12); border-radius: 12px;
+            background: rgba(0,0,0,0.18); color: var(--text); font-weight: bold;
+        }
+        .calc-input { width: 100%; padding: 11px 12px; font-size: 17px; text-align: right; outline: none; }
+        .calc-input:focus { border-color: rgba(200,164,74,0.45); box-shadow: 0 0 0 3px rgba(200,164,74,0.07); }
+        .calc-result { display: flex; align-items: center; justify-content: flex-end; padding: 0 10px; color: var(--orange); font-size: 15px; }
+        .calc-keypad { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 10px; }
+        .calc-key, .calc-fill-btn {
+            border: 1px solid rgba(255,255,255,0.07); background: rgba(255,255,255,0.035);
+            color: var(--text); border-radius: 11px; font-weight: bold; cursor: pointer; transition: all 0.18s;
+        }
+        .calc-key { height: 38px; font-size: 15px; }
+        .calc-key:hover, .calc-fill-btn:hover { background: rgba(255,255,255,0.07); border-color: rgba(255,255,255,0.12); }
+        .calc-key.operator { color: var(--orange); background: rgba(200,164,74,0.08); border-color: rgba(200,164,74,0.18); }
+        .calc-key.muted { color: var(--muted); }
+        .calc-key.equals { color: var(--green); background: rgba(118,166,104,0.08); border-color: rgba(118,166,104,0.18); }
+        .calc-key.wide { grid-column: span 2; }
+        .calc-fill-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
+        .calc-fill-btn { padding: 10px; color: var(--orange); font-size: 13px; }
+        .calc-hint { margin-top: 8px; color: rgba(255,255,255,0.28); font-size: 11px; text-align: center; }
         .amount-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
         .amount-group label { font-size: 12px; color: var(--muted); font-weight: bold; display: block; margin-bottom: 6px; letter-spacing: 0.5px; }
         .amount-input {
@@ -293,7 +329,10 @@
     </div>
 
     <div class="input-card">
-        <div class="input-card-title">＋ 新增帳目</div>
+        <div class="input-card-header">
+            <div class="input-card-title">＋ 新增帳目</div>
+            <button class="calc-toggle" id="calcToggle" type="button" onclick="toggleCalculator()">計算機</button>
+        </div>
         <div class="amount-row">
             <div class="amount-group">
                 <label>至凱買了</label>
@@ -303,6 +342,37 @@
                 <label>柏致買了</label>
                 <input class="amount-input" id="inp_p2" type="number" inputmode="numeric" placeholder="$0" min="0" oninput="updatePreview()">
             </div>
+        </div>
+        <div class="calc-panel" id="calcPanel">
+            <div class="calc-display-row">
+                <input class="calc-input" id="calcExpr" type="text" inputmode="decimal" placeholder="0" oninput="updateCalculator()">
+                <div class="calc-result" id="calcResult">$0</div>
+            </div>
+            <div class="calc-keypad">
+                <button class="calc-key" type="button" onclick="appendCalc('7')">7</button>
+                <button class="calc-key" type="button" onclick="appendCalc('8')">8</button>
+                <button class="calc-key" type="button" onclick="appendCalc('9')">9</button>
+                <button class="calc-key operator" type="button" onclick="appendCalc('÷')">÷</button>
+                <button class="calc-key" type="button" onclick="appendCalc('4')">4</button>
+                <button class="calc-key" type="button" onclick="appendCalc('5')">5</button>
+                <button class="calc-key" type="button" onclick="appendCalc('6')">6</button>
+                <button class="calc-key operator" type="button" onclick="appendCalc('×')">×</button>
+                <button class="calc-key" type="button" onclick="appendCalc('1')">1</button>
+                <button class="calc-key" type="button" onclick="appendCalc('2')">2</button>
+                <button class="calc-key" type="button" onclick="appendCalc('3')">3</button>
+                <button class="calc-key operator" type="button" onclick="appendCalc('-')">−</button>
+                <button class="calc-key" type="button" onclick="appendCalc('0')">0</button>
+                <button class="calc-key" type="button" onclick="appendCalc('.')">.</button>
+                <button class="calc-key muted" type="button" onclick="backspaceCalc()">⌫</button>
+                <button class="calc-key operator" type="button" onclick="appendCalc('+')">+</button>
+                <button class="calc-key muted wide" type="button" onclick="clearCalculator()">C</button>
+                <button class="calc-key equals wide" type="button" onclick="solveCalculator()">=</button>
+            </div>
+            <div class="calc-fill-row">
+                <button class="calc-fill-btn" type="button" onclick="fillCalculatorResult('p1')">填至凱</button>
+                <button class="calc-fill-btn" type="button" onclick="fillCalculatorResult('p2')">填柏致</button>
+            </div>
+            <div class="calc-hint">可直接輸入算式，例如 120+80÷2</div>
         </div>
         <input class="note-input" id="inp_note" type="text" placeholder="備註（店名、說明…）" maxlength="30">
         <div style="font-size:12px; color:var(--muted); font-weight:bold; margin-bottom:8px;">誰代付？</div>
@@ -388,6 +458,7 @@
     let allRecords = {};
     let selectedKeys = new Set();
     let currentView = 'input';
+    let calcValue = 0;
 
     // ===== View 切換 =====
     function handleBack() {
@@ -434,7 +505,7 @@
 
     // 全域按鈕點擊音
     document.addEventListener('click', e => {
-        if (e.target.closest('.submit-btn, .settle-btn, .tab-btn, .payer-btn, .view-records-btn, .confirm-cancel, .header-back'))
+        if (e.target.closest('.submit-btn, .settle-btn, .tab-btn, .payer-btn, .view-records-btn, .confirm-cancel, .header-back, .calc-toggle, .calc-key, .calc-fill-btn'))
             playSound('click');
     });
 
@@ -464,6 +535,132 @@
         if (delta > 0) return `柏致還至凱 $${delta}`;
         if (delta < 0) return `至凱還柏致 $${Math.abs(delta)}`;
         return '不產生欠款';
+    }
+
+    // ===== 小計算機 =====
+    function toggleCalculator() {
+        const panel = document.getElementById('calcPanel');
+        const toggle = document.getElementById('calcToggle');
+        panel.classList.toggle('open');
+        toggle.classList.toggle('active', panel.classList.contains('open'));
+        if (panel.classList.contains('open')) setTimeout(() => document.getElementById('calcExpr').focus(), 80);
+    }
+
+    function appendCalc(value) {
+        const input = document.getElementById('calcExpr');
+        input.value += value;
+        updateCalculator();
+        input.focus();
+    }
+
+    function backspaceCalc() {
+        const input = document.getElementById('calcExpr');
+        input.value = input.value.slice(0, -1);
+        updateCalculator();
+        input.focus();
+    }
+
+    function clearCalculator() {
+        document.getElementById('calcExpr').value = '';
+        calcValue = 0;
+        document.getElementById('calcResult').innerText = '$0';
+    }
+
+    function parseCalcExpression(raw) {
+        const expr = raw.replace(/,/g, '').replace(/×/g, '*').replace(/÷/g, '/').replace(/−/g, '-');
+        let i = 0;
+
+        function skipSpaces() { while (expr[i] === ' ') i++; }
+        function parseNumber() {
+            skipSpaces();
+            const start = i;
+            while (/[0-9.]/.test(expr[i] || '')) i++;
+            if (start === i) throw new Error('number expected');
+            const text = expr.slice(start, i);
+            if ((text.match(/\./g) || []).length > 1) throw new Error('invalid number');
+            return Number(text);
+        }
+        function parseFactor() {
+            skipSpaces();
+            const ch = expr[i];
+            if (ch === '+') { i++; return parseFactor(); }
+            if (ch === '-') { i++; return -parseFactor(); }
+            if (ch === '(') {
+                i++;
+                const value = parseExpression();
+                skipSpaces();
+                if (expr[i] !== ')') throw new Error('missing )');
+                i++;
+                return value;
+            }
+            return parseNumber();
+        }
+        function parseTerm() {
+            let value = parseFactor();
+            while (true) {
+                skipSpaces();
+                const op = expr[i];
+                if (op !== '*' && op !== '/') break;
+                i++;
+                const right = parseFactor();
+                value = op === '*' ? value * right : value / right;
+            }
+            return value;
+        }
+        function parseExpression() {
+            let value = parseTerm();
+            while (true) {
+                skipSpaces();
+                const op = expr[i];
+                if (op !== '+' && op !== '-') break;
+                i++;
+                const right = parseTerm();
+                value = op === '+' ? value + right : value - right;
+            }
+            return value;
+        }
+
+        if (!expr.trim()) return 0;
+        const value = parseExpression();
+        skipSpaces();
+        if (i < expr.length || !Number.isFinite(value)) throw new Error('invalid expression');
+        return value;
+    }
+
+    function formatCalcValue(value) {
+        const rounded = Math.round((value + Number.EPSILON) * 100) / 100;
+        return Number.isInteger(rounded) ? String(rounded) : String(rounded).replace(/(\.\d*?)0+$/, '$1').replace(/\.$/, '');
+    }
+
+    function updateCalculator() {
+        const input = document.getElementById('calcExpr');
+        const result = document.getElementById('calcResult');
+        try {
+            calcValue = parseCalcExpression(input.value);
+            result.innerText = '$' + formatCalcValue(calcValue);
+            result.style.color = calcValue < 0 ? 'var(--red)' : 'var(--orange)';
+            return true;
+        } catch (e) {
+            calcValue = null;
+            result.innerText = '錯誤';
+            result.style.color = 'var(--red)';
+            return false;
+        }
+    }
+
+    function solveCalculator() {
+        if (!updateCalculator()) return showToast('算式有誤', 'var(--red)');
+        document.getElementById('calcExpr').value = formatCalcValue(calcValue);
+        updateCalculator();
+    }
+
+    function fillCalculatorResult(target) {
+        if (!updateCalculator()) return showToast('算式有誤', 'var(--red)');
+        if (calcValue < 0) return showToast('金額不能是負數', 'var(--red)');
+        const input = document.getElementById(target === 'p1' ? 'inp_p1' : 'inp_p2');
+        input.value = formatCalcValue(calcValue);
+        updatePreview();
+        showToast(target === 'p1' ? '已填入至凱金額' : '已填入柏致金額');
     }
 
     // ===== 輸入頁 =====

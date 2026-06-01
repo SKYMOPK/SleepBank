@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
@@ -598,6 +598,55 @@
         body.theme-matcha .sidebar { background: rgba(3,8,5,0.97); border-right-color: rgba(74,222,128,0.18); }
         body.theme-matcha .nav-item.active { background: rgba(74,222,128,0.12); border-color: rgba(74,222,128,0.38); color: #4ade80; }
 
+        /* ── 造型主題：王棋對弈（預備）── */
+        body.theme-chess {
+            --primary: #E7C777; --gold: #F6E7B4; --green: #B8D8A8;
+            --border: rgba(231,199,119,0.28);
+            background:
+                linear-gradient(45deg, rgba(255,255,255,0.035) 25%, transparent 25%, transparent 75%, rgba(255,255,255,0.035) 75%),
+                linear-gradient(45deg, rgba(255,255,255,0.035) 25%, transparent 25%, transparent 75%, rgba(255,255,255,0.035) 75%),
+                radial-gradient(ellipse at 18% 18%, rgba(246,231,180,0.14) 0%, transparent 36%),
+                radial-gradient(ellipse at 84% 82%, rgba(120,80,35,0.28) 0%, transparent 44%),
+                linear-gradient(145deg, #070604 0%, #17120B 38%, #0C0906 68%, #24180B 100%);
+            background-position: 0 0, 18px 18px, 0 0, 0 0, 0 0;
+            background-size: 36px 36px, 36px 36px, auto, auto, auto;
+        }
+        body.theme-chess .app-title {
+            background: linear-gradient(90deg, #f8efd0, #c99b42, #fff8dc, #8a6428, #f8efd0);
+            background-size: 320% 100%;
+            -webkit-background-clip: text; color: transparent;
+            animation: catTitleShimmer 4.8s linear infinite;
+        }
+        body.theme-chess .card { border-color: rgba(231,199,119,0.22); background: rgba(18,13,8,0.76); }
+        body.theme-chess .card:hover { box-shadow: 0 16px 48px rgba(0,0,0,0.68), 0 0 24px rgba(231,199,119,0.13); }
+        body.theme-chess .sidebar { background: rgba(8,6,4,0.98); border-right-color: rgba(231,199,119,0.22); }
+        body.theme-chess .nav-item.active { background: rgba(231,199,119,0.13); border-color: rgba(231,199,119,0.42); color: #f6e7b4; }
+
+        /* ── 造型主題：霧雨玻璃（常駐預備）── */
+        body.theme-rain {
+            --primary: #8FD3E8; --gold: #C7EAF4; --green: #9DE0C2;
+            --border: rgba(143,211,232,0.24);
+            background:
+                linear-gradient(115deg, rgba(255,255,255,0.045) 0 1px, transparent 1px 24px),
+                radial-gradient(ellipse at 22% 18%, rgba(143,211,232,0.20) 0%, transparent 40%),
+                radial-gradient(ellipse at 78% 86%, rgba(65,120,145,0.26) 0%, transparent 46%),
+                linear-gradient(145deg, #061016 0%, #102632 42%, #07131A 70%, #183445 100%);
+        }
+        body.theme-rain .app-title {
+            background: linear-gradient(90deg, #d8f7ff, #8fd3e8, #ffffff, #6fb7cf, #d8f7ff);
+            background-size: 320% 100%;
+            -webkit-background-clip: text; color: transparent;
+            animation: catTitleShimmer 5.5s linear infinite;
+        }
+        body.theme-rain .card {
+            border-color: rgba(143,211,232,0.20);
+            background: rgba(8,22,30,0.68);
+            backdrop-filter: blur(22px);
+        }
+        body.theme-rain .card:hover { box-shadow: 0 16px 48px rgba(0,0,0,0.62), 0 0 24px rgba(143,211,232,0.12); }
+        body.theme-rain .sidebar { background: rgba(4,12,18,0.97); border-right-color: rgba(143,211,232,0.18); }
+        body.theme-rain .nav-item.active { background: rgba(143,211,232,0.12); border-color: rgba(143,211,232,0.36); color: #c7eaf4; }
+
         /* ── 打卡特效覆蓋層 ── */
         #effect-overlay { position:fixed; inset:0; pointer-events:none; z-index:9000; overflow:hidden; }
 
@@ -984,56 +1033,308 @@
             font-size: 16px; opacity: 0.85;
         }
 
-        /* ── 打卡特效：雷霆閃電條 ── */
-        .lightning-bolt {
-            position: absolute; top: -2%; pointer-events: none; z-index: 9001;
-            width: 72px; height: 290px;
-            clip-path: polygon(62% 0%,100% 0%,42% 52%,78% 52%,18% 100%,0% 100%,58% 48%,22% 48%);
-            background: linear-gradient(to bottom, rgba(255,255,255,1.0), rgba(230,210,255,0.95), rgba(167,139,250,0.85), rgba(124,58,237,0.65));
-            box-shadow: 0 0 28px rgba(255,255,255,0.6), 0 0 50px rgba(167,139,250,0.9), 0 0 90px rgba(124,58,237,0.5);
-            animation: lightningStrike 0.62s ease-out forwards;
+        /* ── 訊息樣式：王棋對弈（預備）── */
+        body.msg-chess .toast {
+            background: rgba(10,7,4,0.98) !important;
+            border: 1px solid rgba(231,199,119,0.36) !important;
+            border-left: 4px solid #E7C777 !important;
+            border-radius: 12px !important;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.38), 0 0 18px rgba(231,199,119,0.13) !important;
         }
-        .lightning-bolt-thin {
-            position: absolute; top: -2%; pointer-events: none; z-index: 9001;
-            width: 42px; height: 230px;
-            clip-path: polygon(58% 0%,100% 0%,46% 50%,80% 50%,22% 100%,0% 100%,54% 50%,18% 50%);
-            background: linear-gradient(to bottom, rgba(255,255,255,0.9), rgba(196,181,253,0.8), rgba(109,40,217,0.5));
-            box-shadow: 0 0 16px rgba(196,181,253,0.8), 0 0 40px rgba(124,58,237,0.4);
-            animation: lightningStrike 0.5s ease-out forwards;
+        body.msg-chess .toast::before {
+            content: '';
+            position: absolute; inset: 0; pointer-events: none;
+            background: linear-gradient(45deg, rgba(246,231,180,0.05) 25%, transparent 25%, transparent 75%, rgba(246,231,180,0.05) 75%);
+            background-size: 18px 18px;
         }
-        @keyframes lightningStrike {
-            0%   { opacity:0; transform:scaleY(0); transform-origin:top center; }
-            5%   { opacity:1; transform:scaleY(1); }
-            60%  { opacity:0.9; }
-            100% { opacity:0; }
+        body.msg-chess .toast::after {
+            content: '♚'; position: absolute; top: 7px; right: 13px;
+            font-size: 18px; color: #f6e7b4; opacity: 0.9;
         }
-        /* 雷霆衝擊波 */
+
+        /* ── 訊息樣式：霧雨玻璃（常駐預備）── */
+        body.msg-rain .toast {
+            background: rgba(5,18,26,0.94) !important;
+            border: 1px solid rgba(143,211,232,0.34) !important;
+            border-left: 4px solid #8FD3E8 !important;
+            border-radius: 15px !important;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.34), 0 0 18px rgba(143,211,232,0.13) !important;
+            backdrop-filter: blur(18px) !important;
+        }
+        body.msg-rain .toast::before {
+            content: '';
+            position: absolute; inset: 0; pointer-events: none;
+            background: linear-gradient(120deg, transparent 0%, rgba(255,255,255,0.06) 42%, transparent 70%);
+        }
+        body.msg-rain .toast::after {
+            content: '◌'; position: absolute; top: 6px; right: 13px;
+            font-size: 19px; color: #c7eaf4; opacity: 0.86;
+        }
+
+        /* ── 打卡特效：雷霆（積雨雲層 + SVG 閃電描繪）── */
+        .thunder-canopy-wrap {
+            position: fixed;
+            left: 50%;
+            top: -1vh;
+            width: min(112vw, 680px);
+            height: clamp(72px, 19vh, 168px);
+            transform: translateX(-50%);
+            pointer-events: none;
+            z-index: 9001;
+            overflow: hidden;
+            border-radius: 50% 50% 36% 36% / 38% 38% 62% 62%;
+            animation: thunderCanopyDrift 2.5s ease-out forwards;
+        }
+        @keyframes thunderCanopyDrift {
+            0%   { transform: translateX(-50%) translateY(-24px) scaleX(0.9); }
+            16%  { transform: translateX(-50%) translateY(0) scaleX(1); }
+            68%  { transform: translateX(-50%) translateY(0) scaleX(1); }
+            100% { transform: translateX(-50%) translateY(-8px) scaleX(0.97); }
+        }
+        .thunder-canopy {
+            position: absolute;
+            inset: 0;
+            overflow: visible;
+        }
+        .thunder-canopy-slab {
+            position: absolute;
+            left: 50%;
+            top: 18%;
+            transform: translateX(-50%);
+            width: 96%;
+            height: 62%;
+            border-radius: 50% 50% 40% 40% / 44% 44% 56% 56%;
+            opacity: 0;
+            background: linear-gradient(180deg,
+                rgba(45,14,92,0.92) 0%,
+                rgba(67,24,132,0.88) 45%,
+                rgba(28,8,58,0.98) 100%);
+            box-shadow:
+                0 18px 52px rgba(0,0,0,0.55),
+                0 0 36px rgba(124,58,237,0.22),
+                inset 0 -16px 36px rgba(0,0,0,0.4),
+                inset 0 4px 18px rgba(124,58,237,0.12);
+            animation: thunderSlabLife 2.5s ease-out forwards;
+        }
+        @keyframes thunderSlabLife {
+            0%   { opacity: 0; transform: translateX(-50%) scaleY(0.88); }
+            18%  { opacity: 1; transform: translateX(-50%) scaleY(1); }
+            68%  { opacity: 1; }
+            100% { opacity: 0; transform: translateX(-50%) scaleY(0.96); }
+        }
+        .thunder-canopy-slab::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            background: radial-gradient(ellipse at 50% 55%, rgba(233,213,255,0.22) 0%, transparent 68%);
+            opacity: 0;
+            pointer-events: none;
+        }
+        .thunder-canopy-slab.flash-hit::after {
+            animation: thunderCanopyFlash 0.1s ease-out forwards;
+        }
+        @keyframes thunderCanopyFlash {
+            0%   { opacity: 0; }
+            40%  { opacity: 0.85; }
+            100% { opacity: 0; }
+        }
+        .thunder-canopy-rim {
+            position: absolute;
+            left: 12%;
+            right: 12%;
+            bottom: 10%;
+            height: 20%;
+            border-radius: 50%;
+            background: radial-gradient(ellipse at 50% 100%,
+                rgba(167,139,250,0.28) 0%,
+                rgba(124,58,237,0.12) 40%,
+                transparent 72%);
+            opacity: 0;
+            animation: thunderRimPulse 0.2s ease-in-out 0.42s 4;
+        }
+        @keyframes thunderRimPulse {
+            0%, 100% { opacity: 0.35; }
+            50%      { opacity: 0.75; }
+        }
+        .thunder-strike-wrap {
+            position: fixed;
+            left: 50%;
+            top: clamp(52px, 14vh, 128px);
+            width: min(26vw, 132px);
+            height: min(58vh, 440px);
+            transform: translateX(-50%);
+            pointer-events: none;
+            z-index: 9003;
+            opacity: 0;
+        }
+        .thunder-strike-wrap.live {
+            opacity: 1;
+            animation: thunderStrikeWrapFade 1.35s ease-out forwards;
+        }
+        @keyframes thunderStrikeWrapFade {
+            0%   { opacity: 0; }
+            8%   { opacity: 1; }
+            55%  { opacity: 1; }
+            100% { opacity: 0; }
+        }
+        .thunder-fork-svg {
+            width: 100%;
+            height: 100%;
+            overflow: visible;
+        }
+        .thunder-fork-halo {
+            fill: none;
+            stroke: rgba(196,181,253,0.55);
+            stroke-width: 5;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            stroke-dasharray: 720;
+            stroke-dashoffset: 720;
+            filter: blur(5px);
+        }
+        .thunder-fork-core {
+            fill: none;
+            stroke: #fff;
+            stroke-width: 2.4;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            stroke-dasharray: 720;
+            stroke-dashoffset: 720;
+            filter: drop-shadow(0 0 3px #fff) drop-shadow(0 0 10px #e9d5ff) drop-shadow(0 0 22px #a78bfa);
+        }
+        .thunder-strike-wrap.live .thunder-fork-halo,
+        .thunder-strike-wrap.live .thunder-fork-core {
+            animation: thunderForkDraw 0.34s cubic-bezier(0.15,0.92,0.28,1) forwards;
+        }
+        @keyframes thunderForkDraw {
+            to { stroke-dashoffset: 0; }
+        }
+        .thunder-branch-wrap {
+            position: fixed;
+            pointer-events: none;
+            z-index: 9002;
+            width: min(18vw, 96px);
+            height: min(28vh, 200px);
+            opacity: 0;
+        }
+        .thunder-branch-wrap.live {
+            animation: thunderBranchFade 0.55s ease-out forwards;
+        }
+        @keyframes thunderBranchFade {
+            0%   { opacity: 0; }
+            12%  { opacity: 0.92; }
+            70%  { opacity: 0.5; }
+            100% { opacity: 0; }
+        }
+        .thunder-branch-svg {
+            width: 100%;
+            height: 100%;
+            overflow: visible;
+        }
+        .thunder-branch-path {
+            fill: none;
+            stroke: rgba(237,233,254,0.88);
+            stroke-width: 1.6;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            stroke-dasharray: 280;
+            stroke-dashoffset: 280;
+            filter: drop-shadow(0 0 6px #c4b5fd);
+        }
+        .thunder-branch-wrap.live .thunder-branch-path {
+            animation: thunderForkDraw 0.28s cubic-bezier(0.2,0.9,0.3,1) forwards;
+        }
+        .thunder-impact-glow {
+            position: fixed;
+            left: 50%;
+            top: 52%;
+            width: 200px;
+            height: 88px;
+            transform: translate(-50%, -50%) scale(0.2);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 8999;
+            background: radial-gradient(ellipse,
+                rgba(255,255,255,0.55) 0%,
+                rgba(196,181,253,0.35) 28%,
+                rgba(124,58,237,0.12) 55%,
+                transparent 72%);
+            opacity: 0;
+            animation: thunderImpactGlow 0.85s ease-out forwards;
+        }
+        @keyframes thunderImpactGlow {
+            0%   { opacity: 0; transform: translate(-50%,-50%) scale(0.2); }
+            18%  { opacity: 1; transform: translate(-50%,-50%) scale(1.15); }
+            100% { opacity: 0; transform: translate(-50%,-50%) scale(1.65); }
+        }
+        .thunder-filament {
+            position: fixed;
+            height: 1.5px;
+            pointer-events: none;
+            z-index: 9002;
+            border-radius: 1px;
+            background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.95) 35%, rgba(196,181,253,0.85) 65%, transparent 100%);
+            box-shadow: 0 0 6px rgba(255,255,255,0.8), 0 0 14px rgba(167,139,250,0.65);
+            transform-origin: left center;
+            opacity: 0;
+            animation: thunderFilament 0.48s ease-out forwards;
+        }
+        @keyframes thunderFilament {
+            0%   { opacity: 0; transform: rotate(var(--frot,0deg)) scaleX(0.05); }
+            22%  { opacity: 1; transform: rotate(var(--frot,0deg)) scaleX(1); }
+            100% { opacity: 0; transform: rotate(var(--frot,0deg)) scaleX(0.35); }
+        }
+        .thunder-ember {
+            position: fixed;
+            width: 3px;
+            height: 3px;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9002;
+            background: #fff;
+            box-shadow: 0 0 6px #fff, 0 0 14px #c4b5fd;
+            opacity: 0;
+            animation: thunderEmber var(--edur,0.55s) ease-out var(--edelay,0s) forwards;
+        }
+        @keyframes thunderEmber {
+            0%   { opacity: 0; transform: translate(0,0) scale(0.4); }
+            15%  { opacity: 1; transform: translate(calc(var(--ex,0px)*0.2), calc(var(--ey,0px)*0.2)) scale(1); }
+            100% { opacity: 0; transform: translate(var(--ex,0px), var(--ey,0px)) scale(0.2); }
+        }
         .thunder-shockwave {
-            position:fixed; pointer-events:none; z-index:9000;
-            left:50vw; top:38vh;
-            width:12px; height:12px; border-radius:50%;
-            border:4px solid rgba(196,181,253,0.95);
-            box-shadow:0 0 22px rgba(167,139,250,0.85), 0 0 55px rgba(124,58,237,0.55);
-            transform:translate(-50%,-50%);
-            animation:thunderShockwave 0.72s cubic-bezier(0.08,0.6,0.25,1) forwards;
+            position: fixed;
+            pointer-events: none;
+            z-index: 9000;
+            left: 50%;
+            top: 50%;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            border: 3px solid rgba(233,213,255,0.9);
+            box-shadow: 0 0 20px rgba(196,181,253,0.8), 0 0 48px rgba(124,58,237,0.45);
+            transform: translate(-50%, -50%);
+            animation: thunderShockwave 0.78s cubic-bezier(0.08,0.6,0.25,1) forwards;
         }
         @keyframes thunderShockwave {
-            0%   { width:12px; height:12px; opacity:1; border-width:4px; }
-            40%  { opacity:0.65; }
-            100% { width:min(120vw,120vh); height:min(120vw,120vh); opacity:0; border-width:1px; }
+            0%   { width: 12px; height: 12px; opacity: 1; border-width: 3px; }
+            42%  { opacity: 0.6; }
+            100% { width: min(105vw, 105vh); height: min(105vw, 105vh); opacity: 0; border-width: 1px; }
         }
-        /* 畫面震動 */
         @keyframes thunderShake {
-            0%   { transform:translate(0,0); }
-            14%  { transform:translate(-6px,3px); }
-            28%  { transform:translate(6px,-4px); }
-            42%  { transform:translate(-4px,3px); }
-            57%  { transform:translate(3px,-2px); }
-            72%  { transform:translate(-2px,2px); }
-            86%  { transform:translate(1px,-1px); }
-            100% { transform:translate(0,0); }
+            0%   { transform: translate(0,0); }
+            18%  { transform: translate(-4px,2px); }
+            36%  { transform: translate(4px,-3px); }
+            54%  { transform: translate(-3px,2px); }
+            72%  { transform: translate(2px,-1px); }
+            100% { transform: translate(0,0); }
         }
-        .thunder-shake { animation:thunderShake 0.4s ease-out !important; }
+        .thunder-shake { animation: thunderShake 0.32s ease-out !important; }
+        @media (prefers-reduced-motion: reduce) {
+            .thunder-shake { animation: none !important; }
+            .thunder-canopy-rim { animation: none; }
+            .thunder-fork-halo, .thunder-fork-core, .thunder-branch-path { animation-duration: 0.01s !important; }
+        }
 
         /* ── 打卡特效：抹茶墨滴中心 ── */
         .matcha-drop {
@@ -1097,6 +1398,26 @@
         @keyframes cursorDotFade {
             0%   { opacity:1; transform:translate(-50%,-50%) scale(1.4); }
             100% { opacity:0; transform:translate(-50%,-50%) scale(0.2); }
+        }
+
+        /* 王棋對弈：棋盤格方塊殘影（沿路徑落子） */
+        .cursor-chess-tile {
+            position: fixed; pointer-events: none; z-index: 9998;
+            width: 15px; height: 15px;
+            transform: translate(-50%, -50%);
+            border-radius: 2px;
+            background: var(--tile-bg);
+            border: 1px solid rgba(231,199,119,0.35);
+            box-shadow: 0 0 10px rgba(231,199,119,0.28), inset 0 1px 0 rgba(255,255,255,0.12);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 9px; line-height: 1; color: rgba(246,231,180,0.85);
+            text-shadow: 0 0 6px rgba(231,199,119,0.5);
+            animation: cursorChessTileFade 1.05s ease-out forwards;
+        }
+        @keyframes cursorChessTileFade {
+            0%   { opacity: 0; transform: translate(-50%, -50%) scale(0.35); }
+            12%  { opacity: 0.92; transform: translate(-50%, -50%) scale(1.05); }
+            100% { opacity: 0; transform: translate(-50%, -50%) scale(0.88); filter: blur(1px); }
         }
 
         /* ── 造型背包區塊 ── */
@@ -1532,11 +1853,17 @@
             star_effect:{ n: "深夜星空・打卡特效", i: "🌠", limited: false, type: "effect", d: "流星劃過螢幕的白色拖尾粒子特效" },
             star_cursor:{ n: "深夜星空・游標特效", i: "✨", limited: false, type: "cursor", d: "點擊爆出冰藍菱形粒子，銳利而克制" },
             thunder_color:  { n: "雷霆・主題",     i: "🌩️", limited: true,  type: "color",  active: false, d: "暴風雲層深炭紫背景，電光邊框訊息樣式" },
-            thunder_effect: { n: "雷霆・打卡特效", i: "⚡",  limited: true,  type: "effect", active: false, d: "閃電劈下的強光與電弧衝擊特效" },
+            thunder_effect: { n: "雷霆・打卡特效", i: "⚡",  limited: true,  type: "effect", active: false, d: "積雨雲層翻湧、SVG 閃電描繪劈落與電弧餘燼擴散的精緻動畫" },
             thunder_cursor: { n: "雷霆・游標特效", i: "🔮", limited: true,  type: "cursor", active: false, d: "點擊爆出電弧粒子・移動留下電光殘影軌跡" },
             matcha_color:   { n: "抹茶靜心・主題",     i: "🍵", limited: false, type: "color",  active: false, d: "深墨綠沉靜背景，水墨風格訊息樣式" },
             matcha_effect:  { n: "抹茶靜心・打卡特效", i: "🌿", limited: false, type: "effect", active: false, d: "水墨漣漪向外擴散的靜心特效" },
             matcha_cursor:  { n: "抹茶靜心・游標特效", i: "✦",  limited: false, type: "cursor", active: false, d: "點擊爆出翠綠菱形粒子，清爽克制" },
+            chess_color:    { n: "王棋對弈・主題",     i: "♚", limited: true,  type: "color",  active: false, d: "黑檀棋盤背景、象牙金光與沉穩對局訊息樣式" },
+            chess_effect:   { n: "王棋對弈・打卡特效", i: "♛", limited: true,  type: "effect", active: false, d: "棋盤展開、王棋落子、格線逐格亮起的儀式動畫" },
+            chess_cursor:   { n: "王棋對弈・游標特效", i: "♞", limited: true,  type: "cursor", active: false, d: "滑鼠移動留下棋格殘影，點擊產生落子波紋" },
+            rain_color:     { n: "霧雨玻璃・主題",     i: "💧", limited: false, type: "color",  active: false, d: "冷灰藍玻璃背景、細雨斜紋與水光訊息樣式" },
+            rain_effect:    { n: "霧雨玻璃・打卡特效", i: "🌧️", limited: false, type: "effect", active: false, d: "雨幕落下、玻璃水波擴散與霧光掃過的安靜動畫" },
+            rain_cursor:    { n: "霧雨玻璃・游標特效", i: "◌",  limited: false, type: "cursor", active: false, d: "點擊爆出透明漣漪與水光粒子，銳利而克制" },
         };
 
         let myInventory = {}, myShards = 0, myPoints = 0, myTickets = 0;
@@ -1567,6 +1894,11 @@
         // ===== 🛠️ 工具函數 =====
         const getLocalDateStr = d => d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
         const _ac = new (window.AudioContext || window.webkitAudioContext)();
+        // #region agent log
+        function _dbgThunder(hypothesisId, message, data) {
+            fetch('http://127.0.0.1:7648/ingest/fcc5c218-dc0c-4297-a168-5bac3ef94d6f',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'671b92'},body:JSON.stringify({sessionId:'671b92',hypothesisId,location:'player.html',message,data:data||{},timestamp:Date.now(),runId:(data&&data.runId)||'run1'})}).catch(()=>{});
+        }
+        // #endregion
         function _tone(freq, vol, delay, dur) {
             if (_ac.state === 'suspended') _ac.resume();
             const osc = _ac.createOscillator();
@@ -1659,29 +1991,55 @@
                     gc.gain.exponentialRampToValueAtTime(0.001, ts + dur);
                     oc.frequency.value = freq; oc.start(ts); oc.stop(ts + dur + 0.05);
                 });
-            } else if (type === 'thunder') {
-                if (_ac.state === 'suspended') _ac.resume();
+            } else if (type === 'thunder_build') {
+                const _te = window.__thunderDbgT0 != null ? Math.round(performance.now() - window.__thunderDbgT0) : null;
+                // #region agent log
+                _dbgThunder('A', 'playSound_thunder', { type, acState: _ac.state, elapsedMs: _te });
+                // #endregion
+                const _resumeB = _ac.state === 'suspended' ? _ac.resume() : null;
+                if (_resumeB && _resumeB.then) _resumeB.then(() => { /* #region agent log */ _dbgThunder('A', 'ac_resume_done', { type, acState: _ac.state }); /* #endregion */ });
                 const t = _ac.currentTime;
-                // 電弧嗡鳴
-                const buzz = _ac.createOscillator(); const buzzG = _ac.createGain();
-                buzz.connect(buzzG); buzzG.connect(_ac.destination); buzz.type = 'sawtooth';
-                buzz.frequency.setValueAtTime(520, t); buzz.frequency.exponentialRampToValueAtTime(180, t + 0.09);
-                buzzG.gain.setValueAtTime(0.22, t); buzzG.gain.exponentialRampToValueAtTime(0.001, t + 0.09);
-                buzz.start(t); buzz.stop(t + 0.12);
-                // 雷劈爆裂
-                const crack = _ac.createOscillator(); const crackG = _ac.createGain();
-                crack.connect(crackG); crackG.connect(_ac.destination); crack.type = 'sawtooth';
-                crack.frequency.setValueAtTime(1600, t + 0.04); crack.frequency.exponentialRampToValueAtTime(60, t + 0.22);
-                crackG.gain.setValueAtTime(0, t + 0.04); crackG.gain.linearRampToValueAtTime(0.32, t + 0.06);
-                crackG.gain.exponentialRampToValueAtTime(0.001, t + 0.22);
-                crack.start(t + 0.04); crack.stop(t + 0.25);
-                // 低頻轟鳴
                 const rumble = _ac.createOscillator(); const rumbleG = _ac.createGain();
                 rumble.connect(rumbleG); rumbleG.connect(_ac.destination); rumble.type = 'triangle';
-                rumble.frequency.setValueAtTime(65, t + 0.08); rumble.frequency.linearRampToValueAtTime(28, t + 1.1);
-                rumbleG.gain.setValueAtTime(0, t + 0.08); rumbleG.gain.linearRampToValueAtTime(0.2, t + 0.15);
-                rumbleG.gain.exponentialRampToValueAtTime(0.001, t + 1.1);
-                rumble.start(t + 0.08); rumble.stop(t + 1.2);
+                rumble.frequency.setValueAtTime(38, t); rumble.frequency.linearRampToValueAtTime(52, t + 0.48);
+                rumbleG.gain.setValueAtTime(0, t);
+                rumbleG.gain.linearRampToValueAtTime(0.07, t + 0.12);
+                rumbleG.gain.linearRampToValueAtTime(0.05, t + 0.45);
+                rumbleG.gain.exponentialRampToValueAtTime(0.001, t + 0.55);
+                rumble.start(t); rumble.stop(t + 0.58);
+            } else if (type === 'thunder_flicker') {
+                const _te = window.__thunderDbgT0 != null ? Math.round(performance.now() - window.__thunderDbgT0) : null;
+                // #region agent log
+                _dbgThunder('A', 'playSound_thunder', { type, acState: _ac.state, elapsedMs: _te });
+                // #endregion
+                if (_ac.state === 'suspended') _ac.resume();
+                const t = _ac.currentTime;
+                const zap = _ac.createOscillator(); const zapG = _ac.createGain();
+                zap.connect(zapG); zapG.connect(_ac.destination); zap.type = 'sawtooth';
+                zap.frequency.setValueAtTime(920, t); zap.frequency.exponentialRampToValueAtTime(280, t + 0.05);
+                zapG.gain.setValueAtTime(0.09, t); zapG.gain.exponentialRampToValueAtTime(0.001, t + 0.05);
+                zap.start(t); zap.stop(t + 0.06);
+            } else if (type === 'thunder_strike' || type === 'thunder') {
+                const _te = window.__thunderDbgT0 != null ? Math.round(performance.now() - window.__thunderDbgT0) : null;
+                // #region agent log
+                _dbgThunder('A', 'playSound_thunder', { type, acState: _ac.state, elapsedMs: _te });
+                // #endregion
+                if (_ac.state === 'suspended') _ac.resume();
+                const t = _ac.currentTime;
+                const crack = _ac.createOscillator(); const crackG = _ac.createGain();
+                crack.connect(crackG); crackG.connect(_ac.destination); crack.type = 'sawtooth';
+                crack.frequency.setValueAtTime(1800, t + 0.02); crack.frequency.exponentialRampToValueAtTime(55, t + 0.24);
+                crackG.gain.setValueAtTime(0, t + 0.02);
+                crackG.gain.linearRampToValueAtTime(0.34, t + 0.045);
+                crackG.gain.exponentialRampToValueAtTime(0.001, t + 0.26);
+                crack.start(t + 0.02); crack.stop(t + 0.28);
+                const rumble = _ac.createOscillator(); const rumbleG = _ac.createGain();
+                rumble.connect(rumbleG); rumbleG.connect(_ac.destination); rumble.type = 'triangle';
+                rumble.frequency.setValueAtTime(72, t + 0.05); rumble.frequency.linearRampToValueAtTime(26, t + 1.05);
+                rumbleG.gain.setValueAtTime(0, t + 0.05);
+                rumbleG.gain.linearRampToValueAtTime(0.22, t + 0.1);
+                rumbleG.gain.exponentialRampToValueAtTime(0.001, t + 1.05);
+                rumble.start(t + 0.05); rumble.stop(t + 1.1);
             } else if (type === 'matcha') {
                 if (_ac.state === 'suspended') _ac.resume();
                 const t = _ac.currentTime;
@@ -1695,6 +2053,23 @@
                     gn.gain.exponentialRampToValueAtTime(0.001, st + dur);
                     osc.frequency.value = freq;
                     osc.start(st); osc.stop(st + dur + 0.05);
+                });
+            } else if (type === 'chess') {
+                if (_ac.state === 'suspended') _ac.resume();
+                _tone(196, 0.09, 0, 0.20);
+                _tone(392, 0.055, 0.08, 0.24);
+                _tone(587, 0.04, 0.18, 0.30);
+            } else if (type === 'rain') {
+                if (_ac.state === 'suspended') _ac.resume();
+                [[740,0,0.035,0.34],[988,0.07,0.026,0.30],[622,0.15,0.022,0.42]].forEach(([freq,delay,peak,dur]) => {
+                    const osc = _ac.createOscillator(); const gn = _ac.createGain();
+                    osc.connect(gn); gn.connect(_ac.destination); osc.type = 'sine';
+                    const st = _ac.currentTime + delay;
+                    gn.gain.setValueAtTime(0, st);
+                    gn.gain.linearRampToValueAtTime(peak, st + 0.012);
+                    gn.gain.exponentialRampToValueAtTime(0.001, st + dur);
+                    osc.frequency.value = freq;
+                    osc.start(st); osc.stop(st + dur + 0.04);
                 });
             } else if (type === 'stardust') {
                 // 深夜星空：玲瓏高音鐘聲上行
@@ -2199,10 +2574,14 @@
             document.body.classList.toggle('theme-star',    eq.color === 'star_color');
             document.body.classList.toggle('theme-thunder', eq.color === 'thunder_color');
             document.body.classList.toggle('theme-matcha',  eq.color === 'matcha_color');
+            document.body.classList.toggle('theme-chess',   eq.color === 'chess_color');
+            document.body.classList.toggle('theme-rain',    eq.color === 'rain_color');
             document.body.classList.toggle('msg-cat',     eq.color === 'cat_color');
             document.body.classList.toggle('msg-star',    eq.color === 'star_color');
             document.body.classList.toggle('msg-thunder', eq.color === 'thunder_color');
             document.body.classList.toggle('msg-matcha',  eq.color === 'matcha_color');
+            document.body.classList.toggle('msg-chess',   eq.color === 'chess_color');
+            document.body.classList.toggle('msg-rain',    eq.color === 'rain_color');
             // cursor effect
             initCursorEffect();
         }
@@ -2281,6 +2660,36 @@
         // ===== 🖱️ 游標特效系統 =====
         let _cursorListeners = null;
 
+        const _CHESS_TRAIL_GRID = 20;
+        const _CHESS_PIECES = ['♙', '♘', '♗', '♖', '♕', '♔'];
+
+        function _spawnChessTile(px, py) {
+            const gx = Math.floor(px / _CHESS_TRAIL_GRID);
+            const gy = Math.floor(py / _CHESS_TRAIL_GRID);
+            const light = (gx + gy) % 2 === 0;
+            const el = document.createElement('div');
+            el.className = 'cursor-chess-tile';
+            el.style.cssText = `left:${px}px;top:${py}px;--tile-bg:${light ? 'rgba(246,231,180,0.62)' : 'rgba(28,20,12,0.78)'};`;
+            if (Math.random() < 0.07) el.textContent = _CHESS_PIECES[Math.floor(Math.random() * _CHESS_PIECES.length)];
+            document.body.appendChild(el);
+            setTimeout(() => el.remove(), 1100);
+        }
+
+        function _spawnChessTrailAlongPath(x0, y0, x1, y1) {
+            const dx = x1 - x0, dy = y1 - y0;
+            const dist = Math.hypot(dx, dy);
+            if (dist < 2) {
+                _spawnChessTile(x1, y1);
+                return;
+            }
+            const step = _CHESS_TRAIL_GRID * 1.45;
+            const n = Math.max(1, Math.ceil(dist / step));
+            for (let i = 1; i <= n; i++) {
+                const t = i / n;
+                _spawnChessTile(x0 + dx * t, y0 + dy * t);
+            }
+        }
+
         function _spawnThunderSpark(x, y) {
             let moveAngle = _lastTrailPos
                 ? Math.atan2(y - _lastTrailPos.y, x - _lastTrailPos.x) * 180 / Math.PI
@@ -2314,6 +2723,18 @@
         function _spawnTrail(x, y, isCat) {
             const cursor = myEquipped.cursor;
             if (cursor === 'thunder_cursor') { _spawnThunderSpark(x, y); return; }
+
+            if (cursor === 'chess_cursor') {
+                const prev = _lastTrailPos;
+                _lastTrailPos = { x, y };
+                if (!prev) {
+                    _spawnChessTile(x, y);
+                    return;
+                }
+                _spawnChessTrailAlongPath(prev.x, prev.y, x, y);
+                return;
+            }
+
             if (!isCat) return;
             // 貓咪爪印：計算移動方向
             let angle = 0;
@@ -2337,14 +2758,15 @@
             document.body.appendChild(el);
             setTimeout(() => el.remove(), 1400);
         }
-
         function _spawnClickBurst(x, y) {
             const cursor = myEquipped.cursor;
             const isCat     = cursor === 'cat_cursor';
             const isStar    = cursor === 'star_cursor';
             const isThunder = cursor === 'thunder_cursor';
             const isMatcha  = cursor === 'matcha_cursor';
-            if (!isCat && !isStar && !isThunder && !isMatcha) return;
+            const isChess   = cursor === 'chess_cursor';
+            const isRain    = cursor === 'rain_cursor';
+            if (!isCat && !isStar && !isThunder && !isMatcha && !isChess && !isRain) return;
 
             // center flash
             const flash = document.createElement('div');
@@ -2359,11 +2781,56 @@
             } else if (isMatcha) {
                 flash.style.background = 'radial-gradient(circle, rgba(255,255,255,0.95), rgba(74,222,128,0.7))';
                 flash.style.boxShadow = '0 0 14px rgba(74,222,128,0.9), 0 0 28px rgba(52,211,153,0.45)';
+            } else if (isChess) {
+                flash.style.background = 'radial-gradient(circle, rgba(255,250,225,0.98), rgba(231,199,119,0.75))';
+                flash.style.boxShadow = '0 0 18px rgba(246,231,180,0.95), 0 0 38px rgba(120,80,35,0.55)';
+            } else if (isRain) {
+                flash.style.background = 'radial-gradient(circle, rgba(255,255,255,0.92), rgba(143,211,232,0.62))';
+                flash.style.boxShadow = '0 0 16px rgba(143,211,232,0.78), 0 0 32px rgba(111,183,207,0.34)';
             }
             document.body.appendChild(flash);
             setTimeout(() => flash.remove(), 420);
 
             // burst particles
+            if (isChess) {
+                const ring = document.createElement('div');
+                ring.style.cssText = `position:fixed;left:${x}px;top:${y}px;width:14px;height:14px;border:2px solid rgba(246,231,180,0.72);border-radius:50%;transform:translate(-50%,-50%);box-shadow:0 0 18px rgba(231,199,119,0.45);pointer-events:none;z-index:9998;transition:width 0.42s,height 0.42s,opacity 0.42s;`;
+                document.body.appendChild(ring);
+                requestAnimationFrame(() => { ring.style.width = '86px'; ring.style.height = '86px'; ring.style.opacity = '0'; });
+                setTimeout(() => ring.remove(), 500);
+                ['♙','♘','♗','♖','♕','♔'].forEach((piece, i) => {
+                    const p = document.createElement('div');
+                    const angle = (i / 6) * Math.PI * 2;
+                    const tx = Math.cos(angle) * (34 + Math.random() * 18);
+                    const ty = Math.sin(angle) * (34 + Math.random() * 18);
+                    p.textContent = piece;
+                    p.style.cssText = `position:fixed;left:${x}px;top:${y}px;color:#f6e7b4;font-size:${14+Math.random()*8}px;text-shadow:0 0 10px rgba(231,199,119,0.7);pointer-events:none;z-index:9999;transform:translate(-50%,-50%);transition:transform 0.46s cubic-bezier(0.12,0.65,0.22,1),opacity 0.46s;`;
+                    document.body.appendChild(p);
+                    requestAnimationFrame(() => { p.style.transform = `translate(calc(-50% + ${tx}px), calc(-50% + ${ty}px)) rotate(${(Math.random()-0.5)*90}deg)`; p.style.opacity = '0'; });
+                    setTimeout(() => p.remove(), 540);
+                });
+                return;
+            }
+            if (isRain) {
+                for (let i = 0; i < 3; i++) {
+                    const ring = document.createElement('div');
+                    ring.style.cssText = `position:fixed;left:${x}px;top:${y}px;width:${12+i*10}px;height:${12+i*10}px;border:1px solid rgba(199,234,244,${0.58-i*0.13});border-radius:50%;transform:translate(-50%,-50%);pointer-events:none;z-index:9998;transition:width ${0.5+i*0.08}s,height ${0.5+i*0.08}s,opacity ${0.5+i*0.08}s;`;
+                    document.body.appendChild(ring);
+                    requestAnimationFrame(() => { ring.style.width = `${76+i*34}px`; ring.style.height = `${76+i*34}px`; ring.style.opacity = '0'; });
+                    setTimeout(() => ring.remove(), 760);
+                }
+                for (let i = 0; i < 10; i++) {
+                    const bead = document.createElement('div');
+                    const angle = Math.random() * Math.PI * 2;
+                    const dist = 18 + Math.random() * 42;
+                    bead.style.cssText = `position:fixed;left:${x}px;top:${y}px;width:${4+Math.random()*5}px;height:${4+Math.random()*5}px;border-radius:50%;background:rgba(199,234,244,0.82);box-shadow:0 0 10px rgba(143,211,232,0.45);pointer-events:none;z-index:9999;transform:translate(-50%,-50%);transition:transform 0.48s,opacity 0.48s;`;
+                    document.body.appendChild(bead);
+                    requestAnimationFrame(() => { bead.style.transform = `translate(calc(-50% + ${Math.cos(angle)*dist}px), calc(-50% + ${Math.sin(angle)*dist}px))`; bead.style.opacity = '0'; });
+                    setTimeout(() => bead.remove(), 560);
+                }
+                return;
+            }
+
             const count = isCat ? 8 : 6;
             const shapeClass = isCat ? 'cursor-burst-cat' : 'cursor-burst-star';
             for (let i = 0; i < count; i++) {
@@ -2397,13 +2864,14 @@
                 document.removeEventListener('touchstart',_cursorListeners.tStart);
                 _cursorListeners = null;
             }
-
             const cursor = myEquipped.cursor;
+            _trailThrottle = 0;
+            _lastTrailPos = null;
             if (!cursor) return;
 
             const isCat = cursor === 'cat_cursor';
-            const hasTrail = isCat || cursor === 'thunder_cursor';
-            const trailInterval = cursor === 'thunder_cursor' ? 45 : 65;
+            const hasTrail = isCat || cursor === 'thunder_cursor' || cursor === 'chess_cursor';
+            const trailInterval = cursor === 'thunder_cursor' ? 45 : cursor === 'chess_cursor' ? 52 : 65;
 
             const onMove = e => {
                 if (!hasTrail) return;
@@ -2437,6 +2905,7 @@
         function fireCheckinEffect() {
             const eff = myEquipped.effect;
             const ov = document.getElementById('effect-overlay');
+            if (ov) ov.replaceChildren();
 
             if (eff === 'cat_effect') {
                 // 貓咪落地時喵一聲
@@ -2572,93 +3041,146 @@
                 }
 
             } else if (eff === 'thunder_effect') {
-                playSound('thunder');
+                const _STRIKE_AT = 520;
+                const _FLICKER_AT = [200, 320, 460];
+                window.__thunderDbgT0 = performance.now();
+                // #region agent log
+                _dbgThunder('B', 'thunder_effect_start', { strikeAt: _STRIKE_AT, flickerAt: _FLICKER_AT });
+                // #endregion
 
-                // ── 超強白閃（瞬間衝入）
-                const flash = document.createElement('div');
-                flash.style.cssText = 'position:fixed;inset:0;background:rgba(240,220,255,0.97);pointer-events:none;z-index:8999;opacity:0;transition:opacity 0.03s;';
-                document.body.appendChild(flash);
-                requestAnimationFrame(() => requestAnimationFrame(() => { flash.style.opacity = '1'; }));
-                setTimeout(() => { flash.style.transition = 'opacity 0.22s'; flash.style.opacity = '0'; setTimeout(() => flash.remove(), 240); }, 42);
+                playSound('thunder_build');
+                _FLICKER_AT.forEach(ms => setTimeout(() => playSound('thunder_flicker'), ms));
+                setTimeout(() => playSound('thunder_strike'), _STRIKE_AT);
 
-                // ── 畫面震動
-                const _mc = document.querySelector('.main-content');
-                if (_mc) { _mc.classList.add('thunder-shake'); setTimeout(() => _mc.classList.remove('thunder-shake'), 420); }
+                const _FORK_MAIN = 'M50 2 L42 88 L56 86 L36 168 L50 164 L28 268 L46 158 L40 156 L50 2';
+                const _FORK_LEFT  = 'M50 2 L30 72 L44 70 L22 142 L38 138 L18 210 L34 130 L50 2';
+                const _FORK_RIGHT = 'M50 2 L68 78 L54 76 L76 148 L60 144 L80 218 L64 126 L50 2';
 
-                // ── 衝擊波（兩環）
-                setTimeout(() => {
-                    const sw = document.createElement('div');
-                    sw.className = 'thunder-shockwave';
-                    document.body.appendChild(sw);
-                    setTimeout(() => sw.remove(), 800);
-                }, 28);
-                setTimeout(() => {
-                    const sw2 = document.createElement('div');
-                    sw2.className = 'thunder-shockwave';
-                    sw2.style.cssText = 'position:fixed;pointer-events:none;z-index:9000;left:50vw;top:38vh;width:12px;height:12px;border-radius:50%;border:3px solid rgba(139,92,246,0.7);box-shadow:0 0 14px rgba(109,40,217,0.6);transform:translate(-50%,-50%);animation:thunderShockwave 0.92s cubic-bezier(0.08,0.6,0.25,1) forwards;';
-                    document.body.appendChild(sw2);
-                    setTimeout(() => sw2.remove(), 980);
-                }, 140);
-
-                // ── 二次電紫殘光
-                setTimeout(() => {
-                    const f2 = document.createElement('div');
-                    f2.style.cssText = 'position:fixed;inset:0;background:rgba(139,92,246,0.45);pointer-events:none;z-index:8997;opacity:0;transition:opacity 0.02s;';
-                    document.body.appendChild(f2);
-                    requestAnimationFrame(() => requestAnimationFrame(() => { f2.style.opacity = '1'; }));
-                    setTimeout(() => { f2.style.transition = 'opacity 0.2s'; f2.style.opacity = '0'; setTimeout(() => f2.remove(), 220); }, 30);
-                }, 130);
-
-                // ── 三次尾波（低飽和深紫）
-                setTimeout(() => {
-                    const f3 = document.createElement('div');
-                    f3.style.cssText = 'position:fixed;inset:0;background:rgba(109,40,217,0.24);pointer-events:none;z-index:8996;opacity:0;transition:opacity 0.02s;';
-                    document.body.appendChild(f3);
-                    requestAnimationFrame(() => requestAnimationFrame(() => { f3.style.opacity = '1'; }));
-                    setTimeout(() => { f3.style.transition = 'opacity 0.38s'; f3.style.opacity = '0'; setTimeout(() => f3.remove(), 400); }, 25);
-                }, 320);
-
-                // ── 閃電柱（3~4條，分散畫面）
-                const boltCount = Math.random() < 0.5 ? 4 : 3;
-                const _boltPos = [10, 30, 55, 78].sort(() => Math.random() - 0.5).slice(0, boltCount);
-                _boltPos.forEach((pos, i) => {
-                    setTimeout(() => {
-                        const bolt = document.createElement('div');
-                        bolt.className = i === 0 ? 'lightning-bolt' : 'lightning-bolt-thin';
-                        bolt.style.left = `${pos + (Math.random() - 0.5) * 6}vw`;
-                        ov.appendChild(bolt);
-                        setTimeout(() => bolt.remove(), i === 0 ? 720 : 590);
-                    }, i * 75);
-                });
-
-                // ── 電弧粒子大爆散（28顆，更遠）
-                setTimeout(() => {
-                    for (let i = 0; i < 28; i++) {
-                        const sp = document.createElement('div');
-                        const angle = Math.random() * Math.PI * 2;
-                        const dist = 55 + Math.random() * 170;
-                        const tx = Math.cos(angle) * dist, ty = Math.sin(angle) * dist;
-                        const size = 3 + Math.random() * 5;
-                        const dur = 0.26 + Math.random() * 0.32;
-                        sp.className = 'cursor-burst cursor-burst-star';
-                        sp.style.cssText = `left:50vw;top:38vh;width:${size}px;height:${size}px;--tx:${tx}px;--ty:${ty}px;--cdur:${dur}s;background:hsl(${255+Math.random()*28},90%,80%);`;
-                        document.body.appendChild(sp);
-                        setTimeout(() => sp.remove(), dur * 1000 + 80);
-                    }
-                }, 60);
-
-                // ── 電光紫 confetti（四波）
-                setTimeout(() => confetti({ particleCount:130, spread:120, origin:{y:0.28}, colors:['#a78bfa','#c4b5fd','#ede9fe','#7c3aed','#fff','#ddd6fe','#6d28d9'] }), 65);
-                setTimeout(() => confetti({ particleCount:70, spread:75, angle:52, origin:{x:0.04,y:0.42}, colors:['#a78bfa','#c4b5fd','#fff','#7c3aed'] }), 310);
-                setTimeout(() => confetti({ particleCount:70, spread:75, angle:128, origin:{x:0.96,y:0.42}, colors:['#a78bfa','#c4b5fd','#fff','#7c3aed'] }), 310);
-                setTimeout(() => confetti({ particleCount:55, spread:95, origin:{y:0.52}, colors:['#8b5cf6','#ddd6fe','#fff','#ede9fe'] }), 660);
-
-                // ── 紫色暈光持續（更強、更深）
                 const ambience = document.createElement('div');
-                ambience.style.cssText = 'position:fixed;inset:0;background:radial-gradient(ellipse at 50% 26%, rgba(109,40,200,0.42) 0%, rgba(60,20,140,0.25) 46%, transparent 70%);pointer-events:none;z-index:8998;opacity:0;transition:opacity 0.32s;';
+                ambience.style.cssText = 'position:fixed;inset:0;background:linear-gradient(180deg, rgba(30,10,60,0.5) 0%, rgba(8,3,20,0.65) 38%, rgba(12,5,28,0.45) 100%);pointer-events:none;z-index:8998;opacity:0;transition:opacity 0.5s;';
                 document.body.appendChild(ambience);
                 requestAnimationFrame(() => requestAnimationFrame(() => { ambience.style.opacity = '1'; }));
-                setTimeout(() => { ambience.style.opacity = '0'; setTimeout(() => ambience.remove(), 420); }, 2800);
+                setTimeout(() => { ambience.style.opacity = '0'; setTimeout(() => ambience.remove(), 480); }, 2600);
+
+                const canopyWrap = document.createElement('div');
+                canopyWrap.className = 'thunder-canopy-wrap';
+                canopyWrap.innerHTML = `<div class="thunder-canopy">
+                  <div class="thunder-canopy-slab"></div>
+                  <div class="thunder-canopy-rim"></div>
+                </div>`;
+                ov.appendChild(canopyWrap);
+                const canopySlab = canopyWrap.querySelector('.thunder-canopy-slab');
+                requestAnimationFrame(() => requestAnimationFrame(() => {
+                    const wr = canopyWrap.getBoundingClientRect();
+                    const sr = canopySlab.getBoundingClientRect();
+                    const cs = getComputedStyle(canopyWrap);
+                    // #region agent log
+                    _dbgThunder('C', 'canopy_geometry', {
+                        elapsedMs: Math.round(performance.now() - window.__thunderDbgT0),
+                        wrapW: Math.round(wr.width), wrapH: Math.round(wr.height),
+                        wrapRatio: +(wr.width / Math.max(wr.height, 1)).toFixed(2),
+                        slabW: Math.round(sr.width), slabH: Math.round(sr.height),
+                        wrapOpacity: cs.opacity,
+                        slabOpacity: getComputedStyle(canopySlab).opacity,
+                        runId: 'post-fix'
+                    });
+                    // #endregion
+                }));
+                _FLICKER_AT.forEach(ms => {
+                    setTimeout(() => {
+                        canopySlab.classList.remove('flash-hit');
+                        void canopySlab.offsetWidth;
+                        canopySlab.classList.add('flash-hit');
+                    }, ms);
+                });
+                setTimeout(() => canopyWrap.remove(), 2600);
+
+                setTimeout(() => {
+                    // #region agent log
+                    _dbgThunder('B', 'strike_visual_fire', { elapsedMs: Math.round(performance.now() - window.__thunderDbgT0), targetMs: _STRIKE_AT });
+                    // #endregion
+                    const strikeFlash = document.createElement('div');
+                    strikeFlash.style.cssText = 'position:fixed;inset:0;background:rgba(245,243,255,0.26);pointer-events:none;z-index:8999;opacity:0;transition:opacity 0.035s;';
+                    document.body.appendChild(strikeFlash);
+                    requestAnimationFrame(() => requestAnimationFrame(() => { strikeFlash.style.opacity = '1'; }));
+                    setTimeout(() => { strikeFlash.style.transition = 'opacity 0.32s'; strikeFlash.style.opacity = '0'; setTimeout(() => strikeFlash.remove(), 340); }, 48);
+
+                    const _mc = document.querySelector('.main-content');
+                    if (_mc) { _mc.classList.add('thunder-shake'); setTimeout(() => _mc.classList.remove('thunder-shake'), 320); }
+
+                    const strike = document.createElement('div');
+                    strike.className = 'thunder-strike-wrap';
+                    strike.innerHTML = `<svg class="thunder-fork-svg" viewBox="0 0 100 280" preserveAspectRatio="xMidYMin meet">
+                      <path class="thunder-fork-halo" d="${_FORK_MAIN}"/>
+                      <path class="thunder-fork-core" d="${_FORK_MAIN}"/>
+                    </svg>`;
+                    ov.appendChild(strike);
+                    requestAnimationFrame(() => strike.classList.add('live'));
+                    setTimeout(() => strike.remove(), 1400);
+
+                    [
+                        { path: _FORK_LEFT,  left: '34%', top: 'clamp(80px, 16vh, 140px)', rot: -18 },
+                        { path: _FORK_RIGHT, left: '58%', top: 'clamp(90px, 17vh, 150px)', rot: 14 },
+                    ].forEach((b, i) => {
+                        setTimeout(() => {
+                            const bw = document.createElement('div');
+                            bw.className = 'thunder-branch-wrap';
+                            bw.style.cssText = `left:${b.left};top:${b.top};transform:rotate(${b.rot}deg);`;
+                            bw.innerHTML = `<svg class="thunder-branch-svg" viewBox="0 0 100 220"><path class="thunder-branch-path" d="${b.path}"/></svg>`;
+                            ov.appendChild(bw);
+                            requestAnimationFrame(() => bw.classList.add('live'));
+                            setTimeout(() => bw.remove(), 600);
+                        }, 80 + i * 95);
+                    });
+
+                    const glow = document.createElement('div');
+                    glow.className = 'thunder-impact-glow';
+                    ov.appendChild(glow);
+                    setTimeout(() => glow.remove(), 900);
+
+                    const sw = document.createElement('div');
+                    sw.className = 'thunder-shockwave';
+                    ov.appendChild(sw);
+                    setTimeout(() => sw.remove(), 820);
+
+                    const ix = window.innerWidth / 2;
+                    const iy = window.innerHeight * 0.52;
+                    for (let i = 0; i < 16; i++) {
+                        const ang = Math.random() * Math.PI * 2;
+                        const len = 28 + Math.random() * 52;
+                        const fil = document.createElement('div');
+                        fil.className = 'thunder-filament';
+                        fil.style.cssText = `left:${ix}px;top:${iy}px;width:${len}px;--frot:${(ang*180/Math.PI).toFixed(1)}deg;animation-delay:${(Math.random()*0.08).toFixed(2)}s;`;
+                        ov.appendChild(fil);
+                        setTimeout(() => fil.remove(), 520);
+                    }
+                    for (let j = 0; j < 14; j++) {
+                        const ang = Math.random() * Math.PI * 2;
+                        const dist = 40 + Math.random() * 100;
+                        const em = document.createElement('div');
+                        em.className = 'thunder-ember';
+                        em.style.cssText = `left:${ix}px;top:${iy}px;--ex:${(Math.cos(ang)*dist).toFixed(0)}px;--ey:${(Math.sin(ang)*dist).toFixed(0)}px;--edur:${(0.4+Math.random()*0.35).toFixed(2)}s;--edelay:${(Math.random()*0.06).toFixed(2)}s;`;
+                        ov.appendChild(em);
+                        setTimeout(() => em.remove(), 900);
+                    }
+                }, _STRIKE_AT);
+
+                setTimeout(() => confetti({
+                    particleCount: 72, spread: 92, origin: { y: 0.4 },
+                    colors: ['#ede9fe','#c4b5fd','#a78bfa','#fff','#ddd6fe'],
+                    gravity: 0.34, scalar: 0.82, drift: 0.25
+                }), _STRIKE_AT + 120);
+
+                setTimeout(() => {
+                    // #region agent log
+                    _dbgThunder('D', 'thunder_cleanup_check', {
+                        overlayChildCount: ov.childElementCount,
+                        leftoverNodes: document.querySelectorAll('.thunder-canopy-wrap,.thunder-strike-wrap,.thunder-branch-wrap').length,
+                        runId: 'post-fix'
+                    });
+                    window.__thunderDbgT0 = null;
+                    // #endregion
+                }, 3200);
 
             } else if (eff === 'matcha_effect') {
                 playSound('matcha');
@@ -2708,6 +3230,78 @@
                         setTimeout(() => st.remove(), dur * 1000 + 100);
                     }, Math.random() * 480);
                 }
+            } else if (eff === 'chess_effect') {
+                playSound('chess');
+
+                const ambience = document.createElement('div');
+                ambience.style.cssText = 'position:fixed;inset:0;background:radial-gradient(ellipse at 50% 52%, rgba(246,231,180,0.20) 0%, rgba(40,26,10,0.52) 54%, rgba(0,0,0,0.16) 100%);pointer-events:none;z-index:8998;opacity:0;transition:opacity 0.36s;';
+                document.body.appendChild(ambience);
+                requestAnimationFrame(() => requestAnimationFrame(() => { ambience.style.opacity = '1'; }));
+                setTimeout(() => { ambience.style.opacity = '0'; setTimeout(() => ambience.remove(), 520); }, 2600);
+
+                const board = document.createElement('div');
+                board.style.cssText = 'position:fixed;left:50%;top:52%;width:min(76vw,420px);aspect-ratio:1/1;transform:translate(-50%,-50%) rotateX(58deg) rotateZ(45deg) scale(0.42);transform-origin:center;border:2px solid rgba(246,231,180,0.58);background-size:25% 25%;background-image:linear-gradient(45deg, rgba(246,231,180,0.18) 25%, transparent 25%, transparent 75%, rgba(246,231,180,0.18) 75%),linear-gradient(45deg, rgba(246,231,180,0.18) 25%, transparent 25%, transparent 75%, rgba(246,231,180,0.18) 75%);background-position:0 0,12.5% 12.5%;box-shadow:0 0 42px rgba(231,199,119,0.24), inset 0 0 30px rgba(246,231,180,0.08);pointer-events:none;z-index:9000;opacity:0;transition:opacity 0.24s, transform 0.72s cubic-bezier(0.13,0.72,0.24,1);';
+                ov.appendChild(board);
+                requestAnimationFrame(() => { board.style.opacity = '1'; board.style.transform = 'translate(-50%,-50%) rotateX(58deg) rotateZ(45deg) scale(1)'; });
+                setTimeout(() => { board.style.opacity = '0'; board.style.transform += ' scale(0.92)'; setTimeout(() => board.remove(), 420); }, 2350);
+
+                setTimeout(() => {
+                    const king = document.createElement('div');
+                    king.textContent = '♔';
+                    king.style.cssText = 'position:fixed;left:50%;top:42%;transform:translate(-50%,-160%) scale(0.5);font-size:min(26vw,138px);line-height:1;color:#f8efd0;text-shadow:0 0 16px rgba(246,231,180,0.85),0 0 44px rgba(201,155,66,0.45);pointer-events:none;z-index:9002;opacity:0;transition:transform 0.62s cubic-bezier(0.16,0.78,0.22,1),opacity 0.22s;';
+                    ov.appendChild(king);
+                    requestAnimationFrame(() => { king.style.opacity = '1'; king.style.transform = 'translate(-50%,-50%) scale(1)'; });
+                    setTimeout(() => playSound('chess'), 180);
+                    setTimeout(() => { king.style.opacity = '0'; king.style.transform = 'translate(-50%,-36%) scale(0.88)'; setTimeout(() => king.remove(), 420); }, 1850);
+                }, 310);
+
+                for (let i = 0; i < 24; i++) {
+                    setTimeout(() => {
+                        const sq = document.createElement('div');
+                        const x = 18 + Math.random() * 64;
+                        const y = 20 + Math.random() * 60;
+                        sq.style.cssText = `position:fixed;left:${x}vw;top:${y}vh;width:${18+Math.random()*30}px;height:${18+Math.random()*30}px;transform:rotate(45deg) scale(0.6);border:1px solid rgba(246,231,180,0.5);background:rgba(246,231,180,0.08);box-shadow:0 0 16px rgba(231,199,119,0.25);pointer-events:none;z-index:8999;opacity:0;transition:opacity 0.42s, transform 0.7s;`;
+                        ov.appendChild(sq);
+                        requestAnimationFrame(() => { sq.style.opacity = '0.9'; sq.style.transform = 'rotate(45deg) scale(1)'; });
+                        setTimeout(() => { sq.style.opacity = '0'; sq.style.transform = 'rotate(45deg) scale(0.45)'; setTimeout(() => sq.remove(), 460); }, 420 + Math.random()*500);
+                    }, i * 42);
+                }
+
+                setTimeout(() => confetti({ particleCount:90, spread:70, origin:{y:0.38}, colors:['#f8efd0','#e7c777','#c99b42','#fff8dc','#8a6428'], gravity:0.42, scalar:0.85 }), 620);
+            } else if (eff === 'rain_effect') {
+                playSound('rain');
+
+                const ambience = document.createElement('div');
+                ambience.style.cssText = 'position:fixed;inset:0;background:linear-gradient(120deg, rgba(216,247,255,0.10), rgba(5,18,26,0.38) 45%, rgba(143,211,232,0.08));pointer-events:none;z-index:8998;opacity:0;transition:opacity 0.35s;backdrop-filter:blur(1px);';
+                document.body.appendChild(ambience);
+                requestAnimationFrame(() => requestAnimationFrame(() => { ambience.style.opacity = '1'; }));
+                setTimeout(() => { ambience.style.opacity = '0'; setTimeout(() => ambience.remove(), 520); }, 2700);
+
+                for (let i = 0; i < 46; i++) {
+                    const drop = document.createElement('div');
+                    drop.style.cssText = `position:fixed;left:${Math.random()*100}vw;top:${-8-Math.random()*28}vh;width:${1+Math.random()*1.5}px;height:${34+Math.random()*70}px;border-radius:999px;background:linear-gradient(180deg, rgba(216,247,255,0), rgba(216,247,255,0.7), rgba(143,211,232,0));transform:rotate(14deg);pointer-events:none;z-index:8999;opacity:${0.28+Math.random()*0.48};transition:transform ${0.9+Math.random()*0.9}s linear, opacity 0.45s;`;
+                    ov.appendChild(drop);
+                    requestAnimationFrame(() => { drop.style.transform = `translate(${60+Math.random()*80}px, ${window.innerHeight + 180}px) rotate(14deg)`; });
+                    setTimeout(() => { drop.style.opacity = '0'; setTimeout(() => drop.remove(), 460); }, 900 + Math.random()*950);
+                }
+
+                const glass = document.createElement('div');
+                glass.style.cssText = 'position:fixed;left:50%;top:50%;width:min(78vw,460px);aspect-ratio:1/1;border-radius:50%;transform:translate(-50%,-50%) scale(0.25);border:1px solid rgba(199,234,244,0.45);box-shadow:0 0 42px rgba(143,211,232,0.22), inset 0 0 34px rgba(216,247,255,0.08);background:radial-gradient(circle, rgba(216,247,255,0.10), transparent 58%);pointer-events:none;z-index:9001;opacity:0;transition:transform 1.15s cubic-bezier(0.12,0.65,0.2,1),opacity 0.7s;';
+                ov.appendChild(glass);
+                requestAnimationFrame(() => { glass.style.opacity = '1'; glass.style.transform = 'translate(-50%,-50%) scale(1)'; });
+                setTimeout(() => { glass.style.opacity = '0'; glass.style.transform = 'translate(-50%,-50%) scale(1.18)'; setTimeout(() => glass.remove(), 720); }, 1550);
+
+                for (let i = 0; i < 18; i++) {
+                    setTimeout(() => {
+                        const ripple = document.createElement('div');
+                        ripple.style.cssText = `position:fixed;left:${16+Math.random()*68}vw;top:${18+Math.random()*62}vh;width:10px;height:10px;border:1px solid rgba(199,234,244,0.48);border-radius:50%;pointer-events:none;z-index:9000;opacity:0.8;transform:translate(-50%,-50%);transition:width 0.82s,height 0.82s,opacity 0.82s;`;
+                        ov.appendChild(ripple);
+                        requestAnimationFrame(() => { ripple.style.width = `${48+Math.random()*80}px`; ripple.style.height = ripple.style.width; ripple.style.opacity = '0'; });
+                        setTimeout(() => ripple.remove(), 920);
+                    }, Math.random() * 1200);
+                }
+
+                setTimeout(() => confetti({ particleCount:70, spread:95, origin:{y:0.42}, colors:['#d8f7ff','#8fd3e8','#c7eaf4','#6fb7cf','#ffffff'], gravity:0.28, scalar:0.72, drift:0.28 }), 520);
             }
         }
 
@@ -2725,11 +3319,13 @@
             banner.style.display = 'flex';
 
             if (c.type === 'color') {
-                document.body.classList.remove('theme-cat','theme-star','theme-thunder','theme-matcha','msg-cat','msg-star','msg-thunder','msg-matcha');
+                document.body.classList.remove('theme-cat','theme-star','theme-thunder','theme-matcha','theme-chess','theme-rain','msg-cat','msg-star','msg-thunder','msg-matcha','msg-chess','msg-rain');
                 if (key === 'cat_color')     { document.body.classList.add('theme-cat',     'msg-cat'); }
                 if (key === 'star_color')    { document.body.classList.add('theme-star',    'msg-star'); }
                 if (key === 'thunder_color') { document.body.classList.add('theme-thunder', 'msg-thunder'); }
                 if (key === 'matcha_color')  { document.body.classList.add('theme-matcha',  'msg-matcha'); }
+                if (key === 'chess_color')   { document.body.classList.add('theme-chess',   'msg-chess'); }
+                if (key === 'rain_color')    { document.body.classList.add('theme-rain',    'msg-rain'); }
                 _previewTimer = setTimeout(endPreview, 8000);
             } else if (c.type === 'effect') {
                 const orig = myEquipped.effect;

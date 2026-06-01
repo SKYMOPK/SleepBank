@@ -448,6 +448,15 @@
             font-size: 10px;
         }
 
+        .stat-box-wide { grid-column: 1 / -1; }
+        .stat-split-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; align-items: end; }
+        .stat-mini-val { font-size: 22px; font-weight: 900; letter-spacing: -0.5px; line-height: 1; }
+        .stat-mini-val.left { color: #5AC8FA; }
+        .stat-mini-val.right { color: #FF8C00; }
+        .stat-mini-label { font-size: 10px; color: var(--text2); margin-top: 4px; font-weight: 700; }
+        .stat-gap-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; text-align: left; }
+        .stat-gap-row .stat-extra { margin-top: 0; text-align: right; line-height: 1.7; }
+
         .tag {
             display: inline-flex;
             align-items: center;
@@ -527,6 +536,15 @@
             display: block;
         }
 
+
+        .chart-tools { display:flex; align-items:center; gap:10px; flex-wrap:wrap; justify-content:flex-end; }
+        .chart-mode-row { display:inline-grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:4px; padding:4px; border:1px solid var(--border); border-radius:100px; background:rgba(0,0,0,0.14); }
+        .chart-mode-btn { border:none; border-radius:100px; background:transparent; color:var(--text2); font-size:11px; font-weight:800; padding:5px 10px; cursor:pointer; white-space:nowrap; transition:all 0.16s; }
+        .chart-mode-btn:hover { color:var(--text); background:rgba(255,255,255,0.04); }
+        .chart-mode-btn.active { color:#1E1912; background:var(--accent-lt); box-shadow:0 5px 14px rgba(200,136,58,0.20); }
+        .chart-active-label { margin-top:10px; color:var(--text2); font-size:11px; text-align:center; font-weight:700; }
+        .chart-modal-controls { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:12px; flex-wrap:wrap; }
+        @media (max-width:430px) { .card-head { align-items:flex-start; gap:12px; } .chart-tools { justify-content:flex-start; } .chart-mode-btn { padding:5px 8px; } .chart-modal-controls { align-items:flex-start; } }
         /* ── Records List ── */
         .records-card {
             background: var(--card);
@@ -696,6 +714,15 @@
             margin-left: 2px;
         }
 
+        .hand-chip-status { margin-top: 7px; font-size: 11px; font-weight: 800; color: var(--text2); }
+        .hand-chip-meta { margin-top: 4px; min-height: 14px; font-size: 10px; color: var(--text3); font-weight: 700; }
+        .hand-chip-bar { height: 5px; margin-top: 9px; border-radius: 100px; background: rgba(255,255,255,0.07); overflow: hidden; }
+        .hand-chip-fill { height: 100%; width: 50%; border-radius: inherit; transition: width 0.35s ease, background 0.25s ease; }
+        .hand-chip-fill.good { background: var(--green); }
+        .hand-chip-fill.stable { background: var(--accent-lt); }
+        .hand-chip-fill.low { background: var(--red); }
+        .hand-chip-fill.cold { background: #8E8E9A; }
+
         /* ── Records hover ── */
         .rec-row { transition: background 0.15s; border-radius: 12px; margin: 0 -8px; padding: 12px 8px; }
         .rec-row:hover { background: var(--card2); }
@@ -796,7 +823,7 @@
             z-index: 10;
         }
         .tt-date { font-size: 11px; color: var(--text2); font-weight: 600; margin-bottom: 5px; }
-        .tt-rows { display: flex; gap: 10px; align-items: center; }
+        .tt-rows { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
     </style>
 </head>
 <body>
@@ -891,14 +918,41 @@
                 <div class="stat-extra" id="stat-pr-r-date"></div>
             </div>
             <div class="stat-box">
-                <div class="stat-val" id="stat-7avg">—</div>
+                <div class="stat-split-row">
+                    <div>
+                        <div class="stat-mini-val left" id="stat-7avg-l">—</div>
+                        <div class="stat-mini-label">🤜 左手</div>
+                    </div>
+                    <div>
+                        <div class="stat-mini-val right" id="stat-7avg-r">—</div>
+                        <div class="stat-mini-label">🤛 右手</div>
+                    </div>
+                </div>
                 <div class="stat-name">7日均值</div>
                 <div class="stat-extra" id="stat-trend"></div>
             </div>
             <div class="stat-box">
-                <div class="stat-val" id="stat-30avg">—</div>
+                <div class="stat-split-row">
+                    <div>
+                        <div class="stat-mini-val left" id="stat-30avg-l">—</div>
+                        <div class="stat-mini-label">🤜 左手</div>
+                    </div>
+                    <div>
+                        <div class="stat-mini-val right" id="stat-30avg-r">—</div>
+                        <div class="stat-mini-label">🤛 右手</div>
+                    </div>
+                </div>
                 <div class="stat-name">30日均值</div>
                 <div class="stat-extra" id="stat-days"></div>
+            </div>
+            <div class="stat-box stat-box-wide">
+                <div class="stat-gap-row">
+                    <div>
+                        <div class="stat-val" id="stat-gap-val">—</div>
+                        <div class="stat-name">30天左右差距</div>
+                    </div>
+                    <div class="stat-extra" id="stat-gap-note"></div>
+                </div>
             </div>
         </div>
 
@@ -916,17 +970,17 @@
         <div class="chart-card">
             <div class="card-head">
                 <div class="card-title">握力趨勢</div>
-                <div style="display:flex;align-items:center;gap:10px">
-                    <div class="legend">
-                        <span><span class="leg-line" style="background:#FF8C00"></span>右手</span>
-                        <span><span class="leg-line" style="background:#5AC8FA"></span>左手</span>
-                        <span><span class="leg-dash"></span>7日均</span>
+                <div class="chart-tools">
+                    <div class="chart-mode-row" aria-label="圖表切換">
+                        <button class="chart-mode-btn active" type="button" data-chart-mode="r" onclick="setChartMode('r')">右手</button>
+                        <button class="chart-mode-btn" type="button" data-chart-mode="l" onclick="setChartMode('l')">左手</button>
                     </div>
                     <button class="expand-chart-btn" onclick="openChartModal()">展開</button>
                 </div>
             </div>
             <svg id="chart-svg" class="chart-svg" viewBox="0 0 520 160"
                  preserveAspectRatio="none" style="height:160px"></svg>
+            <div class="chart-active-label" id="chart-active-label">右手趨勢</div>
         </div>
 
         <!-- Recent records accordion -->
@@ -987,10 +1041,12 @@
             <div class="chart-modal-title">📈 握力趨勢</div>
             <button class="chart-close-btn" onclick="closeChartModal()">關閉</button>
         </div>
-        <div class="chart-modal-legend">
-            <span><span class="leg-line" style="background:#FF8C00"></span>右手</span>
-            <span><span class="leg-line" style="background:#5AC8FA"></span>左手</span>
-            <span><span class="leg-dash"></span>7日均</span>
+        <div class="chart-modal-controls">
+            <div class="chart-mode-row" aria-label="圖表切換">
+                <button class="chart-mode-btn active" type="button" data-chart-mode="r" onclick="setChartMode('r')">右手</button>
+                <button class="chart-mode-btn" type="button" data-chart-mode="l" onclick="setChartMode('l')">左手</button>
+            </div>
+            <div class="chart-modal-legend" id="chart-modal-legend"></div>
         </div>
         <div class="chart-modal-svg-wrap">
             <svg id="chart-modal-svg" viewBox="0 0 600 240" preserveAspectRatio="none"
@@ -1024,6 +1080,7 @@ let dbListener = null;
 let _sortedCache = [];
 let _chartModalState = null;
 let _chartTtActiveDate = null;
+let chartMode = 'r';
 
 // ── Helpers ───────────────────────────────────────────────────────────
 function todayStr() {
@@ -1112,34 +1169,65 @@ function getSorted() {
 // ── Status ────────────────────────────────────────────────────────────
 // Returns null if today not recorded.
 // Returns { type, diff, avg7 } or { type:'cold', remaining }
-function calcStatus(sorted, today) {
-    const todayIdx = sorted.findIndex(r => r.date === today);
-    if (todayIdx < 0) return null;
-
-    const prior = sorted.slice(0, todayIdx);
-    if (prior.length < 7) return { type: 'cold', remaining: 7 - prior.length };
-
-    const last7 = prior.slice(-7);
-    const avg7 = last7.reduce((s, r) => s + r.value, 0) / 7;
-    const val = sorted[todayIdx].value;
-    const diff = (val - avg7) / avg7;
-
-    if (diff > 0.05)  return { type: 'fire',   diff, avg7 };
-    if (diff >= 0)    return { type: 'strong',  diff, avg7 };
-    if (diff >= -0.05) return { type: 'tired',  diff, avg7 };
-    return              { type: 'rest',  diff, avg7 };
+function calcHandStatus(sorted, todayRec, hand) {
+    const value = todayRec ? todayRec[hand] || 0 : 0;
+    if (!(value > 0)) return { type: 'missing', value: 0, label: '未記錄', meta: '', pct: null, avg: null };
+    const prior = sorted.filter(r => r.date < todayRec.date && r[hand] > 0).slice(-7);
+    if (prior.length < 3) return { type: 'cold', value, label: '累積中', meta: `還需 ${3 - prior.length} 筆基準`, pct: null, avg: null };
+    const avg = prior.reduce((sum, r) => sum + r[hand], 0) / prior.length;
+    const pct = (value - avg) / avg;
+    let type = 'stable', label = '穩定';
+    if (pct > 0.05) { type = 'good'; label = '狀態很好'; }
+    else if (pct < -0.08) { type = 'rest'; label = '明顯偏低'; }
+    else if (pct < -0.03) { type = 'low'; label = '偏低'; }
+    const absPct = Math.abs(pct * 100).toFixed(1);
+    const direction = pct >= 0 ? '高於' : '低於';
+    return { type, value, label, meta: `${direction}近期平均 ${absPct}%`, pct, avg };
 }
 
-// Records below 7-day prior average, from most recent backwards
-// Returns { count, isConsecutiveCalendar }
-function fatigueDays(sorted) {
+function summarizeHandStatus(lStatus, rStatus) {
+    const active = [
+        { key: 'l', name: '左手', ...lStatus },
+        { key: 'r', name: '右手', ...rStatus }
+    ].filter(h => h.type !== 'missing');
+    if (!active.length) return { emoji: '💪', label: '已記錄', detail: '', cls: '' };
+    if (active.every(h => h.type === 'cold')) return { emoji: '📈', label: '累積基準中', detail: '再多記錄幾次後，就能判斷近期狀態', cls: '' };
+    const ready = active.filter(h => h.type !== 'cold');
+    const rest = ready.filter(h => h.type === 'rest');
+    const low = ready.filter(h => h.type === 'low');
+    const good = ready.filter(h => h.type === 'good');
+    const parts = ready.map(h => `${h.name}${h.label}`).join('，');
+    if (rest.length === active.length || (rest.length && rest.length + low.length === active.length)) return { emoji: '🛌', label: '今天偏疲勞', detail: parts, cls: 'down' };
+    if (rest.length) return { emoji: '🟠', label: `${rest[0].name}明顯偏低`, detail: parts, cls: 'down' };
+    if (low.length) return { emoji: '🟡', label: `${low[0].name}偏低`, detail: parts, cls: 'down' };
+    if (good.length === ready.length && ready.length === active.length) return { emoji: '🔥', label: '今天狀態很好', detail: parts, cls: 'up' };
+    if (good.length) return { emoji: '💪', label: '狀態不錯', detail: parts, cls: 'up' };
+    return { emoji: '🟢', label: '狀態穩定', detail: parts, cls: 'up' };
+}
+
+function handChipHTML(hand, status) {
+    const isLeft = hand === 'l';
+    const colorClass = status.type === 'good' ? 'good' : (status.type === 'low' || status.type === 'rest') ? 'low' : status.type === 'cold' ? 'cold' : 'stable';
+    const fillWidth = status.pct === null ? 50 : Math.max(12, Math.min(100, 50 + status.pct * 260));
+    return `<div class="hand-chip ${isLeft ? 'hand-chip-l' : 'hand-chip-r'}">
+        <div class="hand-chip-label">${isLeft ? '🤜 左手' : '🤛 右手'}</div>
+        <div class="hand-chip-val">${status.value ? status.value.toFixed(1) : '—'}<span class="hand-chip-unit">kg</span></div>
+        <div class="hand-chip-status">${status.label}</div>
+        <div class="hand-chip-meta">${status.meta}</div>
+        <div class="hand-chip-bar"><div class="hand-chip-fill ${colorClass}" style="width:${fillWidth}%"></div></div>
+    </div>`;
+}
+
+function fatigueDaysByHand(sorted, hand) {
+    const handRecs = sorted.filter(r => r[hand] > 0);
     const fatigueRecs = [];
-    for (let i = sorted.length - 1; i >= 7; i--) {
-        const avg = sorted.slice(i-7, i).reduce((s, r) => s + r.value, 0) / 7;
-        if (sorted[i].value < avg) fatigueRecs.unshift(sorted[i]);
+    for (let i = handRecs.length - 1; i >= 3; i--) {
+        const prior = handRecs.slice(Math.max(0, i - 7), i);
+        if (prior.length < 3) break;
+        const avg = prior.reduce((s, r) => s + r[hand], 0) / prior.length;
+        if (handRecs[i][hand] < avg) fatigueRecs.unshift(handRecs[i]);
         else break;
     }
-    if (fatigueRecs.length === 0) return { count: 0, isConsecutiveCalendar: true };
     let isConsecutiveCalendar = true;
     for (let i = 1; i < fatigueRecs.length; i++) {
         const diff = (new Date(fatigueRecs[i].date) - new Date(fatigueRecs[i-1].date)) / 86400000;
@@ -1148,12 +1236,44 @@ function fatigueDays(sorted) {
     return { count: fatigueRecs.length, isConsecutiveCalendar };
 }
 
-// 7-day rolling avg at index i (uses i-7 to i-1)
-function rollingAvg7At(sorted, i) {
-    if (i < 7) return null;
-    return sorted.slice(i-7, i).reduce((s, r) => s + r.value, 0) / 7;
+function fatigueStatus(sorted) {
+    const left = fatigueDaysByHand(sorted, 'l');
+    const right = fatigueDaysByHand(sorted, 'r');
+    const parts = [];
+    if (left.count >= 3) parts.push({ hand: '左手', ...left });
+    if (right.count >= 3) parts.push({ hand: '右手', ...right });
+    return parts;
 }
 
+function rollingAvgAt(sorted, i, hand) {
+    const prior = sorted.slice(0, i).filter(r => r[hand] > 0).slice(-7);
+    if (prior.length < 3) return null;
+    return prior.reduce((s, r) => s + r[hand], 0) / prior.length;
+}
+
+const CHART_MODE = {
+    r: { label:'右手趨勢', short:'右手', color:'#FF8C00', grad:'gradR', modalGrad:'mgradR' },
+    l: { label:'左手趨勢', short:'左手', color:'#5AC8FA', grad:'gradL', modalGrad:'mgradL' }
+};
+function chartValueAt(sorted, d, mode) {
+    return d[mode] || 0;
+}
+function chartAvgAt(sorted, d, mode) {
+    const idx = sorted.findIndex(r => r.date === d.date);
+    return idx >= 0 ? rollingAvgAt(sorted, idx, mode) : null;
+}
+function updateChartModeButtons() {
+    document.querySelectorAll('[data-chart-mode]').forEach(btn => btn.classList.toggle('active', btn.dataset.chartMode === chartMode));
+    const label = document.getElementById('chart-active-label');
+    if (label) label.textContent = `${CHART_MODE[chartMode].label}（含同手7日均線）`;
+}
+function setChartMode(mode) {
+    if (!CHART_MODE[mode]) return;
+    chartMode = mode;
+    updateChartModeButtons();
+    renderChart(_sortedCache);
+    if (document.getElementById('chart-modal').classList.contains('show')) renderChartModal(_sortedCache);
+}
 // ── Render ────────────────────────────────────────────────────────────
 function render() {
     const sorted = getSorted();
@@ -1196,13 +1316,16 @@ function render() {
     renderStats(sorted);
 
     // Fatigue
-    const { count: fc, isConsecutiveCalendar } = fatigueDays(sorted);
+    const fatigueParts = fatigueStatus(sorted);
     const fw = document.getElementById('fatigue-wrap');
-    if (fc >= 3) {
+    if (fatigueParts.length) {
         fw.style.display = 'flex';
-        const label = isConsecutiveCalendar ? `連續 ${fc} 天` : `${fc} 筆`;
+        const label = fatigueParts.map(p => {
+            const unit = p.isConsecutiveCalendar ? `連續 ${p.count} 天` : `${p.count} 筆`;
+            return `${p.hand}${unit}`;
+        }).join('、');
         document.getElementById('fatigue-sub').textContent =
-            `已 ${label} 低於7日基準，考慮讓身體休息一下`;
+            `${label}低於各自近期基準，考慮讓身體休息一下`;
     } else {
         fw.style.display = 'none';
     }
@@ -1225,60 +1348,32 @@ function renderStatusCard(sorted, today, hasToday) {
         emojiEl.textContent = sorted.length === 0 ? '💪' : '⏳';
         valEl.textContent = '—';
         lblEl.textContent = '今日尚未記錄';
-        diffEl.textContent = '';
+        diffEl.textContent = sorted.length === 0 ? '開始第一次紀錄後，這裡會顯示今日狀態' : '記錄後會和近期狀態比較';
+        diffEl.className = 'status-diff';
         extraEl.innerHTML = '';
         return;
     }
 
-    const status = calcStatus(sorted, today);
     const todayRec = sorted.find(r => r.date === today);
-    valEl.textContent = todayRec ? todayRec.value.toFixed(1) : '—';
-
-    if (!status) {
+    if (!todayRec) {
         emojiEl.textContent = '💪';
+        valEl.textContent = '—';
         lblEl.textContent = '已記錄';
         diffEl.textContent = '';
         extraEl.innerHTML = '';
         return;
     }
 
-    if (status.type === 'cold') {
-        emojiEl.textContent = '📈';
-        lblEl.textContent = '已記錄';
-        diffEl.textContent = '';
-        extraEl.innerHTML = `<div class="cold-badge">⏳ 累積基準中，還需 ${status.remaining} 筆</div>`;
-        return;
-    }
+    const lStatus = calcHandStatus(sorted, todayRec, 'l');
+    const rStatus = calcHandStatus(sorted, todayRec, 'r');
+    const summary = summarizeHandStatus(lStatus, rStatus);
 
-    const pct  = (status.diff * 100).toFixed(1);
-    const sign = status.diff >= 0 ? '+' : '';
-
-    const cfg = {
-        fire:   { emoji: '🔥', lbl: '狀態極佳！今天超越了自己',  cls: 'up' },
-        strong: { emoji: '💪', lbl: '表現穩定，維持在水準上',    cls: 'up' },
-        tired:  { emoji: '😮‍💨', lbl: '今天有點疲憊',             cls: 'down' },
-        rest:   { emoji: '🛌', lbl: '建議充分休息，養精蓄銳',    cls: 'down' },
-    };
-    const c = cfg[status.type];
-    emojiEl.textContent = c.emoji;
-    lblEl.textContent   = c.lbl;
-    diffEl.textContent  = `${sign}${pct}% vs 7日均線（${status.avg7.toFixed(1)} kg）`;
-    diffEl.className    = `status-diff ${c.cls}`;
-    const isNewFmt = records[today] !== null && typeof records[today] === 'object';
-    if (todayRec && isNewFmt && todayRec.l > 0 && todayRec.r > 0) {
-        extraEl.innerHTML = `<div class="hand-row">
-            <div class="hand-chip hand-chip-l">
-                <div class="hand-chip-label">🤜 左手</div>
-                <div class="hand-chip-val">${todayRec.l}<span class="hand-chip-unit">kg</span></div>
-            </div>
-            <div class="hand-chip hand-chip-r">
-                <div class="hand-chip-label">🤛 右手</div>
-                <div class="hand-chip-val">${todayRec.r}<span class="hand-chip-unit">kg</span></div>
-            </div>
-        </div>`;
-    } else {
-        extraEl.innerHTML = '';
-    }
+    emojiEl.textContent = summary.emoji;
+    valEl.textContent = todayRec.value.toFixed(1);
+    lblEl.textContent = summary.label;
+    diffEl.textContent = summary.detail;
+    diffEl.className = `status-diff ${summary.cls}`.trim();
+    extraEl.innerHTML = `<div class="hand-row">${handChipHTML('l', lStatus)}${handChipHTML('r', rStatus)}</div>`;
 }
 
 function renderStats(sorted) {
@@ -1286,18 +1381,27 @@ function renderStats(sorted) {
     const prLDate  = document.getElementById('stat-pr-l-date');
     const prREl    = document.getElementById('stat-pr-r');
     const prRDate  = document.getElementById('stat-pr-r-date');
-    const avg7El   = document.getElementById('stat-7avg');
+    const avg7LEl  = document.getElementById('stat-7avg-l');
+    const avg7REl  = document.getElementById('stat-7avg-r');
+    const avg30LEl = document.getElementById('stat-30avg-l');
+    const avg30REl = document.getElementById('stat-30avg-r');
     const trendEl  = document.getElementById('stat-trend');
-    const avg30El  = document.getElementById('stat-30avg');
     const daysEl   = document.getElementById('stat-days');
+    const gapValEl = document.getElementById('stat-gap-val');
+    const gapNoteEl = document.getElementById('stat-gap-note');
+
+    const clearStats = () => {
+        [prLEl, prREl, avg7LEl, avg7REl, avg30LEl, avg30REl, gapValEl].forEach(e => e.textContent = '—');
+        prLDate.innerHTML = prRDate.innerHTML = trendEl.innerHTML = daysEl.innerHTML = gapNoteEl.innerHTML = '';
+        document.getElementById('stat-box-prl').classList.remove('pr-today');
+        document.getElementById('stat-box-prr').classList.remove('pr-today');
+    };
 
     if (sorted.length === 0) {
-        [prLEl, prREl, avg7El, avg30El].forEach(e => e.textContent = '—');
-        prLDate.innerHTML = prRDate.innerHTML = trendEl.innerHTML = daysEl.innerHTML = '';
+        clearStats();
         return;
     }
 
-    // Separate L / R PRs — only consider records from 4/16 onwards (split-hand tracking start)
     const today = todayStr();
     const PR_START = '2026-04-16';
     const withL = sorted.filter(r => r.l > 0 && r.date >= PR_START);
@@ -1313,6 +1417,7 @@ function renderStats(sorted) {
         document.getElementById('stat-box-prl').classList.toggle('pr-today', isTodayL);
     } else {
         prLEl.textContent = '—'; prLDate.innerHTML = '';
+        document.getElementById('stat-box-prl').classList.remove('pr-today');
     }
 
     if (withR.length) {
@@ -1325,35 +1430,55 @@ function renderStats(sorted) {
         document.getElementById('stat-box-prr').classList.toggle('pr-today', isTodayR);
     } else {
         prREl.textContent = '—'; prRDate.innerHTML = '';
+        document.getElementById('stat-box-prr').classList.remove('pr-today');
     }
 
-    // 7-day avg
-    const last7 = sorted.slice(-7);
-    const avg7 = last7.reduce((s, r) => s + r.value, 0) / last7.length;
-    avg7El.textContent = avg7.toFixed(1);
+    const avgOf = (arr, hand, take) => {
+        const vals = arr.filter(r => r[hand] > 0).slice(-take).map(r => r[hand]);
+        return vals.length ? vals.reduce((s, v) => s + v, 0) / vals.length : null;
+    };
+    const fmtAvg = v => v === null ? '—' : v.toFixed(1);
 
-    // Trend: recent 7 vs prior 7
-    const prev7 = sorted.slice(-14, -7);
-    if (prev7.length >= 3) {
-        const pAvg = prev7.reduce((s, r) => s + r.value, 0) / prev7.length;
-        const diff = (avg7 - pAvg) / pAvg;
-        if (diff > 0.02)
-            trendEl.innerHTML = `<span class="tag tag-green">↑ 上升</span>`;
-        else if (diff < -0.02)
-            trendEl.innerHTML = `<span class="tag tag-red">↓ 下降</span>`;
-        else
-            trendEl.innerHTML = `<span class="tag tag-muted">→ 穩定</span>`;
-    } else {
-        trendEl.innerHTML = `<span class="tag tag-muted">累積中</span>`;
-    }
+    const avg7L = avgOf(sorted, 'l', 7);
+    const avg7R = avgOf(sorted, 'r', 7);
+    const avg30L = avgOf(sorted, 'l', 30);
+    const avg30R = avgOf(sorted, 'r', 30);
+    avg7LEl.textContent = fmtAvg(avg7L);
+    avg7REl.textContent = fmtAvg(avg7R);
+    avg30LEl.textContent = fmtAvg(avg30L);
+    avg30REl.textContent = fmtAvg(avg30R);
 
-    // 30-day avg
-    const last30 = sorted.slice(-30);
-    const avg30 = last30.reduce((s, r) => s + r.value, 0) / last30.length;
-    avg30El.textContent = avg30.toFixed(1);
+    const trendTag = (hand, label) => {
+        const vals = sorted.filter(r => r[hand] > 0).map(r => r[hand]);
+        const recent = vals.slice(-7);
+        const prior = vals.slice(-14, -7);
+        if (recent.length < 3 || prior.length < 3) return `<span class="tag tag-muted">${label}累積中</span>`;
+        const rAvg = recent.reduce((s, v) => s + v, 0) / recent.length;
+        const pAvg = prior.reduce((s, v) => s + v, 0) / prior.length;
+        const diff = (rAvg - pAvg) / pAvg;
+        if (diff > 0.02) return `<span class="tag tag-green">${label}↑</span>`;
+        if (diff < -0.02) return `<span class="tag tag-red">${label}↓</span>`;
+        return `<span class="tag tag-muted">${label}→</span>`;
+    };
+    trendEl.innerHTML = `${trendTag('l', '左')} ${trendTag('r', '右')}`;
     daysEl.innerHTML = `<span class="tag tag-muted">${sorted.length} 天</span>`;
-}
 
+    const gapRecs = sorted.filter(r => r.l > 0 && r.r > 0).slice(-30);
+    if (!gapRecs.length) {
+        gapValEl.textContent = '—';
+        gapNoteEl.innerHTML = '<span class="tag tag-muted">需要雙手紀錄</span>';
+        return;
+    }
+
+    const avgGap = gapRecs.reduce((s, r) => s + Math.abs(r.l - r.r), 0) / gapRecs.length;
+    const avgL = gapRecs.reduce((s, r) => s + r.l, 0) / gapRecs.length;
+    const avgR = gapRecs.reduce((s, r) => s + r.r, 0) / gapRecs.length;
+    const higher = Math.abs(avgL - avgR) < 0.05 ? '左右接近' : avgL > avgR ? '左手平均較高' : '右手平均較高';
+    const base = (avgL + avgR) / 2;
+    const pct = base ? (avgGap / base * 100).toFixed(1) : '0.0';
+    gapValEl.textContent = avgGap.toFixed(1);
+    gapNoteEl.innerHTML = `<span class="tag ${avgGap <= 2 ? 'tag-green' : avgGap <= 5 ? 'tag-orange' : 'tag-red'}">${higher}</span><br>近 ${gapRecs.length} 筆 · 平均差 ${pct}%`;
+}
 // ── Chart ─────────────────────────────────────────────────────────────
 function buildLineSegs(data, xOf, yOf, valFn) {
     const GAP_MS = 86400000 * 1.5;
@@ -1374,137 +1499,37 @@ function buildLineSegs(data, xOf, yOf, valFn) {
 
 function renderChart(sorted) {
     const svg = document.getElementById('chart-svg');
-
+    updateChartModeButtons();
+    const cfg = CHART_MODE[chartMode];
     if (sorted.length < 2) {
-        svg.innerHTML = `<text x="260" y="80" text-anchor="middle" fill="#3A3A45"
-            font-size="13" font-family="-apple-system,sans-serif">需要更多數據（至少 2 筆）</text>`;
+        svg.innerHTML = `<text x="260" y="80" text-anchor="middle" fill="#3A3A45" font-size="13" font-family="-apple-system,sans-serif">需要更多數據（至少 2 筆）</text>`;
         return;
     }
 
     const data = sorted.slice(-30);
-    const n    = data.length;
-    const today = todayStr();
+    const actualValues = data.map(d => chartValueAt(sorted, d, chartMode)).filter(v => v > 0);
+    const avgValues = data.map(d => chartAvgAt(sorted, d, chartMode)).filter(v => v > 0);
+    const values = actualValues.concat(avgValues);
+    if (actualValues.length < 2) {
+        svg.innerHTML = `<text x="260" y="80" text-anchor="middle" fill="#3A3A45" font-size="13" font-family="-apple-system,sans-serif">${cfg.short}需要更多數據</text>`;
+        return;
+    }
 
-    const W  = 520, H = 160;
-    const PL = 34, PR = 10, PT = 10, PB = 28;
-    const cW = W - PL - PR;
-    const cH = H - PT - PB;
-
-    // Include both l and r for Y scale
-    const allVals = data.flatMap(d => [d.l, d.r]).filter(v => v > 0);
-    const minV = Math.min(...allVals);
-    const maxV = Math.max(...allVals);
-    const range = maxV - minV || 1;
-
-    const t0 = new Date(data[0].date).getTime();
-    const t1 = new Date(data[n-1].date).getTime();
-    const tSpan = t1 - t0 || 1;
-    const xOf = dateStr => PL + ((new Date(dateStr).getTime() - t0) / tSpan) * cW;
-    const yOf = v => PT + cH - ((v - minV) / range) * cH;
-
-    // Two lines: right (orange) and left (blue)
-    const segsR = buildLineSegs(data, xOf, yOf, d => d.r);
-    const segsL = buildLineSegs(data, xOf, yOf, d => d.l);
-
-    // 7-day rolling baseline (based on max value)
-    const GAP_MS = 86400000 * 1.5;
-    const baseSegs = [];
-    let bSeg = [];
-    data.forEach((d, i) => {
-        if (i > 0 && new Date(d.date) - new Date(data[i-1].date) > GAP_MS) {
-            if (bSeg.length >= 2) baseSegs.push(bSeg.join(' '));
-            bSeg = [];
-        }
-        const globalIdx = sorted.findIndex(r => r.date === d.date);
-        const avg = rollingAvg7At(sorted, globalIdx);
-        if (avg !== null) bSeg.push(`${xOf(d.date)},${yOf(avg)}`);
-        else { if (bSeg.length >= 2) baseSegs.push(bSeg.join(' ')); bSeg = []; }
-    });
-    if (bSeg.length >= 2) baseSegs.push(bSeg.join(' '));
-
-    // Y axis labels
-    const yLevels = [minV, (minV+maxV)/2, maxV];
-    const yLabels = yLevels.map(v =>
-        `<text x="${PL-4}" y="${yOf(v)}" text-anchor="end" dominant-baseline="middle"
-            fill="#3A3A45" font-size="9" font-family="-apple-system,sans-serif">${Math.round(v)}</text>`
-    ).join('');
-
-    // X axis labels
-    const step = Math.max(1, Math.floor(n / 5));
-    const xLabels = data.map((d, i) => {
-        if (i % step !== 0 && i !== n-1) return '';
-        return `<text x="${xOf(d.date)}" y="${H-3}" text-anchor="middle"
-            fill="#3A3A45" font-size="9" font-family="-apple-system,sans-serif">${fmtShort(d.date)}</text>`;
-    }).join('');
-
-    // Dots for both hands
-    const dotsR = data.filter(d => d.r > 0).map(d => {
-        const isT = d.date === today;
-        return `<circle cx="${xOf(d.date)}" cy="${yOf(d.r)}"
-            r="${isT ? 5 : 2.5}" fill="#FF8C00"
-            stroke="${isT ? '#fff' : 'none'}" stroke-width="${isT ? 1.5 : 0}"/>`;
-    }).join('');
-    const dotsL = data.filter(d => d.l > 0).map(d => {
-        const isT = d.date === today;
-        return `<circle cx="${xOf(d.date)}" cy="${yOf(d.l)}"
-            r="${isT ? 5 : 2.5}" fill="#5AC8FA"
-            stroke="${isT ? '#fff' : 'none'}" stroke-width="${isT ? 1.5 : 0}"/>`;
-    }).join('');
-
-    const bottomY = PT + cH;
-    const areaR = segsR.map(pts => {
-        if (pts.length < 2) return '';
-        const firstX = parseFloat(pts[0].split(',')[0]);
-        const lastX  = parseFloat(pts[pts.length-1].split(',')[0]);
-        return `<polygon points="${[...pts, `${lastX},${bottomY}`, `${firstX},${bottomY}`].join(' ')}" fill="url(#gradR)"/>`;
-    }).join('');
-    const areaL = segsL.map(pts => {
-        if (pts.length < 2) return '';
-        const firstX = parseFloat(pts[0].split(',')[0]);
-        const lastX  = parseFloat(pts[pts.length-1].split(',')[0]);
-        return `<polygon points="${[...pts, `${lastX},${bottomY}`, `${firstX},${bottomY}`].join(' ')}" fill="url(#gradL)"/>`;
-    }).join('');
-
-    // subtle horizontal grid lines
-    const gridLines = [0.25, 0.5, 0.75].map(f => {
-        const gy = PT + cH * f;
-        return `<line x1="${PL}" y1="${gy}" x2="${W-PR}" y2="${gy}" stroke="#1C1C27" stroke-width="1"/>`;
-    }).join('');
-
-    svg.innerHTML = `
-        <defs>
-            <linearGradient id="gradR" x1="0" y1="${PT}" x2="0" y2="${bottomY}" gradientUnits="userSpaceOnUse">
-                <stop offset="0%"   stop-color="#FF8C00" stop-opacity="0.42"/>
-                <stop offset="100%" stop-color="#FF8C00" stop-opacity="0"/>
-            </linearGradient>
-            <linearGradient id="gradL" x1="0" y1="${PT}" x2="0" y2="${bottomY}" gradientUnits="userSpaceOnUse">
-                <stop offset="0%"   stop-color="#5AC8FA" stop-opacity="0.32"/>
-                <stop offset="100%" stop-color="#5AC8FA" stop-opacity="0"/>
-            </linearGradient>
-        </defs>
-        ${gridLines}
-        <line x1="${PL}" y1="${PT}" x2="${PL}" y2="${bottomY}" stroke="#1C1C27" stroke-width="1"/>
-        <line x1="${PL}" y1="${bottomY}" x2="${W-PR}" y2="${bottomY}" stroke="#1C1C27" stroke-width="1"/>
-        ${yLabels}
-        ${xLabels}
-        ${areaL}
-        ${areaR}
-        ${baseSegs.map(pts =>
-            `<polyline points="${pts}" fill="none" stroke="#3A3A52"
-                stroke-width="1.5" stroke-dasharray="5,3"/>`
-        ).join('')}
-        ${segsL.map(pts =>
-            `<polyline points="${pts.join(' ')}" fill="none" stroke="#5AC8FA"
-                stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="0.85"/>`
-        ).join('')}
-        ${segsR.map(pts =>
-            `<polyline points="${pts.join(' ')}" fill="none" stroke="#FF8C00"
-                stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>`
-        ).join('')}
-        ${dotsL}
-        ${dotsR}`;
+    const W=520,H=160,PL=34,PR=10,PT=10,PB=28,cW=W-PL-PR,cH=H-PT-PB,bottomY=PT+cH;
+    const minV=Math.min(...values), maxV=Math.max(...values), range=maxV-minV||1;
+    const t0=new Date(data[0].date).getTime(), t1=new Date(data[data.length-1].date).getTime(), tSpan=t1-t0||1;
+    const xOf=ds=>PL+((new Date(ds).getTime()-t0)/tSpan)*cW, yOf=v=>PT+cH-((v-minV)/range)*cH;
+    const segs=buildLineSegs(data,xOf,yOf,d=>chartValueAt(sorted,d,chartMode));
+    const avgSegs=buildLineSegs(data,xOf,yOf,d=>chartAvgAt(sorted,d,chartMode));
+    const grid=[0.25,0.5,0.75].map(f=>`<line x1="${PL}" y1="${PT+cH*f}" x2="${W-PR}" y2="${PT+cH*f}" stroke="#1C1C27" stroke-width="1"/>`).join('');
+    const yLabels=[minV,(minV+maxV)/2,maxV].map(v=>`<text x="${PL-4}" y="${yOf(v)}" text-anchor="end" dominant-baseline="middle" fill="#3A3A45" font-size="9" font-family="-apple-system,sans-serif">${Math.round(v)}</text>`).join('');
+    const step=Math.max(1,Math.floor(data.length/5));
+    const xLabels=data.map((d,i)=>(i%step!==0&&i!==data.length-1)?'':`<text x="${xOf(d.date)}" y="${H-3}" text-anchor="middle" fill="#3A3A45" font-size="9" font-family="-apple-system,sans-serif">${fmtShort(d.date)}</text>`).join('');
+    const area=segs.map(pts=>pts.length<2?'':`<polygon points="${[...pts,`${parseFloat(pts[pts.length-1].split(',')[0])},${bottomY}`,`${parseFloat(pts[0].split(',')[0])},${bottomY}`].join(' ')}" fill="url(#${cfg.grad})"/>`).join('');
+    const dots=data.map(d=>{ const v=chartValueAt(sorted,d,chartMode); if(!(v>0)) return ''; const isT=d.date===todayStr(); return `<circle cx="${xOf(d.date)}" cy="${yOf(v)}" r="${isT?5:2.8}" fill="${cfg.color}" stroke="${isT?'#fff':'none'}" stroke-width="${isT?1.5:0}"/>`; }).join('');
+    const avgLine=avgSegs.map(pts=>`<polyline points="${pts.join(' ')}" fill="none" stroke="#8E8E9A" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="5,4"/>`).join('');
+    svg.innerHTML = `<defs><linearGradient id="gradR" x1="0" y1="${PT}" x2="0" y2="${bottomY}" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#FF8C00" stop-opacity="0.42"/><stop offset="100%" stop-color="#FF8C00" stop-opacity="0"/></linearGradient><linearGradient id="gradL" x1="0" y1="${PT}" x2="0" y2="${bottomY}" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#5AC8FA" stop-opacity="0.34"/><stop offset="100%" stop-color="#5AC8FA" stop-opacity="0"/></linearGradient></defs>${grid}<line x1="${PL}" y1="${PT}" x2="${PL}" y2="${bottomY}" stroke="#1C1C27" stroke-width="1"/><line x1="${PL}" y1="${bottomY}" x2="${W-PR}" y2="${bottomY}" stroke="#1C1C27" stroke-width="1"/>${yLabels}${xLabels}${area}${avgLine}${segs.map(pts=>`<polyline points="${pts.join(' ')}" fill="none" stroke="${cfg.color}" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>`).join('')}${dots}`;
 }
-
 // ── Records List ──────────────────────────────────────────────────────
 function renderList(sorted) {
     const el = document.getElementById('records-card');
@@ -1651,153 +1676,65 @@ function closeChartModal(e) {
 
 function renderChartModal(sorted) {
     const svg = document.getElementById('chart-modal-svg');
-    if (sorted.length < 2) {
-        svg.innerHTML = `<text x="300" y="120" text-anchor="middle" fill="#3A3A45"
-            font-size="14" font-family="-apple-system,sans-serif">需要更多數據（至少 2 筆）</text>`;
-        return;
-    }
+    updateChartModeButtons();
+    const cfg = CHART_MODE[chartMode];
+    const legend = document.getElementById('chart-modal-legend');
+    if (legend) legend.innerHTML = `<span><span class="leg-line" style="background:${cfg.color}"></span>${cfg.short}</span><span><span class="leg-dash"></span>同手7日均</span><span style="color:var(--text3)">點擊圖表可查看當日紀錄</span>`;
+    if (sorted.length < 2) { svg.innerHTML = `<text x="300" y="120" text-anchor="middle" fill="#3A3A45" font-size="14" font-family="-apple-system,sans-serif">需要更多數據（至少 2 筆）</text>`; return; }
 
-    const data  = sorted.slice(-30);
-    const n     = data.length;
-    const today = todayStr();
-    const W = 600, H = 240, PL = 40, PR = 12, PT = 16, PB = 34;
-    const cW = W - PL - PR, cH = H - PT - PB;
-    const bottomY = PT + cH;
-
-    const allVals = data.flatMap(d => [d.l, d.r]).filter(v => v > 0);
-    const minV = Math.min(...allVals), maxV = Math.max(...allVals);
-    const range = maxV - minV || 1;
-
-    const t0 = new Date(data[0].date).getTime();
-    const t1 = new Date(data[n-1].date).getTime();
-    const tSpan = t1 - t0 || 1;
-    const xOf = ds => PL + ((new Date(ds).getTime() - t0) / tSpan) * cW;
-    const yOf = v  => PT + cH - ((v - minV) / range) * cH;
-
-    _chartModalState = { data, xOf, yOf, W, H };
-
-    const segsR = buildLineSegs(data, xOf, yOf, d => d.r);
-    const segsL = buildLineSegs(data, xOf, yOf, d => d.l);
-
-    const mkArea = (segs, grad) => segs.map(pts => {
-        if (pts.length < 2) return '';
-        const fx = parseFloat(pts[0].split(',')[0]);
-        const lx = parseFloat(pts[pts.length-1].split(',')[0]);
-        return `<polygon points="${[...pts,`${lx},${bottomY}`,`${fx},${bottomY}`].join(' ')}" fill="url(#${grad})"/>`;
-    }).join('');
-
-    const GAP_MS = 86400000 * 1.5;
-    const baseSegs = []; let bSeg = [];
-    data.forEach((d, i) => {
-        if (i > 0 && new Date(d.date) - new Date(data[i-1].date) > GAP_MS) {
-            if (bSeg.length >= 2) baseSegs.push(bSeg.join(' ')); bSeg = [];
-        }
-        const gi = sorted.findIndex(r => r.date === d.date);
-        const avg = rollingAvg7At(sorted, gi);
-        if (avg !== null) bSeg.push(`${xOf(d.date)},${yOf(avg)}`);
-        else { if (bSeg.length >= 2) baseSegs.push(bSeg.join(' ')); bSeg = []; }
-    });
-    if (bSeg.length >= 2) baseSegs.push(bSeg.join(' '));
-
-    const gridLines = [0.25, 0.5, 0.75].map(f =>
-        `<line x1="${PL}" y1="${PT + cH*f}" x2="${W-PR}" y2="${PT + cH*f}" stroke="#1C1C27" stroke-width="1"/>`
-    ).join('');
-
-    const yLevels = [0, 0.25, 0.5, 0.75, 1].map(f => minV + range * f);
-    const yLabels = yLevels.map(v =>
-        `<text x="${PL-5}" y="${yOf(v)}" text-anchor="end" dominant-baseline="middle"
-            fill="#3A3A45" font-size="10" font-family="-apple-system,sans-serif">${Math.round(v)}</text>`
-    ).join('');
-
-    const step = Math.max(1, Math.floor(n / 8));
-    const xLabels = data.map((d, i) => {
-        if (i % step !== 0 && i !== n-1) return '';
-        return `<text x="${xOf(d.date)}" y="${H-6}" text-anchor="middle"
-            fill="#3A3A45" font-size="10" font-family="-apple-system,sans-serif">${fmtShort(d.date)}</text>`;
-    }).join('');
-
-    const mkDots = (hand, color) => data.filter(d => d[hand] > 0).map(d => {
-        const isT = d.date === today;
-        return `<circle cx="${xOf(d.date)}" cy="${yOf(d[hand])}"
-            r="${isT ? 6 : 4}" fill="${color}"
-            stroke="${isT ? '#fff' : 'none'}" stroke-width="${isT ? 2 : 0}"/>`;
-    }).join('');
-
-    svg.innerHTML = `
-        <defs>
-            <linearGradient id="mgradR" x1="0" y1="${PT}" x2="0" y2="${bottomY}" gradientUnits="userSpaceOnUse">
-                <stop offset="0%"   stop-color="#FF8C00" stop-opacity="0.42"/>
-                <stop offset="100%" stop-color="#FF8C00" stop-opacity="0"/>
-            </linearGradient>
-            <linearGradient id="mgradL" x1="0" y1="${PT}" x2="0" y2="${bottomY}" gradientUnits="userSpaceOnUse">
-                <stop offset="0%"   stop-color="#5AC8FA" stop-opacity="0.32"/>
-                <stop offset="100%" stop-color="#5AC8FA" stop-opacity="0"/>
-            </linearGradient>
-        </defs>
-        ${gridLines}
-        <line x1="${PL}" y1="${PT}"      x2="${PL}"   y2="${bottomY}" stroke="#1C1C27" stroke-width="1"/>
-        <line x1="${PL}" y1="${bottomY}" x2="${W-PR}" y2="${bottomY}" stroke="#1C1C27" stroke-width="1"/>
-        ${yLabels}${xLabels}
-        ${mkArea(segsL,'mgradL')}${mkArea(segsR,'mgradR')}
-        ${baseSegs.map(p => `<polyline points="${p}" fill="none" stroke="#3A3A52" stroke-width="1.5" stroke-dasharray="5,3"/>`).join('')}
-        ${segsL.map(p => `<polyline points="${p.join(' ')}" fill="none" stroke="#5AC8FA" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.9"/>`).join('')}
-        ${segsR.map(p => `<polyline points="${p.join(' ')}" fill="none" stroke="#FF8C00" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>`).join('')}
-        ${mkDots('l','#5AC8FA')}${mkDots('r','#FF8C00')}
-        <line id="tt-vline" x1="0" y1="${PT}" x2="0" y2="${bottomY}"
-              stroke="rgba(255,255,255,0.15)" stroke-width="1.5" stroke-dasharray="4,3" display="none"/>`;
-
-    // Reset tooltip state on re-render
+    const data=sorted.slice(-30);
+    const actualValues=data.map(d=>chartValueAt(sorted,d,chartMode)).filter(v=>v>0);
+    const avgValues=data.map(d=>chartAvgAt(sorted,d,chartMode)).filter(v=>v>0);
+    const values=actualValues.concat(avgValues);
+    if (actualValues.length < 2) { svg.innerHTML = `<text x="300" y="120" text-anchor="middle" fill="#3A3A45" font-size="14" font-family="-apple-system,sans-serif">${cfg.short}需要更多數據</text>`; return; }
+    const W=600,H=240,PL=40,PR=12,PT=16,PB=34,cW=W-PL-PR,cH=H-PT-PB,bottomY=PT+cH;
+    const minV=Math.min(...values), maxV=Math.max(...values), range=maxV-minV||1;
+    const t0=new Date(data[0].date).getTime(), t1=new Date(data[data.length-1].date).getTime(), tSpan=t1-t0||1;
+    const xOf=ds=>PL+((new Date(ds).getTime()-t0)/tSpan)*cW, yOf=v=>PT+cH-((v-minV)/range)*cH;
+    _chartModalState = { data, sorted, xOf, yOf, W, H, mode: chartMode };
+    const segs=buildLineSegs(data,xOf,yOf,d=>chartValueAt(sorted,d,chartMode));
+    const avgSegs=buildLineSegs(data,xOf,yOf,d=>chartAvgAt(sorted,d,chartMode));
+    const grid=[0.25,0.5,0.75].map(f=>`<line x1="${PL}" y1="${PT+cH*f}" x2="${W-PR}" y2="${PT+cH*f}" stroke="#1C1C27" stroke-width="1"/>`).join('');
+    const yLabels=[0,0.25,0.5,0.75,1].map(f=>minV+range*f).map(v=>`<text x="${PL-5}" y="${yOf(v)}" text-anchor="end" dominant-baseline="middle" fill="#3A3A45" font-size="10" font-family="-apple-system,sans-serif">${Math.round(v)}</text>`).join('');
+    const step=Math.max(1,Math.floor(data.length/8));
+    const xLabels=data.map((d,i)=>(i%step!==0&&i!==data.length-1)?'':`<text x="${xOf(d.date)}" y="${H-6}" text-anchor="middle" fill="#3A3A45" font-size="10" font-family="-apple-system,sans-serif">${fmtShort(d.date)}</text>`).join('');
+    const area=segs.map(pts=>pts.length<2?'':`<polygon points="${[...pts,`${parseFloat(pts[pts.length-1].split(',')[0])},${bottomY}`,`${parseFloat(pts[0].split(',')[0])},${bottomY}`].join(' ')}" fill="url(#${cfg.modalGrad})"/>`).join('');
+    const dots=data.map(d=>{ const v=chartValueAt(sorted,d,chartMode); if(!(v>0)) return ''; const isT=d.date===todayStr(); return `<circle cx="${xOf(d.date)}" cy="${yOf(v)}" r="${isT?6:4}" fill="${cfg.color}" stroke="${isT?'#fff':'none'}" stroke-width="${isT?2:0}"/>`; }).join('');
+    const avgLine=avgSegs.map(p=>`<polyline points="${p.join(' ')}" fill="none" stroke="#8E8E9A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="6,4"/>`).join('');
+    svg.innerHTML = `<defs><linearGradient id="mgradR" x1="0" y1="${PT}" x2="0" y2="${bottomY}" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#FF8C00" stop-opacity="0.42"/><stop offset="100%" stop-color="#FF8C00" stop-opacity="0"/></linearGradient><linearGradient id="mgradL" x1="0" y1="${PT}" x2="0" y2="${bottomY}" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#5AC8FA" stop-opacity="0.34"/><stop offset="100%" stop-color="#5AC8FA" stop-opacity="0"/></linearGradient></defs>${grid}<line x1="${PL}" y1="${PT}" x2="${PL}" y2="${bottomY}" stroke="#1C1C27" stroke-width="1"/><line x1="${PL}" y1="${bottomY}" x2="${W-PR}" y2="${bottomY}" stroke="#1C1C27" stroke-width="1"/>${yLabels}${xLabels}${area}${avgLine}${segs.map(p=>`<polyline points="${p.join(' ')}" fill="none" stroke="${cfg.color}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>`).join('')}${dots}<line id="tt-vline" x1="0" y1="${PT}" x2="0" y2="${bottomY}" stroke="rgba(255,255,255,0.15)" stroke-width="1.5" stroke-dasharray="4,3" display="none"/>`;
     _chartTtActiveDate = null;
     document.getElementById('chart-tt').style.display = 'none';
-
-    // Interaction handler
     svg.onclick = svg.ontouchstart = null;
     function onInteract(clientX) {
         if (!_chartModalState) return;
-        const { data, xOf, yOf, W, H } = _chartModalState;
+        const { data, sorted, xOf, yOf, W, mode } = _chartModalState;
         const rect = svg.getBoundingClientRect();
         const svgX = (clientX - rect.left) / rect.width * W;
-
-        let closest = null, minD = Infinity;
-        data.forEach(d => { const dx = Math.abs(xOf(d.date) - svgX); if (dx < minD) { minD = dx; closest = d; } });
+        let closest=null, minD=Infinity;
+        data.forEach(d => { const v=chartValueAt(sorted,d,mode); if(!(v>0)) return; const dx=Math.abs(xOf(d.date)-svgX); if(dx<minD){minD=dx; closest=d;} });
         if (!closest) return;
-
-        const tt = document.getElementById('chart-tt');
-        if (_chartTtActiveDate === closest.date) {
-            tt.style.display = 'none';
-            _chartTtActiveDate = null;
-            svg.querySelector('#tt-vline')?.setAttribute('display','none');
-            return;
-        }
+        const tt=document.getElementById('chart-tt');
+        if (_chartTtActiveDate === closest.date) { tt.style.display='none'; _chartTtActiveDate=null; svg.querySelector('#tt-vline')?.setAttribute('display','none'); return; }
         _chartTtActiveDate = closest.date;
-
-        // Vertical indicator line
-        const vl = svg.querySelector('#tt-vline');
-        if (vl) { vl.setAttribute('x1', xOf(closest.date)); vl.setAttribute('x2', xOf(closest.date)); vl.removeAttribute('display'); }
-
-        // Content
-        const rows = [];
-        if (closest.l > 0) rows.push(`<span style="color:#5AC8FA;font-weight:700">🤜 ${closest.l} kg</span>`);
-        if (closest.r > 0) rows.push(`<span style="color:#FF8C00;font-weight:700">🤛 ${closest.r} kg</span>`);
+        const vl=svg.querySelector('#tt-vline'); if(vl){ vl.setAttribute('x1',xOf(closest.date)); vl.setAttribute('x2',xOf(closest.date)); vl.removeAttribute('display'); }
+        const rows=[];
+        const current = chartValueAt(sorted, closest, mode);
+        const avg = chartAvgAt(sorted, closest, mode);
+        rows.push(`<span style="color:${cfg.color};font-weight:800">${cfg.short} ${current.toFixed(1)} kg</span>`);
+        if (avg !== null) rows.push(`<span style="color:#8E8E9A;font-weight:800">7日均 ${avg.toFixed(1)} kg</span>`);
+        const otherHand = mode === 'l' ? 'r' : 'l';
+        const otherCfg = CHART_MODE[otherHand];
+        if (closest[otherHand] > 0) rows.push(`<span style="color:${otherCfg.color};font-weight:700">${otherCfg.short} ${closest[otherHand]} kg</span>`);
         document.getElementById('tt-date').textContent = fmtShort(closest.date);
-        document.getElementById('tt-rows').innerHTML = rows.join('<span style="color:var(--text3);margin:0 4px">·</span>');
-
-        // Position
-        const scaleX = rect.width / W;
-        const scaleY = rect.height / H;
-        const screenX = xOf(closest.date) * scaleX;
-        const minYSvg = Math.min(
-            closest.r > 0 ? yOf(closest.r) : H,
-            closest.l > 0 ? yOf(closest.l) : H
-        );
-        tt.style.display = 'block';
+        document.getElementById('tt-rows').innerHTML = rows.join('<span style="color:var(--text3);margin:0 2px">·</span>');
+        const scaleX=rect.width/W, scaleY=rect.height/H, screenX=xOf(closest.date)*scaleX;
+        tt.style.display='block';
         tt.style.left = `${Math.max(55, Math.min(rect.width - 55, screenX))}px`;
-        tt.style.top  = `${Math.max(4, minYSvg * scaleY - tt.offsetHeight - 10)}px`;
+        tt.style.top = `${Math.max(4, yOf(current) * scaleY - tt.offsetHeight - 10)}px`;
     }
     svg.onclick = e => onInteract(e.clientX);
     svg.ontouchstart = e => { e.preventDefault(); onInteract(e.touches[0].clientX); };
 }
-
 document.getElementById('grip-input-r').addEventListener('keydown', e => {
     if (e.key === 'Enter') submitToday();
 });
