@@ -537,6 +537,77 @@
         return '不產生欠款';
     }
 
+    function dateKey(ts = Date.now()) {
+        const d = new Date(ts);
+        return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    }
+    function monthKeyFromDate(dateStr) { return dateStr.slice(0, 7); }
+    function daysInMonthKey(monthKey) {
+        const [y, m] = monthKey.split('-').map(Number);
+        return new Date(y, m, 0).getDate();
+    }
+    function addDays(dateStr, n) {
+        const d = new Date(dateStr + 'T00:00:00');
+        d.setDate(d.getDate() + n);
+        return dateKey(d.getTime());
+    }
+    function settleBudgetState(state) {
+        if (!state || !state.monthKey) return state;
+        const today = dateKey();
+        const currentMonth = monthKeyFromDate(today);
+        let b = { ...state };
+        let vault = Number(b.vault) || 0;
+        if (b.monthKey !== currentMonth) {
+            if (b.lastSettledDate && b.monthBudget > 0) {
+                const limit = Number(b.monthBudget || 0) / daysInMonthKey(b.monthKey);
+                let d = b.lastSettledDate;
+                while (monthKeyFromDate(d) === b.monthKey) {
+                    vault += limit - (d === b.lastSettledDate ? Number(b.spentToday || 0) : 0);
+                    d = addDays(d, 1);
+                }
+            }
+            return { monthKey: currentMonth, monthBudget: 0, locked: false, vault, spentToday: 0, lastSettledDate: today, updatedAt: Date.now() };
+        }
+        if (!b.lastSettledDate) b.lastSettledDate = today;
+        if (b.lastSettledDate < today && b.monthBudget > 0) {
+            const limit = Number(b.monthBudget || 0) / daysInMonthKey(b.monthKey);
+            let d = b.lastSettledDate;
+            while (d < today && monthKeyFromDate(d) === b.monthKey) {
+                vault += limit - (d === b.lastSettledDate ? Number(b.spentToday || 0) : 0);
+                d = addDays(d, 1);
+            }
+            b.spentToday = 0;
+            b.lastSettledDate = today;
+        }
+        b.vault = Math.round(vault * 100) / 100;
+        b.updatedAt = Date.now();
+        return b;
+    }
+    function applyBudgetSpend(uid, amount, appliedDate, direction = 1) {
+        const amt = Number(amount) || 0;
+        if (amt <= 0) return Promise.resolve();
+        const spendDate = appliedDate || dateKey();
+        return db.ref('budget/' + uid).transaction(raw => {
+            if (!raw || !raw.monthKey) return raw;
+            const b = settleBudgetState(raw);
+            if (!b || !b.monthKey) return b;
+            if (spendDate === dateKey() && b.monthKey === monthKeyFromDate(spendDate)) {
+                b.spentToday = Math.max(0, Number(b.spentToday || 0) + amt * direction);
+            } else {
+                b.vault = Math.round((Number(b.vault || 0) - amt * direction) * 100) / 100;
+            }
+            b.updatedAt = Date.now();
+            return b;
+        });
+    }
+    function applyRecordBudget(record, direction = 1) {
+        const info = record.budgetApplied || { date: dateKey(record.timestamp || Date.now()), p1: record.p1_bought || 0, p2: record.p2_bought || 0 };
+        return Promise.all([
+            applyBudgetSpend('p1', info.p1 || 0, info.date, direction),
+            applyBudgetSpend('p2', info.p2 || 0, info.date, direction)
+        ]).catch(() => showToast('⚠️ 每日額度同步失敗，請稍後檢查', 'var(--red)'));
+    }
+
     // ===== 小計算機 =====
     function toggleCalculator() {
         const panel = document.getElementById('calcPanel');
@@ -699,14 +770,14 @@
         if (!currentPayer) return showToast('請選擇付款人', 'var(--red)');
         if (p1 === 0 && p2 === 0) return showToast('請輸入金額', 'var(--red)');
         const payerName = currentPayer === 'p1' ? '至凱' : '柏致';
-        const record = { p1_bought: p1, p2_bought: p2, payer: currentPayer, note, timestamp: Date.now(), settled: false };
+        const record = { p1_bought: p1, p2_bought: p2, payer: currentPayer, note, timestamp: Date.now(), settled: false, budgetApplied: { date: dateKey(), p1, p2 } };
         const preview = document.getElementById('previewText').innerText;
         const amountsLine = [p1 ? `至凱 $${p1}` : '', p2 ? `柏致 $${p2}` : ''].filter(Boolean).join('、');
         showConfirm(
             '確認新增',
             `<strong>${note}</strong><br>${amountsLine}<br>由 ${payerName} 代付<br><br>${preview}`,
             () => {
-                db.ref('split/records').push(record);
+                db.ref('split/records').push(record).then(() => applyRecordBudget(record));
                 db.ref('split/balance').transaction(b => (b || 0) + getDelta(record));
                 document.getElementById('inp_p1').value = '';
                 document.getElementById('inp_p2').value = '';
@@ -749,7 +820,7 @@
             '刪除這筆帳目',
             `<strong>${r.note}</strong><br>${payerName}付<br><br>此筆對帳務的影響將一併撤銷，<br>無法復原。`,
             () => {
-                db.ref('split/records/' + key).remove();
+                db.ref('split/records/' + key).remove().then(() => applyRecordBudget(r, -1));
                 db.ref('split/balance').transaction(b => (b || 0) - delta);
                 selectedKeys.delete(key);
                 playSound('remove');
