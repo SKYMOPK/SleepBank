@@ -383,54 +383,101 @@ input:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(208,163,79,.
 #toast.show { opacity: 1; transform: translate3d(-50%,0,0); }
 
 @media (max-width: 720px) {
-  main { padding: 12px 10px 34px; }
+  main { padding: 10px 10px 34px; }
+  .topbar { min-height:60px; }
+  .brand h1 { font-size:17px; }
+  .icon-btn { width:44px; height:44px; font-size:21px; }
+  .section-heading h2, .hub-hero h2, .lobby-header h2 { font-size: clamp(28px, 8vw, 36px); }
+  .section-heading p, .hub-hero p, .lobby-header p, .tab-toolbar p, .action-panel p { font-size:14px; }
+  .eyebrow { font-size:11px; }
   .hub-hero { grid-template-columns: 1fr; }
   .hero-stats { grid-template-columns: repeat(3,1fr); }
+  .hero-stats div, .detail-stats div { padding:13px 8px; }
+  .hero-stats span, .detail-stats strong { font-size:24px; }
+  .hero-stats small, .detail-stats small { font-size:11px; }
+  .tab-btn { min-height:46px; font-size:14px; }
   .room-actions { grid-template-columns: 1fr; }
-  .action-panel { min-height: 180px; }
+  .action-panel { min-height: 190px; padding:24px 20px; }
+  .action-panel h3, .tab-toolbar h3 { font-size:18px; }
+  .panel-icon { width:50px; height:50px; font-size:17px; }
+  .primary-btn, .secondary-btn { min-height:48px; font-size:15px; }
+  input { min-height:48px; font-size:15px; }
+  .guide-band strong { font-size:24px; }
+  .guide-band span { font-size:12px; }
   .tab-toolbar { align-items:flex-start; flex-direction:column; }
   .toolbar-actions { width:100%; display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); justify-content:stretch; }
   .toolbar-actions label, .toolbar-actions select { min-width:0; width:100%; }
+  .toolbar-actions label { font-size:11px; }
+  .toolbar-actions select { height:44px; font-size:14px; }
   .toolbar-actions .primary-btn { grid-column:1 / -1; width:100%; }
   .card-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .game-card { padding:8px; gap:6px; }
+  .card-title { font-size:14px; }
+  .card-summary { min-height:44px; font-size:11px; line-height:1.48; }
+  .card-count { font-size:11px; }
+  .card-rarity { font-size:9px; }
+  .card-copy-count { min-width:34px; font-size:12px; }
+  .card-control { width:36px; height:36px; font-size:19px; }
   .guide-band { grid-template-columns: repeat(2,1fr); }
   .players-ready { min-height: 0; grid-template-columns: 1fr; padding: 16px 0; }
   .link-pulse { text-align: center; transform: rotate(90deg); }
   .lobby-header { align-items: flex-start; }
   .battle-status { grid-template-columns: repeat(5,1fr); gap:3px; }
-  .battle-status div { padding: 8px 3px; }
-  .battle-status strong { font-size:11px; }
-  .battle-status small { font-size:7px; }
-  .battle-controls { grid-template-columns: 56px 1fr; }
-  .resource-pill { min-height: 60px; }
-  .hand { gap: 3px; }
-  .hand-card { height:68px; padding:2px; }
-  .hand-card .tower-art { width:43px; }
-  .hand-card small { font-size:7px; }
-  .battle-card-info { grid-template-columns:44px minmax(0,1fr); }
-  .battle-info-art { width:40px; }
+  .battle-status div { padding: 9px 3px; }
+  .battle-status strong { font-size:14px; }
+  .battle-status small { font-size:10px; }
+  .wave-track { height:28px; font-size:11px; }
+  .wave-track b,.wave-track em { font-size:11px; }
+  .battle-alerts { min-height:29px; gap:6px; }
+  .battle-chip { min-height:24px; padding:3px 9px; font-size:10px; }
+  .battle-controls { grid-template-columns: 64px 1fr; gap:7px; }
+  .resource-pill { min-height: 72px; font-size:14px; }
+  .resource-pill strong { font-size:26px; }
+  .hand { gap: 4px; }
+  .hand-card { height:82px; padding:3px; border-radius:9px; }
+  .hand-card .tower-art { width:52px; }
+  .hand-card small { font-size:9px; }
+  .hand-card i { font-size:8px; }
+  .hand-card b { width:23px; height:23px; font-size:10px; }
+  .battle-help { min-height:34px; padding:9px 0; font-size:12px; }
+  .battle-card-info { min-height:78px; grid-template-columns:54px minmax(0,1fr); gap:10px; padding:9px 10px; }
+  .battle-info-art { width:50px; }
+  .battle-card-info strong { font-size:14px; }
+  .battle-card-info span:not(.tower-art) { font-size:11px; }
   .battle-card-info small { grid-column:1 / -1; max-width:none; text-align:left; }
+  .sound-btn { width:44px; height:44px; font-size:16px; }
   .deck-strip { grid-template-columns:repeat(5,minmax(0,1fr)); min-height:0; padding:7px; gap:4px; }
-  .deck-card { padding:3px; }
-  .deck-card strong { font-size:7px; }
+  .deck-card { padding:4px; }
+  .deck-card strong { font-size:8px; }
   .deck-card small { display:none; }
-  .deck-card button { width:20px; height:20px; right:2px; top:2px; }
+  .deck-card button { width:22px; height:22px; right:2px; top:2px; }
+  .card-detail-modal { padding:18px; }
+  .detail-icon { width:82px; }
+  .card-detail-info p { font-size:13px; }
+  .rank-btn { min-height:40px; font-size:14px; }
   .detail-stats { grid-template-columns: repeat(2,1fr); }
 }
 
 @media (max-width: 390px) {
-  .identity-grid { grid-template-columns: 1fr 1fr; gap: 7px; }
-  .identity-btn { min-height: 125px; }
-  .topbar { grid-template-columns: 38px 1fr 38px; padding-left: 8px; padding-right: 8px; }
-  .icon-btn { width: 38px; height: 38px; }
+  main { padding-left: 8px; padding-right: 8px; }
+  .identity-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
+  .identity-btn { min-height: 140px; }
+  .identity-btn strong { font-size:18px; }
+  .identity-btn small { font-size:12px; }
+  .avatar { width:50px; height:50px; font-size:18px; }
+  .topbar { grid-template-columns: 42px 1fr 42px; padding-left: 8px; padding-right: 8px; }
+  .icon-btn { width: 42px; height: 42px; }
   .brand p { display: none; }
-  .tab-btn { flex: 1; padding: 0 6px; font-size: 12px; }
+  .brand h1 { font-size:16px; }
+  .tab-btn { flex: 1; padding: 0 6px; font-size: 13px; }
   .gacha-btn { padding: 0 9px; }
   .card-grid { gap:7px; }
-  .game-card { padding:6px; }
-  .card-title { font-size:11px; }
-  .card-summary { min-height:29px; font-size:8px; }
-  .card-count { font-size:8px; }
+  .game-card { padding:7px; }
+  .card-title { font-size:13px; }
+  .card-summary { min-height:42px; font-size:11px; }
+  .card-count { font-size:10px; }
   .card-copy-count { top:9px; right:9px; }
+  .battle-status strong { font-size:13px; }
+  .battle-status small { font-size:9px; }
   .lobby-header h2 { font-size: 25px; }
 }
