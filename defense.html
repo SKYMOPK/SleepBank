@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <title>宿舍守睡戰</title>
+  <link rel="icon" href="data:,">
+  <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
+  <link rel="stylesheet" href="defense.css?v=12">
+</head>
+<body>
+  <div id="toast" role="status"></div>
+
+  <header class="topbar">
+    <a class="icon-btn" href="index.html" aria-label="返回首頁" title="返回首頁">←</a>
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <div>
+        <h1>宿舍守睡戰</h1>
+        <p>雙人合作守住夢境</p>
+      </div>
+    </div>
+    <button class="icon-btn" id="homeBtn" aria-label="遊戲首頁" title="遊戲首頁">⌂</button>
+  </header>
+
+  <main>
+    <section class="screen active" id="identityScreen">
+      <div class="identity-stage">
+        <div class="moon-scene" aria-hidden="true">
+          <span class="moon" aria-hidden="true"></span>
+          <span class="cloud cloud-a" aria-hidden="true"></span>
+          <span class="cloud cloud-b" aria-hidden="true"></span>
+        </div>
+        <div class="section-heading">
+          <span class="eyebrow">DORM DEFENSE</span>
+          <h2>今晚由誰守夜？</h2>
+          <p>選擇身分後即可管理卡牌、建立房間或加入夥伴。</p>
+        </div>
+        <div class="identity-grid">
+          <button class="identity-btn p1" data-player="p1">
+            <span class="avatar avatar-p1">凱</span><strong>至凱</strong><small>自己視角 · 下方</small>
+          </button>
+          <button class="identity-btn p2" data-player="p2">
+            <span class="avatar avatar-p2">柏</span><strong>柏致</strong><small>自己視角 · 下方</small>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <section class="screen" id="hubScreen">
+      <div class="hub-hero">
+        <div>
+          <span class="eyebrow" id="hubIdentity">守夜員</span>
+          <h2>準備進入夢境防線</h2>
+          <p>整理牌組、研究攻擊方式，再與室友一起挑戰最高波數。</p>
+        </div>
+        <div class="hero-stats">
+          <div><span id="tokenValue">0</span><small>夢境代幣</small></div>
+          <div><span id="bestWaveValue">0</span><small>最高波數</small></div>
+          <div><span id="deckCountValue">15</span><small>牌組張數</small></div>
+        </div>
+      </div>
+
+      <nav class="hub-tabs" aria-label="遊戲功能">
+        <button class="tab-btn active" data-tab="rooms">對戰</button>
+        <button class="tab-btn" data-tab="collection">收藏</button>
+        <button class="tab-btn" data-tab="deck">牌組</button>
+      </nav>
+
+      <div class="hub-tab active" id="roomsTab">
+        <div class="room-actions">
+          <section class="action-panel create-room">
+            <span class="panel-icon">房</span>
+            <div><h3>建立合作房間</h3><p>產生六位房間碼，等待夥伴加入。</p></div>
+            <button class="primary-btn" id="createRoomBtn">建立房間</button>
+          </section>
+          <section class="action-panel">
+            <span class="panel-icon">加</span>
+            <div><h3>加入房間</h3><p>輸入夥伴分享的六位房間碼。</p></div>
+            <div class="join-row">
+              <input id="roomCodeInput" maxlength="6" autocomplete="off" placeholder="房間碼" aria-label="房間碼">
+              <button class="primary-btn" id="joinRoomBtn">加入</button>
+            </div>
+          </section>
+        </div>
+        <section class="guide-band">
+          <div><strong>3</strong><span>共用生命</span></div>
+          <div><strong>4×5</strong><span>每人棋盤</span></div>
+          <div><strong>∞</strong><span>無限波生存</span></div>
+          <div><strong>20%</strong><span>固定暴擊率</span></div>
+        </section>
+      </div>
+
+      <div class="hub-tab" id="collectionTab">
+        <div class="tab-toolbar">
+          <div><h3>卡牌收藏</h3><p id="gachaMeta">點擊卡牌查看互動式攻擊預覽。</p></div>
+          <div class="toolbar-actions">
+            <label><span>篩選</span><select id="collectionFilter">
+              <option value="all">全部</option>
+              <option value="owned">已解鎖</option>
+              <option value="missing">未解鎖</option>
+              <option value="full">滿卡</option>
+              <option value="common">普通</option>
+              <option value="rare">稀有</option>
+              <option value="epic">史詩</option>
+              <option value="legendary">傳說</option>
+            </select></label>
+            <label><span>排序</span><select id="collectionSort">
+              <option value="rarity">稀有度</option>
+              <option value="owned">持有數</option>
+              <option value="name">名稱</option>
+            </select></label>
+            <button class="primary-btn gacha-btn" id="gachaBtn">抽卡 · 50</button>
+          </div>
+        </div>
+        <div class="card-grid" id="collectionGrid"></div>
+      </div>
+
+      <div class="hub-tab" id="deckTab">
+        <div class="tab-toolbar">
+          <div><h3>守夜牌組</h3><p id="deckValidation">牌組需為 15–20 張，同卡最多 3 張。</p></div>
+          <div class="toolbar-actions">
+            <label><span>篩選</span><select id="deckFilter">
+              <option value="all">全部</option>
+              <option value="owned">已解鎖</option>
+              <option value="missing">未解鎖</option>
+              <option value="full">滿卡</option>
+              <option value="common">普通</option>
+              <option value="rare">稀有</option>
+              <option value="epic">史詩</option>
+              <option value="legendary">傳說</option>
+            </select></label>
+            <label><span>排序</span><select id="deckSort">
+              <option value="rarity">稀有度</option>
+              <option value="owned">持有數</option>
+              <option value="name">名稱</option>
+            </select></label>
+            <button class="primary-btn" id="saveDeckBtn">儲存牌組</button>
+          </div>
+        </div>
+        <div class="deck-strip" id="deckStrip"></div>
+        <h3 class="subheading">可用卡牌</h3>
+        <div class="card-grid compact" id="deckCollectionGrid"></div>
+      </div>
+    </section>
+
+    <section class="screen" id="lobbyScreen">
+      <div class="lobby-header">
+        <div><span class="eyebrow">合作房間</span><h2 id="lobbyCode">------</h2><p>雙方選定合法牌組並準備後，由房主開始。</p></div>
+        <button class="secondary-btn" id="leaveRoomBtn">離開房間</button>
+      </div>
+      <div class="players-ready">
+        <div class="ready-player" id="readyP1"><span class="avatar avatar-p1">凱</span><div><strong>至凱</strong><small>等待加入</small></div><b>未準備</b></div>
+        <div class="link-pulse">⟷</div>
+        <div class="ready-player" id="readyP2"><span class="avatar avatar-p2">柏</span><div><strong>柏致</strong><small>等待加入</small></div><b>未準備</b></div>
+      </div>
+      <div class="lobby-actions">
+        <button class="secondary-btn" id="readyBtn">準備</button>
+        <button class="primary-btn" id="startBtn" disabled>開始守夜</button>
+      </div>
+      <div class="lobby-deck" id="lobbyDeck"></div>
+    </section>
+
+    <section class="screen battle-screen" id="battleScreen">
+      <div class="battle-status">
+        <div><small>波數</small><strong id="waveValue">0</strong></div>
+        <div><small>下一個 Boss</small><strong id="nextBossValue">10 波</strong></div>
+        <div><small>夢境核心</small><strong id="livesValue">3 / 3</strong></div>
+        <div><small>隊友資源</small><strong id="partnerValue">30 ✦</strong></div>
+        <div><small>同步</small><strong id="syncValue">房主</strong></div>
+      </div>
+      <div class="wave-track"><span id="waveProgress"></span><b id="waveTrackText">距離 Boss：10 波</b><em id="battleState">準備中</em></div>
+      <div class="battle-alerts" id="battleAlerts"></div>
+      <div class="battle-frame">
+        <canvas id="battleCanvas" width="1000" height="1000" aria-label="宿舍守睡戰戰場"></canvas>
+        <div class="battle-overlay" id="battleOverlay"><strong>等待房主開始</strong><span></span></div>
+      </div>
+      <div class="battle-controls">
+        <div class="resource-pill">✦ <strong id="resourceValue">30</strong></div>
+        <div class="hand" id="hand"></div>
+      </div>
+      <div class="battle-help" id="battleHelp">所有塔皆可攻擊全線。點擊手牌放置，或點擊兩座同種同階塔合成。</div>
+      <div class="battle-card-info" id="battleCardInfo">
+        <span class="tower-art battle-info-art" id="battleInfoArt" aria-hidden="true"></span>
+        <div>
+          <strong id="battleInfoName">選擇卡牌或塔</strong>
+          <span id="battleInfoDescription">選取後可查看攻擊方式與目前階級數值。</span>
+        </div>
+        <small id="battleInfoStats">拖曳同種同階塔即可合成</small>
+      </div>
+      <button class="sound-btn" id="soundBtn" title="切換音效" aria-label="切換音效">♪</button>
+      <button class="secondary-btn leave-battle" id="leaveBattleBtn">離開對局</button>
+    </section>
+  </main>
+
+  <div class="modal-overlay" id="cardModal" aria-hidden="true">
+    <div class="card-detail-modal">
+      <button class="modal-close icon-btn" id="closeCardModal" aria-label="關閉">×</button>
+      <div class="card-detail-info">
+        <span class="detail-icon tower-art" id="detailIcon"></span>
+        <div><span class="eyebrow" id="detailRarity">攻擊預覽</span><h2 id="detailName"></h2><p id="detailDescription"></p></div>
+      </div>
+      <div class="rank-switch" id="rankSwitch" aria-label="預覽階級"></div>
+      <canvas id="previewCanvas" width="700" height="360" aria-label="卡牌攻擊預覽"></canvas>
+      <div class="detail-stats" id="detailStats"></div>
+      <div class="rank-effect"><strong>升階特色</strong><span id="detailRankEffect"></span></div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="resultModal" aria-hidden="true">
+    <div class="result-modal">
+      <span class="result-icon" aria-hidden="true"></span>
+      <span class="eyebrow">守夜結束</span>
+      <p class="result-reason" id="resultReason">夢境核心失守</p>
+      <h2 id="resultWave">抵達第 0 波</h2>
+      <p id="resultReward">獲得 0 枚夢境代幣</p>
+      <button class="primary-btn" id="resultHomeBtn">返回大廳</button>
+    </div>
+  </div>
+
+  <script src="defense-bundle.js?v=10"></script>
+</body>
+</html>
