@@ -2016,10 +2016,14 @@ function battlePointFromEvent(event) {
 function battleCellFromPoint(point) {
   let closest = null;
   let distance = Infinity;
+  const canvasRect = battleCanvas.getBoundingClientRect();
+  const touchLayout = canvasRect.width <= 520;
+  const hitRadiusX = touchLayout ? .085 : .075;
+  const hitRadiusY = touchLayout ? .043 : .0325;
   for (let index = 0; index < GAME.rows * GAME.cols; index += 1) {
     const pos = viewedBoardPosition(state.playerId, state.playerId, index);
-    const dx = Math.abs(point.x - pos.x) / .075;
-    const dy = Math.abs(point.y - pos.y) / .0325;
+    const dx = Math.abs(point.x - pos.x) / hitRadiusX;
+    const dy = Math.abs(point.y - pos.y) / hitRadiusY;
     const nextDistance = Math.hypot(dx, dy);
     if (nextDistance < distance) {
       distance = nextDistance;

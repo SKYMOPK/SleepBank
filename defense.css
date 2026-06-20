@@ -430,16 +430,24 @@ input:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(208,163,79,.
   .wave-track b,.wave-track em { font-size:11px; }
   .battle-alerts { min-height:29px; gap:6px; }
   .battle-chip { min-height:24px; padding:3px 9px; font-size:10px; }
-  .battle-controls { grid-template-columns: 64px 1fr; gap:7px; }
-  .resource-pill { min-height: 72px; font-size:14px; }
-  .resource-pill strong { font-size:26px; }
-  .hand { gap: 4px; }
-  .hand-card { height:82px; padding:3px; border-radius:9px; }
-  .hand-card .tower-art { width:52px; }
-  .hand-card small { font-size:9px; }
+  .battle-controls { grid-template-columns:1fr; gap:7px; }
+  .resource-pill { min-height:42px; display:flex; align-items:center; justify-content:center; gap:8px; font-size:15px; }
+  .resource-pill strong { display:inline; font-size:28px; line-height:1; }
+  .hand {
+    display:flex;
+    gap:8px;
+    overflow-x:auto;
+    overflow-y:hidden;
+    padding:2px 2px 8px;
+    scroll-snap-type:x proximity;
+    -webkit-overflow-scrolling:touch;
+  }
+  .hand-card { flex:0 0 92px; height:96px; padding:5px; border-radius:9px; scroll-snap-align:start; }
+  .hand-card .tower-art { width:62px; }
+  .hand-card small { font-size:10px; }
   .hand-card i { font-size:8px; }
-  .hand-card b { width:23px; height:23px; font-size:10px; }
-  .battle-help { min-height:34px; padding:9px 0; font-size:12px; }
+  .hand-card b { width:24px; height:24px; font-size:10px; }
+  .battle-help { min-height:36px; padding:9px 4px; font-size:12px; line-height:1.45; }
   .battle-card-info { min-height:78px; grid-template-columns:54px minmax(0,1fr); gap:10px; padding:9px 10px; }
   .battle-info-art { width:50px; }
   .battle-card-info strong { font-size:14px; }
@@ -479,5 +487,8 @@ input:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(208,163,79,.
   .card-copy-count { top:9px; right:9px; }
   .battle-status strong { font-size:13px; }
   .battle-status small { font-size:9px; }
+  .hand { gap:7px; }
+  .hand-card { flex-basis:88px; height:94px; }
+  .hand-card .tower-art { width:59px; }
   .lobby-header h2 { font-size: 25px; }
 }
