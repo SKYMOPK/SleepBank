@@ -1,5 +1,6 @@
 import {
   CARDS,
+  ELITE_TRAITS,
   ENEMIES,
   GAME,
   RARITIES,
@@ -7,11 +8,15 @@ import {
   STARTER_DECK,
   bossTypeForWave,
   cardStats,
+  effectiveEnemySpeed,
+  eliteTraitForSpawn,
   enemyStats,
   isBossWave,
   nextBossWave,
   waveEnemyCount,
   waveEnemySequence,
+  waveSpawnInterval,
+  waveThemeForWave,
   waveEnemyType,
 } from './defense-config.js';
 
@@ -102,11 +107,13 @@ export function settlementForMatch(match, reason, settledAt = Date.now()) {
   const safeReason = allowedReasons.includes(reason) ? reason : 'defeat';
   const wave = Math.max(0, Number(match?.wave) || 0);
   const bossesKilled = Math.max(0, Number(match?.bossesKilled) || 0);
+  const bestPerfectWaveStreak = Math.max(0, Number(match?.bestPerfectWaveStreak) || 0);
   return {
     reason: safeReason,
     reward: rewardForRun(wave, bossesKilled),
     wave,
     bossesKilled,
+    bestPerfectWaveStreak,
     settledAt,
   };
 }
@@ -159,7 +166,13 @@ export function createMatch(decks, options = {}) {
     pausedReason: '',
     elapsed: 0,
     wave: 0,
+    waveTheme: 'calm',
     waveState: 'break',
+    waveHadLeak: false,
+    perfectWaveStreak: 0,
+    bestPerfectWaveStreak: 0,
+    lastWavePerfect: null,
+    streakEventId: 0,
     nextWaveIn: 1.2,
     spawnRemaining: 0,
     spawnCooldown: 0,
@@ -196,7 +209,19 @@ function hydrateBoard(value) {
 export function hydrateMatchSnapshot(snapshot) {
   if (!snapshot) return null;
   const match = { ...snapshot };
-  match.enemies = firebaseList(snapshot.enemies);
+  match.waveTheme = snapshot.waveTheme || waveThemeForWave(snapshot.wave || 1);
+  match.waveHadLeak = Boolean(snapshot.waveHadLeak);
+  match.perfectWaveStreak = Math.max(0, Number(snapshot.perfectWaveStreak) || 0);
+  match.bestPerfectWaveStreak = Math.max(match.perfectWaveStreak, Number(snapshot.bestPerfectWaveStreak) || 0);
+  match.lastWavePerfect = typeof snapshot.lastWavePerfect === 'boolean' ? snapshot.lastWavePerfect : null;
+  match.streakEventId = Math.max(0, Number(snapshot.streakEventId) || 0);
+  match.enemies = firebaseList(snapshot.enemies).map((enemy) => ({
+    ...enemy,
+    shield: Math.max(0, Number(enemy.shield) || 0),
+    maxShield: Math.max(0, Number(enemy.maxShield) || 0),
+    speedMultiplier: Math.max(0, Number(enemy.speedMultiplier) || 1),
+    frenzyActive: Boolean(enemy.frenzyActive),
+  }));
   match.effects = firebaseList(snapshot.effects);
   match.pendingHits = firebaseList(snapshot.pendingHits);
   match.damageNumbers = firebaseList(snapshot.damageNumbers);
@@ -322,7 +347,17 @@ export function viewedEnemyPosition(viewer, enemy) {
   return orientPosition(enemyPosition(enemy), viewer);
 }
 
+function tauntsPlayer(enemy, playerId) {
+  if (!enemy || enemy.hp <= 0 || enemy.eliteTrait !== 'shield' || Number(enemy.shield) <= 0) return false;
+  const shared = enemyPosition(enemy).shared;
+  return shared || enemy.lane === playerId;
+}
+
 export function findTarget(match, playerId, tower, cellIndex) {
+  const tauntTarget = match.enemies
+    .filter((enemy) => tauntsPlayer(enemy, playerId))
+    .sort((left, right) => right.progress - left.progress)[0];
+  if (tauntTarget) return tauntTarget;
   let best = null;
   let bestShared = false;
   for (const enemy of match.enemies) {
@@ -352,6 +387,57 @@ function laneTargets(match, playerId) {
 function damageWithCrit(stats, random) {
   const crit = random() < GAME.critChance;
   return { damage: stats.damage * (crit ? stats.critMultiplier : 1), crit };
+}
+
+function pushEnemyEffect(match, enemy, type, color, duration = 0.55) {
+  if (!match?.effects || !enemy) return;
+  const position = enemyPosition(enemy);
+  match.effects.push({
+    id: match.nextEntityId++,
+    targetId: enemy.id,
+    type,
+    x: position.x,
+    y: position.y,
+    fromX: position.x,
+    fromY: position.y,
+    playerId: null,
+    color,
+    ttl: duration,
+    maxTtl: duration,
+    crit: false,
+  });
+  if (match.effects.length > 80) match.effects.splice(0, match.effects.length - 80);
+}
+
+export function applyEnemyDamage(match, enemy, damage) {
+  if (!enemy || enemy.hp <= 0) return { applied: 0, shieldDamage: 0, healthDamage: 0, shieldBroken: false };
+  let remaining = Math.max(0, Number(damage) || 0);
+  const shieldBefore = Math.max(0, Number(enemy.shield) || 0);
+  const shieldDamage = Math.min(shieldBefore, remaining);
+  if (shieldDamage > 0) {
+    enemy.shield = Math.max(0, shieldBefore - shieldDamage);
+    remaining -= shieldDamage;
+  }
+  const healthDamage = Math.min(Math.max(0, Number(enemy.hp) || 0), remaining);
+  enemy.hp -= remaining;
+  const shieldBroken = shieldBefore > 0 && enemy.shield <= 0;
+  if (shieldBroken) {
+    enemy.shieldBreakTtl = 0.55;
+    pushEnemyEffect(match, enemy, 'shieldBreak', ELITE_TRAITS.shield.color, 0.55);
+  }
+  if (enemy.eliteTrait === 'frenzy' && !enemy.frenzyActive && enemy.hp > 0
+    && enemy.hp / Math.max(1, enemy.maxHp) <= ELITE_TRAITS.frenzy.triggerHpRatio) {
+    enemy.frenzyActive = true;
+    enemy.speedMultiplier = ELITE_TRAITS.frenzy.speedMultiplier;
+    enemy.frenzyPulseTtl = 0.7;
+    pushEnemyEffect(match, enemy, 'frenzyBurst', ELITE_TRAITS.frenzy.color, 0.7);
+  }
+  return {
+    applied: shieldDamage + healthDamage,
+    shieldDamage,
+    healthDamage,
+    shieldBroken,
+  };
 }
 
 function queueDamage(match, enemy, damage, source) {
@@ -418,14 +504,16 @@ function resolvePendingHits(match, dt) {
       continue;
     }
     const position = enemyPosition(enemy);
-    enemy.hp -= hit.damage;
+    const damageResult = applyEnemyDamage(match, enemy, hit.damage);
     match.damageNumbers ||= [];
     match.damageNumbers.push({
       id: match.nextEntityId++,
       x: position.x,
       y: position.y,
-      damage: hit.damage,
+      damage: damageResult.applied,
       crit: hit.crit || false,
+      shielded: damageResult.shieldDamage > 0,
+      shieldBreak: damageResult.shieldBroken,
       ttl: 0.82,
       maxTtl: 0.82,
     });
@@ -547,18 +635,36 @@ function auraMultiplier(player, playerId, targetIndex) {
 
 function startWave(match) {
   match.wave += 1;
+  match.waveTheme = waveThemeForWave(match.wave);
+  match.waveHadLeak = false;
   match.waveState = 'spawning';
   match.spawnRemaining = waveEnemyCount(match.wave) * 2;
   match.spawnTotal = match.spawnRemaining;
   match.spawnCooldown = 0;
 }
 
+function applyEliteTrait(enemy, traitId) {
+  const trait = ELITE_TRAITS[traitId];
+  if (!trait || enemy.boss || enemy.spawnedFromElite) return enemy;
+  enemy.eliteTrait = traitId;
+  enemy.maxHp = Math.max(1, Math.round(enemy.maxHp * trait.hpMultiplier));
+  enemy.hp = enemy.maxHp;
+  enemy.sizeMultiplier = trait.sizeMultiplier;
+  enemy.speedMultiplier = 1;
+  if (traitId === 'shield') {
+    enemy.maxShield = Math.max(1, Math.round(enemy.maxHp * trait.shieldRatio));
+    enemy.shield = enemy.maxShield;
+  }
+  return enemy;
+}
+
 function spawnEnemy(match) {
   const total = match.spawnTotal || waveEnemyCount(match.wave) * 2;
   const spawnIndex = Math.floor((total - match.spawnRemaining) / 2);
+  const sequence = waveEnemySequence(match.wave);
   const type = isBossWave(match.wave)
     ? bossTypeForWave(match.wave)
-    : waveEnemySequence(match.wave)[spawnIndex] || waveEnemyType(match.wave);
+    : sequence[spawnIndex] || waveEnemyType(match.wave);
   const lane = match.spawnRemaining % 2 === 0 ? 'p1' : 'p2';
   const stats = enemyStats(type, match.wave);
   const enemy = {
@@ -567,11 +673,14 @@ function spawnEnemy(match) {
     lane,
     progress: 0,
     ...stats,
+    speedMultiplier: 1,
   };
+  const eliteTrait = eliteTraitForSpawn(match.wave, spawnIndex, sequence.length);
+  if (eliteTrait) applyEliteTrait(enemy, eliteTrait);
   if (stats.boss) enemy.abilityCd = stats.abilityInterval || 5;
   match.enemies.push(enemy);
   match.spawnRemaining -= 1;
-  match.spawnCooldown = isBossWave(match.wave) ? 0.5 : Math.max(0.22, 0.75 - match.wave * 0.005);
+  match.spawnCooldown = waveSpawnInterval(match.wave);
 }
 
 function clearSilenceFromBoss(match, boss) {
@@ -611,6 +720,7 @@ function summonFearMinions(match, boss) {
       ...stats,
       hp,
       maxHp: hp,
+      speedMultiplier: 1,
     });
   }
 }
@@ -658,8 +768,48 @@ function updateBossAbilities(match, dt, random) {
   });
 }
 
+function spawnSplitterChildren(match, enemy) {
+  const trait = ELITE_TRAITS.splitter;
+  const stats = enemyStats('swarm', match.wave);
+  const childHp = Math.max(1, Math.round(stats.maxHp * trait.childHpRatio));
+  const parentPosition = enemyPosition(enemy);
+  const children = [];
+  for (let index = 0; index < trait.childCount; index += 1) {
+    const child = {
+      id: match.nextEntityId++,
+      type: 'swarm',
+      lane: enemy.lane,
+      progress: Math.max(0, enemy.progress - 0.012 * (index + 1)),
+      ...stats,
+      hp: childHp,
+      maxHp: childHp,
+      speedMultiplier: 1,
+      spawnedFromElite: enemy.id,
+    };
+    children.push(child);
+    const childPosition = enemyPosition(child);
+    match.effects.push({
+      id: match.nextEntityId++,
+      targetId: child.id,
+      type: 'split',
+      x: childPosition.x,
+      y: childPosition.y,
+      fromX: parentPosition.x,
+      fromY: parentPosition.y,
+      playerId: null,
+      color: trait.color,
+      ttl: 0.55,
+      maxTtl: 0.55,
+      crit: false,
+    });
+  }
+  if (match.effects.length > 80) match.effects.splice(0, match.effects.length - 80);
+  return children;
+}
+
 function resolveDeaths(match) {
   const alive = [];
+  const spawned = [];
   for (const enemy of match.enemies) {
     if (enemy.hp > 0) {
       alive.push(enemy);
@@ -670,8 +820,11 @@ function resolveDeaths(match) {
     match.players.p1.resource += reward;
     match.players.p2.resource += reward;
     if (enemy.boss) match.bossesKilled += 1;
+    if (enemy.eliteTrait === 'splitter' && !enemy.spawnedFromElite) {
+      spawned.push(...spawnSplitterChildren(match, enemy));
+    }
   }
-  match.enemies = alive;
+  match.enemies = [...alive, ...spawned];
 }
 
 export function tickMatch(match, dt, random = Math.random) {
@@ -695,12 +848,14 @@ export function tickMatch(match, dt, random = Math.random) {
 
   match.enemies.forEach((enemy) => {
     if (enemy.dotTtl > 0) {
-      enemy.hp -= (enemy.dot || 0) * safeDt;
+      applyEnemyDamage(match, enemy, (enemy.dot || 0) * safeDt);
       enemy.dotTtl -= safeDt;
     }
     if (enemy.slowTtl > 0) enemy.slowTtl -= safeDt;
     else enemy.slow = 0;
-    enemy.progress += enemy.speed * (1 - (enemy.slow || 0)) * safeDt;
+    if (enemy.shieldBreakTtl > 0) enemy.shieldBreakTtl -= safeDt;
+    if (enemy.frenzyPulseTtl > 0) enemy.frenzyPulseTtl -= safeDt;
+    enemy.progress += effectiveEnemySpeed(enemy) * safeDt;
   });
   updateBossAbilities(match, safeDt, random);
   resolvePendingHits(match, safeDt);
@@ -722,6 +877,12 @@ export function tickMatch(match, dt, random = Math.random) {
     return false;
   });
   if (leaked) {
+    match.waveHadLeak = true;
+    if (match.perfectWaveStreak > 0) {
+      match.perfectWaveStreak = 0;
+      match.lastWavePerfect = false;
+      match.streakEventId = Math.max(0, Number(match.streakEventId) || 0) + 1;
+    }
     match.lives = Math.max(0, match.lives - leaked);
     if (match.lives <= 0) {
       match.status = 'gameover';
@@ -744,6 +905,12 @@ export function tickMatch(match, dt, random = Math.random) {
 
   if (match.waveState === 'spawning' && match.spawnRemaining <= 0) match.waveState = 'active';
   if (match.waveState === 'active' && match.enemies.length === 0) {
+    if (!match.waveHadLeak) {
+      match.perfectWaveStreak = Math.max(0, Number(match.perfectWaveStreak) || 0) + 1;
+      match.bestPerfectWaveStreak = Math.max(match.bestPerfectWaveStreak || 0, match.perfectWaveStreak);
+      match.lastWavePerfect = true;
+      match.streakEventId = Math.max(0, Number(match.streakEventId) || 0) + 1;
+    }
     match.waveState = 'break';
     match.nextWaveIn = GAME.waveBreakMs / 1000;
   }
@@ -769,8 +936,24 @@ export function createPreviewMatch(cardId, rank = 1) {
     lane: 'p1',
     progress: 0.43 - offset * 0.07,
     ...enemyStats(type, 1),
+    speedMultiplier: 1,
   }));
   return match;
 }
 
-export { CARDS, ENEMIES, GAME, RARITIES, bossTypeForWave, cardStats, isBossWave, nextBossWave, waveEnemySequence };
+export {
+  CARDS,
+  ELITE_TRAITS,
+  ENEMIES,
+  GAME,
+  RARITIES,
+  bossTypeForWave,
+  cardStats,
+  effectiveEnemySpeed,
+  eliteTraitForSpawn,
+  isBossWave,
+  nextBossWave,
+  waveEnemySequence,
+  waveSpawnInterval,
+  waveThemeForWave,
+};

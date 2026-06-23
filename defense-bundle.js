@@ -253,6 +253,92 @@ const ENEMIES = Object.freeze({
   boss: Object.freeze({ name: '失眠巨獸', color: '#D0A34F', hp: 1120, speed: 0.023, radius: 15, boss: true, abilityInterval: 5 }),
 });
 
+const ELITE_TRAITS = Object.freeze({
+  shield: Object.freeze({
+    name: '嘲諷護盾',
+    color: '#55D6F2',
+    hpMultiplier: 1.25,
+    sizeMultiplier: 1.12,
+    shieldRatio: 0.5,
+  }),
+  splitter: Object.freeze({
+    name: '分裂',
+    color: '#8ED37D',
+    hpMultiplier: 1.25,
+    sizeMultiplier: 1.12,
+    childCount: 3,
+    childHpRatio: 0.4,
+  }),
+  frenzy: Object.freeze({
+    name: '狂暴',
+    color: '#F07167',
+    hpMultiplier: 1.25,
+    sizeMultiplier: 1.12,
+    triggerHpRatio: 0.5,
+    speedMultiplier: 1.6,
+  }),
+});
+
+const WAVE_THEMES = Object.freeze({
+  calm: Object.freeze({
+    name: '深眠前兆',
+    color: '#A9B0A3',
+    hint: '普通暖身波',
+    pattern: Object.freeze(['normal']),
+    countOffset: 0,
+    spawnIntervalMultiplier: 1,
+    eliteTrait: null,
+  }),
+  swarm: Object.freeze({
+    name: '雜念潮',
+    color: '#8ED37D',
+    hint: '範圍／連鎖塔有效',
+    pattern: Object.freeze(['swarm', 'normal', 'swarm', 'swarm', 'fast']),
+    countOffset: 1,
+    spawnIntervalMultiplier: 0.82,
+    eliteTrait: 'splitter',
+  }),
+  rush: Object.freeze({
+    name: '驚醒突襲',
+    color: '#F09A72',
+    hint: '減速／爆發塔有效',
+    pattern: Object.freeze(['fast', 'normal', 'fast', 'normal', 'fast']),
+    countOffset: 0,
+    spawnIntervalMultiplier: 0.9,
+    eliteTrait: 'frenzy',
+  }),
+  siege: Object.freeze({
+    name: '重壓夢境',
+    color: '#A997C4',
+    hint: '高傷／持續傷害塔有效',
+    pattern: Object.freeze(['tank', 'normal', 'tank', 'normal', 'normal']),
+    countOffset: -1,
+    spawnIntervalMultiplier: 1.15,
+    eliteTrait: 'shield',
+  }),
+  mixed: Object.freeze({
+    name: '扭曲混合',
+    color: '#D0A34F',
+    hint: '均衡配置較穩定',
+    pattern: Object.freeze(['normal', 'swarm', 'fast', 'normal', 'tank']),
+    countOffset: 0,
+    spawnIntervalMultiplier: 1,
+    eliteTrait: null,
+  }),
+  boss: Object.freeze({
+    name: 'Boss 波',
+    color: '#F0B84B',
+    hint: '集中火力守住核心',
+    pattern: Object.freeze([]),
+    countOffset: 0,
+    spawnIntervalMultiplier: 1,
+    eliteTrait: null,
+  }),
+});
+
+const WAVE_THEME_CYCLE = Object.freeze(['swarm', 'rush', 'siege', 'mixed']);
+const MIXED_ELITE_CYCLE = Object.freeze(['shield', 'splitter', 'frenzy']);
+
 const PLAYER_NAMES = Object.freeze({ p1: '至凱', p2: '柏致' });
 
 function cardStats(cardId, rank = 1) {
@@ -313,9 +399,18 @@ function waveEnemyType(wave) {
   return waveEnemySequence(wave)[0] || 'normal';
 }
 
+function waveThemeForWave(wave) {
+  const safeWave = Math.max(1, Number(wave) || 1);
+  if (isBossWave(safeWave)) return 'boss';
+  if (safeWave === 1) return 'calm';
+  return WAVE_THEME_CYCLE[(safeWave - 2) % WAVE_THEME_CYCLE.length];
+}
+
 function waveEnemyCount(wave) {
   if (isBossWave(wave)) return 1;
-  return 6 + Math.floor(wave / 4);
+  const baseCount = 6 + Math.floor((wave + 1) / 3);
+  const theme = WAVE_THEMES[waveThemeForWave(wave)] || WAVE_THEMES.calm;
+  return Math.max(4, baseCount + theme.countOffset);
 }
 
 function bossTypeForWave(wave) {
@@ -328,12 +423,33 @@ function bossTypeForWave(wave) {
 function waveEnemySequence(wave) {
   if (isBossWave(wave)) return [bossTypeForWave(wave)];
   const count = waveEnemyCount(wave);
-  return Array.from({ length: count }, (_, index) => {
-    if (wave >= 7 && (index + wave) % 6 === 0) return 'tank';
-    if (wave >= 5 && (index * 2 + wave) % 5 === 0) return 'fast';
-    if (wave >= 3 && (index + wave) % 3 === 0) return 'swarm';
-    return 'normal';
-  });
+  const theme = WAVE_THEMES[waveThemeForWave(wave)] || WAVE_THEMES.calm;
+  return Array.from({ length: count }, (_, index) => theme.pattern[index % theme.pattern.length]);
+}
+
+function waveSpawnInterval(wave) {
+  if (isBossWave(wave)) return 0.5;
+  const theme = WAVE_THEMES[waveThemeForWave(wave)] || WAVE_THEMES.calm;
+  const baseInterval = Math.max(0.2, 0.66 - wave * 0.006);
+  return Math.max(0.18, baseInterval * theme.spawnIntervalMultiplier);
+}
+
+function eliteTraitForSpawn(wave, spawnIndex, enemyCount = waveEnemyCount(wave)) {
+  if (wave < 6 || isBossWave(wave)) return null;
+  const eliteIndex = Math.floor((Math.max(1, enemyCount) - 1) / 2);
+  if (spawnIndex !== eliteIndex) return null;
+  const themeId = waveThemeForWave(wave);
+  const theme = WAVE_THEMES[themeId] || WAVE_THEMES.calm;
+  if (theme.eliteTrait) return theme.eliteTrait;
+  const mixedRound = Math.max(0, Math.floor((wave - 9) / WAVE_THEME_CYCLE.length));
+  return MIXED_ELITE_CYCLE[mixedRound % MIXED_ELITE_CYCLE.length];
+}
+
+function effectiveEnemySpeed(enemy) {
+  const speed = Math.max(0, Number(enemy?.speed) || 0);
+  const multiplier = Math.max(0, Number(enemy?.speedMultiplier) || 1);
+  const slow = Math.max(0, Math.min(0.95, Number(enemy?.slow) || 0));
+  return speed * multiplier * (1 - slow);
 }
 
 function enemyStats(type, wave) {
@@ -437,11 +553,13 @@ function settlementForMatch(match, reason, settledAt = Date.now()) {
   const safeReason = allowedReasons.includes(reason) ? reason : 'defeat';
   const wave = Math.max(0, Number(match?.wave) || 0);
   const bossesKilled = Math.max(0, Number(match?.bossesKilled) || 0);
+  const bestPerfectWaveStreak = Math.max(0, Number(match?.bestPerfectWaveStreak) || 0);
   return {
     reason: safeReason,
     reward: rewardForRun(wave, bossesKilled),
     wave,
     bossesKilled,
+    bestPerfectWaveStreak,
     settledAt,
   };
 }
@@ -494,7 +612,13 @@ function createMatch(decks, options = {}) {
     pausedReason: '',
     elapsed: 0,
     wave: 0,
+    waveTheme: 'calm',
     waveState: 'break',
+    waveHadLeak: false,
+    perfectWaveStreak: 0,
+    bestPerfectWaveStreak: 0,
+    lastWavePerfect: null,
+    streakEventId: 0,
     nextWaveIn: 1.2,
     spawnRemaining: 0,
     spawnCooldown: 0,
@@ -531,7 +655,19 @@ function hydrateBoard(value) {
 function hydrateMatchSnapshot(snapshot) {
   if (!snapshot) return null;
   const match = { ...snapshot };
-  match.enemies = firebaseList(snapshot.enemies);
+  match.waveTheme = snapshot.waveTheme || waveThemeForWave(snapshot.wave || 1);
+  match.waveHadLeak = Boolean(snapshot.waveHadLeak);
+  match.perfectWaveStreak = Math.max(0, Number(snapshot.perfectWaveStreak) || 0);
+  match.bestPerfectWaveStreak = Math.max(match.perfectWaveStreak, Number(snapshot.bestPerfectWaveStreak) || 0);
+  match.lastWavePerfect = typeof snapshot.lastWavePerfect === 'boolean' ? snapshot.lastWavePerfect : null;
+  match.streakEventId = Math.max(0, Number(snapshot.streakEventId) || 0);
+  match.enemies = firebaseList(snapshot.enemies).map((enemy) => ({
+    ...enemy,
+    shield: Math.max(0, Number(enemy.shield) || 0),
+    maxShield: Math.max(0, Number(enemy.maxShield) || 0),
+    speedMultiplier: Math.max(0, Number(enemy.speedMultiplier) || 1),
+    frenzyActive: Boolean(enemy.frenzyActive),
+  }));
   match.effects = firebaseList(snapshot.effects);
   match.pendingHits = firebaseList(snapshot.pendingHits);
   match.damageNumbers = firebaseList(snapshot.damageNumbers);
@@ -657,7 +793,17 @@ function viewedEnemyPosition(viewer, enemy) {
   return orientPosition(enemyPosition(enemy), viewer);
 }
 
+function tauntsPlayer(enemy, playerId) {
+  if (!enemy || enemy.hp <= 0 || enemy.eliteTrait !== 'shield' || Number(enemy.shield) <= 0) return false;
+  const shared = enemyPosition(enemy).shared;
+  return shared || enemy.lane === playerId;
+}
+
 function findTarget(match, playerId, tower, cellIndex) {
+  const tauntTarget = match.enemies
+    .filter((enemy) => tauntsPlayer(enemy, playerId))
+    .sort((left, right) => right.progress - left.progress)[0];
+  if (tauntTarget) return tauntTarget;
   let best = null;
   let bestShared = false;
   for (const enemy of match.enemies) {
@@ -687,6 +833,57 @@ function laneTargets(match, playerId) {
 function damageWithCrit(stats, random) {
   const crit = random() < GAME.critChance;
   return { damage: stats.damage * (crit ? stats.critMultiplier : 1), crit };
+}
+
+function pushEnemyEffect(match, enemy, type, color, duration = 0.55) {
+  if (!match?.effects || !enemy) return;
+  const position = enemyPosition(enemy);
+  match.effects.push({
+    id: match.nextEntityId++,
+    targetId: enemy.id,
+    type,
+    x: position.x,
+    y: position.y,
+    fromX: position.x,
+    fromY: position.y,
+    playerId: null,
+    color,
+    ttl: duration,
+    maxTtl: duration,
+    crit: false,
+  });
+  if (match.effects.length > 80) match.effects.splice(0, match.effects.length - 80);
+}
+
+function applyEnemyDamage(match, enemy, damage) {
+  if (!enemy || enemy.hp <= 0) return { applied: 0, shieldDamage: 0, healthDamage: 0, shieldBroken: false };
+  let remaining = Math.max(0, Number(damage) || 0);
+  const shieldBefore = Math.max(0, Number(enemy.shield) || 0);
+  const shieldDamage = Math.min(shieldBefore, remaining);
+  if (shieldDamage > 0) {
+    enemy.shield = Math.max(0, shieldBefore - shieldDamage);
+    remaining -= shieldDamage;
+  }
+  const healthDamage = Math.min(Math.max(0, Number(enemy.hp) || 0), remaining);
+  enemy.hp -= remaining;
+  const shieldBroken = shieldBefore > 0 && enemy.shield <= 0;
+  if (shieldBroken) {
+    enemy.shieldBreakTtl = 0.55;
+    pushEnemyEffect(match, enemy, 'shieldBreak', ELITE_TRAITS.shield.color, 0.55);
+  }
+  if (enemy.eliteTrait === 'frenzy' && !enemy.frenzyActive && enemy.hp > 0
+    && enemy.hp / Math.max(1, enemy.maxHp) <= ELITE_TRAITS.frenzy.triggerHpRatio) {
+    enemy.frenzyActive = true;
+    enemy.speedMultiplier = ELITE_TRAITS.frenzy.speedMultiplier;
+    enemy.frenzyPulseTtl = 0.7;
+    pushEnemyEffect(match, enemy, 'frenzyBurst', ELITE_TRAITS.frenzy.color, 0.7);
+  }
+  return {
+    applied: shieldDamage + healthDamage,
+    shieldDamage,
+    healthDamage,
+    shieldBroken,
+  };
 }
 
 function queueDamage(match, enemy, damage, source) {
@@ -753,14 +950,16 @@ function resolvePendingHits(match, dt) {
       continue;
     }
     const position = enemyPosition(enemy);
-    enemy.hp -= hit.damage;
+    const damageResult = applyEnemyDamage(match, enemy, hit.damage);
     match.damageNumbers ||= [];
     match.damageNumbers.push({
       id: match.nextEntityId++,
       x: position.x,
       y: position.y,
-      damage: hit.damage,
+      damage: damageResult.applied,
       crit: hit.crit || false,
+      shielded: damageResult.shieldDamage > 0,
+      shieldBreak: damageResult.shieldBroken,
       ttl: 0.82,
       maxTtl: 0.82,
     });
@@ -882,18 +1081,36 @@ function auraMultiplier(player, playerId, targetIndex) {
 
 function startWave(match) {
   match.wave += 1;
+  match.waveTheme = waveThemeForWave(match.wave);
+  match.waveHadLeak = false;
   match.waveState = 'spawning';
   match.spawnRemaining = waveEnemyCount(match.wave) * 2;
   match.spawnTotal = match.spawnRemaining;
   match.spawnCooldown = 0;
 }
 
+function applyEliteTrait(enemy, traitId) {
+  const trait = ELITE_TRAITS[traitId];
+  if (!trait || enemy.boss || enemy.spawnedFromElite) return enemy;
+  enemy.eliteTrait = traitId;
+  enemy.maxHp = Math.max(1, Math.round(enemy.maxHp * trait.hpMultiplier));
+  enemy.hp = enemy.maxHp;
+  enemy.sizeMultiplier = trait.sizeMultiplier;
+  enemy.speedMultiplier = 1;
+  if (traitId === 'shield') {
+    enemy.maxShield = Math.max(1, Math.round(enemy.maxHp * trait.shieldRatio));
+    enemy.shield = enemy.maxShield;
+  }
+  return enemy;
+}
+
 function spawnEnemy(match) {
   const total = match.spawnTotal || waveEnemyCount(match.wave) * 2;
   const spawnIndex = Math.floor((total - match.spawnRemaining) / 2);
+  const sequence = waveEnemySequence(match.wave);
   const type = isBossWave(match.wave)
     ? bossTypeForWave(match.wave)
-    : waveEnemySequence(match.wave)[spawnIndex] || waveEnemyType(match.wave);
+    : sequence[spawnIndex] || waveEnemyType(match.wave);
   const lane = match.spawnRemaining % 2 === 0 ? 'p1' : 'p2';
   const stats = enemyStats(type, match.wave);
   const enemy = {
@@ -902,11 +1119,14 @@ function spawnEnemy(match) {
     lane,
     progress: 0,
     ...stats,
+    speedMultiplier: 1,
   };
+  const eliteTrait = eliteTraitForSpawn(match.wave, spawnIndex, sequence.length);
+  if (eliteTrait) applyEliteTrait(enemy, eliteTrait);
   if (stats.boss) enemy.abilityCd = stats.abilityInterval || 5;
   match.enemies.push(enemy);
   match.spawnRemaining -= 1;
-  match.spawnCooldown = isBossWave(match.wave) ? 0.5 : Math.max(0.22, 0.75 - match.wave * 0.005);
+  match.spawnCooldown = waveSpawnInterval(match.wave);
 }
 
 function clearSilenceFromBoss(match, boss) {
@@ -946,6 +1166,7 @@ function summonFearMinions(match, boss) {
       ...stats,
       hp,
       maxHp: hp,
+      speedMultiplier: 1,
     });
   }
 }
@@ -993,8 +1214,48 @@ function updateBossAbilities(match, dt, random) {
   });
 }
 
+function spawnSplitterChildren(match, enemy) {
+  const trait = ELITE_TRAITS.splitter;
+  const stats = enemyStats('swarm', match.wave);
+  const childHp = Math.max(1, Math.round(stats.maxHp * trait.childHpRatio));
+  const parentPosition = enemyPosition(enemy);
+  const children = [];
+  for (let index = 0; index < trait.childCount; index += 1) {
+    const child = {
+      id: match.nextEntityId++,
+      type: 'swarm',
+      lane: enemy.lane,
+      progress: Math.max(0, enemy.progress - 0.012 * (index + 1)),
+      ...stats,
+      hp: childHp,
+      maxHp: childHp,
+      speedMultiplier: 1,
+      spawnedFromElite: enemy.id,
+    };
+    children.push(child);
+    const childPosition = enemyPosition(child);
+    match.effects.push({
+      id: match.nextEntityId++,
+      targetId: child.id,
+      type: 'split',
+      x: childPosition.x,
+      y: childPosition.y,
+      fromX: parentPosition.x,
+      fromY: parentPosition.y,
+      playerId: null,
+      color: trait.color,
+      ttl: 0.55,
+      maxTtl: 0.55,
+      crit: false,
+    });
+  }
+  if (match.effects.length > 80) match.effects.splice(0, match.effects.length - 80);
+  return children;
+}
+
 function resolveDeaths(match) {
   const alive = [];
+  const spawned = [];
   for (const enemy of match.enemies) {
     if (enemy.hp > 0) {
       alive.push(enemy);
@@ -1005,8 +1266,11 @@ function resolveDeaths(match) {
     match.players.p1.resource += reward;
     match.players.p2.resource += reward;
     if (enemy.boss) match.bossesKilled += 1;
+    if (enemy.eliteTrait === 'splitter' && !enemy.spawnedFromElite) {
+      spawned.push(...spawnSplitterChildren(match, enemy));
+    }
   }
-  match.enemies = alive;
+  match.enemies = [...alive, ...spawned];
 }
 
 function tickMatch(match, dt, random = Math.random) {
@@ -1030,12 +1294,14 @@ function tickMatch(match, dt, random = Math.random) {
 
   match.enemies.forEach((enemy) => {
     if (enemy.dotTtl > 0) {
-      enemy.hp -= (enemy.dot || 0) * safeDt;
+      applyEnemyDamage(match, enemy, (enemy.dot || 0) * safeDt);
       enemy.dotTtl -= safeDt;
     }
     if (enemy.slowTtl > 0) enemy.slowTtl -= safeDt;
     else enemy.slow = 0;
-    enemy.progress += enemy.speed * (1 - (enemy.slow || 0)) * safeDt;
+    if (enemy.shieldBreakTtl > 0) enemy.shieldBreakTtl -= safeDt;
+    if (enemy.frenzyPulseTtl > 0) enemy.frenzyPulseTtl -= safeDt;
+    enemy.progress += effectiveEnemySpeed(enemy) * safeDt;
   });
   updateBossAbilities(match, safeDt, random);
   resolvePendingHits(match, safeDt);
@@ -1057,6 +1323,12 @@ function tickMatch(match, dt, random = Math.random) {
     return false;
   });
   if (leaked) {
+    match.waveHadLeak = true;
+    if (match.perfectWaveStreak > 0) {
+      match.perfectWaveStreak = 0;
+      match.lastWavePerfect = false;
+      match.streakEventId = Math.max(0, Number(match.streakEventId) || 0) + 1;
+    }
     match.lives = Math.max(0, match.lives - leaked);
     if (match.lives <= 0) {
       match.status = 'gameover';
@@ -1079,6 +1351,12 @@ function tickMatch(match, dt, random = Math.random) {
 
   if (match.waveState === 'spawning' && match.spawnRemaining <= 0) match.waveState = 'active';
   if (match.waveState === 'active' && match.enemies.length === 0) {
+    if (!match.waveHadLeak) {
+      match.perfectWaveStreak = Math.max(0, Number(match.perfectWaveStreak) || 0) + 1;
+      match.bestPerfectWaveStreak = Math.max(match.bestPerfectWaveStreak || 0, match.perfectWaveStreak);
+      match.lastWavePerfect = true;
+      match.streakEventId = Math.max(0, Number(match.streakEventId) || 0) + 1;
+    }
     match.waveState = 'break';
     match.nextWaveIn = GAME.waveBreakMs / 1000;
   }
@@ -1104,6 +1382,7 @@ function createPreviewMatch(cardId, rank = 1) {
     lane: 'p1',
     progress: 0.43 - offset * 0.07,
     ...enemyStats(type, 1),
+    speedMultiplier: 1,
   }));
   return match;
 }
@@ -1257,6 +1536,8 @@ const state = {
   deckSort: 'rarity',
   lastFrameCostMs: 0,
   reducedFx: false,
+  lastStreakEventId: 0,
+  battleMomentTimer: 0,
 };
 
 const byId = (id) => document.getElementById(id);
@@ -1329,6 +1610,9 @@ function playEffectSound(effect) {
     dot: [240, 0.09, 'sawtooth'],
     burst: [520, 0.08, 'square'],
     global: [880, 0.14, 'triangle'],
+    shieldBreak: [1040, 0.16, 'triangle'],
+    frenzyBurst: [150, 0.18, 'sawtooth'],
+    split: [620, 0.08, 'sine'],
     projectile: [430, 0.055, 'triangle'],
   }[effect.type] || [430, 0.055, 'triangle'];
   tone(sound[0], sound[1], sound[2], effect.crit ? 0.05 : 0.025);
@@ -1350,6 +1634,29 @@ function showToast(message, type = 'success') {
   toast.classList.add('show');
   clearTimeout(showToast.timer);
   showToast.timer = setTimeout(() => toast.classList.remove('show'), 2400);
+}
+
+function showBattleMoment(title, detail, type = 'success') {
+  const moment = byId('battleMoment');
+  if (!moment) return;
+  moment.querySelector('strong').textContent = title;
+  moment.querySelector('span').textContent = detail;
+  moment.classList.remove('show', 'success', 'broken');
+  void moment.offsetWidth;
+  moment.classList.add('show', type);
+  if (state.battleMomentTimer) clearTimeout(state.battleMomentTimer);
+  state.battleMomentTimer = setTimeout(() => moment.classList.remove('show'), 1800);
+}
+
+function syncStreakMoment(match) {
+  const eventId = Math.max(0, Number(match?.streakEventId) || 0);
+  if (!eventId || eventId <= state.lastStreakEventId) return;
+  state.lastStreakEventId = eventId;
+  if (match.lastWavePerfect) {
+    showBattleMoment('完美防守', `連續 ${match.perfectWaveStreak} 波零漏怪`, 'success');
+  } else {
+    showBattleMoment('連勝中斷', '夢境核心遭到突破', 'broken');
+  }
 }
 
 function showScreen(id) {
@@ -1739,6 +2046,9 @@ function enterRoom(roomCode) {
   state.snapshotWriteInFlight = false;
   state.snapshotWriteQueued = false;
   state.snapshotExtraUpdates = {};
+  state.lastStreakEventId = 0;
+  if (state.battleMomentTimer) clearTimeout(state.battleMomentTimer);
+  state.battleMomentTimer = 0;
   state.settled = false;
   state.settlementPromise = null;
   state.pendingActions.clear();
@@ -2239,6 +2549,9 @@ async function leaveRoom(removeSelf = true) {
   state.match = null;
   state.selectedHand = null;
   state.selectedTower = null;
+  state.lastStreakEventId = 0;
+  if (state.battleMomentTimer) clearTimeout(state.battleMomentTimer);
+  state.battleMomentTimer = 0;
   clearTowerDrag();
   closeModal('resultModal');
   showScreen('hubScreen');
@@ -2285,6 +2598,7 @@ function showResult(value) {
   byId('resultReason').textContent = settlementReasonLabel(settlement.reason);
   byId('resultWave').textContent = `抵達第 ${wave} 波`;
   byId('resultReward').textContent = `獲得 ${settlement.reward || 0} 枚夢境代幣`;
+  byId('resultStreak').textContent = `最高完美防守 ×${Math.max(0, Number(settlement.bestPerfectWaveStreak ?? state.match?.bestPerfectWaveStreak) || 0)}`;
   openModal('resultModal');
 }
 
@@ -2305,6 +2619,10 @@ function battleStatusChips(match, playerId) {
   const player = match.players?.[playerId];
   if (!player) return [];
   const chips = [];
+  const themeId = match.waveTheme || waveThemeForWave(match.wave || 1);
+  const theme = WAVE_THEMES[themeId] || WAVE_THEMES.calm;
+  if (match.wave > 0) chips.push({ text: `${theme.name} · ${theme.hint}`, color: theme.color });
+  if (match.perfectWaveStreak > 0) chips.push({ text: `完美防守 ×${match.perfectWaveStreak}`, color: '#F4CE78' });
   const hateStacks = Math.max(0, Number(player.hateDamageStacks) || 0);
   if (hateStacks > 0) chips.push({ text: `憎恨 +${Math.round(hateStacks * 3)}%`, color: '#B489E6' });
   const silenced = player.board.filter((tower) => tower?.silencedBy).length;
@@ -2334,7 +2652,7 @@ function battleStatusChips(match, playerId) {
 }
 
 function enemyPositionIsShared(enemy) {
-  return enemy.progress >= 0.5;
+  return enemy.progress >= 0.34;
 }
 
 function renderBattleChips(chips) {
@@ -2349,6 +2667,7 @@ function renderBattleUi() {
   if (!me) return;
   const partnerId = state.playerId === 'p1' ? 'p2' : 'p1';
   const partner = state.match.players?.[partnerId];
+  syncStreakMoment(state.match);
   const now = performance.now();
   if (now - state.lastBattleDomAt >= 100) {
     state.lastBattleDomAt = now;
@@ -2367,6 +2686,12 @@ function renderBattleUi() {
     battleCanvas.dataset.ownTowers = String(me.board.filter(Boolean).length);
     battleCanvas.dataset.partnerTowers = String(partner?.board?.filter(Boolean).length || 0);
     battleCanvas.dataset.enemies = String(state.match.enemies?.length || 0);
+    battleCanvas.dataset.waveTheme = state.match.waveTheme || waveThemeForWave(state.match.wave || 1);
+    battleCanvas.dataset.perfectStreak = String(state.match.perfectWaveStreak || 0);
+    battleCanvas.dataset.eliteSignature = (state.match.enemies || [])
+      .filter((enemy) => enemy.eliteTrait)
+      .map((enemy) => `${enemy.id}:${enemy.eliteTrait}:${Math.ceil(enemy.shield || 0)}:${enemy.frenzyActive ? 1 : 0}`)
+      .join('|');
     battleCanvas.dataset.enemySignature = (state.match.enemies || [])
       .slice(0, 8)
       .map((enemy) => `${enemy.id}:${enemy.progress.toFixed(3)}:${Math.ceil(enemy.hp)}`)
@@ -2386,7 +2711,13 @@ function renderBattleUi() {
     const interval = state.match.wave >= 100 ? 5 : 10;
     const waveProgress = isBossWave(state.match.wave) ? 100 : ((state.match.wave % interval) / interval) * 100;
     byId('waveProgress').style.width = `${Math.max(4, waveProgress)}%`;
-    byId('waveTrackText').textContent = isBossWave(state.match.wave) ? 'Boss 波進行中' : `距離 Boss：${bossWave - state.match.wave} 波`;
+    if (state.match.waveState === 'break') {
+      const nextTheme = WAVE_THEMES[waveThemeForWave(state.match.wave + 1)] || WAVE_THEMES.calm;
+      byId('waveTrackText').textContent = `下一波：${nextTheme.name} · ${nextTheme.hint}`;
+    } else {
+      const currentTheme = WAVE_THEMES[state.match.waveTheme || waveThemeForWave(state.match.wave)] || WAVE_THEMES.calm;
+      byId('waveTrackText').textContent = `${currentTheme.name} · ${currentTheme.hint}`;
+    }
     const chips = battleStatusChips(state.match, state.playerId);
     renderBattleChips(chips);
     battleCanvas.dataset.statusChips = chips.map((chip) => chip.text).join('|');
@@ -2537,7 +2868,7 @@ function updateGuestVisuals(now) {
   const alive = new Set();
   for (const enemy of state.match?.enemies || []) {
     alive.add(enemy.id);
-    const target = Math.min(1, enemy.progress + enemy.speed * (1 - (enemy.slow || 0)) * predictionSeconds);
+    const target = Math.min(1, enemy.progress + effectiveEnemySpeed(enemy) * predictionSeconds);
     const current = state.guestVisualProgress.get(enemy.id);
     if (current === undefined) {
       state.guestVisualProgress.set(enemy.id, target);
@@ -2607,6 +2938,7 @@ function battleVisualProfile(match, canvas) {
     || enemyCount > (mobile ? 12 : PERFORMANCE_SOFT_ENEMY_COUNT)
     || state.lastFrameCostMs > BATTLE_EFFECT_TARGET_MS;
   return {
+    mobile,
     reduced,
     effectLimit: reduced ? (mobile ? 42 : 68) : 120,
     damageLimit: reduced ? (mobile ? 24 : 42) : 90,
@@ -2708,8 +3040,8 @@ function drawRoute(ctx, canvas) {
 function drawBoards(ctx, canvas, match, viewer, options, visualProfile = {}) {
   const width = canvas.width;
   const height = canvas.height;
-  const cellWidth = width * .13;
-  const cellHeight = height * .052;
+  const cellWidth = width * (visualProfile.mobile ? .145 : .13);
+  const cellHeight = height * (visualProfile.mobile ? .062 : .052);
   for (const playerId of ['p1', 'p2']) {
     const player = match.players?.[playerId];
     if (!player) continue;
@@ -2864,9 +3196,10 @@ function drawEnemies(ctx, canvas, match, viewer, interpolateSeconds = 0, enemyPr
   match.enemies?.forEach((enemy) => {
     const pos = viewedEnemyPosition(viewer, {
       ...enemy,
-      progress: enemyProgress?.get(enemy.id) ?? Math.min(1, enemy.progress + enemy.speed * (1 - (enemy.slow || 0)) * interpolateSeconds),
+      progress: enemyProgress?.get(enemy.id) ?? Math.min(1, enemy.progress + effectiveEnemySpeed(enemy) * interpolateSeconds),
     });
-    const size = width * (enemy.boss ? .095 : enemy.type === 'tank' ? .07 : enemy.type === 'swarm' ? .05 : .062);
+    const baseSize = width * (enemy.boss ? .095 : enemy.type === 'tank' ? .07 : enemy.type === 'swarm' ? .05 : .062);
+    const size = baseSize * Math.max(1, Number(enemy.sizeMultiplier) || 1);
     ctx.save();
     ctx.shadowColor = enemy.color;
     ctx.shadowBlur = (enemy.boss ? 24 : 8) * (visualProfile.shadowScale ?? 1);
@@ -2880,8 +3213,78 @@ function drawEnemies(ctx, canvas, match, viewer, interpolateSeconds = 0, enemyPr
     ctx.fillStyle = enemy.boss ? '#d0a34f' : '#82b878';
     roundedRect(ctx, pos.x * width - radius, pos.y * height - size * .54, radius * 2 * hpPct, Math.max(3, width * .005), 3);
     ctx.fill();
+    drawEliteStatus(ctx, canvas, enemy, pos, size, visualProfile);
     if (enemy.boss) drawBossTelegraph(ctx, canvas, enemy, pos, size, visualProfile);
   });
+}
+
+function drawEliteStatus(ctx, canvas, enemy, pos, size, visualProfile = {}) {
+  const trait = ELITE_TRAITS[enemy.eliteTrait];
+  if (!trait) return;
+  const width = canvas.width;
+  const height = canvas.height;
+  const x = pos.x * width;
+  const y = pos.y * height;
+  const pulse = (Math.sin(performance.now() / 110) + 1) / 2;
+  ctx.save();
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+  ctx.strokeStyle = trait.color;
+  ctx.fillStyle = trait.color;
+  ctx.shadowColor = trait.color;
+  ctx.shadowBlur = visualProfile.reduced ? 3 : 10;
+  ctx.lineWidth = Math.max(2, width * .003);
+  if (enemy.eliteTrait === 'shield') {
+    const shieldPct = Math.max(0, Math.min(1, (Number(enemy.shield) || 0) / Math.max(1, Number(enemy.maxShield) || 1)));
+    const radius = size * (.63 + pulse * .035);
+    ctx.beginPath();
+    for (let corner = 0; corner < 6; corner += 1) {
+      const angle = -Math.PI / 2 + corner * Math.PI / 3;
+      const px = x + Math.cos(angle) * radius;
+      const py = y + Math.sin(angle) * radius;
+      if (corner === 0) ctx.moveTo(px, py);
+      else ctx.lineTo(px, py);
+    }
+    ctx.closePath();
+    ctx.globalAlpha = .35 + shieldPct * .45;
+    ctx.stroke();
+    ctx.globalAlpha = 1;
+    const barWidth = size * 1.05;
+    const barHeight = Math.max(3, width * .006);
+    ctx.fillStyle = 'rgba(5,15,18,.8)';
+    roundedRect(ctx, x - barWidth / 2, y - size * .72, barWidth, barHeight, barHeight / 2);
+    ctx.fill();
+    if (shieldPct > 0) {
+      ctx.fillStyle = trait.color;
+      roundedRect(ctx, x - barWidth / 2, y - size * .72, barWidth * shieldPct, barHeight, barHeight / 2);
+      ctx.fill();
+    }
+  } else if (enemy.eliteTrait === 'splitter') {
+    ctx.shadowBlur = visualProfile.reduced ? 2 : 7;
+    for (let dot = 0; dot < 3; dot += 1) {
+      const angle = -Math.PI / 2 + dot * Math.PI * 2 / 3 + performance.now() / 850;
+      ctx.beginPath();
+      ctx.arc(x + Math.cos(angle) * size * .56, y + Math.sin(angle) * size * .56, Math.max(2.5, size * .09), 0, Math.PI * 2);
+      ctx.fill();
+    }
+  } else if (enemy.eliteTrait === 'frenzy') {
+    ctx.globalAlpha = enemy.frenzyActive ? .65 + pulse * .35 : .35;
+    const offset = size * .63;
+    for (const direction of [-1, 1]) {
+      ctx.beginPath();
+      ctx.moveTo(x + direction * offset, y - size * .24);
+      ctx.lineTo(x + direction * size * .82, y);
+      ctx.lineTo(x + direction * offset, y + size * .24);
+      ctx.stroke();
+    }
+    if (enemy.frenzyActive && !visualProfile.reduced) {
+      ctx.globalAlpha = .24 + pulse * .22;
+      ctx.beginPath();
+      ctx.arc(x, y, size * (.67 + pulse * .12), 0, Math.PI * 2);
+      ctx.stroke();
+    }
+  }
+  ctx.restore();
 }
 
 function drawBossTelegraph(ctx, canvas, enemy, pos, size, visualProfile = {}) {
@@ -2965,7 +3368,40 @@ function drawEffects(ctx, canvas, match, viewer, interpolateSeconds = 0, enemyPr
     ctx.fillStyle = effect.color;
     ctx.shadowColor = effect.color;
     ctx.shadowBlur = (effect.crit ? 22 : 12) * (visualProfile.shadowScale ?? 1);
-    if (effect.type === 'chain') {
+    if (effect.type === 'shieldBreak') {
+      ctx.globalAlpha = life;
+      ctx.beginPath();
+      ctx.arc(targetX, targetY, width * (.02 + progress * .065), 0, Math.PI * 2);
+      ctx.lineWidth = width * (.008 * life + .002);
+      ctx.stroke();
+      for (let shard = 0; shard < 6; shard += 1) {
+        const angle = shard * Math.PI / 3;
+        ctx.beginPath();
+        ctx.moveTo(targetX + Math.cos(angle) * width * .018, targetY + Math.sin(angle) * width * .018);
+        ctx.lineTo(targetX + Math.cos(angle) * width * (.025 + progress * .055), targetY + Math.sin(angle) * width * (.025 + progress * .055));
+        ctx.stroke();
+      }
+    } else if (effect.type === 'frenzyBurst') {
+      ctx.globalAlpha = life;
+      for (let ray = 0; ray < 8; ray += 1) {
+        const angle = ray * Math.PI / 4;
+        ctx.beginPath();
+        ctx.moveTo(targetX + Math.cos(angle) * width * .014, targetY + Math.sin(angle) * width * .014);
+        ctx.lineTo(targetX + Math.cos(angle) * width * (.025 + progress * .055), targetY + Math.sin(angle) * width * (.025 + progress * .055));
+        ctx.lineWidth = width * .005 * life;
+        ctx.stroke();
+      }
+    } else if (effect.type === 'split') {
+      ctx.globalAlpha = Math.min(1, life * 1.6);
+      ctx.beginPath();
+      ctx.moveTo(fromX, fromY);
+      ctx.lineTo(currentX, currentY);
+      ctx.lineWidth = width * .0035 * life;
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(currentX, currentY, width * (.006 + life * .006), 0, Math.PI * 2);
+      ctx.fill();
+    } else if (effect.type === 'chain') {
       ctx.beginPath();
       ctx.moveTo(fromX, fromY);
       for (let segment = 1; segment < 7; segment += 1) {
@@ -3044,13 +3480,14 @@ function drawDamageNumbers(ctx, canvas, match, viewer, interpolateSeconds = 0, v
     const pos = orientPosition({ x: number.x, y: number.y }, viewer);
     ctx.save();
     ctx.globalAlpha = Math.min(1, life * 1.8);
-    ctx.fillStyle = number.crit ? '#ffe18a' : '#f4efe0';
+    ctx.fillStyle = number.shieldBreak ? '#C5F8FF' : number.shielded ? '#72DDF2' : number.crit ? '#ffe18a' : '#f4efe0';
     ctx.strokeStyle = 'rgba(15,17,12,.82)';
     ctx.lineWidth = Math.max(2, width * .003);
     ctx.font = `950 ${width * (number.crit ? .023 : .018)}px system-ui`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    const label = `${number.crit ? '!' : ''}${Math.max(1, Math.round(number.damage))}`;
+    const amount = Math.max(1, Math.round(number.damage));
+    const label = number.shieldBreak ? `破盾 ${amount}` : number.shielded ? `盾 ${amount}` : `${number.crit ? '!' : ''}${amount}`;
     const drawX = pos.x * width;
     const drawY = pos.y * height - width * (.028 + progress * .055);
     ctx.strokeText(label, drawX, drawY);
@@ -3343,6 +3780,42 @@ if (demoMode) {
 
 if (e2eMode) {
   globalThis.__defenseE2E = {
+    forceEliteScenario() {
+      if (!state.isHost || !state.match) return false;
+      state.match.wave = 8;
+      state.match.waveTheme = 'siege';
+      state.match.waveState = 'active';
+      state.match.waveHadLeak = false;
+      state.match.spawnRemaining = 0;
+      state.match.spawnTotal = 0;
+      state.match.perfectWaveStreak = 2;
+      state.match.bestPerfectWaveStreak = 3;
+      state.match.lastWavePerfect = true;
+      state.match.streakEventId = Math.max(0, Number(state.match.streakEventId) || 0) + 1;
+      state.match.effects = [];
+      state.match.pendingHits = [];
+      state.match.damageNumbers = [];
+      state.match.enemies = [
+        {
+          id: state.match.nextEntityId++, type: 'tank', lane: 'p1', progress: 0.44,
+          hp: 100000, maxHp: 100000, shield: 50000, maxShield: 50000,
+          speed: 0.006, speedMultiplier: 1, eliteTrait: 'shield', sizeMultiplier: 1.12, color: ENEMIES.tank.color,
+        },
+        {
+          id: state.match.nextEntityId++, type: 'swarm', lane: 'p2', progress: 0.22,
+          hp: 100000, maxHp: 100000, speed: 0.006, speedMultiplier: 1,
+          eliteTrait: 'splitter', sizeMultiplier: 1.12, color: ENEMIES.swarm.color,
+        },
+        {
+          id: state.match.nextEntityId++, type: 'fast', lane: 'p1', progress: 0.3,
+          hp: 49000, maxHp: 100000, speed: 0.006, speedMultiplier: 1.6, frenzyActive: true,
+          eliteTrait: 'frenzy', sizeMultiplier: 1.12, color: ENEMIES.fast.color,
+        },
+      ];
+      state.lastSnapshotAt = 0;
+      renderBattleUi();
+      return true;
+    },
     forceDefeat() {
       if (!state.isHost || !state.match) return false;
       state.match.lives = 0;

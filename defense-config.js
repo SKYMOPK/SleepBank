@@ -248,6 +248,92 @@ export const ENEMIES = Object.freeze({
   boss: Object.freeze({ name: '失眠巨獸', color: '#D0A34F', hp: 1120, speed: 0.023, radius: 15, boss: true, abilityInterval: 5 }),
 });
 
+export const ELITE_TRAITS = Object.freeze({
+  shield: Object.freeze({
+    name: '嘲諷護盾',
+    color: '#55D6F2',
+    hpMultiplier: 1.25,
+    sizeMultiplier: 1.12,
+    shieldRatio: 0.5,
+  }),
+  splitter: Object.freeze({
+    name: '分裂',
+    color: '#8ED37D',
+    hpMultiplier: 1.25,
+    sizeMultiplier: 1.12,
+    childCount: 3,
+    childHpRatio: 0.4,
+  }),
+  frenzy: Object.freeze({
+    name: '狂暴',
+    color: '#F07167',
+    hpMultiplier: 1.25,
+    sizeMultiplier: 1.12,
+    triggerHpRatio: 0.5,
+    speedMultiplier: 1.6,
+  }),
+});
+
+export const WAVE_THEMES = Object.freeze({
+  calm: Object.freeze({
+    name: '深眠前兆',
+    color: '#A9B0A3',
+    hint: '普通暖身波',
+    pattern: Object.freeze(['normal']),
+    countOffset: 0,
+    spawnIntervalMultiplier: 1,
+    eliteTrait: null,
+  }),
+  swarm: Object.freeze({
+    name: '雜念潮',
+    color: '#8ED37D',
+    hint: '範圍／連鎖塔有效',
+    pattern: Object.freeze(['swarm', 'normal', 'swarm', 'swarm', 'fast']),
+    countOffset: 1,
+    spawnIntervalMultiplier: 0.82,
+    eliteTrait: 'splitter',
+  }),
+  rush: Object.freeze({
+    name: '驚醒突襲',
+    color: '#F09A72',
+    hint: '減速／爆發塔有效',
+    pattern: Object.freeze(['fast', 'normal', 'fast', 'normal', 'fast']),
+    countOffset: 0,
+    spawnIntervalMultiplier: 0.9,
+    eliteTrait: 'frenzy',
+  }),
+  siege: Object.freeze({
+    name: '重壓夢境',
+    color: '#A997C4',
+    hint: '高傷／持續傷害塔有效',
+    pattern: Object.freeze(['tank', 'normal', 'tank', 'normal', 'normal']),
+    countOffset: -1,
+    spawnIntervalMultiplier: 1.15,
+    eliteTrait: 'shield',
+  }),
+  mixed: Object.freeze({
+    name: '扭曲混合',
+    color: '#D0A34F',
+    hint: '均衡配置較穩定',
+    pattern: Object.freeze(['normal', 'swarm', 'fast', 'normal', 'tank']),
+    countOffset: 0,
+    spawnIntervalMultiplier: 1,
+    eliteTrait: null,
+  }),
+  boss: Object.freeze({
+    name: 'Boss 波',
+    color: '#F0B84B',
+    hint: '集中火力守住核心',
+    pattern: Object.freeze([]),
+    countOffset: 0,
+    spawnIntervalMultiplier: 1,
+    eliteTrait: null,
+  }),
+});
+
+const WAVE_THEME_CYCLE = Object.freeze(['swarm', 'rush', 'siege', 'mixed']);
+const MIXED_ELITE_CYCLE = Object.freeze(['shield', 'splitter', 'frenzy']);
+
 export const PLAYER_NAMES = Object.freeze({ p1: '至凱', p2: '柏致' });
 
 export function cardStats(cardId, rank = 1) {
@@ -308,9 +394,18 @@ export function waveEnemyType(wave) {
   return waveEnemySequence(wave)[0] || 'normal';
 }
 
+export function waveThemeForWave(wave) {
+  const safeWave = Math.max(1, Number(wave) || 1);
+  if (isBossWave(safeWave)) return 'boss';
+  if (safeWave === 1) return 'calm';
+  return WAVE_THEME_CYCLE[(safeWave - 2) % WAVE_THEME_CYCLE.length];
+}
+
 export function waveEnemyCount(wave) {
   if (isBossWave(wave)) return 1;
-  return 6 + Math.floor(wave / 4);
+  const baseCount = 6 + Math.floor((wave + 1) / 3);
+  const theme = WAVE_THEMES[waveThemeForWave(wave)] || WAVE_THEMES.calm;
+  return Math.max(4, baseCount + theme.countOffset);
 }
 
 export function bossTypeForWave(wave) {
@@ -323,12 +418,33 @@ export function bossTypeForWave(wave) {
 export function waveEnemySequence(wave) {
   if (isBossWave(wave)) return [bossTypeForWave(wave)];
   const count = waveEnemyCount(wave);
-  return Array.from({ length: count }, (_, index) => {
-    if (wave >= 7 && (index + wave) % 6 === 0) return 'tank';
-    if (wave >= 5 && (index * 2 + wave) % 5 === 0) return 'fast';
-    if (wave >= 3 && (index + wave) % 3 === 0) return 'swarm';
-    return 'normal';
-  });
+  const theme = WAVE_THEMES[waveThemeForWave(wave)] || WAVE_THEMES.calm;
+  return Array.from({ length: count }, (_, index) => theme.pattern[index % theme.pattern.length]);
+}
+
+export function waveSpawnInterval(wave) {
+  if (isBossWave(wave)) return 0.5;
+  const theme = WAVE_THEMES[waveThemeForWave(wave)] || WAVE_THEMES.calm;
+  const baseInterval = Math.max(0.2, 0.66 - wave * 0.006);
+  return Math.max(0.18, baseInterval * theme.spawnIntervalMultiplier);
+}
+
+export function eliteTraitForSpawn(wave, spawnIndex, enemyCount = waveEnemyCount(wave)) {
+  if (wave < 6 || isBossWave(wave)) return null;
+  const eliteIndex = Math.floor((Math.max(1, enemyCount) - 1) / 2);
+  if (spawnIndex !== eliteIndex) return null;
+  const themeId = waveThemeForWave(wave);
+  const theme = WAVE_THEMES[themeId] || WAVE_THEMES.calm;
+  if (theme.eliteTrait) return theme.eliteTrait;
+  const mixedRound = Math.max(0, Math.floor((wave - 9) / WAVE_THEME_CYCLE.length));
+  return MIXED_ELITE_CYCLE[mixedRound % MIXED_ELITE_CYCLE.length];
+}
+
+export function effectiveEnemySpeed(enemy) {
+  const speed = Math.max(0, Number(enemy?.speed) || 0);
+  const multiplier = Math.max(0, Number(enemy?.speedMultiplier) || 1);
+  const slow = Math.max(0, Math.min(0.95, Number(enemy?.slow) || 0));
+  return speed * multiplier * (1 - slow);
 }
 
 export function enemyStats(type, wave) {

@@ -10,7 +10,7 @@
   <link rel="icon" href="data:,">
   <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
-  <link rel="stylesheet" href="defense.css?v=15">
+  <link rel="stylesheet" href="defense.css?v=17">
 </head>
 <body>
   <div id="toast" role="status"></div>
@@ -177,6 +177,7 @@
       <div class="battle-alerts" id="battleAlerts"></div>
       <div class="battle-frame">
         <canvas id="battleCanvas" width="1000" height="1000" aria-label="宿舍守睡戰戰場"></canvas>
+        <div class="battle-moment" id="battleMoment" aria-live="polite"><strong>完美防守</strong><span>連續 1 波零漏怪</span></div>
         <div class="battle-overlay" id="battleOverlay"><strong>等待房主開始</strong><span></span></div>
       </div>
       <div class="battle-controls">
@@ -218,10 +219,11 @@
       <p class="result-reason" id="resultReason">夢境核心失守</p>
       <h2 id="resultWave">抵達第 0 波</h2>
       <p id="resultReward">獲得 0 枚夢境代幣</p>
+      <p class="result-streak" id="resultStreak">最高完美防守 ×0</p>
       <button class="primary-btn" id="resultHomeBtn">返回大廳</button>
     </div>
   </div>
 
-  <script src="defense-bundle.js?v=11"></script>
+  <script src="defense-bundle.js?v=13"></script>
 </body>
 </html>

@@ -294,6 +294,8 @@ input:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(208,163,79,.
 .wave-track { height:24px; position:relative; display:flex; align-items:center; justify-content:space-between; margin-bottom:6px; padding:0 8px; border:1px solid var(--line); border-radius:6px; background:rgba(0,0,0,.2); overflow:hidden; color:var(--muted); font-size:9px; font-style:normal; font-weight:850; }
 .wave-track span { position:absolute; inset:0 auto 0 0; width:4%; background:linear-gradient(90deg,rgba(130,184,120,.18),rgba(208,163,79,.24)); transition:width .45s var(--ease); }
 .wave-track b,.wave-track em { position:relative; z-index:1; font-size:9px; font-style:normal; }
+.wave-track b { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.wave-track em { flex:0 0 auto; margin-left:8px; }
 .battle-alerts { min-height:25px; display:flex; flex-wrap:wrap; gap:5px; align-items:center; justify-content:center; margin-bottom:7px; }
 .battle-chip { min-height:20px; display:inline-flex; align-items:center; gap:5px; border:1px solid color-mix(in srgb,var(--chip-color,#d0a34f) 50%,var(--line)); border-radius:999px; padding:2px 8px; color:var(--chip-color,#d0a34f); background:color-mix(in srgb,var(--chip-color,#d0a34f) 11%,rgba(0,0,0,.35)); font-size:9px; font-weight:950; transform:translate3d(0,0,0); }
 .battle-chip.warn { animation:chipPulse .8s var(--ease) infinite alternate; }
@@ -302,7 +304,14 @@ input:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(208,163,79,.
 #battleCanvas, #previewCanvas { display: block; width: 100%; height: 100%; touch-action: manipulation; }
 #battleCanvas { touch-action: none; cursor: grab; }
 #battleCanvas.dragging { cursor: grabbing; }
-.battle-overlay { position: absolute; inset: 0; display: none; place-content: center; gap: 6px; text-align: center; background: rgba(11,13,9,.72); backdrop-filter: blur(6px); }
+.battle-moment { position:absolute; left:50%; top:50%; z-index:3; width:min(250px,78%); display:grid; gap:4px; padding:12px 16px; border:1px solid rgba(244,206,120,.55); border-radius:8px; color:#fff1b8; background:rgba(18,21,14,.9); box-shadow:0 16px 38px rgba(0,0,0,.42); text-align:center; opacity:0; pointer-events:none; transform:translate3d(-50%,-40%,0) scale(.9); }
+.battle-moment strong { font-size:19px; }
+.battle-moment span { color:var(--muted); font-size:11px; font-weight:800; }
+.battle-moment.success { border-color:rgba(244,206,120,.7); box-shadow:0 16px 38px rgba(0,0,0,.42),0 0 24px rgba(244,206,120,.16); }
+.battle-moment.broken { border-color:rgba(203,115,115,.75); color:#ffd2d2; box-shadow:0 16px 38px rgba(0,0,0,.42),0 0 24px rgba(203,115,115,.16); }
+.battle-moment.show { animation:battleMomentIn 1.8s var(--ease) both; }
+@keyframes battleMomentIn { 0% { opacity:0; transform:translate3d(-50%,-32%,0) scale(.88); } 16%,72% { opacity:1; transform:translate3d(-50%,-50%,0) scale(1); } 100% { opacity:0; transform:translate3d(-50%,-62%,0) scale(.96); } }
+.battle-overlay { position: absolute; inset: 0; z-index:4; display: none; place-content: center; gap: 6px; text-align: center; background: rgba(11,13,9,.72); backdrop-filter: blur(6px); }
 .battle-overlay.show { display: grid; }
 .battle-overlay strong { font-size: 24px; }
 .battle-overlay span { color: var(--muted); font-size: 12px; }
@@ -359,6 +368,7 @@ input:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(208,163,79,.
 .result-modal h2 { margin: 8px 0; }
 .result-modal p { color: var(--muted); }
 .result-modal .result-reason { margin:10px 0 0; color:var(--gold); font-size:12px; font-weight:850; }
+.result-modal .result-streak { margin:8px 0 0; color:#f4ce78; font-size:12px; font-weight:900; }
 .result-modal .primary-btn { width: 100%; margin-top: 12px; }
 
 #toast {
@@ -430,6 +440,9 @@ input:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(208,163,79,.
   .wave-track b,.wave-track em { font-size:11px; }
   .battle-alerts { min-height:29px; gap:6px; }
   .battle-chip { min-height:24px; padding:3px 9px; font-size:10px; }
+  .battle-moment { width:min(245px,82%); padding:11px 13px; }
+  .battle-moment strong { font-size:17px; }
+  .battle-moment span { font-size:11px; }
   .battle-controls { grid-template-columns:1fr; gap:7px; }
   .resource-pill { min-height:42px; display:flex; align-items:center; justify-content:center; gap:8px; font-size:15px; }
   .resource-pill strong { display:inline; font-size:28px; line-height:1; }
