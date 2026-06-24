@@ -4,8 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>宿舍帳本</title>
+    <link rel="icon" href="data:,">
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
+    <script src="split-core.js"></script>
     <style>
         :root {
             --bg: #1E1912;
@@ -174,6 +176,7 @@
         }
         .submit-btn:hover { background: rgba(255,179,64,0.2); box-shadow: 0 6px 22px rgba(255,179,64,0.2); transform: translateY(-2px); }
         .submit-btn:active { transform: scale(0.97) translateY(0); }
+        .submit-btn:disabled { opacity: 0.38; cursor: not-allowed; transform: none; box-shadow: none; }
 
         /* ===== 查看帳目按鈕 ===== */
         .view-records-btn {
@@ -238,17 +241,19 @@
             border: 1px solid rgba(255,255,255,0.08);
             border-radius: 18px; padding: 16px; margin-bottom: 10px;
             display: flex; align-items: flex-start; gap: 14px;
-            transition: border-color 0.2s, box-shadow 0.2s;
+            transition: border-color 0.25s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.25s cubic-bezier(0.25, 1, 0.5, 1), transform 0.25s cubic-bezier(0.25, 1, 0.5, 1);
+            cursor: pointer;
         }
         .record-card:hover { border-color: rgba(255,255,255,0.13); box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
-        .record-card.settled { opacity: 0.4; }
+        .record-card:active { transform: scale(0.992); }
+        .record-card.settled { opacity: 0.72; }
         .record-checkbox {
-            width: 22px; height: 22px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.15);
-            background: rgba(255,255,255,0.03); cursor: pointer; flex-shrink: 0;
-            display: flex; align-items: center; justify-content: center; margin-top: 2px; transition: all 0.2s;
+            width: 44px; height: 44px; border: 0; background: transparent; cursor: pointer; flex-shrink: 0;
+            display: grid; place-items: center; margin: -8px 0 0 -8px; position: relative;
         }
-        .record-checkbox.checked { background: var(--blue); border-color: var(--blue); }
-        .record-checkbox.checked::after { content: '✓'; color: white; font-size: 13px; font-weight: bold; }
+        .record-checkbox::before { content:''; width:22px; height:22px; border-radius:6px; border:1px solid rgba(255,255,255,0.18); background:rgba(255,255,255,0.03); transition:all 0.22s cubic-bezier(0.25, 1, 0.5, 1); }
+        .record-checkbox.checked::before { background: var(--blue); border-color: var(--blue); box-shadow:0 0 14px rgba(143,174,200,0.25); }
+        .record-checkbox.checked::after { content: '✓'; position:absolute; color: white; font-size: 13px; font-weight: bold; }
         .record-body { flex: 1; min-width: 0; }
         .record-note { font-weight: bold; font-size: 15px; margin-bottom: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .record-amounts { font-size: 12px; color: var(--muted); margin-bottom: 5px; }
@@ -295,11 +300,86 @@
         /* ===== 逐筆刪除按鈕 ===== */
         .record-delete-btn { flex-shrink: 0; width: 32px; height: 32px; border-radius: 10px; border: 1px solid rgba(248,113,113,0.18); background: rgba(248,113,113,0.05); color: rgba(248,113,113,0.4); font-size: 15px; cursor: pointer; transition: all 0.2s; align-self: center; display: flex; align-items: center; justify-content: center; }
         .record-delete-btn:hover { background: rgba(248,113,113,0.15); border-color: rgba(248,113,113,0.4); color: var(--red); }
+
+        /* ===== 搜尋、月份與批次操作 ===== */
+        .record-tools { margin: 14px 16px 0; display: grid; grid-template-columns: minmax(0,1fr) 128px 112px; gap: 8px; }
+        .record-search, .record-filter {
+            min-width:0; height:42px; border:1px solid rgba(255,255,255,0.09); border-radius:12px;
+            background:rgba(0,0,0,0.18); color:var(--text); padding:0 12px; outline:none;
+            font-size:13px; font-weight:700; transition:border-color .22s cubic-bezier(0.25, 1, 0.5, 1), box-shadow .22s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+        .record-search:focus, .record-filter:focus { border-color:rgba(200,164,74,0.45); box-shadow:0 0 0 3px rgba(200,164,74,0.07); }
+        .record-filter option { background:#211b13; color:var(--text); }
+        .filter-result { margin:9px 18px 0; color:var(--muted); font-size:11px; min-height:16px; }
+        .month-group { margin-bottom:18px; }
+        .month-heading {
+            width:100%; min-height:44px; display:flex; align-items:center; justify-content:space-between; gap:12px;
+            border:0; border-bottom:1px solid rgba(255,255,255,0.08); background:transparent; color:var(--text);
+            padding:8px 2px; margin-bottom:10px; cursor:pointer; text-align:left;
+        }
+        .month-heading strong { font-size:13px; }
+        .month-heading span { color:var(--muted); font-size:11px; text-align:right; }
+        .month-heading i { color:var(--orange); font-size:12px; font-style:normal; transition:transform .24s cubic-bezier(0.25, 1, 0.5, 1); }
+        .month-group.collapsed .month-heading i { transform:rotate(-90deg); }
+        .month-records { display:block; }
+        .month-group.collapsed .month-records { display:none; }
+        .selection-bar {
+            position:sticky; bottom:12px; z-index:80; display:none; grid-template-columns:minmax(0,1fr) auto; align-items:center; gap:12px;
+            margin:14px 16px 0; padding:12px 14px; border:1px solid rgba(143,174,200,0.32); border-radius:16px;
+            background:rgba(25,28,35,0.94); backdrop-filter:blur(18px); box-shadow:0 12px 35px rgba(0,0,0,0.4);
+        }
+        .selection-bar.show { display:grid; animation:fadeInUp .28s cubic-bezier(0.25, 1, 0.5, 1); }
+        .selection-bar strong { display:block; color:var(--blue); font-size:13px; }
+        .selection-bar span { display:block; color:var(--muted); font-size:11px; margin-top:2px; }
+        .selection-bar button { height:40px; border:1px solid rgba(143,174,200,0.35); border-radius:12px; background:rgba(143,174,200,0.12); color:var(--blue); padding:0 15px; font-weight:900; cursor:pointer; }
+        .settlement-heading { margin:12px 0 10px; padding:12px 2px 8px; border-bottom:1px solid rgba(118,166,104,0.2); }
+        .settlement-heading strong { display:block; color:var(--green); font-size:13px; }
+        .settlement-heading span { display:block; color:var(--muted); font-size:11px; margin-top:4px; }
+
+        /* ===== 編輯帳目與復原 ===== */
+        .edit-overlay { display:none; position:fixed; inset:0; z-index:600; align-items:flex-end; justify-content:center; padding:16px; background:rgba(0,0,0,0.72); backdrop-filter:blur(10px); }
+        .edit-overlay.show { display:flex; }
+        .edit-sheet { width:100%; max-width:480px; border:1px solid rgba(255,255,255,0.12); border-radius:22px; background:rgba(28,25,22,0.98); padding:20px; box-shadow:0 24px 70px rgba(0,0,0,0.6); animation:sheetIn .3s cubic-bezier(0.25, 1, 0.5, 1); }
+        @keyframes sheetIn { from { opacity:0; transform:translate3d(0,28px,0) scale(.98); } to { opacity:1; transform:translate3d(0,0,0) scale(1); } }
+        .edit-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; }
+        .edit-header strong { font-size:17px; color:var(--orange); }
+        .icon-action { width:40px; height:40px; display:grid; place-items:center; border:1px solid rgba(255,255,255,0.1); border-radius:50%; background:rgba(255,255,255,0.04); color:var(--muted); font-size:19px; cursor:pointer; }
+        .edit-actions { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:15px; }
+        .edit-actions button { min-height:46px; border-radius:14px; font-size:14px; font-weight:900; cursor:pointer; }
+        .edit-cancel { border:1px solid rgba(255,255,255,0.1); background:rgba(255,255,255,0.04); color:var(--muted); }
+        .edit-save { border:1px solid rgba(200,164,74,0.36); background:rgba(200,164,74,0.12); color:var(--orange); }
+        .edit-readonly { padding:12px; border:1px solid rgba(255,255,255,0.08); border-radius:12px; color:var(--muted); font-size:12px; text-align:center; }
+        .undo-toast {
+            position:fixed; left:50%; bottom:20px; z-index:1000; min-width:min(360px,calc(100vw - 32px)); display:none;
+            grid-template-columns:minmax(0,1fr) auto; align-items:center; gap:14px; padding:12px 14px 12px 16px;
+            border:1px solid rgba(255,255,255,0.12); border-radius:14px; background:rgba(24,27,32,0.97); box-shadow:0 14px 40px rgba(0,0,0,0.5);
+            transform:translate3d(-50%,0,0);
+        }
+        .undo-toast.show { display:grid; animation:undoIn .3s cubic-bezier(0.25, 1, 0.5, 1); }
+        @keyframes undoIn { from { opacity:0; transform:translate3d(-50%,20px,0); } to { opacity:1; transform:translate3d(-50%,0,0); } }
+        .undo-toast span { font-size:13px; font-weight:800; color:var(--text); }
+        .undo-toast button { min-width:58px; height:38px; border:1px solid rgba(200,164,74,0.35); border-radius:11px; background:rgba(200,164,74,0.12); color:var(--orange); font-weight:950; cursor:pointer; }
+        .sync-pill { position:absolute; right:16px; top:50%; transform:translateY(-50%); color:var(--muted); font-size:10px; font-weight:800; }
+        .sync-pill.online { color:var(--green); }
+        .sync-pill.offline { color:var(--red); }
+
+        @media (max-width: 560px) {
+            .record-tools { grid-template-columns:1fr 1fr; }
+            .record-search { grid-column:1 / -1; }
+            .record-card { padding:14px 12px; gap:8px; }
+            .record-time { font-size:10px; }
+            .edit-overlay { padding:8px; }
+            .edit-sheet { border-radius:18px; padding:17px 15px; }
+        }
     </style>
 </head>
 <body>
 
 <div id="toast"></div>
+<div class="undo-toast" id="undoToast" aria-live="polite">
+    <span id="undoText">操作完成</span>
+    <button type="button" onclick="undoLastAction()">復原</button>
+</div>
 
 <!-- ===== 確認 Modal ===== -->
 <div class="confirm-overlay" id="confirmOverlay">
@@ -313,9 +393,35 @@
     </div>
 </div>
 
+<div class="edit-overlay" id="recordEditor" aria-hidden="true">
+    <div class="edit-sheet" role="dialog" aria-modal="true" aria-labelledby="editorTitle">
+        <div class="edit-header">
+            <strong id="editorTitle">編輯帳目</strong>
+            <button class="icon-action" type="button" onclick="closeRecordEditor()" aria-label="關閉">×</button>
+        </div>
+        <div class="amount-row">
+            <div class="amount-group"><label for="edit_p1">至凱買了</label><input class="amount-input" id="edit_p1" type="number" inputmode="decimal" min="0" step="0.01" oninput="updateEditorPreview()"></div>
+            <div class="amount-group"><label for="edit_p2">柏致買了</label><input class="amount-input" id="edit_p2" type="number" inputmode="decimal" min="0" step="0.01" oninput="updateEditorPreview()"></div>
+        </div>
+        <input class="note-input" id="edit_note" type="text" maxlength="30" placeholder="備註（店名、說明…）" oninput="updateEditorPreview()">
+        <div class="input-card-title">誰代付？</div>
+        <div class="payer-row">
+            <button class="payer-btn" id="edit_btn_p1" type="button" onclick="selectEditorPayer('p1')">👦🏻 至凱付</button>
+            <button class="payer-btn" id="edit_btn_p2" type="button" onclick="selectEditorPayer('p2')">👦🏼 柏致付</button>
+        </div>
+        <div class="preview-text" id="editorPreview"></div>
+        <div class="edit-readonly" id="editorReadonly" hidden>這筆帳目已結清，僅供查看。</div>
+        <div class="edit-actions">
+            <button class="edit-cancel" type="button" onclick="closeRecordEditor()">取消</button>
+            <button class="edit-save" id="editorSaveBtn" type="button" onclick="saveRecordEdit()">儲存修改</button>
+        </div>
+    </div>
+</div>
+
 <header class="header">
     <span class="header-back" onclick="handleBack()" style="cursor:pointer;">← 返回</span>
     <div class="header-title" id="headerTitle">📒 宿舍帳本</div>
+    <span class="sync-pill" id="syncPill">同步中</span>
 </header>
 
 <!-- ===== VIEW 1：輸入頁 ===== -->
@@ -336,11 +442,11 @@
         <div class="amount-row">
             <div class="amount-group">
                 <label>至凱買了</label>
-                <input class="amount-input" id="inp_p1" type="number" inputmode="numeric" placeholder="$0" min="0" oninput="updatePreview()">
+                <input class="amount-input" id="inp_p1" type="number" inputmode="decimal" placeholder="$0" min="0" step="0.01" oninput="updatePreview()">
             </div>
             <div class="amount-group">
                 <label>柏致買了</label>
-                <input class="amount-input" id="inp_p2" type="number" inputmode="numeric" placeholder="$0" min="0" oninput="updatePreview()">
+                <input class="amount-input" id="inp_p2" type="number" inputmode="decimal" placeholder="$0" min="0" step="0.01" oninput="updatePreview()">
             </div>
         </div>
         <div class="calc-panel" id="calcPanel">
@@ -377,11 +483,11 @@
         <input class="note-input" id="inp_note" type="text" placeholder="備註（店名、說明…）" maxlength="30">
         <div style="font-size:12px; color:var(--muted); font-weight:bold; margin-bottom:8px;">誰代付？</div>
         <div class="payer-row">
-            <div class="payer-btn" id="btn_p1" onclick="selectPayer('p1')">👦🏻 至凱付</div>
-            <div class="payer-btn" id="btn_p2" onclick="selectPayer('p2')">👦🏼 柏致付</div>
+            <button class="payer-btn" id="btn_p1" type="button" onclick="selectPayer('p1')">👦🏻 至凱付</button>
+            <button class="payer-btn" id="btn_p2" type="button" onclick="selectPayer('p2')">👦🏼 柏致付</button>
         </div>
         <div class="preview-text" id="previewText">請輸入金額並選擇付款人</div>
-        <button class="submit-btn" onclick="addRecord()">＋ 新增這筆</button>
+        <button class="submit-btn" id="submitBtn" onclick="addRecord()" disabled>＋ 新增這筆</button>
     </div>
 
     <div class="view-records-btn" onclick="switchView('unsettled')">
@@ -414,11 +520,22 @@
 
     <div class="settle-card">
         <button class="settle-btn primary" onclick="settleAll()">✅ 一鍵全部結清</button>
-        <button class="settle-btn secondary" onclick="settleSelected()">☑️ 結清選取</button>
+        <button class="settle-btn secondary" onclick="selectVisibleRecords()">☑️ 選取目前結果</button>
     </div>
+
+    <div class="record-tools">
+        <input class="record-search" id="uSearch" type="search" placeholder="搜尋備註" aria-label="搜尋未結清帳目" oninput="setRecordFilter('unsettled','search',this.value)">
+        <select class="record-filter" id="uMonth" aria-label="未結清帳目月份" onchange="setRecordFilter('unsettled','month',this.value)"><option value="all">全部月份</option></select>
+        <select class="record-filter" id="uPayer" aria-label="未結清帳目付款人" onchange="setRecordFilter('unsettled','payer',this.value)"><option value="all">全部付款人</option><option value="p1">至凱付</option><option value="p2">柏致付</option></select>
+    </div>
+    <div class="filter-result" id="uFilterResult"></div>
 
     <div class="list-section">
         <div id="record-list-unsettled"><div class="empty-state">📭 目前沒有未結清的帳目</div></div>
+    </div>
+    <div class="selection-bar" id="selectionBar">
+        <div><strong id="selectionCount">已選 0 筆</strong><span id="selectionSummary">不影響目前欠款</span></div>
+        <button type="button" onclick="settleSelected()">結清選取</button>
     </div>
 
 </div>
@@ -431,6 +548,13 @@
     <div style="margin: 20px 16px 0;">
         <button class="settle-btn" style="width:100%; color:var(--red); background:rgba(255,69,58,0.08); border-color:rgba(255,69,58,0.25); padding:14px;" onclick="deleteSettled()">🗑️ 清空所有已結清紀錄</button>
     </div>
+
+    <div class="record-tools">
+        <input class="record-search" id="sSearch" type="search" placeholder="搜尋備註" aria-label="搜尋已結清帳目" oninput="setRecordFilter('settled','search',this.value)">
+        <select class="record-filter" id="sMonth" aria-label="已結清帳目月份" onchange="setRecordFilter('settled','month',this.value)"><option value="all">全部月份</option></select>
+        <select class="record-filter" id="sPayer" aria-label="已結清帳目付款人" onchange="setRecordFilter('settled','payer',this.value)"><option value="all">全部付款人</option><option value="p1">至凱付</option><option value="p2">柏致付</option></select>
+    </div>
+    <div class="filter-result" id="sFilterResult"></div>
 
     <div class="list-section">
         <div id="record-list-settled"><div class="empty-state">📭 沒有已結清的紀錄</div></div>
@@ -451,14 +575,29 @@
     };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
+    const ledgerCore = window.SplitLedgerCore;
+    const playerNames = { p1: '至凱', p2: '柏致' };
 
     let currentBalance = 0;
     let currentPayer = null;
-    let currentTab = 'unsettled';
     let allRecords = {};
+    let allSettlements = {};
     let selectedKeys = new Set();
     let currentView = 'input';
     let calcValue = 0;
+    let editingKey = null;
+    let editorPayer = null;
+    let lastUndoAction = null;
+    let undoTimer = null;
+    let recordsLoaded = false;
+    let isSubmitting = false;
+    const syncingBudgetKeys = new Map();
+    const collapsedMonths = new Set();
+    const initializedMonthGroups = new Set();
+    const recordFilters = {
+        unsettled: { search: '', month: 'all', payer: 'all' },
+        settled: { search: '', month: 'all', payer: 'all' },
+    };
 
     // ===== View 切換 =====
     function handleBack() {
@@ -519,6 +658,43 @@
         setTimeout(() => el.classList.remove('show'), 2500);
     }
 
+    function escapeHtml(value) {
+        return String(value ?? '').replace(/[&<>'"]/g, char => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', "'":'&#39;', '"':'&quot;' }[char]));
+    }
+
+    function operationId(prefix = 'op') {
+        return `${prefix}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 9)}`;
+    }
+
+    function offerUndo(message, action) {
+        clearTimeout(undoTimer);
+        lastUndoAction = action;
+        document.getElementById('undoText').innerText = message;
+        document.getElementById('undoToast').classList.add('show');
+        undoTimer = setTimeout(clearUndo, 6000);
+    }
+
+    function clearUndo() {
+        clearTimeout(undoTimer);
+        undoTimer = null;
+        lastUndoAction = null;
+        document.getElementById('undoToast').classList.remove('show');
+    }
+
+    async function undoLastAction() {
+        if (!lastUndoAction) return;
+        const action = lastUndoAction;
+        clearUndo();
+        try {
+            await action();
+            playSound('success');
+            showToast('↩️ 已復原');
+        } catch (error) {
+            console.error(error);
+            showToast('復原失敗，請檢查網路', 'var(--red)');
+        }
+    }
+
     function formatTime(ts) {
         const d = new Date(ts);
         const mo = d.getMonth() + 1, da = d.getDate();
@@ -527,7 +703,7 @@
     }
 
     function getDelta(r) {
-        return r.payer === 'p1' ? (r.p2_bought || 0) : -(r.p1_bought || 0);
+        return ledgerCore.recordDelta(r);
     }
 
     function getResultText(r) {
@@ -538,8 +714,7 @@
     }
 
     function dateKey(ts = Date.now()) {
-        const d = new Date(ts);
-        return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+        return ledgerCore.dateKeyFromTimestamp(ts);
     }
     function monthKeyFromDate(dateStr) { return dateStr.slice(0, 7); }
     function daysInMonthKey(monthKey) {
@@ -566,7 +741,7 @@
                     d = addDays(d, 1);
                 }
             }
-            return { monthKey: currentMonth, monthBudget: 0, locked: false, vault, spentToday: 0, lastSettledDate: today, updatedAt: Date.now() };
+            return { monthKey: currentMonth, monthBudget: 0, locked: false, vault, spentToday: 0, lastSettledDate: today, updatedAt: Date.now(), splitOps: b.splitOps || {} };
         }
         if (!b.lastSettledDate) b.lastSettledDate = today;
         if (b.lastSettledDate < today && b.monthBudget > 0) {
@@ -583,29 +758,81 @@
         b.updatedAt = Date.now();
         return b;
     }
-    function applyBudgetSpend(uid, amount, appliedDate, direction = 1) {
-        const amt = Number(amount) || 0;
-        if (amt <= 0) return Promise.resolve();
+    function compactSplitOps(ops = {}, nextId, timestamp) {
+        const entries = Object.entries({ ...ops, [nextId]: timestamp })
+            .sort((a, b) => Number(b[1]) - Number(a[1]))
+            .slice(0, 120);
+        return Object.fromEntries(entries);
+    }
+
+    function applyBudgetAdjustment(uid, delta, appliedDate, opId) {
+        const amountDelta = ledgerCore.roundMoney(delta);
+        if (amountDelta === 0) return Promise.resolve();
         const spendDate = appliedDate || dateKey();
         return db.ref('budget/' + uid).transaction(raw => {
             if (!raw || !raw.monthKey) return raw;
             const b = settleBudgetState(raw);
             if (!b || !b.monthKey) return b;
+            if (b.splitOps && b.splitOps[opId]) return b;
             if (spendDate === dateKey() && b.monthKey === monthKeyFromDate(spendDate)) {
-                b.spentToday = Math.max(0, Number(b.spentToday || 0) + amt * direction);
+                b.spentToday = Math.max(0, ledgerCore.roundMoney(Number(b.spentToday || 0) + amountDelta));
             } else {
-                b.vault = Math.round((Number(b.vault || 0) - amt * direction) * 100) / 100;
+                b.vault = ledgerCore.roundMoney(Number(b.vault || 0) - amountDelta);
             }
-            b.updatedAt = Date.now();
+            const now = Date.now();
+            b.splitOps = compactSplitOps(b.splitOps, opId, now);
+            b.updatedAt = now;
             return b;
         });
     }
-    function applyRecordBudget(record, direction = 1) {
-        const info = record.budgetApplied || { date: dateKey(record.timestamp || Date.now()), p1: record.p1_bought || 0, p2: record.p2_bought || 0 };
-        return Promise.all([
-            applyBudgetSpend('p1', info.p1 || 0, info.date, direction),
-            applyBudgetSpend('p2', info.p2 || 0, info.date, direction)
-        ]).catch(() => showToast('⚠️ 每日額度同步失敗，請稍後檢查', 'var(--red)'));
+
+    async function applyBudgetSync(sync) {
+        const before = sync.before ? { budgetApplied: sync.before } : null;
+        const after = sync.after ? { budgetApplied: sync.after } : null;
+        const adjustments = ledgerCore.budgetAdjustments(before, after);
+        await Promise.all(adjustments.map(adjustment => applyBudgetAdjustment(
+            adjustment.playerId,
+            adjustment.delta,
+            adjustment.date,
+            `${sync.opId}:${adjustment.playerId}:${adjustment.date}`
+        )));
+    }
+
+    async function reconcileRecordBudget(key, record) {
+        const sync = record && record.budgetSync;
+        if (!sync) return;
+        if (syncingBudgetKeys.has(key)) return syncingBudgetKeys.get(key);
+        const task = (async () => {
+        try {
+            await applyBudgetSync(sync);
+            await db.ref('split/records/' + key).transaction(current => {
+                if (!current || !current.budgetSync || current.budgetSync.opId !== sync.opId) return;
+                if (sync.deleteAfterSync) return null;
+                const cleaned = { ...current };
+                delete cleaned.budgetSync;
+                return cleaned;
+            });
+        } catch (error) {
+            console.error(error);
+            showToast('⚠️ 每日額度同步待重試', 'var(--red)');
+            throw error;
+        } finally {
+            if (syncingBudgetKeys.get(key) === task) syncingBudgetKeys.delete(key);
+        }
+        })();
+        syncingBudgetKeys.set(key, task);
+        return task;
+    }
+
+    async function commitRecordChange(key, beforeRecord, afterRecord) {
+        const opId = operationId('budget');
+        const before = ledgerCore.budgetSnapshot(beforeRecord);
+        const after = ledgerCore.budgetSnapshot(afterRecord);
+        const pending = afterRecord
+            ? { ...afterRecord, budgetSync: { opId, before, after, createdAt: Date.now() } }
+            : { ...beforeRecord, deletedAt: Date.now(), budgetSync: { opId, before, after: null, deleteAfterSync: true, createdAt: Date.now() } };
+        await db.ref('split/records/' + key).set(pending);
+        await reconcileRecordBudget(key, pending);
     }
 
     // ===== 小計算機 =====
@@ -746,7 +973,9 @@
         const p1 = Number(document.getElementById('inp_p1').value) || 0;
         const p2 = Number(document.getElementById('inp_p2').value) || 0;
         const el = document.getElementById('previewText');
-        if (!currentPayer || (p1 === 0 && p2 === 0)) {
+        const validation = ledgerCore.validateRecordDraft({ p1_bought: p1, p2_bought: p2, payer: currentPayer });
+        document.getElementById('submitBtn').disabled = !validation.valid || !recordsLoaded || isSubmitting;
+        if (!validation.valid) {
             el.className = 'preview-text';
             el.innerText = currentPayer ? '（金額皆為 0，不產生欠款）' : '請輸入金額並選擇付款人';
             return;
@@ -763,32 +992,54 @@
         el.innerText = msg;
     }
 
+    function resetInputForm() {
+        document.getElementById('inp_p1').value = '';
+        document.getElementById('inp_p2').value = '';
+        document.getElementById('inp_note').value = '';
+        currentPayer = null;
+        document.getElementById('btn_p1').classList.remove('selected');
+        document.getElementById('btn_p2').classList.remove('selected');
+        updatePreview();
+    }
+
     function addRecord() {
-        const p1 = Number(document.getElementById('inp_p1').value) || 0;
-        const p2 = Number(document.getElementById('inp_p2').value) || 0;
-        const note = document.getElementById('inp_note').value.trim() || '（未填備註）';
-        if (!currentPayer) return showToast('請選擇付款人', 'var(--red)');
-        if (p1 === 0 && p2 === 0) return showToast('請輸入金額', 'var(--red)');
+        const validation = ledgerCore.validateRecordDraft({
+            p1_bought: document.getElementById('inp_p1').value,
+            p2_bought: document.getElementById('inp_p2').value,
+            payer: currentPayer,
+            note: document.getElementById('inp_note').value,
+        });
+        if (!validation.valid) return showToast(validation.reason, 'var(--red)');
+        const { p1_bought: p1, p2_bought: p2, note } = validation.record;
         const payerName = currentPayer === 'p1' ? '至凱' : '柏致';
-        const record = { p1_bought: p1, p2_bought: p2, payer: currentPayer, note, timestamp: Date.now(), settled: false, budgetApplied: { date: dateKey(), p1, p2 } };
+        const now = Date.now();
+        const record = { p1_bought: p1, p2_bought: p2, payer: currentPayer, note, timestamp: now, updatedAt: now, editVersion: 1, settled: false, budgetApplied: { date: dateKey(now), p1, p2 } };
         const preview = document.getElementById('previewText').innerText;
         const amountsLine = [p1 ? `至凱 $${p1}` : '', p2 ? `柏致 $${p2}` : ''].filter(Boolean).join('、');
         showConfirm(
             '確認新增',
-            `<strong>${note}</strong><br>${amountsLine}<br>由 ${payerName} 代付<br><br>${preview}`,
-            () => {
-                db.ref('split/records').push(record).then(() => applyRecordBudget(record));
-                db.ref('split/balance').transaction(b => (b || 0) + getDelta(record));
-                document.getElementById('inp_p1').value = '';
-                document.getElementById('inp_p2').value = '';
-                document.getElementById('inp_note').value = '';
-                currentPayer = null;
-                document.getElementById('btn_p1').classList.remove('selected');
-                document.getElementById('btn_p2').classList.remove('selected');
-                document.getElementById('previewText').className = 'preview-text';
-                document.getElementById('previewText').innerText = '請輸入金額並選擇付款人';
-                playSound('add');
-                showToast('✅ 已新增！');
+            `<strong>${escapeHtml(note)}</strong><br>${amountsLine}<br>由 ${payerName} 代付<br><br>${escapeHtml(preview)}`,
+            async () => {
+                if (isSubmitting) return;
+                isSubmitting = true;
+                updatePreview();
+                const ref = db.ref('split/records').push();
+                try {
+                    await commitRecordChange(ref.key, null, record);
+                    resetInputForm();
+                    playSound('add');
+                    offerUndo('已新增帳目', async () => {
+                        const snapshot = await ref.once('value');
+                        const current = snapshot.val();
+                        if (current) await commitRecordChange(ref.key, current, null);
+                    });
+                } catch (error) {
+                    console.error(error);
+                    showToast('新增失敗，請檢查網路', 'var(--red)');
+                } finally {
+                    isSubmitting = false;
+                    updatePreview();
+                }
             }
         );
     }
@@ -810,21 +1061,123 @@
         document.getElementById('confirmOverlay').classList.remove('show');
     }
 
+    // ===== 帳目詳情與編輯 =====
+    function openRecordEditor(key) {
+        const record = allRecords[key];
+        if (!record || record.deletedAt) return;
+        editingKey = key;
+        editorPayer = record.payer;
+        document.getElementById('edit_p1').value = record.p1_bought || '';
+        document.getElementById('edit_p2').value = record.p2_bought || '';
+        document.getElementById('edit_note').value = record.note === '（未填備註）' ? '' : record.note || '';
+        const readOnly = Boolean(record.settled);
+        document.getElementById('editorTitle').innerText = readOnly ? '帳目詳情' : '編輯帳目';
+        document.getElementById('editorReadonly').hidden = !readOnly;
+        document.getElementById('editorSaveBtn').hidden = readOnly;
+        ['edit_p1', 'edit_p2', 'edit_note'].forEach(id => { document.getElementById(id).disabled = readOnly; });
+        ['edit_btn_p1', 'edit_btn_p2'].forEach(id => { document.getElementById(id).disabled = readOnly; });
+        document.getElementById('recordEditor').classList.add('show');
+        document.getElementById('recordEditor').setAttribute('aria-hidden', 'false');
+        selectEditorPayer(record.payer, true);
+        updateEditorPreview();
+        playSound('open');
+    }
+
+    function closeRecordEditor() {
+        editingKey = null;
+        editorPayer = null;
+        document.getElementById('recordEditor').classList.remove('show');
+        document.getElementById('recordEditor').setAttribute('aria-hidden', 'true');
+        playSound('close');
+    }
+
+    function selectEditorPayer(playerId, skipPreview = false) {
+        if (!editingKey || (allRecords[editingKey]?.settled && !skipPreview)) return;
+        editorPayer = playerId;
+        document.getElementById('edit_btn_p1').classList.toggle('selected', playerId === 'p1');
+        document.getElementById('edit_btn_p2').classList.toggle('selected', playerId === 'p2');
+        if (!skipPreview) updateEditorPreview();
+    }
+
+    function editorDraft() {
+        return ledgerCore.validateRecordDraft({
+            p1_bought: document.getElementById('edit_p1').value,
+            p2_bought: document.getElementById('edit_p2').value,
+            payer: editorPayer,
+            note: document.getElementById('edit_note').value,
+        });
+    }
+
+    function updateEditorPreview() {
+        if (!editingKey) return;
+        const validation = editorDraft();
+        const preview = document.getElementById('editorPreview');
+        const saveButton = document.getElementById('editorSaveBtn');
+        if (!validation.valid) {
+            preview.className = 'preview-text';
+            preview.innerText = validation.reason;
+            saveButton.disabled = true;
+            return;
+        }
+        preview.className = 'preview-text has-value';
+        preview.innerText = getResultText(validation.record);
+        saveButton.disabled = Boolean(allRecords[editingKey]?.settled || allRecords[editingKey]?.budgetSync);
+    }
+
+    async function saveRecordEdit() {
+        const key = editingKey;
+        const before = key && allRecords[key];
+        if (!before || before.settled) return;
+        if (before.budgetSync) return showToast('這筆帳目仍在同步，請稍後再試', 'var(--red)');
+        const validation = editorDraft();
+        if (!validation.valid) return showToast(validation.reason, 'var(--red)');
+        const now = Date.now();
+        const after = {
+            ...before,
+            ...validation.record,
+            updatedAt: now,
+            editVersion: (Number(before.editVersion) || 1) + 1,
+            budgetApplied: {
+                date: ledgerCore.budgetSnapshot(before).date,
+                p1: validation.record.p1_bought,
+                p2: validation.record.p2_bought,
+            },
+        };
+        delete after.budgetSync;
+        closeRecordEditor();
+        try {
+            await commitRecordChange(key, before, after);
+            offerUndo('帳目已更新', () => commitRecordChange(key, after, before));
+        } catch (error) {
+            console.error(error);
+            showToast('修改失敗，請檢查網路', 'var(--red)');
+        }
+    }
+
+    document.addEventListener('keydown', event => {
+        if (event.key === 'Escape' && document.getElementById('recordEditor').classList.contains('show')) closeRecordEditor();
+    });
+
     // ===== 逐筆刪除（未結清）=====
     function confirmDeleteRecord(key) {
         const r = allRecords[key];
-        if (!r) return;
-        const delta = getDelta(r);
+        if (!r || r.settled || r.deletedAt) return;
+        if (r.budgetSync) return showToast('這筆帳目仍在同步，請稍後再試', 'var(--red)');
         const payerName = r.payer === 'p1' ? '至凱' : '柏致';
         showConfirm(
             '刪除這筆帳目',
-            `<strong>${r.note}</strong><br>${payerName}付<br><br>此筆對帳務的影響將一併撤銷，<br>無法復原。`,
-            () => {
-                db.ref('split/records/' + key).remove().then(() => applyRecordBudget(r, -1));
-                db.ref('split/balance').transaction(b => (b || 0) - delta);
-                selectedKeys.delete(key);
-                playSound('remove');
-                showToast('🗑️ 已刪除', 'var(--red)');
+            `<strong>${escapeHtml(r.note)}</strong><br>${payerName}付<br><br>欠款與每日額度會一併撤銷，<br>完成後可在 6 秒內復原。`,
+            async () => {
+                try {
+                    await commitRecordChange(key, r, null);
+                    selectedKeys.delete(key);
+                    updateSelectionBar();
+                    playSound('remove');
+                    offerUndo('帳目已刪除', () => commitRecordChange(key, null, r));
+                } catch (error) {
+                    console.error(error);
+                    showToast('刪除失敗，請檢查網路', 'var(--red)');
+                }
             },
             true
         );
@@ -832,45 +1185,106 @@
 
     // ===== 紀錄頁 =====
     function settleAll() {
-        const unsettled = Object.entries(allRecords).filter(([,r]) => !r.settled);
+        const unsettled = ledgerCore.filterRecords(allRecords, { settled: false });
         if (unsettled.length === 0) return showToast('沒有未結清的帳目', 'var(--muted)');
-        showConfirm('全部結清', `確定要將全部 <strong>${unsettled.length} 筆</strong>標為已結清並歸零帳務嗎？`, () => {
-            const updates = {};
-            unsettled.forEach(([k]) => { updates[k + '/settled'] = true; });
-            db.ref('split/records').update(updates);
-            db.ref('split/balance').set(0);
-            selectedKeys.clear();
-            playSound('success');
-            showToast('🎉 已全部結清！');
-        });
+        if (unsettled.some(([, record]) => record.budgetSync)) return showToast('仍有帳目同步中，請稍後再結清', 'var(--red)');
+        confirmSettlement(unsettled, 'all');
     }
 
     function settleSelected() {
         if (selectedKeys.size === 0) return showToast('請先勾選要結清的帳目', 'var(--muted)');
-        showConfirm('結清選取', `確定要結清選取的 <strong>${selectedKeys.size} 筆</strong>嗎？`, () => {
-            let deltaSub = 0;
-            const updates = {};
-            selectedKeys.forEach(k => {
-                const r = allRecords[k];
-                if (r && !r.settled) { updates[k + '/settled'] = true; deltaSub += getDelta(r); }
-            });
-            db.ref('split/records').update(updates);
-            db.ref('split/balance').transaction(b => (b || 0) - deltaSub);
-            selectedKeys.clear();
-            playSound('success');
-            showToast('☑️ 已結清選取帳目！');
+        const entries = [...selectedKeys]
+            .map(key => [key, allRecords[key]])
+            .filter(([, record]) => record && !record.settled && !record.deletedAt && !record.budgetSync);
+        if (!entries.length) return showToast('選取的帳目已經變更', 'var(--red)');
+        confirmSettlement(entries, 'selected');
+    }
+
+    function settlementInstruction(summary) {
+        if (!summary.amount) return '互不相欠，無需轉帳';
+        return `${playerNames[summary.from]} 應轉給 ${playerNames[summary.to]} $${summary.amount}`;
+    }
+
+    function confirmSettlement(entries, mode) {
+        const summary = ledgerCore.settlementSummary(entries);
+        const title = mode === 'all' ? '全部結清' : '結清選取';
+        showConfirm(
+            title,
+            `共 <strong>${entries.length} 筆</strong><br>${settlementInstruction(summary)}<br><br>完成後可在 6 秒內復原。`,
+            () => performSettlement(entries, mode, summary)
+        );
+    }
+
+    async function performSettlement(entries, mode, summary) {
+        const settlementRef = db.ref('split/settlements').push();
+        const settlementId = settlementRef.key;
+        const now = Date.now();
+        const recordIds = Object.fromEntries(entries.map(([key]) => [key, true]));
+        const updates = {
+            [`settlements/${settlementId}`]: {
+                timestamp: now,
+                mode,
+                amount: summary.amount,
+                from: summary.from,
+                to: summary.to,
+                count: entries.length,
+                recordIds,
+            },
+        };
+        entries.forEach(([key]) => {
+            updates[`records/${key}/settled`] = true;
+            updates[`records/${key}/settledAt`] = now;
+            updates[`records/${key}/settlementId`] = settlementId;
         });
+        try {
+            await db.ref('split').update(updates);
+            selectedKeys.clear();
+            updateSelectionBar();
+            playSound('success');
+            offerUndo(mode === 'all' ? '全部帳目已結清' : '選取帳目已結清', async () => {
+                const undoUpdates = { [`settlements/${settlementId}/undoneAt`]: Date.now() };
+                entries.forEach(([key]) => {
+                    undoUpdates[`records/${key}/settled`] = false;
+                    undoUpdates[`records/${key}/settledAt`] = null;
+                    undoUpdates[`records/${key}/settlementId`] = null;
+                });
+                await db.ref('split').update(undoUpdates);
+            });
+        } catch (error) {
+            console.error(error);
+            showToast('結清失敗，請檢查網路', 'var(--red)');
+        }
+    }
+
+    function selectVisibleRecords() {
+        const entries = ledgerCore.filterRecords(allRecords, { ...recordFilters.unsettled, settled: false }).filter(([, record]) => !record.budgetSync);
+        selectedKeys = new Set(entries.map(([key]) => key));
+        renderList();
+        updateSelectionBar();
     }
 
     function deleteSettled() {
-        const settled = Object.entries(allRecords).filter(([,r]) => r.settled);
+        const settled = ledgerCore.filterRecords(allRecords, { settled: true });
         if (settled.length === 0) return showToast('沒有已結清的紀錄', 'var(--muted)');
-        showConfirm('刪除已結清紀錄', `確定要永久刪除全部 <strong>${settled.length} 筆</strong>已結清紀錄？此操作無法復原。`, () => {
+        showConfirm('刪除已結清紀錄', `確定刪除全部 <strong>${settled.length} 筆</strong>已結清紀錄？完成後可在 6 秒內復原。`, async () => {
             const updates = {};
-            settled.forEach(([k]) => { updates[k] = null; });
-            db.ref('split/records').update(updates);
-            playSound('remove');
-            showToast('🗑️ 已刪除所有已結清紀錄');
+            const settlementIds = [...new Set(settled.map(([, record]) => record.settlementId).filter(Boolean))];
+            const settlementSnapshots = Object.fromEntries(settlementIds.map(id => [id, allSettlements[id]]).filter(([, value]) => value));
+            settled.forEach(([key]) => { updates[`records/${key}`] = null; });
+            settlementIds.forEach(id => { updates[`settlements/${id}`] = null; });
+            try {
+                await db.ref('split').update(updates);
+                playSound('remove');
+                offerUndo('已結清紀錄已刪除', async () => {
+                    const restore = {};
+                    settled.forEach(([key, record]) => { restore[`records/${key}`] = record; });
+                    Object.entries(settlementSnapshots).forEach(([id, settlement]) => { restore[`settlements/${id}`] = settlement; });
+                    await db.ref('split').update(restore);
+                });
+            } catch (error) {
+                console.error(error);
+                showToast('刪除失敗，請檢查網路', 'var(--red)');
+            }
         }, true);
     }
 
@@ -880,14 +1294,16 @@
             const payerName = r.payer === 'p1' ? '至凱' : '柏致';
             const isChecked = selectedKeys.has(k);
             const amountsText = [r.p1_bought ? `至凱 $${r.p1_bought}` : '', r.p2_bought ? `柏致 $${r.p2_bought}` : ''].filter(Boolean).join('　');
-            const deleteBtn = !r.settled ? `<button class="record-delete-btn" onclick="confirmDeleteRecord('${k}')" title="刪除此筆">✕</button>` : '';
+            const selectable = !r.settled && !r.budgetSync;
+            const deleteBtn = selectable ? `<button class="record-delete-btn" onclick="event.stopPropagation();confirmDeleteRecord('${k}')" title="刪除此筆" aria-label="刪除此筆">✕</button>` : '';
+            const syncText = r.budgetSync ? ' · 同步中' : '';
             return `
-            <div class="record-card">
-                ${!r.settled ? `<div class="record-checkbox${isChecked ? ' checked' : ''}" onclick="toggleSelect('${k}', this)"></div>` : '<div style="width:22px;flex-shrink:0;"></div>'}
+            <div class="record-card${r.settled ? ' settled' : ''}" data-record-key="${escapeHtml(k)}" onclick="openRecordEditor('${k}')">
+                ${selectable ? `<button class="record-checkbox${isChecked ? ' checked' : ''}" type="button" onclick="event.stopPropagation();toggleSelect('${k}', this)" aria-label="${isChecked ? '取消選取' : '選取'} ${escapeHtml(r.note)}"></button>` : '<div style="width:36px;flex-shrink:0;"></div>'}
                 <div class="record-body">
-                    <div class="record-note">${r.note}</div>
+                    <div class="record-note">${escapeHtml(r.note)}</div>
                     <div class="record-amounts">${amountsText}</div>
-                    <div><span class="record-payer-tag">💳 ${payerName}付</span></div>
+                    <div><span class="record-payer-tag">💳 ${payerName}付${syncText}</span></div>
                     <div class="record-result${delta === 0 ? ' zero' : ''}">${getResultText(r)}</div>
                 </div>
                 <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px;flex-shrink:0;">
@@ -897,19 +1313,104 @@
             </div>`;
         };
 
-        const unsettledEntries = Object.entries(allRecords).filter(([,r]) => !r.settled).sort((a,b) => b[1].timestamp - a[1].timestamp);
-        const settledEntries   = Object.entries(allRecords).filter(([,r]) =>  r.settled).sort((a,b) => b[1].timestamp - a[1].timestamp);
+        const renderSettledBatch = entries => {
+            const batches = new Map();
+            entries.forEach(entry => {
+                const batchId = entry[1].settlementId || 'legacy';
+                if (!batches.has(batchId)) batches.set(batchId, []);
+                batches.get(batchId).push(entry);
+            });
+            return [...batches.entries()].map(([batchId, batchEntries]) => {
+                const settlement = batchId === 'legacy' ? null : allSettlements[batchId];
+                const summary = ledgerCore.settlementSummary(batchEntries);
+                const heading = settlement
+                    ? `<div class="settlement-heading"><strong>${settlementInstruction(settlement)}</strong><span>${formatTime(settlement.timestamp)} · ${settlement.count || batchEntries.length} 筆</span></div>`
+                    : `<div class="settlement-heading"><strong>舊結清紀錄</strong><span>${batchEntries.length} 筆 · ${settlementInstruction(summary)}</span></div>`;
+                return heading + batchEntries.map(([key, record]) => makeCard(key, record)).join('');
+            }).join('');
+        };
 
+        const renderGroups = (kind, entries) => ledgerCore.groupRecordsByMonth(entries).map(group => {
+            const token = `${kind}:${group.key}`;
+            if (!initializedMonthGroups.has(token)) {
+                initializedMonthGroups.add(token);
+                if (group.key !== ledgerCore.monthKeyFromTimestamp()) collapsedMonths.add(token);
+            }
+            const collapsed = collapsedMonths.has(token);
+            const content = kind === 'settled' ? renderSettledBatch(group.records) : group.records.map(([key, record]) => makeCard(key, record)).join('');
+            return `<section class="month-group${collapsed ? ' collapsed' : ''}" data-month="${group.key}">
+                <button class="month-heading" type="button" onclick="toggleMonthGroup('${kind}','${group.key}')">
+                    <strong>${group.label}</strong><span>${group.count} 筆 · 淨額 ${formatBalanceShort(group.balance)}</span><i>⌄</i>
+                </button>
+                <div class="month-records">${content}</div>
+            </section>`;
+        }).join('');
+
+        const unsettledEntries = ledgerCore.filterRecords(allRecords, { ...recordFilters.unsettled, settled: false });
+        const settledEntries = ledgerCore.filterRecords(allRecords, { ...recordFilters.settled, settled: true });
         const uList = document.getElementById('record-list-unsettled');
-        if (uList) uList.innerHTML = unsettledEntries.length ? unsettledEntries.map(([k,r]) => makeCard(k,r)).join('') : '<div class="empty-state">📭 目前沒有未結清的帳目</div>';
-
         const sList = document.getElementById('record-list-settled');
-        if (sList) sList.innerHTML = settledEntries.length ? settledEntries.map(([k,r]) => makeCard(k,r)).join('') : '<div class="empty-state">📭 沒有已結清的紀錄</div>';
+        if (uList) uList.innerHTML = unsettledEntries.length ? renderGroups('unsettled', unsettledEntries) : '<div class="empty-state">📭 沒有符合條件的未結清帳目</div>';
+        if (sList) sList.innerHTML = settledEntries.length ? renderGroups('settled', settledEntries) : '<div class="empty-state">📭 沒有符合條件的已結清紀錄</div>';
+        document.getElementById('uFilterResult').innerText = `顯示 ${unsettledEntries.length} 筆`;
+        document.getElementById('sFilterResult').innerText = `顯示 ${settledEntries.length} 筆`;
+        updateSelectionBar();
     }
 
     function toggleSelect(key, el) {
         if (selectedKeys.has(key)) { selectedKeys.delete(key); el.classList.remove('checked'); }
         else { selectedKeys.add(key); el.classList.add('checked'); }
+        el.setAttribute('aria-label', `${selectedKeys.has(key) ? '取消選取' : '選取'} ${allRecords[key]?.note || '帳目'}`);
+        updateSelectionBar();
+    }
+
+    function formatBalanceShort(balance) {
+        if (balance > 0) return `柏致欠至凱 $${balance}`;
+        if (balance < 0) return `至凱欠柏致 $${Math.abs(balance)}`;
+        return '互不相欠';
+    }
+
+    function updateSelectionBar() {
+        const entries = [...selectedKeys]
+            .map(key => [key, allRecords[key]])
+            .filter(([, record]) => record && !record.settled && !record.deletedAt && !record.budgetSync);
+        selectedKeys = new Set(entries.map(([key]) => key));
+        const bar = document.getElementById('selectionBar');
+        bar.classList.toggle('show', entries.length > 0);
+        document.getElementById('selectionCount').innerText = `已選 ${entries.length} 筆`;
+        document.getElementById('selectionSummary').innerText = entries.length ? settlementInstruction(ledgerCore.settlementSummary(entries)) : '不影響目前欠款';
+    }
+
+    function toggleMonthGroup(kind, month) {
+        const token = `${kind}:${month}`;
+        if (collapsedMonths.has(token)) collapsedMonths.delete(token);
+        else collapsedMonths.add(token);
+        renderList();
+    }
+
+    function setRecordFilter(kind, field, value) {
+        recordFilters[kind][field] = value;
+        if (field === 'month' && value !== 'all') collapsedMonths.delete(`${kind}:${value}`);
+        if (kind === 'unsettled') selectedKeys.clear();
+        renderList();
+    }
+
+    function syncMonthFilters() {
+        const monthsByKind = {
+            unsettled: ledgerCore.filterRecords(allRecords, { settled: false }),
+            settled: ledgerCore.filterRecords(allRecords, { settled: true }),
+        };
+        for (const [kind, entries] of Object.entries(monthsByKind)) {
+            const select = document.getElementById(kind === 'unsettled' ? 'uMonth' : 'sMonth');
+            const current = recordFilters[kind].month;
+            const months = [...new Set(entries.map(([, record]) => ledgerCore.monthKeyFromTimestamp(record.timestamp)))].sort().reverse();
+            select.innerHTML = '<option value="all">全部月份</option>' + months.map(month => `<option value="${month}">${ledgerCore.monthLabel(month)}</option>`).join('');
+            if (months.includes(current)) select.value = current;
+            else {
+                recordFilters[kind].month = 'all';
+                select.value = 'all';
+            }
+        }
     }
 
     // ===== Firebase 監聽 =====
@@ -942,19 +1443,45 @@
         updatePreview();
     }
 
+    let storedBalance = null;
     db.ref('split/balance').on('value', snap => {
-        currentBalance = snap.val() || 0;
-        updateBalanceUI(currentBalance);
+        storedBalance = ledgerCore.roundMoney(snap.val() || 0);
     });
 
     db.ref('split/records').on('value', snap => {
         allRecords = snap.val() || {};
-        const unsettledCount = Object.values(allRecords).filter(r => !r.settled).length;
+        recordsLoaded = true;
+        document.body.dataset.recordsLoaded = 'true';
+        currentBalance = ledgerCore.balanceFromRecords(allRecords);
+        updateBalanceUI(currentBalance);
+        if (storedBalance !== currentBalance) {
+            storedBalance = currentBalance;
+            db.ref('split/balance').set(currentBalance).catch(error => console.error(error));
+        }
+        const unsettledCount = ledgerCore.filterRecords(allRecords, { settled: false }).length;
         const badge = document.getElementById('unsettled-badge');
         badge.innerText = unsettledCount;
         badge.style.display = unsettledCount > 0 ? 'inline-block' : 'none';
+        syncMonthFilters();
         if (currentView === 'unsettled' || currentView === 'settled') renderList();
+        Object.entries(allRecords).forEach(([key, record]) => {
+            if (record && record.budgetSync) reconcileRecordBudget(key, record).catch(() => {});
+        });
     });
+
+    db.ref('split/settlements').on('value', snap => {
+        allSettlements = snap.val() || {};
+        if (currentView === 'settled') renderList();
+    });
+
+    db.ref('.info/connected').on('value', snap => {
+        const connected = snap.val() === true;
+        const pill = document.getElementById('syncPill');
+        pill.className = `sync-pill ${connected ? 'online' : 'offline'}`;
+        pill.innerText = connected ? '已同步' : '離線';
+    });
+
+    updatePreview();
 
 </script>
 
