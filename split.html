@@ -19,6 +19,10 @@
             --green: #76A668;
             --red: #C47070;
             --blue: #8FAEC8;
+            --surface: rgba(44, 36, 22, 0.68);
+            --surface-strong: rgba(28, 24, 18, 0.94);
+            --shadow-card: 0 16px 48px rgba(0,0,0,0.28);
+            --radius-card: 20px;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -34,27 +38,70 @@
             padding-bottom: 40px;
         }
 
-        .page-wrapper { max-width: 560px; margin: 0 auto; }
+        .page-wrapper { max-width: 560px; margin: 0 auto; padding-bottom: 18px; }
+        .icon {
+            width: 1.1em;
+            height: 1.1em;
+            display: inline-block;
+            vertical-align: -0.18em;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            flex-shrink: 0;
+        }
+        .icon.soft-fill { fill: currentColor; stroke-width: 0; opacity: 0.92; }
+        .section-kicker {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            font-weight: 900;
+            color: var(--muted);
+            letter-spacing: 0.5px;
+        }
 
         /* ===== Header ===== */
         .header {
-            background: rgba(28, 22, 14, 0.92);
+            background: rgba(28, 22, 14, 0.94);
             backdrop-filter: blur(24px);
             -webkit-backdrop-filter: blur(24px);
             border-bottom: 1px solid var(--border);
-            padding: 20px;
-            text-align: center;
+            padding: 14px 88px;
             position: sticky;
             top: 0;
             z-index: 100;
+            min-height: 66px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
-        .header-title { font-size: 18px; font-weight: 800; letter-spacing: 1px; color: var(--orange); }
+        .header-title {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 9px;
+            font-size: 18px;
+            font-weight: 900;
+            letter-spacing: 0.5px;
+            color: var(--orange);
+            white-space: nowrap;
+        }
+        .header-title .icon {
+            width: 20px;
+            height: 20px;
+        }
         .header-back {
             position: absolute; left: 20px; top: 50%; transform: translateY(-50%);
-            color: var(--muted); text-decoration: none; font-size: 14px; font-weight: bold;
-            transition: color 0.2s;
+            color: var(--muted); text-decoration: none; font-size: 13px; font-weight: 900;
+            transition: color 0.2s, background 0.2s, border-color 0.2s;
+            display: inline-flex; align-items: center; gap: 6px;
+            min-height: 40px; padding: 0 12px;
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 12px; background: rgba(255,255,255,0.03);
         }
-        .header-back:hover { color: var(--text); }
+        .header-back:hover { color: var(--text); background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.14); }
         .header-right {
             position: absolute; right: 20px; top: 50%; transform: translateY(-50%);
         }
@@ -67,14 +114,14 @@
         /* ===== 淨額大字 ===== */
         .balance-card {
             margin: 20px 16px 0;
-            background: rgba(44, 36, 22, 0.75);
+            background: var(--surface);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
             border: 1px solid var(--border);
-            border-radius: 24px;
-            padding: 30px 20px;
+            border-radius: var(--radius-card);
+            padding: 28px 20px 26px;
             text-align: center;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.35);
+            box-shadow: var(--shadow-card);
             position: relative;
             overflow: hidden;
             transition: box-shadow 0.3s;
@@ -84,9 +131,9 @@
             position: absolute; top: 0; left: 0; right: 0; height: 1px;
             background: linear-gradient(90deg, transparent, rgba(200,160,80,0.30), transparent);
         }
-        .balance-label { font-size: 12px; color: var(--muted); letter-spacing: 1px; margin-bottom: 12px; }
-        .balance-amount { font-size: 56px; font-weight: 900; line-height: 1; transition: color 0.4s; }
-        .balance-desc { font-size: 14px; font-weight: 600; margin-top: 12px; transition: color 0.4s; opacity: 0.85; }
+        .balance-label { font-size: 12px; color: var(--muted); letter-spacing: 1px; margin-bottom: 12px; font-weight: 900; }
+        .balance-amount { font-size: clamp(42px, 10vw, 56px); font-weight: 950; line-height: 1; transition: color 0.4s; letter-spacing: 0; }
+        .balance-desc { font-size: 14px; font-weight: 800; margin-top: 12px; transition: color 0.4s; opacity: 0.9; }
         .balance-amount.owe { color: var(--red); filter: drop-shadow(0 4px 12px rgba(196,112,112,0.25)); }
         .balance-amount.owed { color: var(--orange); filter: drop-shadow(0 4px 12px rgba(200,164,74,0.25)); }
         .balance-amount.zero { color: var(--green); filter: drop-shadow(0 4px 12px rgba(118,166,104,0.20)); }
@@ -94,20 +141,22 @@
         /* ===== 輸入卡 ===== */
         .input-card {
             margin: 14px 16px 0;
-            background: rgba(44, 36, 22, 0.65);
+            background: var(--surface);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
             border: 1px solid var(--border);
-            border-radius: 24px;
-            padding: 24px 20px;
+            border-radius: var(--radius-card);
+            padding: 22px 18px;
+            box-shadow: 0 12px 36px rgba(0,0,0,0.18);
         }
-        .input-card-title { font-size: 12px; font-weight: bold; color: var(--muted); letter-spacing: 0.5px; margin-bottom: 16px; }
+        .input-card-title { font-size: 12px; font-weight: 900; color: var(--muted); letter-spacing: 0.5px; margin-bottom: 16px; }
         .input-card-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
         .input-card-header .input-card-title { margin-bottom: 0; }
         .calc-toggle {
             border: 1px solid rgba(200,164,74,0.22); background: rgba(200,164,74,0.08);
             color: var(--orange); border-radius: 12px; padding: 8px 11px;
-            font-size: 12px; font-weight: bold; cursor: pointer; transition: all 0.2s;
+            font-size: 12px; font-weight: 900; cursor: pointer; transition: all 0.2s;
+            display: inline-flex; align-items: center; gap: 7px;
         }
         .calc-toggle:hover, .calc-toggle.active { background: rgba(200,164,74,0.15); border-color: rgba(200,164,74,0.38); }
         .calc-panel {
@@ -160,14 +209,18 @@
             padding: 14px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.08);
             background: rgba(255,255,255,0.03); color: var(--muted);
             font-size: 14px; font-weight: bold; cursor: pointer; transition: all 0.25s; text-align: center;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
         }
         .payer-btn:hover { background: rgba(255,255,255,0.06); color: var(--text); }
         .payer-btn.selected {
             border-color: rgba(255,179,64,0.45); background: rgba(255,179,64,0.1);
             color: var(--orange); box-shadow: 0 0 18px rgba(255,179,64,0.15);
         }
-        .preview-text { text-align: center; font-size: 13px; color: var(--muted); margin-bottom: 14px; min-height: 18px; font-weight: 600; transition: color 0.2s; }
-        .preview-text.has-value { color: var(--orange); }
+        .preview-text {
+            text-align: center; font-size: 13px; color: var(--muted); margin-bottom: 14px; min-height: 18px; font-weight: 800; transition: color 0.2s;
+            padding: 10px 12px; border: 1px solid rgba(255,255,255,0.07); border-radius: 12px; background: rgba(0,0,0,0.12);
+        }
+        .preview-text.has-value { color: var(--orange); border-color: rgba(200,164,74,0.24); background: rgba(200,164,74,0.07); }
         .submit-btn {
             width: 100%; padding: 16px; border-radius: 16px;
             border: 1px solid rgba(255,179,64,0.35); background: rgba(255,179,64,0.12);
@@ -186,6 +239,8 @@
             color: var(--muted); cursor: pointer; font-size: 15px; font-weight: bold;
             transition: all 0.2s; backdrop-filter: blur(10px);
         }
+        .view-records-label { display: inline-flex; align-items: center; gap: 9px; }
+        .view-records-btn .icon { color: var(--orange); }
         .view-records-btn:hover { background: rgba(255,255,255,0.05); color: var(--text); }
         .view-records-btn:active { background: rgba(255,255,255,0.07); }
         .view-records-badge {
@@ -196,8 +251,8 @@
         /* ===== 紀錄 View ===== */
         .balance-mini {
             margin: 20px 16px 0;
-            background: rgba(22, 26, 42, 0.65); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255,255,255,0.09);
+            background: var(--surface); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
             border-radius: 18px; padding: 18px 20px;
             display: flex; align-items: center; justify-content: space-between;
         }
@@ -212,13 +267,28 @@
         .settle-btn {
             padding: 14px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.07);
             background: rgba(255,255,255,0.025); color: var(--muted);
-            font-size: 13px; font-weight: bold; cursor: pointer; transition: all 0.2s; text-align: center;
+            font-size: 13px; font-weight: 900; cursor: pointer; transition: all 0.2s; text-align: center;
+            display: flex; align-items: center; justify-content: center; gap: 7px;
         }
         .settle-btn.primary { background: rgba(74,222,128,0.08); border-color: rgba(74,222,128,0.25); color: var(--green); }
         .settle-btn.primary:hover  { background: rgba(74,222,128,0.16); box-shadow: 0 6px 18px rgba(74,222,128,0.15); transform: translateY(-2px); }
         .settle-btn.secondary { background: rgba(123,156,255,0.08); border-color: rgba(123,156,255,0.22); color: var(--blue); }
         .settle-btn.secondary:hover { background: rgba(123,156,255,0.16); transform: translateY(-2px); }
         .settle-btn:active { transform: scale(0.97) translateY(0); }
+        .settle-btn:disabled, .submit-btn.is-loading {
+            opacity: 0.46;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        .settle-btn.danger-soft {
+            width:100%;
+            color:var(--red);
+            background:rgba(255,69,58,0.06);
+            border-color:rgba(255,69,58,0.18);
+            padding:14px;
+        }
+        .settle-btn.danger-soft:hover { background:rgba(255,69,58,0.1); transform:none; }
 
         .list-section { margin: 14px 16px 0; }
         .tab-row { display: flex; gap: 8px; margin-bottom: 14px; }
@@ -239,8 +309,8 @@
             background: rgba(22, 26, 42, 0.55);
             backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
             border: 1px solid rgba(255,255,255,0.08);
-            border-radius: 18px; padding: 16px; margin-bottom: 10px;
-            display: flex; align-items: flex-start; gap: 14px;
+            border-radius: 16px; padding: 15px; margin-bottom: 10px;
+            display: grid; grid-template-columns: auto minmax(0,1fr) auto; align-items: flex-start; gap: 12px;
             transition: border-color 0.25s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.25s cubic-bezier(0.25, 1, 0.5, 1), transform 0.25s cubic-bezier(0.25, 1, 0.5, 1);
             cursor: pointer;
         }
@@ -253,19 +323,28 @@
         }
         .record-checkbox::before { content:''; width:22px; height:22px; border-radius:6px; border:1px solid rgba(255,255,255,0.18); background:rgba(255,255,255,0.03); transition:all 0.22s cubic-bezier(0.25, 1, 0.5, 1); }
         .record-checkbox.checked::before { background: var(--blue); border-color: var(--blue); box-shadow:0 0 14px rgba(143,174,200,0.25); }
-        .record-checkbox.checked::after { content: '✓'; position:absolute; color: white; font-size: 13px; font-weight: bold; }
+        .record-checkbox .icon { position:absolute; width:14px; height:14px; color:white; pointer-events:none; }
         .record-body { flex: 1; min-width: 0; }
-        .record-note { font-weight: bold; font-size: 15px; margin-bottom: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .record-amounts { font-size: 12px; color: var(--muted); margin-bottom: 5px; }
+        .record-title-row { display:flex; align-items:flex-start; justify-content:space-between; gap:10px; margin-bottom:7px; }
+        .record-note { font-weight: 900; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .record-amounts { font-size: 12px; color: var(--muted); margin-bottom: 7px; line-height:1.45; }
+        .record-meta-row { display:flex; align-items:center; flex-wrap:wrap; gap:7px; margin-bottom:6px; }
         .record-payer-tag {
-            display: inline-block; font-size: 11px; font-weight: bold; padding: 2px 8px;
-            border-radius: 6px; background: rgba(255,179,64,0.1); color: var(--orange);
-            border: 1px solid rgba(255,179,64,0.22); margin-bottom: 4px;
+            display: inline-flex; align-items:center; gap:5px; font-size: 11px; font-weight: 900; padding: 4px 8px;
+            border-radius: 999px; background: rgba(255,179,64,0.1); color: var(--orange);
+            border: 1px solid rgba(255,179,64,0.22);
         }
-        .record-result { font-size: 14px; font-weight: bold; color: var(--orange); }
+        .record-payer-tag .icon { width:13px; height:13px; }
+        .record-result { font-size: 14px; font-weight: 900; color: var(--orange); line-height:1.35; }
         .record-result.zero { color: var(--green); }
-        .record-time { font-size: 11px; color: rgba(255,255,255,0.25); text-align: right; white-space: nowrap; flex-shrink: 0; padding-top: 3px; }
-        .empty-state { text-align: center; color: rgba(255,255,255,0.2); padding: 40px 20px; font-size: 14px; line-height: 2; }
+        .record-time { font-size: 11px; color: rgba(255,255,255,0.35); text-align: right; white-space: nowrap; flex-shrink: 0; padding-top: 1px; font-weight:700; }
+        .record-side { display:flex; flex-direction:column; align-items:flex-end; gap:8px; flex-shrink:0; }
+        .record-spacer { width:36px; flex-shrink:0; }
+        .empty-state {
+            display:grid; place-items:center; gap:10px; text-align: center; color: rgba(255,255,255,0.34);
+            padding: 40px 20px; font-size: 14px; line-height: 1.8;
+        }
+        .empty-state .icon { width:28px; height:28px; color:rgba(200,164,74,0.62); }
 
         /* ===== Toast ===== */
         #toast {
@@ -285,10 +364,19 @@
         /* ===== 確認 Modal ===== */
         .confirm-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.72); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); z-index: 500; align-items: center; justify-content: center; padding: 20px; }
         .confirm-overlay.show { display: flex; }
-        .confirm-box { background: rgba(18, 22, 36, 0.96); border: 1px solid rgba(255,255,255,0.12); border-radius: 24px; padding: 32px 24px; width: 100%; max-width: 360px; text-align: center; animation: fadeInUp 0.25s ease-out; backdrop-filter: blur(20px); }
-        .confirm-title { font-size: 18px; font-weight: 800; margin-bottom: 12px; }
-        .confirm-body { font-size: 14px; color: var(--muted); line-height: 1.8; margin-bottom: 24px; }
+        .confirm-box { background: rgba(18, 22, 36, 0.96); border: 1px solid rgba(255,255,255,0.12); border-radius: 22px; padding: 26px 22px; width: 100%; max-width: 380px; text-align: left; animation: fadeInUp 0.25s ease-out; backdrop-filter: blur(20px); box-shadow:0 24px 80px rgba(0,0,0,0.5); }
+        .confirm-title { font-size: 18px; font-weight: 900; margin-bottom: 14px; color:var(--text); text-align:center; }
+        .confirm-body { font-size: 14px; color: var(--muted); line-height: 1.65; margin-bottom: 22px; }
         .confirm-body strong { color: var(--text); }
+        .confirm-details { display:grid; gap:8px; margin:4px 0 12px; }
+        .confirm-row {
+            display:grid; grid-template-columns:88px minmax(0,1fr); gap:10px; align-items:start;
+            padding:10px 12px; border:1px solid rgba(255,255,255,0.08); border-radius:12px; background:rgba(255,255,255,0.035);
+        }
+        .confirm-row span:first-child { color:var(--muted); font-size:12px; font-weight:900; }
+        .confirm-row span:last-child { color:var(--text); font-size:14px; font-weight:900; word-break:break-word; }
+        .confirm-note { margin-top:10px; color:var(--muted); font-size:12px; text-align:center; }
+        .confirm-note.danger { color:var(--red); }
         .confirm-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .confirm-cancel { padding: 14px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.04); color: var(--muted); font-size: 15px; font-weight: bold; cursor: pointer; transition: all 0.2s; }
         .confirm-cancel:hover { background: rgba(255,255,255,0.08); color: var(--text); }
@@ -298,7 +386,8 @@
         .confirm-ok.danger:hover { background: rgba(248,113,113,0.2); }
 
         /* ===== 逐筆刪除按鈕 ===== */
-        .record-delete-btn { flex-shrink: 0; width: 32px; height: 32px; border-radius: 10px; border: 1px solid rgba(248,113,113,0.18); background: rgba(248,113,113,0.05); color: rgba(248,113,113,0.4); font-size: 15px; cursor: pointer; transition: all 0.2s; align-self: center; display: flex; align-items: center; justify-content: center; }
+        .record-delete-btn { flex-shrink: 0; width: 34px; height: 34px; border-radius: 10px; border: 1px solid rgba(248,113,113,0.18); background: rgba(248,113,113,0.05); color: rgba(248,113,113,0.58); font-size: 15px; cursor: pointer; transition: all 0.2s; align-self: center; display: flex; align-items: center; justify-content: center; }
+        .record-delete-btn .icon { width:16px; height:16px; }
         .record-delete-btn:hover { background: rgba(248,113,113,0.15); border-color: rgba(248,113,113,0.4); color: var(--red); }
 
         /* ===== 搜尋、月份與批次操作 ===== */
@@ -317,10 +406,10 @@
             border:0; border-bottom:1px solid rgba(255,255,255,0.08); background:transparent; color:var(--text);
             padding:8px 2px; margin-bottom:10px; cursor:pointer; text-align:left;
         }
-        .month-heading strong { font-size:13px; }
+        .month-heading strong { font-size:13px; display:flex; align-items:center; gap:7px; }
         .month-heading span { color:var(--muted); font-size:11px; text-align:right; }
-        .month-heading i { color:var(--orange); font-size:12px; font-style:normal; transition:transform .24s cubic-bezier(0.25, 1, 0.5, 1); }
-        .month-group.collapsed .month-heading i { transform:rotate(-90deg); }
+        .month-chevron { color:var(--orange); transition:transform .24s cubic-bezier(0.25, 1, 0.5, 1); display:grid; place-items:center; }
+        .month-group.collapsed .month-chevron { transform:rotate(-90deg); }
         .month-records { display:block; }
         .month-group.collapsed .month-records { display:none; }
         .selection-bar {
@@ -331,7 +420,7 @@
         .selection-bar.show { display:grid; animation:fadeInUp .28s cubic-bezier(0.25, 1, 0.5, 1); }
         .selection-bar strong { display:block; color:var(--blue); font-size:13px; }
         .selection-bar span { display:block; color:var(--muted); font-size:11px; margin-top:2px; }
-        .selection-bar button { height:40px; border:1px solid rgba(143,174,200,0.35); border-radius:12px; background:rgba(143,174,200,0.12); color:var(--blue); padding:0 15px; font-weight:900; cursor:pointer; }
+        .selection-bar button { height:40px; border:1px solid rgba(143,174,200,0.35); border-radius:12px; background:rgba(143,174,200,0.12); color:var(--blue); padding:0 15px; font-weight:900; cursor:pointer; display:inline-flex; align-items:center; gap:7px; }
         .settlement-heading { margin:12px 0 10px; padding:12px 2px 8px; border-bottom:1px solid rgba(118,166,104,0.2); }
         .settlement-heading strong { display:block; color:var(--green); font-size:13px; }
         .settlement-heading span { display:block; color:var(--muted); font-size:11px; margin-top:4px; }
@@ -344,6 +433,7 @@
         .edit-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; }
         .edit-header strong { font-size:17px; color:var(--orange); }
         .icon-action { width:40px; height:40px; display:grid; place-items:center; border:1px solid rgba(255,255,255,0.1); border-radius:50%; background:rgba(255,255,255,0.04); color:var(--muted); font-size:19px; cursor:pointer; }
+        .icon-action .icon { width:18px; height:18px; }
         .edit-actions { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:15px; }
         .edit-actions button { min-height:46px; border-radius:14px; font-size:14px; font-weight:900; cursor:pointer; }
         .edit-cancel { border:1px solid rgba(255,255,255,0.1); background:rgba(255,255,255,0.04); color:var(--muted); }
@@ -359,21 +449,69 @@
         @keyframes undoIn { from { opacity:0; transform:translate3d(-50%,20px,0); } to { opacity:1; transform:translate3d(-50%,0,0); } }
         .undo-toast span { font-size:13px; font-weight:800; color:var(--text); }
         .undo-toast button { min-width:58px; height:38px; border:1px solid rgba(200,164,74,0.35); border-radius:11px; background:rgba(200,164,74,0.12); color:var(--orange); font-weight:950; cursor:pointer; }
-        .sync-pill { position:absolute; right:16px; top:50%; transform:translateY(-50%); color:var(--muted); font-size:10px; font-weight:800; }
+        .sync-pill {
+            position:absolute; right:16px; top:50%; transform:translateY(-50%); color:var(--muted); font-size:11px; font-weight:900;
+            display:inline-flex; align-items:center; gap:6px; min-height:32px; padding:0 10px;
+            border:1px solid rgba(255,255,255,0.08); border-radius:999px; background:rgba(255,255,255,0.035);
+        }
+        .sync-pill::before { content:''; width:7px; height:7px; border-radius:50%; background:currentColor; box-shadow:0 0 10px currentColor; opacity:0.85; }
         .sync-pill.online { color:var(--green); }
         .sync-pill.offline { color:var(--red); }
 
         @media (max-width: 560px) {
             .record-tools { grid-template-columns:1fr 1fr; }
             .record-search { grid-column:1 / -1; }
-            .record-card { padding:14px 12px; gap:8px; }
-            .record-time { font-size:10px; }
+            .record-card { padding:14px 12px; gap:8px; grid-template-columns:auto minmax(0,1fr); }
+            .record-side { grid-column:2; flex-direction:row; justify-content:space-between; align-items:center; margin-top:8px; }
+            .record-title-row { display:block; }
+            .record-time { font-size:10px; text-align:left; margin-top:5px; }
             .edit-overlay { padding:8px; }
             .edit-sheet { border-radius:18px; padding:17px 15px; }
         }
+        @media (max-width: 420px) {
+            .header { padding-inline: 76px; min-height:62px; }
+            .header-back { left:12px; padding:0 10px; }
+            .sync-pill { right:10px; padding:0 8px; font-size:10px; }
+            .balance-card { padding:24px 16px 22px; }
+            .input-card { padding:18px 15px; }
+            .confirm-box { padding:22px 18px; }
+            .confirm-row { grid-template-columns:74px minmax(0,1fr); }
+            .selection-bar { grid-template-columns:1fr; bottom:10px; }
+            .selection-bar button { width:100%; justify-content:center; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .view.active,
+            .calc-panel.open,
+            .confirm-box,
+            .edit-sheet,
+            .undo-toast.show,
+            .selection-bar.show {
+                animation: none;
+            }
+        }
     </style>
+    <link rel="stylesheet" href="system-ui.css">
 </head>
-<body>
+<body class="sb-page sb-split">
+
+<svg aria-hidden="true" focusable="false" width="0" height="0" style="position:absolute;overflow:hidden">
+    <symbol id="icon-ledger" viewBox="0 0 24 24"><path d="M7 3h10a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z"/><path d="M9 7h6M9 11h6M9 15h4"/></symbol>
+    <symbol id="icon-arrow-left" viewBox="0 0 24 24"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></symbol>
+    <symbol id="icon-arrow-right" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></symbol>
+    <symbol id="icon-plus" viewBox="0 0 24 24"><path d="M12 5v14"/><path d="M5 12h14"/></symbol>
+    <symbol id="icon-calculator" viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 7h8M8 11h.01M12 11h.01M16 11h.01M8 15h.01M12 15h.01M16 15h.01"/></symbol>
+    <symbol id="icon-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M5 21a7 7 0 0 1 14 0"/></symbol>
+    <symbol id="icon-list" viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13"/><path d="M3 6h.01M3 12h.01M3 18h.01"/></symbol>
+    <symbol id="icon-archive" viewBox="0 0 24 24"><path d="M4 7h16"/><path d="M6 7v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V7"/><path d="M9 11h6"/><path d="M5 3h14v4H5z"/></symbol>
+    <symbol id="icon-check" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></symbol>
+    <symbol id="icon-check-circle" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/></symbol>
+    <symbol id="icon-trash" viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v5M14 11v5"/></symbol>
+    <symbol id="icon-card" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18"/><path d="M7 15h4"/></symbol>
+    <symbol id="icon-chevron-down" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+    <symbol id="icon-close" viewBox="0 0 24 24"><path d="M6 6l12 12"/><path d="M18 6 6 18"/></symbol>
+    <symbol id="icon-sync" viewBox="0 0 24 24"><path d="M20 11a8 8 0 0 0-14.9-4"/><path d="M4 5v5h5"/><path d="M4 13a8 8 0 0 0 14.9 4"/><path d="M20 19v-5h-5"/></symbol>
+    <symbol id="icon-receipt" viewBox="0 0 24 24"><path d="M6 3h12v18l-2-1.2-2 1.2-2-1.2-2 1.2-2-1.2L6 21V3Z"/><path d="M9 7h6M9 11h6M9 15h4"/></symbol>
+</svg>
 
 <div id="toast"></div>
 <div class="undo-toast" id="undoToast" aria-live="polite">
@@ -397,17 +535,17 @@
     <div class="edit-sheet" role="dialog" aria-modal="true" aria-labelledby="editorTitle">
         <div class="edit-header">
             <strong id="editorTitle">編輯帳目</strong>
-            <button class="icon-action" type="button" onclick="closeRecordEditor()" aria-label="關閉">×</button>
+            <button class="icon-action" type="button" onclick="closeRecordEditor()" aria-label="關閉"><svg class="icon"><use href="#icon-close"></use></svg></button>
         </div>
         <div class="amount-row">
-            <div class="amount-group"><label for="edit_p1">至凱買了</label><input class="amount-input" id="edit_p1" type="number" inputmode="decimal" min="0" step="0.01" oninput="updateEditorPreview()"></div>
-            <div class="amount-group"><label for="edit_p2">柏致買了</label><input class="amount-input" id="edit_p2" type="number" inputmode="decimal" min="0" step="0.01" oninput="updateEditorPreview()"></div>
+            <div class="amount-group"><label for="edit_p1">至凱消費金額</label><input class="amount-input" id="edit_p1" type="number" inputmode="decimal" min="0" step="0.01" oninput="updateEditorPreview()"></div>
+            <div class="amount-group"><label for="edit_p2">柏致消費金額</label><input class="amount-input" id="edit_p2" type="number" inputmode="decimal" min="0" step="0.01" oninput="updateEditorPreview()"></div>
         </div>
         <input class="note-input" id="edit_note" type="text" maxlength="30" placeholder="備註（店名、說明…）" oninput="updateEditorPreview()">
-        <div class="input-card-title">誰代付？</div>
+        <div class="input-card-title">實際先付款的人</div>
         <div class="payer-row">
-            <button class="payer-btn" id="edit_btn_p1" type="button" onclick="selectEditorPayer('p1')">👦🏻 至凱付</button>
-            <button class="payer-btn" id="edit_btn_p2" type="button" onclick="selectEditorPayer('p2')">👦🏼 柏致付</button>
+            <button class="payer-btn" id="edit_btn_p1" type="button" onclick="selectEditorPayer('p1')"><svg class="icon"><use href="#icon-user"></use></svg><span>至凱付</span></button>
+            <button class="payer-btn" id="edit_btn_p2" type="button" onclick="selectEditorPayer('p2')"><svg class="icon"><use href="#icon-user"></use></svg><span>柏致付</span></button>
         </div>
         <div class="preview-text" id="editorPreview"></div>
         <div class="edit-readonly" id="editorReadonly" hidden>這筆帳目已結清，僅供查看。</div>
@@ -419,8 +557,8 @@
 </div>
 
 <header class="header">
-    <span class="header-back" onclick="handleBack()" style="cursor:pointer;">← 返回</span>
-    <div class="header-title" id="headerTitle">📒 宿舍帳本</div>
+    <span class="header-back" onclick="handleBack()" style="cursor:pointer;"><svg class="icon"><use href="#icon-arrow-left"></use></svg><span>返回</span></span>
+    <div class="header-title" id="headerTitle"><svg class="icon"><use href="#icon-ledger"></use></svg><span>宿舍帳本</span></div>
     <span class="sync-pill" id="syncPill">同步中</span>
 </header>
 
@@ -431,21 +569,21 @@
     <div class="balance-card">
         <div class="balance-label">目前欠款</div>
         <div class="balance-amount zero" id="balanceAmount">$0</div>
-        <div class="balance-desc zero" id="balanceDesc">互不相欠 ✓</div>
+        <div class="balance-desc zero" id="balanceDesc">互不相欠</div>
     </div>
 
     <div class="input-card">
         <div class="input-card-header">
-            <div class="input-card-title">＋ 新增帳目</div>
-            <button class="calc-toggle" id="calcToggle" type="button" onclick="toggleCalculator()">計算機</button>
+            <div class="input-card-title section-kicker"><svg class="icon"><use href="#icon-receipt"></use></svg><span>新增帳目</span></div>
+            <button class="calc-toggle" id="calcToggle" type="button" onclick="toggleCalculator()"><svg class="icon"><use href="#icon-calculator"></use></svg><span>計算機</span></button>
         </div>
         <div class="amount-row">
             <div class="amount-group">
-                <label>至凱買了</label>
+                <label>至凱消費金額</label>
                 <input class="amount-input" id="inp_p1" type="number" inputmode="decimal" placeholder="$0" min="0" step="0.01" oninput="updatePreview()">
             </div>
             <div class="amount-group">
-                <label>柏致買了</label>
+                <label>柏致消費金額</label>
                 <input class="amount-input" id="inp_p2" type="number" inputmode="decimal" placeholder="$0" min="0" step="0.01" oninput="updatePreview()">
             </div>
         </div>
@@ -481,26 +619,26 @@
             <div class="calc-hint">可直接輸入算式，例如 120+80÷2</div>
         </div>
         <input class="note-input" id="inp_note" type="text" placeholder="備註（店名、說明…）" maxlength="30">
-        <div style="font-size:12px; color:var(--muted); font-weight:bold; margin-bottom:8px;">誰代付？</div>
+        <div style="font-size:12px; color:var(--muted); font-weight:bold; margin-bottom:8px;">實際先付款的人</div>
         <div class="payer-row">
-            <button class="payer-btn" id="btn_p1" type="button" onclick="selectPayer('p1')">👦🏻 至凱付</button>
-            <button class="payer-btn" id="btn_p2" type="button" onclick="selectPayer('p2')">👦🏼 柏致付</button>
+            <button class="payer-btn" id="btn_p1" type="button" onclick="selectPayer('p1')"><svg class="icon"><use href="#icon-user"></use></svg><span>至凱付</span></button>
+            <button class="payer-btn" id="btn_p2" type="button" onclick="selectPayer('p2')"><svg class="icon"><use href="#icon-user"></use></svg><span>柏致付</span></button>
         </div>
         <div class="preview-text" id="previewText">請輸入金額並選擇付款人</div>
-        <button class="submit-btn" id="submitBtn" onclick="addRecord()" disabled>＋ 新增這筆</button>
+        <button class="submit-btn" id="submitBtn" onclick="addRecord()" disabled><svg class="icon"><use href="#icon-plus"></use></svg><span>新增這筆</span></button>
     </div>
 
     <div class="view-records-btn" onclick="switchView('unsettled')">
-        <span>📋 未結清帳目</span>
+        <span class="view-records-label"><svg class="icon"><use href="#icon-list"></use></svg><span>未結清帳目</span></span>
         <span>
             <span class="view-records-badge" id="unsettled-badge">0</span>
-            <span style="color:var(--muted); margin-left:4px;">→</span>
+            <svg class="icon" style="color:var(--muted); margin-left:4px;"><use href="#icon-arrow-right"></use></svg>
         </span>
     </div>
 
     <div class="view-records-btn" onclick="switchView('settled')" style="margin-top:8px; border-color:rgba(255,255,255,0.05);">
-        <span style="color:rgba(255,255,255,0.35);">🗂️ 已結清紀錄</span>
-        <span style="color:var(--muted);">→</span>
+        <span class="view-records-label" style="color:rgba(255,255,255,0.45);"><svg class="icon"><use href="#icon-archive"></use></svg><span>已結清紀錄</span></span>
+        <svg class="icon" style="color:var(--muted);"><use href="#icon-arrow-right"></use></svg>
     </div>
 
 </div>
@@ -514,13 +652,13 @@
         <div class="balance-mini-label">目前欠款</div>
         <div style="text-align:right;">
             <div class="balance-mini-amount zero" id="balanceAmountMini">$0</div>
-            <div class="balance-mini-desc" id="balanceDescMini">互不相欠 ✓</div>
+            <div class="balance-mini-desc" id="balanceDescMini">互不相欠</div>
         </div>
     </div>
 
     <div class="settle-card">
-        <button class="settle-btn primary" onclick="settleAll()">✅ 一鍵全部結清</button>
-        <button class="settle-btn secondary" onclick="selectVisibleRecords()">☑️ 選取目前結果</button>
+        <button class="settle-btn primary" id="settleAllBtn" onclick="settleAll()"><svg class="icon"><use href="#icon-check-circle"></use></svg><span>一鍵全部結清</span></button>
+        <button class="settle-btn secondary" id="selectVisibleBtn" onclick="selectVisibleRecords()"><svg class="icon"><use href="#icon-check"></use></svg><span>選取目前結果</span></button>
     </div>
 
     <div class="record-tools">
@@ -531,11 +669,11 @@
     <div class="filter-result" id="uFilterResult"></div>
 
     <div class="list-section">
-        <div id="record-list-unsettled"><div class="empty-state">📭 目前沒有未結清的帳目</div></div>
+        <div id="record-list-unsettled"><div class="empty-state"><svg class="icon"><use href="#icon-archive"></use></svg><span>目前沒有未結清的帳目</span></div></div>
     </div>
     <div class="selection-bar" id="selectionBar">
         <div><strong id="selectionCount">已選 0 筆</strong><span id="selectionSummary">不影響目前欠款</span></div>
-        <button type="button" onclick="settleSelected()">結清選取</button>
+        <button type="button" onclick="settleSelected()"><svg class="icon"><use href="#icon-check-circle"></use></svg><span>結清選取</span></button>
     </div>
 
 </div>
@@ -546,7 +684,7 @@
 <div class="page-wrapper">
 
     <div style="margin: 20px 16px 0;">
-        <button class="settle-btn" style="width:100%; color:var(--red); background:rgba(255,69,58,0.08); border-color:rgba(255,69,58,0.25); padding:14px;" onclick="deleteSettled()">🗑️ 清空所有已結清紀錄</button>
+        <button class="settle-btn danger-soft" onclick="deleteSettled()"><svg class="icon"><use href="#icon-trash"></use></svg><span>清空所有已結清紀錄</span></button>
     </div>
 
     <div class="record-tools">
@@ -557,7 +695,7 @@
     <div class="filter-result" id="sFilterResult"></div>
 
     <div class="list-section">
-        <div id="record-list-settled"><div class="empty-state">📭 沒有已結清的紀錄</div></div>
+        <div id="record-list-settled"><div class="empty-state"><svg class="icon"><use href="#icon-archive"></use></svg><span>沒有已結清的紀錄</span></div></div>
     </div>
 
 </div>
@@ -591,6 +729,7 @@
     let undoTimer = null;
     let recordsLoaded = false;
     let isSubmitting = false;
+    let isConnected = false;
     const syncingBudgetKeys = new Map();
     const collapsedMonths = new Set();
     const initializedMonthGroups = new Set();
@@ -605,7 +744,20 @@
         else window.location.href = 'index.html';
     }
 
-    const viewTitles = { input: '📒 帳本', unsettled: '📋 未結清', settled: '🗂️ 已結清' };
+    function icon(name, extraClass = '') {
+        return `<svg class="icon${extraClass ? ` ${extraClass}` : ''}" aria-hidden="true"><use href="#icon-${name}"></use></svg>`;
+    }
+
+    const viewTitles = {
+        input: { icon: 'ledger', text: '宿舍帳本' },
+        unsettled: { icon: 'list', text: '未結清' },
+        settled: { icon: 'archive', text: '已結清' },
+    };
+
+    function setHeaderTitle(view) {
+        const title = viewTitles[view] || viewTitles.input;
+        document.getElementById('headerTitle').innerHTML = `${icon(title.icon)}<span>${title.text}</span>`;
+    }
 
     function switchView(v) {
         currentView = v;
@@ -613,20 +765,29 @@
             const el = document.getElementById('view-' + id);
             if (el) el.classList.toggle('active', v === id);
         });
-        document.getElementById('headerTitle').innerText = viewTitles[v] || '📒 帳本';
+        setHeaderTitle(v);
         if (v === 'unsettled' || v === 'settled') renderList();
         window.scrollTo(0, 0);
     }
 
     // ===== 工具 =====
-    // ===== 🔊 音效引擎 =====
-    const _ac = new (window.AudioContext || window.webkitAudioContext)();
+    // ===== 音效引擎 =====
+    let _ac = null;
+    function audioContext() {
+        if (_ac) return _ac;
+        const AudioApi = window.AudioContext || window.webkitAudioContext;
+        if (!AudioApi) return null;
+        _ac = new AudioApi();
+        return _ac;
+    }
     function _tone(freq, vol, delay, dur) {
-        if (_ac.state === 'suspended') _ac.resume();
-        const osc = _ac.createOscillator(), gain = _ac.createGain();
-        osc.connect(gain); gain.connect(_ac.destination);
+        const ac = audioContext();
+        if (!ac) return;
+        if (ac.state === 'suspended') ac.resume();
+        const osc = ac.createOscillator(), gain = ac.createGain();
+        osc.connect(gain); gain.connect(ac.destination);
         osc.type = 'sine'; osc.frequency.value = freq;
-        const t = _ac.currentTime + delay;
+        const t = ac.currentTime + delay;
         gain.gain.setValueAtTime(0, t);
         gain.gain.linearRampToValueAtTime(vol, t + 0.018);
         gain.gain.exponentialRampToValueAtTime(0.001, t + dur);
@@ -662,6 +823,56 @@
         return String(value ?? '').replace(/[&<>'"]/g, char => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', "'":'&#39;', '"':'&quot;' }[char]));
     }
 
+    function confirmDetails(rows, note = '', danger = false) {
+        const rowHtml = rows.map(row => `
+            <div class="confirm-row">
+                <span>${escapeHtml(row.label)}</span>
+                <span>${escapeHtml(row.value)}</span>
+            </div>
+        `).join('');
+        const noteHtml = note ? `<div class="confirm-note${danger ? ' danger' : ''}">${escapeHtml(note)}</div>` : '';
+        return `<div class="confirm-details">${rowHtml}</div>${noteHtml}`;
+    }
+
+    function emptyState(message) {
+        return `<div class="empty-state">${icon('archive')}<span>${escapeHtml(message)}</span></div>`;
+    }
+
+    function setSubmitState() {
+        const button = document.getElementById('submitBtn');
+        button.classList.toggle('is-loading', isSubmitting);
+        button.setAttribute('aria-busy', isSubmitting ? 'true' : 'false');
+        button.innerHTML = isSubmitting
+            ? `${icon('sync')}<span>新增中</span>`
+            : `${icon('plus')}<span>新增這筆</span>`;
+    }
+
+    function updateSettleControls() {
+        const unsettled = ledgerCore.filterRecords(allRecords, { settled: false });
+        const visible = ledgerCore.filterRecords(allRecords, { ...recordFilters.unsettled, settled: false }).filter(([, record]) => !record.budgetSync);
+        const settleAllButton = document.getElementById('settleAllBtn');
+        const selectVisibleButton = document.getElementById('selectVisibleBtn');
+        if (settleAllButton) settleAllButton.disabled = unsettled.length === 0 || unsettled.some(([, record]) => record.budgetSync);
+        if (selectVisibleButton) selectVisibleButton.disabled = visible.length === 0;
+    }
+
+    function setSyncState(state) {
+        const pill = document.getElementById('syncPill');
+        const labels = {
+            pending: '同步中',
+            online: '已同步',
+            offline: '離線',
+        };
+        pill.className = `sync-pill ${state === 'offline' ? 'offline' : state === 'online' ? 'online' : ''}`;
+        pill.innerText = labels[state] || labels.pending;
+    }
+
+    function refreshSyncPill() {
+        if (!isConnected) return setSyncState('offline');
+        const hasPendingRecord = Object.values(allRecords || {}).some(record => record && record.budgetSync);
+        setSyncState(hasPendingRecord ? 'pending' : 'online');
+    }
+
     function operationId(prefix = 'op') {
         return `${prefix}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 9)}`;
     }
@@ -688,7 +899,7 @@
         try {
             await action();
             playSound('success');
-            showToast('↩️ 已復原');
+            showToast('已復原');
         } catch (error) {
             console.error(error);
             showToast('復原失敗，請檢查網路', 'var(--red)');
@@ -814,7 +1025,7 @@
             });
         } catch (error) {
             console.error(error);
-            showToast('⚠️ 每日額度同步待重試', 'var(--red)');
+            showToast('每日額度同步待重試', 'var(--red)');
             throw error;
         } finally {
             if (syncingBudgetKeys.get(key) === task) syncingBudgetKeys.delete(key);
@@ -975,6 +1186,7 @@
         const el = document.getElementById('previewText');
         const validation = ledgerCore.validateRecordDraft({ p1_bought: p1, p2_bought: p2, payer: currentPayer });
         document.getElementById('submitBtn').disabled = !validation.valid || !recordsLoaded || isSubmitting;
+        setSubmitState();
         if (!validation.valid) {
             el.className = 'preview-text';
             el.innerText = currentPayer ? '（金額皆為 0，不產生欠款）' : '請輸入金額並選擇付款人';
@@ -987,7 +1199,7 @@
         if (owe === 0) { msg = '此筆不產生欠款'; }
         else if (newBal > 0) { msg = `新增後：柏致共欠至凱 $${newBal}`; }
         else if (newBal < 0) { msg = `新增後：至凱共欠柏致 $${Math.abs(newBal)}`; }
-        else { msg = '新增後：互不相欠 ✓'; }
+        else { msg = '新增後：互不相欠'; }
         el.className = 'preview-text has-value';
         el.innerText = msg;
     }
@@ -1015,10 +1227,15 @@
         const now = Date.now();
         const record = { p1_bought: p1, p2_bought: p2, payer: currentPayer, note, timestamp: now, updatedAt: now, editVersion: 1, settled: false, budgetApplied: { date: dateKey(now), p1, p2 } };
         const preview = document.getElementById('previewText').innerText;
-        const amountsLine = [p1 ? `至凱 $${p1}` : '', p2 ? `柏致 $${p2}` : ''].filter(Boolean).join('、');
+        const amountsLine = [p1 ? `至凱 $${p1}` : '', p2 ? `柏致 $${p2}` : ''].filter(Boolean).join('、') || '$0';
         showConfirm(
             '確認新增',
-            `<strong>${escapeHtml(note)}</strong><br>${amountsLine}<br>由 ${payerName} 代付<br><br>${escapeHtml(preview)}`,
+            confirmDetails([
+                { label: '帳目', value: note },
+                { label: '消費金額', value: amountsLine },
+                { label: '先付款', value: payerName },
+                { label: '新增結果', value: preview },
+            ]),
             async () => {
                 if (isSubmitting) return;
                 isSubmitting = true;
@@ -1166,7 +1383,11 @@
         const payerName = r.payer === 'p1' ? '至凱' : '柏致';
         showConfirm(
             '刪除這筆帳目',
-            `<strong>${escapeHtml(r.note)}</strong><br>${payerName}付<br><br>欠款與每日額度會一併撤銷，<br>完成後可在 6 秒內復原。`,
+            confirmDetails([
+                { label: '帳目', value: r.note },
+                { label: '先付款', value: payerName },
+                { label: '影響', value: getResultText(r) },
+            ], '欠款與每日額度會一併撤銷，完成後可在 6 秒內復原。', true),
             async () => {
                 try {
                     await commitRecordChange(key, r, null);
@@ -1210,7 +1431,10 @@
         const title = mode === 'all' ? '全部結清' : '結清選取';
         showConfirm(
             title,
-            `共 <strong>${entries.length} 筆</strong><br>${settlementInstruction(summary)}<br><br>完成後可在 6 秒內復原。`,
+            confirmDetails([
+                { label: '帳目數', value: `${entries.length} 筆` },
+                { label: '結算結果', value: settlementInstruction(summary) },
+            ], '完成後可在 6 秒內復原。'),
             () => performSettlement(entries, mode, summary)
         );
     }
@@ -1266,7 +1490,10 @@
     function deleteSettled() {
         const settled = ledgerCore.filterRecords(allRecords, { settled: true });
         if (settled.length === 0) return showToast('沒有已結清的紀錄', 'var(--muted)');
-        showConfirm('刪除已結清紀錄', `確定刪除全部 <strong>${settled.length} 筆</strong>已結清紀錄？完成後可在 6 秒內復原。`, async () => {
+        showConfirm('刪除已結清紀錄', confirmDetails([
+            { label: '刪除範圍', value: '所有已結清紀錄' },
+            { label: '帳目數', value: `${settled.length} 筆` },
+        ], '此操作只清除已結清紀錄，完成後可在 6 秒內復原。', true), async () => {
             const updates = {};
             const settlementIds = [...new Set(settled.map(([, record]) => record.settlementId).filter(Boolean))];
             const settlementSnapshots = Object.fromEntries(settlementIds.map(id => [id, allSettlements[id]]).filter(([, value]) => value));
@@ -1295,19 +1522,23 @@
             const isChecked = selectedKeys.has(k);
             const amountsText = [r.p1_bought ? `至凱 $${r.p1_bought}` : '', r.p2_bought ? `柏致 $${r.p2_bought}` : ''].filter(Boolean).join('　');
             const selectable = !r.settled && !r.budgetSync;
-            const deleteBtn = selectable ? `<button class="record-delete-btn" onclick="event.stopPropagation();confirmDeleteRecord('${k}')" title="刪除此筆" aria-label="刪除此筆">✕</button>` : '';
+            const safeKey = escapeHtml(k);
+            const safeNote = escapeHtml(r.note);
+            const deleteBtn = selectable ? `<button class="record-delete-btn" onclick="event.stopPropagation();confirmDeleteRecord('${safeKey}')" title="刪除此筆" aria-label="刪除此筆">${icon('trash')}</button>` : '';
             const syncText = r.budgetSync ? ' · 同步中' : '';
             return `
-            <div class="record-card${r.settled ? ' settled' : ''}" data-record-key="${escapeHtml(k)}" onclick="openRecordEditor('${k}')">
-                ${selectable ? `<button class="record-checkbox${isChecked ? ' checked' : ''}" type="button" onclick="event.stopPropagation();toggleSelect('${k}', this)" aria-label="${isChecked ? '取消選取' : '選取'} ${escapeHtml(r.note)}"></button>` : '<div style="width:36px;flex-shrink:0;"></div>'}
+            <div class="record-card${r.settled ? ' settled' : ''}" data-record-key="${safeKey}" onclick="openRecordEditor('${safeKey}')">
+                ${selectable ? `<button class="record-checkbox${isChecked ? ' checked' : ''}" type="button" onclick="event.stopPropagation();toggleSelect('${safeKey}', this)" aria-label="${isChecked ? '取消選取' : '選取'} ${safeNote}">${isChecked ? icon('check') : ''}</button>` : '<div class="record-spacer"></div>'}
                 <div class="record-body">
-                    <div class="record-note">${escapeHtml(r.note)}</div>
-                    <div class="record-amounts">${amountsText}</div>
-                    <div><span class="record-payer-tag">💳 ${payerName}付${syncText}</span></div>
+                    <div class="record-title-row">
+                        <div class="record-note">${safeNote}</div>
+                        <div class="record-time">${formatTime(r.timestamp)}</div>
+                    </div>
+                    <div class="record-amounts">${escapeHtml(amountsText || '未填消費金額')}</div>
+                    <div class="record-meta-row"><span class="record-payer-tag">${icon('card')}<span>${payerName}代付${escapeHtml(syncText)}</span></span></div>
                     <div class="record-result${delta === 0 ? ' zero' : ''}">${getResultText(r)}</div>
                 </div>
-                <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px;flex-shrink:0;">
-                    <div class="record-time">${formatTime(r.timestamp)}</div>
+                <div class="record-side">
                     ${deleteBtn}
                 </div>
             </div>`;
@@ -1340,7 +1571,7 @@
             const content = kind === 'settled' ? renderSettledBatch(group.records) : group.records.map(([key, record]) => makeCard(key, record)).join('');
             return `<section class="month-group${collapsed ? ' collapsed' : ''}" data-month="${group.key}">
                 <button class="month-heading" type="button" onclick="toggleMonthGroup('${kind}','${group.key}')">
-                    <strong>${group.label}</strong><span>${group.count} 筆 · 淨額 ${formatBalanceShort(group.balance)}</span><i>⌄</i>
+                    <strong>${icon('ledger')}<span>${group.label}</span></strong><span>${group.count} 筆 · 淨額 ${formatBalanceShort(group.balance)}</span><span class="month-chevron">${icon('chevron-down')}</span>
                 </button>
                 <div class="month-records">${content}</div>
             </section>`;
@@ -1350,16 +1581,18 @@
         const settledEntries = ledgerCore.filterRecords(allRecords, { ...recordFilters.settled, settled: true });
         const uList = document.getElementById('record-list-unsettled');
         const sList = document.getElementById('record-list-settled');
-        if (uList) uList.innerHTML = unsettledEntries.length ? renderGroups('unsettled', unsettledEntries) : '<div class="empty-state">📭 沒有符合條件的未結清帳目</div>';
-        if (sList) sList.innerHTML = settledEntries.length ? renderGroups('settled', settledEntries) : '<div class="empty-state">📭 沒有符合條件的已結清紀錄</div>';
+        if (uList) uList.innerHTML = unsettledEntries.length ? renderGroups('unsettled', unsettledEntries) : emptyState('沒有符合條件的未結清帳目');
+        if (sList) sList.innerHTML = settledEntries.length ? renderGroups('settled', settledEntries) : emptyState('沒有符合條件的已結清紀錄');
         document.getElementById('uFilterResult').innerText = `顯示 ${unsettledEntries.length} 筆`;
         document.getElementById('sFilterResult').innerText = `顯示 ${settledEntries.length} 筆`;
+        updateSettleControls();
         updateSelectionBar();
     }
 
     function toggleSelect(key, el) {
         if (selectedKeys.has(key)) { selectedKeys.delete(key); el.classList.remove('checked'); }
         else { selectedKeys.add(key); el.classList.add('checked'); }
+        el.innerHTML = selectedKeys.has(key) ? icon('check') : '';
         el.setAttribute('aria-label', `${selectedKeys.has(key) ? '取消選取' : '選取'} ${allRecords[key]?.note || '帳目'}`);
         updateSelectionBar();
     }
@@ -1436,9 +1669,9 @@
             miniDesc.innerText = '至凱欠柏致';
         } else {
             amountEl.className = 'balance-amount zero'; amountEl.innerText = '$0';
-            descEl.className = 'balance-desc zero'; descEl.innerText = '互不相欠 ✓';
+            descEl.className = 'balance-desc zero'; descEl.innerText = '互不相欠';
             miniEl.className = 'balance-mini-amount zero'; miniEl.innerText = '$0';
-            miniDesc.innerText = '互不相欠 ✓';
+            miniDesc.innerText = '互不相欠';
         }
         updatePreview();
     }
@@ -1463,6 +1696,8 @@
         badge.innerText = unsettledCount;
         badge.style.display = unsettledCount > 0 ? 'inline-block' : 'none';
         syncMonthFilters();
+        updateSettleControls();
+        refreshSyncPill();
         if (currentView === 'unsettled' || currentView === 'settled') renderList();
         Object.entries(allRecords).forEach(([key, record]) => {
             if (record && record.budgetSync) reconcileRecordBudget(key, record).catch(() => {});
@@ -1476,9 +1711,8 @@
 
     db.ref('.info/connected').on('value', snap => {
         const connected = snap.val() === true;
-        const pill = document.getElementById('syncPill');
-        pill.className = `sync-pill ${connected ? 'online' : 'offline'}`;
-        pill.innerText = connected ? '已同步' : '離線';
+        isConnected = connected;
+        refreshSyncPill();
     });
 
     updatePreview();

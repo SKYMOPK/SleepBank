@@ -38,7 +38,6 @@ const card = (data) => Object.freeze({
 export const CARDS = Object.freeze({
   pillow_guard: card({
     name: '枕頭守衛',
-    icon: '🛏️',
     starter: true,
     color: '#D0A34F',
     damage: 17,
@@ -50,7 +49,6 @@ export const CARDS = Object.freeze({
   }),
   alarm_turret: card({
     name: '鬧鐘砲塔',
-    icon: '⏰',
     starter: true,
     color: '#E06C75',
     damage: 8,
@@ -62,7 +60,6 @@ export const CARDS = Object.freeze({
   }),
   night_light: card({
     name: '夜燈',
-    icon: '🏮',
     starter: true,
     color: '#F2B95F',
     rarity: 'rare',
@@ -76,7 +73,6 @@ export const CARDS = Object.freeze({
   }),
   white_noise: card({
     name: '白噪音機',
-    icon: '🌧️',
     starter: true,
     color: '#72B7C9',
     damage: 7,
@@ -90,7 +86,6 @@ export const CARDS = Object.freeze({
   }),
   dream_catcher: card({
     name: '捕夢網',
-    icon: '🕸️',
     starter: true,
     color: '#9A8FC1',
     rarity: 'rare',
@@ -104,7 +99,6 @@ export const CARDS = Object.freeze({
   }),
   mosquito_coil: card({
     name: '蚊香',
-    icon: '🌀',
     color: '#7EAE78',
     damage: 5,
     interval: 1.2,
@@ -117,7 +111,6 @@ export const CARDS = Object.freeze({
   }),
   moon_prism: card({
     name: '月光稜鏡',
-    icon: '🔷',
     color: '#8FAEC8',
     rarity: 'epic',
     damage: 11,
@@ -130,7 +123,6 @@ export const CARDS = Object.freeze({
   }),
   sheep_counter: card({
     name: '數羊機',
-    icon: '🐑',
     color: '#E9E0C6',
     rarity: 'rare',
     damage: 10,
@@ -143,7 +135,6 @@ export const CARDS = Object.freeze({
   }),
   gravity_blanket: card({
     name: '重力被',
-    icon: '🛌',
     color: '#B58B6A',
     rarity: 'epic',
     damage: 4,
@@ -157,7 +148,6 @@ export const CARDS = Object.freeze({
   }),
   sleep_cap_sniper: card({
     name: '睡帽狙擊手',
-    icon: '🎯',
     color: '#C47070',
     rarity: 'epic',
     damage: 43,
@@ -169,7 +159,6 @@ export const CARDS = Object.freeze({
   }),
   meteor_projector: card({
     name: '流星投影燈',
-    icon: '🌠',
     color: '#C084C6',
     rarity: 'legendary',
     damage: 9,
@@ -181,7 +170,6 @@ export const CARDS = Object.freeze({
   }),
   orange_guard: card({
     name: '胖橘守衛',
-    icon: '🐈',
     color: '#D98F50',
     rarity: 'legendary',
     damage: 16,
@@ -194,7 +182,6 @@ export const CARDS = Object.freeze({
   }),
   hate_dream: card({
     name: '憎恨之夢',
-    icon: '◆',
     color: '#8A4CE3',
     rarity: 'epic',
     damage: 10,
@@ -207,7 +194,6 @@ export const CARDS = Object.freeze({
   }),
   charge_core: card({
     name: '充能核心',
-    icon: '◇',
     color: '#55D6F2',
     rarity: 'legendary',
     damage: 9,

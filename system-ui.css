@@ -1,0 +1,318 @@
+/* Shared low-risk polish for SleepBank pages. Keep this file behavior-free. */
+:root {
+    --sb-focus: rgba(208, 163, 79, 0.78);
+    --sb-line: rgba(200, 160, 100, 0.22);
+    --sb-safe-bottom: max(18px, env(safe-area-inset-bottom));
+}
+
+body.sb-page {
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+}
+
+body.sb-page :where(button, a, input, textarea, select, [onclick]) {
+    font-family: inherit;
+    -webkit-tap-highlight-color: transparent;
+}
+
+body.sb-page :where(button, a, [onclick]) {
+    touch-action: manipulation;
+}
+
+body.sb-page :where(button, a, input, textarea, select):focus-visible {
+    outline: 2px solid var(--sb-focus);
+    outline-offset: 3px;
+}
+
+body.sb-page :where(input, textarea, select) {
+    min-height: 44px;
+}
+
+body.sb-page :where(#toast, .toast, .undo-toast) {
+    max-width: calc(100vw - 28px);
+}
+
+@media (hover: hover) {
+    body.sb-page :where(a, button, [onclick]) {
+        transition-duration: 0.2s;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    body.sb-page *,
+    body.sb-page *::before,
+    body.sb-page *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        scroll-behavior: auto !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* Home page: keep original look, only improve density and tap targets. */
+.sb-index {
+    padding-bottom: var(--sb-safe-bottom);
+}
+
+.sb-index .section {
+    max-width: 460px;
+}
+
+.sb-index .time-pill,
+.sb-index .changelog-btn {
+    min-height: 40px;
+}
+
+.sb-index .player-card,
+.sb-index .feature-card {
+    min-height: 112px;
+}
+
+.sb-index .player-card {
+    min-height: 148px;
+}
+
+.sb-index .p-ico,
+.sb-index .f-ico {
+    line-height: 1;
+}
+
+@media (max-width: 380px) {
+    .sb-index .header {
+        padding-inline: 16px;
+    }
+
+    .sb-index .section {
+        width: calc(100% - 32px);
+    }
+
+    .sb-index .player-grid,
+    .sb-index .feature-grid {
+        gap: 9px;
+    }
+
+    .sb-index .feature-card {
+        padding: 14px;
+    }
+}
+
+/* Budget */
+.sb-budget {
+    padding-bottom: var(--sb-safe-bottom);
+}
+
+.sb-budget .user-btn,
+.sb-budget .btn {
+    min-height: 46px;
+}
+
+.sb-budget .input {
+    min-height: 48px;
+}
+
+@media (max-width: 420px) {
+    .sb-budget .wrap {
+        padding-inline: 12px;
+    }
+
+    .sb-budget .stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .sb-budget .form-row {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Split */
+.sb-split {
+    padding-bottom: var(--sb-safe-bottom);
+}
+
+.sb-split .amount-input,
+.sb-split .note-input,
+.sb-split .record-search,
+.sb-split .record-filter,
+.sb-split .calc-input {
+    min-height: 46px;
+}
+
+.sb-split .payer-btn,
+.sb-split .settle-btn,
+.sb-split .submit-btn,
+.sb-split .tab-btn {
+    min-height: 46px;
+}
+
+@media (max-width: 420px) {
+    .sb-split .amount-row,
+    .sb-split .payer-row,
+    .sb-split .settle-card,
+    .sb-split .edit-actions {
+        grid-template-columns: 1fr;
+    }
+
+    .sb-split .header-title {
+        font-size: 16px;
+    }
+}
+
+/* Grip */
+.sb-grip .back-btn,
+.sb-grip .user-chip,
+.sb-grip .tab-btn,
+.sb-grip .chart-mode-btn,
+.sb-grip .expand-chart-btn,
+.sb-grip .submit-btn,
+.sb-grip .modal-btn {
+    min-height: 44px;
+}
+
+.sb-grip .grip-input,
+.sb-grip .modal-input {
+    min-height: 58px;
+}
+
+.sb-grip .tab-bar {
+    padding-bottom: var(--sb-safe-bottom);
+}
+
+@media (max-width: 430px) {
+    .sb-grip #app {
+        padding-inline: 12px;
+    }
+
+    .sb-grip .user-cards {
+        gap: 12px;
+    }
+
+    .sb-grip .stats-row {
+        gap: 8px;
+    }
+}
+
+/* Admin */
+.sb-admin .page-wrapper {
+    max-width: 720px;
+}
+
+.sb-admin .section-header {
+    min-height: 58px;
+}
+
+.sb-admin .btn,
+.sb-admin .type-btn,
+.sb-admin .target-btn,
+.sb-admin .cart-qty-btn,
+.sb-admin .cart-remove {
+    min-height: 42px;
+}
+
+@media (max-width: 540px) {
+    .sb-admin .target-row,
+    .sb-admin .reward-row,
+    .sb-admin .code-row {
+        grid-template-columns: 1fr;
+    }
+
+    .sb-admin .section-body {
+        padding: 16px;
+    }
+
+    .sb-admin .item-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+/* Player page: fix cramped mobile header without changing feature logic. */
+.sb-player .main-content {
+    padding-inline: clamp(18px, 4vw, 50px);
+}
+
+.sb-player .nav-item,
+.sb-player .btn,
+.sb-player .bottom-nav-item,
+.sb-player .market-tab,
+.sb-player .tab-btn,
+.sb-player .pool-tab,
+.sb-player .gacha-curr-btn,
+.sb-player .transfer-option {
+    min-height: 44px;
+}
+
+@media (max-width: 768px) {
+    .sb-player .main-content {
+        padding: 10px 12px 92px !important;
+    }
+
+    .sb-player .top-bar {
+        display: grid;
+        grid-template-columns: auto auto minmax(0, 1fr);
+        align-items: center;
+        gap: 8px;
+        margin-inline: -12px;
+        padding-inline: 14px;
+    }
+
+    .sb-player .mobile-only-title {
+        min-width: 0;
+        margin-left: 0 !important;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        font-size: 14px !important;
+        line-height: 1.2;
+    }
+
+    .sb-player .opp-status-panel {
+        grid-column: 1 / -1;
+        width: 100%;
+        justify-content: space-between;
+        gap: 8px;
+        padding-top: 6px;
+    }
+
+    .sb-player .opp-status-panel > div:first-child,
+    .sb-player .opp-monitor {
+        min-width: 0;
+    }
+
+    .sb-player #opp_details {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .sb-player .bottom-nav {
+        padding-bottom: env(safe-area-inset-bottom);
+    }
+
+    .sb-player .bottom-nav-item {
+        font-size: 11px;
+    }
+}
+
+@media (max-width: 420px) {
+    .sb-player .action-grid,
+    .sb-player .gacha-stats-row,
+    .sb-player .prob-grid,
+    .sb-player .pool-tabs,
+    .sb-player .market-tabs {
+        gap: 8px;
+    }
+}
+
+/* Defense non-battle surfaces: keep existing visual identity. */
+.sb-defense .identity-btn,
+.sb-defense .primary-btn,
+.sb-defense .secondary-btn,
+.sb-defense .tab-btn,
+.sb-defense .rank-btn {
+    min-height: 44px;
+}
+
+@media (max-width: 720px) {
+    .sb-defense main {
+        padding-inline: 12px;
+    }
+}

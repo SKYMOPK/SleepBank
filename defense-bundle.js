@@ -43,7 +43,6 @@ const card = (data) => Object.freeze({
 const CARDS = Object.freeze({
   pillow_guard: card({
     name: '枕頭守衛',
-    icon: '🛏️',
     starter: true,
     color: '#D0A34F',
     damage: 17,
@@ -55,7 +54,6 @@ const CARDS = Object.freeze({
   }),
   alarm_turret: card({
     name: '鬧鐘砲塔',
-    icon: '⏰',
     starter: true,
     color: '#E06C75',
     damage: 8,
@@ -67,7 +65,6 @@ const CARDS = Object.freeze({
   }),
   night_light: card({
     name: '夜燈',
-    icon: '🏮',
     starter: true,
     color: '#F2B95F',
     rarity: 'rare',
@@ -81,7 +78,6 @@ const CARDS = Object.freeze({
   }),
   white_noise: card({
     name: '白噪音機',
-    icon: '🌧️',
     starter: true,
     color: '#72B7C9',
     damage: 7,
@@ -95,7 +91,6 @@ const CARDS = Object.freeze({
   }),
   dream_catcher: card({
     name: '捕夢網',
-    icon: '🕸️',
     starter: true,
     color: '#9A8FC1',
     rarity: 'rare',
@@ -109,7 +104,6 @@ const CARDS = Object.freeze({
   }),
   mosquito_coil: card({
     name: '蚊香',
-    icon: '🌀',
     color: '#7EAE78',
     damage: 5,
     interval: 1.2,
@@ -122,7 +116,6 @@ const CARDS = Object.freeze({
   }),
   moon_prism: card({
     name: '月光稜鏡',
-    icon: '🔷',
     color: '#8FAEC8',
     rarity: 'epic',
     damage: 11,
@@ -135,7 +128,6 @@ const CARDS = Object.freeze({
   }),
   sheep_counter: card({
     name: '數羊機',
-    icon: '🐑',
     color: '#E9E0C6',
     rarity: 'rare',
     damage: 10,
@@ -148,7 +140,6 @@ const CARDS = Object.freeze({
   }),
   gravity_blanket: card({
     name: '重力被',
-    icon: '🛌',
     color: '#B58B6A',
     rarity: 'epic',
     damage: 4,
@@ -162,7 +153,6 @@ const CARDS = Object.freeze({
   }),
   sleep_cap_sniper: card({
     name: '睡帽狙擊手',
-    icon: '🎯',
     color: '#C47070',
     rarity: 'epic',
     damage: 43,
@@ -174,7 +164,6 @@ const CARDS = Object.freeze({
   }),
   meteor_projector: card({
     name: '流星投影燈',
-    icon: '🌠',
     color: '#C084C6',
     rarity: 'legendary',
     damage: 9,
@@ -186,7 +175,6 @@ const CARDS = Object.freeze({
   }),
   orange_guard: card({
     name: '胖橘守衛',
-    icon: '🐈',
     color: '#D98F50',
     rarity: 'legendary',
     damage: 16,
@@ -199,7 +187,6 @@ const CARDS = Object.freeze({
   }),
   hate_dream: card({
     name: '憎恨之夢',
-    icon: '◆',
     color: '#8A4CE3',
     rarity: 'epic',
     damage: 10,
@@ -212,7 +199,6 @@ const CARDS = Object.freeze({
   }),
   charge_core: card({
     name: '充能核心',
-    icon: '◇',
     color: '#55D6F2',
     rarity: 'legendary',
     damage: 9,
@@ -756,7 +742,7 @@ function boardPosition(playerId, cellIndex) {
   const col = cellIndex % GAME.cols;
   return {
     x: 0.18 + col * 0.16,
-    y: (playerId === 'p1' ? 0.72 : 0.08) + row * 0.065,
+    y: (playerId === 'p1' ? 0.7 : 0.075) + row * 0.075,
   };
 }
 
@@ -770,7 +756,7 @@ function viewedBoardPosition(viewer, playerId, cellIndex) {
   const col = cellIndex % GAME.cols;
   return {
     x: 0.18 + col * 0.16,
-    y: (viewer === playerId ? 0.72 : 0.08) + row * 0.065,
+    y: (viewer === playerId ? 0.7 : 0.075) + row * 0.075,
   };
 }
 
@@ -1073,7 +1059,7 @@ function auraMultiplier(player, playerId, targetIndex) {
     if (!tower || tower.cardId !== 'gravity_blanket' || index === targetIndex) return;
     const stats = cardStats(tower.cardId, tower.rank);
     const origin = boardPosition(playerId, index);
-    const cellDistance = Math.hypot((origin.x - target.x) / 0.16, (origin.y - target.y) / 0.065);
+    const cellDistance = Math.hypot((origin.x - target.x) / 0.16, (origin.y - target.y) / 0.075);
     if (cellDistance <= stats.auraRange) multiplier += stats.auraBoost;
   });
   return multiplier;
@@ -1455,7 +1441,7 @@ const ENEMY_SPRITES = Object.freeze({
 const towerSprite = new Image();
 towerSprite.src = 'assets/defense/towers.png?v=3';
 const enemySprite = new Image();
-enemySprite.src = 'assets/defense/enemies.png';
+enemySprite.src = 'assets/defense/enemies.png?v=2';
 const battleBackgroundCache = new Map();
 
 const state = {
@@ -1524,6 +1510,8 @@ const state = {
   guestVisualDamageNumbers: new Map(),
   snapshotSentAt: 0,
   handSignature: '',
+  hudSignature: '',
+  selectionSignature: '',
   soundEnabled: localStorage.getItem('defense-sound') !== 'off',
   audioContext: null,
   seenEffectIds: new Set(),
@@ -1538,6 +1526,14 @@ const state = {
   reducedFx: false,
   lastStreakEventId: 0,
   battleMomentTimer: 0,
+  infoExpanded: window.innerWidth > 720,
+  reconnectDeadline: 0,
+  lastLives: null,
+  lastWave: null,
+  coreHitStartedAt: 0,
+  waveChangeStartedAt: 0,
+  motionReduced: window.matchMedia?.('(prefers-reduced-motion: reduce)').matches === true,
+  gachaRevealCardId: null,
 };
 
 const byId = (id) => document.getElementById(id);
@@ -1555,6 +1551,10 @@ function towerArtStyle(cardId) {
 
 function towerArtHtml(cardId, className = '') {
   return `<span class="tower-art ${className}" style="${towerArtStyle(cardId)}"></span>`;
+}
+
+function iconSvg(name, className = '') {
+  return `<svg class="icon ${className}" aria-hidden="true"><use href="#icon-${name}"></use></svg>`;
 }
 
 function ensureAudio() {
@@ -1610,12 +1610,14 @@ function playEffectSound(effect) {
     dot: [240, 0.09, 'sawtooth'],
     burst: [520, 0.08, 'square'],
     global: [880, 0.14, 'triangle'],
+    laser: [960, 0.16, 'sawtooth'],
     shieldBreak: [1040, 0.16, 'triangle'],
     frenzyBurst: [150, 0.18, 'sawtooth'],
     split: [620, 0.08, 'sine'],
     projectile: [430, 0.055, 'triangle'],
   }[effect.type] || [430, 0.055, 'triangle'];
   tone(sound[0], sound[1], sound[2], effect.crit ? 0.05 : 0.025);
+  if (effect.crit) tone(sound[0] * 1.5, Math.min(.12, sound[1] + .03), 'triangle', 0.02, .025);
 }
 
 function syncEffectSounds(match) {
@@ -1663,6 +1665,27 @@ function showScreen(id) {
   if (document.querySelector('.screen.active')?.id === id) return;
   screens.forEach((screen) => screen.classList.toggle('active', screen.id === id));
   byId('homeBtn').style.visibility = id === 'identityScreen' ? 'hidden' : 'visible';
+  document.body.classList.toggle('battle-active', id === 'battleScreen');
+  if (id === 'battleScreen') {
+    state.infoExpanded = window.innerWidth > 720;
+    syncBattleInfoExpansion();
+  }
+}
+
+function syncBattleInfoExpansion() {
+  const toggle = byId('battleInfoToggle');
+  const panel = byId('battleCardInfo');
+  if (!toggle || !panel) return;
+  toggle.setAttribute('aria-expanded', String(state.infoExpanded));
+  panel.classList.toggle('collapsed', !state.infoExpanded);
+}
+
+function updateSoundButton() {
+  const button = byId('soundBtn');
+  const use = byId('soundIconUse');
+  button.classList.toggle('muted', !state.soundEnabled);
+  button.setAttribute('aria-pressed', String(state.soundEnabled));
+  use?.setAttribute('href', state.soundEnabled ? '#icon-volume' : '#icon-volume-off');
 }
 
 function openModal(id) {
@@ -1782,7 +1805,7 @@ function renderCard(cardId, mode) {
   const locked = owned === 0;
   const full = owned >= GAME.maxCopies;
   const control = mode === 'deck'
-    ? `<button class="card-control" data-add="${cardId}" aria-label="加入 ${escapeHtml(card.name)}">＋</button>`
+    ? `<button class="card-control" data-add="${cardId}" aria-label="加入 ${escapeHtml(card.name)}">${iconSvg('plus')}</button>`
     : '';
   const status = mode === 'deck'
     ? `牌組 ${inDeck} 張`
@@ -1814,15 +1837,25 @@ function renderDeck() {
   byId('deckValidation').style.color = validation.valid ? 'var(--green)' : 'var(--red)';
   byId('saveDeckBtn').disabled = !validation.valid;
   byId('deckCountValue').textContent = state.workingDeck.length;
-  byId('deckStrip').innerHTML = state.workingDeck.map((cardId, index) => {
+  const groupedDeck = [];
+  const groupedById = new Map();
+  state.workingDeck.forEach((cardId) => {
+    if (!groupedById.has(cardId)) {
+      const entry = { cardId, count: 0 };
+      groupedById.set(cardId, entry);
+      groupedDeck.push(entry);
+    }
+    groupedById.get(cardId).count += 1;
+  });
+  byId('deckStrip').innerHTML = groupedDeck.map(({ cardId, count }) => {
     const card = CARDS[cardId];
     const rarity = RARITIES[card.rarity];
-    const copy = state.workingDeck.slice(0, index + 1).filter((value) => value === cardId).length;
-    return `<article class="deck-card" style="--card-color:${card.color};--rarity-color:${rarity.color}">
-      <span class="deck-card-art">${towerArtHtml(cardId)}</span>
+    return `<article class="deck-stack-card" style="--card-color:${card.color};--rarity-color:${rarity.color}">
+      <span class="deck-stack-art">${towerArtHtml(cardId)}</span>
       <strong>${escapeHtml(card.name)}</strong>
-      <small>${escapeHtml(rarity.name)} · 第 ${copy} 張</small>
-      <button data-remove="${index}" aria-label="移除 ${escapeHtml(card.name)}">×</button>
+      <small>${escapeHtml(rarity.name)}</small>
+      <span class="deck-stack-count">×${count}</span>
+      <button class="deck-stack-remove" data-remove-card="${cardId}" aria-label="移除一張 ${escapeHtml(card.name)}">${iconSvg('minus')}</button>
     </article>`;
   }).join('');
   byId('deckCollectionGrid').innerHTML = sortedCardIds(state.deckFilter, state.deckSort).map((cardId) => renderCard(cardId, 'deck')).join('');
@@ -1852,12 +1885,23 @@ async function gacha() {
     state.user = normalizeUser(result.snapshot.val());
     localStorage.setItem(`defense-user-${state.playerId}`, JSON.stringify(state.user));
     renderHub();
-    showToast(`獲得新卡牌：${CARDS[cardId].name}`);
-    openCardDetail(cardId);
+    showGachaReveal(cardId);
   } catch (error) {
     console.error('Gacha transaction failed:', error);
     showToast('抽卡同步失敗，未扣除代幣', 'error');
   }
+}
+
+function showGachaReveal(cardId) {
+  const card = CARDS[cardId];
+  const rarity = RARITIES[card.rarity];
+  state.gachaRevealCardId = cardId;
+  byId('gachaRevealArt').setAttribute('style', towerArtStyle(cardId));
+  byId('gachaRevealRarity').textContent = rarity.name;
+  byId('gachaRevealName').textContent = card.name;
+  byId('gachaRevealCard').style.setProperty('--card-color', card.color);
+  byId('gachaRevealCard').style.setProperty('--rarity-color', rarity.color);
+  openModal('gachaRevealModal');
 }
 
 function addDeckCard(cardId) {
@@ -1873,6 +1917,11 @@ function addDeckCard(cardId) {
 function removeDeckCard(index) {
   state.workingDeck.splice(index, 1);
   renderDeck();
+}
+
+function removeDeckCardById(cardId) {
+  const index = state.workingDeck.lastIndexOf(cardId);
+  if (index >= 0) removeDeckCard(index);
 }
 
 async function saveDeck() {
@@ -2043,6 +2092,14 @@ function enterRoom(roomCode) {
   state.guestVisualEffects.clear();
   state.guestVisualDamageNumbers.clear();
   state.guestVisualLastAt = 0;
+  state.handSignature = '';
+  state.hudSignature = '';
+  state.selectionSignature = '';
+  state.lastLives = null;
+  state.lastWave = null;
+  state.coreHitStartedAt = 0;
+  state.waveChangeStartedAt = 0;
+  state.reconnectDeadline = 0;
   state.snapshotWriteInFlight = false;
   state.snapshotWriteQueued = false;
   state.snapshotExtraUpdates = {};
@@ -2105,6 +2162,8 @@ async function recoverRoomConnection() {
     state.guestLastRenderAt = 0;
     const latest = await roomRef.child('snapshot').once('value');
     handleSnapshotUpdate(latest.val(), true);
+    state.reconnectDeadline = 0;
+    if (state.room?.status === 'playing') showBattleMoment('重新連線成功', '戰場狀態已完成同步', 'success');
   } catch (error) {
     console.warn('Presence recovery failed:', error);
   } finally {
@@ -2115,8 +2174,10 @@ async function recoverRoomConnection() {
 function syncDisconnectSettlementTimer(meta) {
   if (state.disconnectSettlementTimer) clearTimeout(state.disconnectSettlementTimer);
   state.disconnectSettlementTimer = 0;
+  state.reconnectDeadline = 0;
   if (meta?.status !== 'paused' || !meta.pausedAt) return;
   const remaining = Math.max(0, GAME.roomReconnectMs - (Date.now() - Number(meta.pausedAt)));
+  state.reconnectDeadline = Date.now() + remaining;
   state.disconnectSettlementTimer = setTimeout(() => {
     state.disconnectSettlementTimer = 0;
     if (state.room?.status === 'paused') settleRoom('disconnect');
@@ -2211,6 +2272,10 @@ function renderLobby() {
     el.classList.toggle('ready', Boolean(player?.ready));
     el.querySelector('small').textContent = player?.connected ? (player.clientId === clientId ? '你正在使用此身分' : '已加入房間') : '等待加入';
     el.querySelector('b').textContent = player?.ready ? '已準備' : '未準備';
+    const role = byId(playerId === 'p1' ? 'roleP1' : 'roleP2');
+    const hostPlayerId = state.room?.hostPlayerId;
+    role.textContent = playerId === hostPlayerId ? '房主' : player?.connected ? '隊友' : '';
+    role.style.display = role.textContent ? 'block' : 'none';
   }
   const me = state.room?.players?.[state.playerId];
   byId('readyBtn').textContent = me?.ready ? '取消準備' : '準備';
@@ -2361,7 +2426,7 @@ function hostFrame(now) {
     state.lastSnapshotAt = now;
     queueSnapshotWrite();
   }
-  const frameInterval = battleCanvas.width <= 500 ? 1000 / 30 : 1000 / 45;
+  const frameInterval = battleCanvas.getBoundingClientRect().width <= 520 ? 1000 / 30 : 1000 / 45;
   if (now - state.hostLastRenderAt >= frameInterval) {
     state.hostLastRenderAt = now;
     renderBattleUi();
@@ -2596,9 +2661,10 @@ function showResult(value) {
   const settlement = typeof value === 'number' ? { reward: value } : value || {};
   const wave = settlement.wave ?? state.match?.wave ?? 0;
   byId('resultReason').textContent = settlementReasonLabel(settlement.reason);
-  byId('resultWave').textContent = `抵達第 ${wave} 波`;
-  byId('resultReward').textContent = `獲得 ${settlement.reward || 0} 枚夢境代幣`;
-  byId('resultStreak').textContent = `最高完美防守 ×${Math.max(0, Number(settlement.bestPerfectWaveStreak ?? state.match?.bestPerfectWaveStreak) || 0)}`;
+  byId('resultWave').textContent = `第 ${wave} 波`;
+  byId('resultBosses').textContent = Math.max(0, Number(settlement.bossesKilled ?? state.match?.bossesKilled) || 0);
+  byId('resultReward').textContent = Math.max(0, Number(settlement.reward) || 0);
+  byId('resultStreak').textContent = `×${Math.max(0, Number(settlement.bestPerfectWaveStreak ?? state.match?.bestPerfectWaveStreak) || 0)}`;
   openModal('resultModal');
 }
 
@@ -2661,89 +2727,133 @@ function renderBattleChips(chips) {
   )).join('');
 }
 
-function renderBattleUi() {
-  if (!state.match) return;
-  const me = state.match.players?.[state.playerId];
-  if (!me) return;
-  const partnerId = state.playerId === 'p1' ? 'p2' : 'p1';
-  const partner = state.match.players?.[partnerId];
-  syncStreakMoment(state.match);
+function syncBattleTransitions(match) {
   const now = performance.now();
-  if (now - state.lastBattleDomAt >= 100) {
-    state.lastBattleDomAt = now;
-    byId('waveValue').textContent = state.match.wave;
-    byId('livesValue').textContent = `${state.match.lives} / ${GAME.lives}`;
-    byId('battleState').textContent = state.room?.status === 'paused'
-      ? '等待重連'
-      : state.match.waveState === 'break' ? `下一波 ${Math.max(0, state.match.nextWaveIn).toFixed(1)}s` : '防守中';
-    byId('resourceValue').textContent = Math.floor(me.resource);
-    const bossWave = nextBossWave(state.match.wave);
-    byId('nextBossValue').textContent = isBossWave(state.match.wave) ? 'BOSS' : `${bossWave - state.match.wave} 波`;
-    byId('partnerValue').textContent = `${Math.floor(partner?.resource || 0)} ✦`;
-    battleCanvas.dataset.viewer = state.playerId;
-    battleCanvas.dataset.viewMode = VIEW_MODE;
-    battleCanvas.dataset.ownBoardSide = 'bottom';
-    battleCanvas.dataset.ownTowers = String(me.board.filter(Boolean).length);
-    battleCanvas.dataset.partnerTowers = String(partner?.board?.filter(Boolean).length || 0);
-    battleCanvas.dataset.enemies = String(state.match.enemies?.length || 0);
-    battleCanvas.dataset.waveTheme = state.match.waveTheme || waveThemeForWave(state.match.wave || 1);
-    battleCanvas.dataset.perfectStreak = String(state.match.perfectWaveStreak || 0);
-    battleCanvas.dataset.eliteSignature = (state.match.enemies || [])
-      .filter((enemy) => enemy.eliteTrait)
-      .map((enemy) => `${enemy.id}:${enemy.eliteTrait}:${Math.ceil(enemy.shield || 0)}:${enemy.frenzyActive ? 1 : 0}`)
-      .join('|');
-    battleCanvas.dataset.enemySignature = (state.match.enemies || [])
-      .slice(0, 8)
-      .map((enemy) => `${enemy.id}:${enemy.progress.toFixed(3)}:${Math.ceil(enemy.hp)}`)
-      .join('|');
-    battleCanvas.dataset.ownBoardSignature = me.board
-      .map((tower, index) => tower ? `${index}:${tower.cardId}:${tower.rank}` : '')
-      .filter(Boolean)
-      .join('|');
-    battleCanvas.dataset.snapshotSeq = String(state.isHost ? state.snapshotSeq : state.lastSnapshotSeq);
-    battleCanvas.dataset.damageNumbers = String(state.match.damageNumbers?.length || 0);
-    const connected = state.room?.players?.[partnerId]?.connected !== false;
-    const pendingCount = state.pendingActions.size;
-    const syncValue = byId('syncValue');
-    syncValue.textContent = state.isHost ? '房主' : !connected ? '中斷' : pendingCount ? `同步 ${pendingCount}` : '已同步';
-    syncValue.classList.toggle('pending', pendingCount > 0);
-    syncValue.classList.toggle('offline', !connected);
-    const interval = state.match.wave >= 100 ? 5 : 10;
-    const waveProgress = isBossWave(state.match.wave) ? 100 : ((state.match.wave % interval) / interval) * 100;
-    byId('waveProgress').style.width = `${Math.max(4, waveProgress)}%`;
-    if (state.match.waveState === 'break') {
-      const nextTheme = WAVE_THEMES[waveThemeForWave(state.match.wave + 1)] || WAVE_THEMES.calm;
-      byId('waveTrackText').textContent = `下一波：${nextTheme.name} · ${nextTheme.hint}`;
-    } else {
-      const currentTheme = WAVE_THEMES[state.match.waveTheme || waveThemeForWave(state.match.wave)] || WAVE_THEMES.calm;
-      byId('waveTrackText').textContent = `${currentTheme.name} · ${currentTheme.hint}`;
-    }
-    const chips = battleStatusChips(state.match, state.playerId);
-    renderBattleChips(chips);
-    battleCanvas.dataset.statusChips = chips.map((chip) => chip.text).join('|');
+  if (state.lastLives !== null && match.lives < state.lastLives) {
+    state.coreHitStartedAt = now;
+    tone(120, .22, 'sawtooth', .045);
   }
+  if (state.lastWave !== null && match.wave !== state.lastWave && match.wave > 0) {
+    state.waveChangeStartedAt = now;
+    tone(420, .08, 'triangle', .024);
+    tone(610, .12, 'triangle', .018, .07);
+  }
+  state.lastLives = match.lives;
+  state.lastWave = match.wave;
+}
+
+function syncBattleHud(me, partner, partnerId, now) {
+  if (now - state.lastBattleDomAt < 100) return;
+  state.lastBattleDomAt = now;
+  const connected = state.room?.players?.[partnerId]?.connected !== false;
+  const pendingCount = state.pendingActions.size;
+  const chips = battleStatusChips(state.match, state.playerId);
+  const reconnectSeconds = state.reconnectDeadline ? Math.max(0, Math.ceil((state.reconnectDeadline - Date.now()) / 1000)) : 0;
+  const hudSignature = [
+    state.match.wave,
+    state.match.lives,
+    state.match.waveState,
+    Math.floor(state.match.nextWaveIn || 0),
+    Math.floor(me.resource),
+    Math.floor(partner?.resource || 0),
+    state.room?.status,
+    connected,
+    pendingCount,
+    state.snapshotSeq,
+    state.lastSnapshotSeq,
+    reconnectSeconds,
+    chips.map((chip) => `${chip.text}:${chip.warn ? 1 : 0}`).join('|'),
+  ].join('::');
+  if (state.hudSignature === hudSignature) return;
+  state.hudSignature = hudSignature;
+  byId('waveValue').textContent = state.match.wave;
+  byId('livesValue').textContent = `${state.match.lives} / ${GAME.lives}`;
+  byId('battleState').textContent = state.room?.status === 'paused'
+    ? '等待重連'
+    : state.match.waveState === 'break' ? `下一波 ${Math.max(0, state.match.nextWaveIn).toFixed(1)}s` : '防守中';
+  byId('resourceValue').textContent = Math.floor(me.resource);
+  byId('resourceHudValue').textContent = Math.floor(me.resource);
+  const bossWave = nextBossWave(state.match.wave);
+  byId('nextBossValue').textContent = isBossWave(state.match.wave) ? 'BOSS' : `${bossWave - state.match.wave} 波`;
+  byId('partnerValue').textContent = Math.floor(partner?.resource || 0);
+  battleCanvas.dataset.viewer = state.playerId;
+  battleCanvas.dataset.viewMode = VIEW_MODE;
+  battleCanvas.dataset.ownBoardSide = 'bottom';
+  battleCanvas.dataset.ownTowers = String(me.board.filter(Boolean).length);
+  battleCanvas.dataset.partnerTowers = String(partner?.board?.filter(Boolean).length || 0);
+  battleCanvas.dataset.enemies = String(state.match.enemies?.length || 0);
+  battleCanvas.dataset.waveTheme = state.match.waveTheme || waveThemeForWave(state.match.wave || 1);
+  battleCanvas.dataset.perfectStreak = String(state.match.perfectWaveStreak || 0);
+  battleCanvas.dataset.eliteSignature = (state.match.enemies || [])
+    .filter((enemy) => enemy.eliteTrait)
+    .map((enemy) => `${enemy.id}:${enemy.eliteTrait}:${Math.ceil(enemy.shield || 0)}:${enemy.frenzyActive ? 1 : 0}`)
+    .join('|');
+  battleCanvas.dataset.enemySignature = (state.match.enemies || [])
+    .slice(0, 8)
+    .map((enemy) => `${enemy.id}:${enemy.progress.toFixed(3)}:${Math.ceil(enemy.hp)}`)
+    .join('|');
+  battleCanvas.dataset.ownBoardSignature = me.board
+    .map((tower, index) => tower ? `${index}:${tower.cardId}:${tower.rank}` : '')
+    .filter(Boolean)
+    .join('|');
+  battleCanvas.dataset.snapshotSeq = String(state.isHost ? state.snapshotSeq : state.lastSnapshotSeq);
+  battleCanvas.dataset.damageNumbers = String(state.match.damageNumbers?.length || 0);
+  const syncValue = byId('syncValue');
+  syncValue.textContent = state.isHost ? '房主' : !connected ? '中斷' : pendingCount ? `同步 ${pendingCount}` : '已同步';
+  syncValue.classList.toggle('pending', pendingCount > 0);
+  syncValue.classList.toggle('offline', !connected);
+  const interval = state.match.wave >= 100 ? 5 : 10;
+  const waveProgress = isBossWave(state.match.wave) ? 100 : ((state.match.wave % interval) / interval) * 100;
+  byId('waveProgress').style.width = `${Math.max(4, waveProgress)}%`;
+  if (state.match.waveState === 'break') {
+    const nextTheme = WAVE_THEMES[waveThemeForWave(state.match.wave + 1)] || WAVE_THEMES.calm;
+    byId('waveTrackText').textContent = `下一波：${nextTheme.name} · ${nextTheme.hint}`;
+  } else {
+    const currentTheme = WAVE_THEMES[state.match.waveTheme || waveThemeForWave(state.match.wave)] || WAVE_THEMES.calm;
+    byId('waveTrackText').textContent = `${currentTheme.name} · ${currentTheme.hint}`;
+  }
+  renderBattleChips(chips);
+  battleCanvas.dataset.statusChips = chips.map((chip) => chip.text).join('|');
+  const overlay = byId('battleOverlay');
+  const paused = state.room?.status === 'paused';
+  overlay.classList.toggle('show', paused);
+  if (paused) {
+    overlay.querySelector('strong').textContent = connected ? '重新同步戰場' : '等待夥伴重新連線';
+    overlay.querySelector('span').textContent = connected ? '正在套用最新戰鬥快照' : '房間將保留五分鐘';
+    byId('reconnectCountdown').textContent = reconnectSeconds ? `剩餘 ${Math.floor(reconnectSeconds / 60)}:${String(reconnectSeconds % 60).padStart(2, '0')}` : '';
+  } else {
+    byId('reconnectCountdown').textContent = '';
+  }
+}
+
+function syncBattleHand(me) {
   const handSignature = `${me.hand.join('|')}::${state.selectedHand ?? '-'}::${me.resource >= GAME.placeCost ? 'ready' : 'poor'}`;
-  if (state.handSignature !== handSignature) {
-    state.handSignature = handSignature;
-    byId('hand').innerHTML = me.hand.map((cardId, index) => {
-      const card = CARDS[cardId];
-      const rarity = RARITIES[card.rarity];
-      return `<button class="hand-card ${state.selectedHand === index ? 'selected' : ''} ${me.resource < GAME.placeCost ? 'unaffordable' : ''}" data-hand="${index}" style="--card-color:${card.color};--rarity-color:${rarity.color}">${towerArtHtml(cardId)}<small>${escapeHtml(card.name)}</small><i>${escapeHtml(rarity.name)}</i><b>${GAME.placeCost}</b></button>`;
-    }).join('');
-  }
+  if (state.handSignature === handSignature) return;
+  state.handSignature = handSignature;
+  byId('hand').innerHTML = me.hand.map((cardId, index) => {
+    const card = CARDS[cardId];
+    const rarity = RARITIES[card.rarity];
+    return `<button class="hand-card ${state.selectedHand === index ? 'selected' : ''} ${me.resource < GAME.placeCost ? 'unaffordable' : ''}" data-hand="${index}" style="--card-color:${card.color};--rarity-color:${rarity.color}">${towerArtHtml(cardId)}<small>${escapeHtml(card.name)}</small><i>${escapeHtml(rarity.name)}</i><b>${GAME.placeCost}</b></button>`;
+  }).join('');
+}
+
+function syncBattleSelection(me) {
   const selectedTower = state.selectedTower === null ? null : me.board[state.selectedTower];
   const mergeTargets = selectedTower ? me.board.filter((tower, index) => (
     tower && isValidMergeTarget(state.selectedTower, index)
   )).length : 0;
+  const selectedHandCard = state.selectedHand === null ? null : me.hand[state.selectedHand];
+  const infoCardId = selectedTower?.cardId || selectedHandCard;
+  const infoRank = selectedTower?.rank || 1;
+  const signature = [state.selectedHand, state.selectedTower, state.dragTarget, Math.floor(me.resource), infoCardId, infoRank, mergeTargets].join('::');
+  battleCanvas.dataset.dragTarget = state.dragTarget === null ? '' : String(state.dragTarget);
+  if (state.selectionSignature === signature) return;
+  state.selectionSignature = signature;
   byId('battleHelp').textContent = state.selectedHand !== null
     ? me.resource < GAME.placeCost ? '資源不足，擊殺敵人後即可放置。' : '選擇亮起的空格放置卡牌。'
     : selectedTower ? `${CARDS[selectedTower.cardId].name} ${selectedTower.rank} 階 · ${mergeTargets ? `有 ${mergeTargets} 座可合成目標` : '目前沒有可合成目標'}`
       : '選擇手牌放置，或選擇同種同階塔合成。';
-  const selectedHandCard = state.selectedHand === null ? null : me.hand[state.selectedHand];
-  const infoCardId = selectedTower?.cardId || selectedHandCard;
-  const infoRank = selectedTower?.rank || 1;
   const infoPanel = byId('battleCardInfo');
-  battleCanvas.dataset.dragTarget = state.dragTarget === null ? '' : String(state.dragTarget);
   infoPanel.classList.toggle('active', Boolean(infoCardId));
   if (infoCardId) {
     const card = CARDS[infoCardId];
@@ -2761,13 +2871,20 @@ function renderBattleUi() {
     byId('battleInfoDescription').textContent = '選取後可查看攻擊方式與目前階級數值。';
     byId('battleInfoStats').textContent = '拖曳同種同階塔即可合成';
   }
-  const overlay = byId('battleOverlay');
-  const paused = state.room?.status === 'paused';
-  overlay.classList.toggle('show', paused);
-  if (paused) {
-    overlay.querySelector('strong').textContent = '等待夥伴重新連線';
-    overlay.querySelector('span').textContent = '房間將保留五分鐘';
-  }
+}
+
+function renderBattleUi() {
+  if (!state.match) return;
+  const me = state.match.players?.[state.playerId];
+  if (!me) return;
+  const partnerId = state.playerId === 'p1' ? 'p2' : 'p1';
+  const partner = state.match.players?.[partnerId];
+  const now = performance.now();
+  syncBattleTransitions(state.match);
+  syncStreakMoment(state.match);
+  syncBattleHud(me, partner, partnerId, now);
+  syncBattleHand(me);
+  syncBattleSelection(me);
   resizeBattleCanvas();
   drawBattle(battleCtx, battleCanvas, state.match, state.playerId, {
     selectedTower: state.selectedTower,
@@ -2789,7 +2906,7 @@ function guestFrame(now) {
     state.guestRaf = 0;
     return;
   }
-  const frameInterval = battleCanvas.width <= 500 ? 1000 / 30 : 1000 / 45;
+  const frameInterval = battleCanvas.getBoundingClientRect().width <= 520 ? 1000 / 30 : 1000 / 45;
   if (now - state.guestLastRenderAt < frameInterval) {
     state.guestRaf = requestAnimationFrame(guestFrame);
     return;
@@ -2892,10 +3009,18 @@ function updateGuestVisuals(now) {
 function resizeBattleCanvas() {
   const rect = battleCanvas.getBoundingClientRect();
   const scale = Math.min(window.devicePixelRatio || 1, 1.5);
-  const size = Math.min(1000, Math.max(360, Math.round(rect.width * scale)));
-  if (battleCanvas.width !== size || battleCanvas.height !== size) {
-    battleCanvas.width = size;
-    battleCanvas.height = size;
+  let width = Math.min(1100, Math.max(360, Math.round(rect.width * scale)));
+  let height = Math.min(1200, Math.max(360, Math.round(rect.height * scale)));
+  const maxPixels = rect.width <= 520 ? 620000 : 920000;
+  const pixelCount = width * height;
+  if (pixelCount > maxPixels) {
+    const reduction = Math.sqrt(maxPixels / pixelCount);
+    width = Math.round(width * reduction);
+    height = Math.round(height * reduction);
+  }
+  if (battleCanvas.width !== width || battleCanvas.height !== height) {
+    battleCanvas.width = width;
+    battleCanvas.height = height;
   }
 }
 
@@ -2907,6 +3032,12 @@ function drawBattle(ctx, canvas, match, viewer, options = {}) {
   const x = (value) => value * width;
   const y = (value) => value * height;
   ctx.clearRect(0, 0, width, height);
+  const coreHitAge = state.coreHitStartedAt ? (performance.now() - state.coreHitStartedAt) / 720 : 2;
+  ctx.save();
+  if (coreHitAge >= 0 && coreHitAge < 1 && !state.motionReduced) {
+    const shake = Math.sin(coreHitAge * Math.PI * 9) * width * .006 * (1 - coreHitAge);
+    ctx.translate(shake, 0);
+  }
   drawBattleBackground(ctx, canvas);
   drawBoards(ctx, canvas, match, viewer, options, visualProfile);
   drawEnemies(ctx, canvas, match, viewer, options.interpolateSeconds || 0, options.enemyProgress, visualProfile);
@@ -2914,6 +3045,7 @@ function drawBattle(ctx, canvas, match, viewer, options = {}) {
   drawDamageNumbers(ctx, canvas, match, viewer, options.interpolateSeconds || 0, options.damageNumbers, visualProfile);
   drawActionBursts(ctx, canvas, viewer, options.actionBursts || []);
   drawDraggedTower(ctx, canvas, match, viewer, options);
+  drawCoreHitFeedback(ctx, canvas, coreHitAge);
 
   ctx.fillStyle = 'rgba(244,239,223,.68)';
   ctx.font = `800 ${Math.max(11, width * .015)}px system-ui`;
@@ -2924,17 +3056,75 @@ function drawBattle(ctx, canvas, match, viewer, options = {}) {
   ctx.fillStyle = '#d0a34f';
   ctx.font = `900 ${Math.max(10, width * .012)}px system-ui`;
   ctx.fillText('共用中線 · 優先鎖定', x(.52), y(.465));
+  ctx.restore();
+  drawWaveTransition(ctx, canvas, match);
   state.lastFrameCostMs = performance.now() - frameStart;
   state.reducedFx = visualProfile.reduced;
+}
+
+function drawCoreHitFeedback(ctx, canvas, age) {
+  if (age < 0 || age >= 1) return;
+  const width = canvas.width;
+  const height = canvas.height;
+  const x = width * .94;
+  const y = height * .5;
+  ctx.save();
+  ctx.globalCompositeOperation = 'lighter';
+  ctx.globalAlpha = 1 - age;
+  ctx.strokeStyle = '#ff8f78';
+  ctx.fillStyle = `rgba(255,96,78,${.18 * (1 - age)})`;
+  ctx.lineWidth = Math.max(3, width * .008 * (1 - age));
+  ctx.beginPath();
+  ctx.arc(x, y, width * (.035 + age * .09), 0, Math.PI * 2);
+  ctx.fill();
+  ctx.stroke();
+  for (let ray = 0; ray < 8; ray += 1) {
+    const angle = ray * Math.PI / 4;
+    const inner = width * (.035 + age * .03);
+    const outer = width * (.07 + age * .11);
+    ctx.beginPath();
+    ctx.moveTo(x + Math.cos(angle) * inner, y + Math.sin(angle) * inner);
+    ctx.lineTo(x + Math.cos(angle) * outer, y + Math.sin(angle) * outer);
+    ctx.stroke();
+  }
+  ctx.restore();
+}
+
+function drawWaveTransition(ctx, canvas, match) {
+  if (!state.waveChangeStartedAt || state.motionReduced) return;
+  const age = (performance.now() - state.waveChangeStartedAt) / 1150;
+  if (age < 0 || age >= 1) return;
+  const width = canvas.width;
+  const height = canvas.height;
+  const alpha = Math.sin(age * Math.PI);
+  const theme = WAVE_THEMES[match.waveTheme || waveThemeForWave(match.wave)] || WAVE_THEMES.calm;
+  ctx.save();
+  ctx.globalAlpha = alpha * .9;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillStyle = 'rgba(11,14,10,.78)';
+  roundedRect(ctx, width * .29, height * .42, width * .42, Math.max(56, height * .1), width * .012);
+  ctx.fill();
+  ctx.strokeStyle = theme.color;
+  ctx.lineWidth = Math.max(2, width * .003);
+  ctx.stroke();
+  ctx.fillStyle = '#fff2c8';
+  ctx.font = `950 ${Math.max(18, width * .03)}px system-ui`;
+  ctx.fillText(`第 ${match.wave} 波`, width * .5, height * .455);
+  ctx.fillStyle = theme.color;
+  ctx.font = `850 ${Math.max(11, width * .016)}px system-ui`;
+  ctx.fillText(theme.name, width * .5, height * .51);
+  ctx.restore();
 }
 
 function battleVisualProfile(match, canvas) {
   const enemyCount = match.enemies?.length || 0;
   const effectCount = match.effects?.length || 0;
   const damageCount = match.damageNumbers?.length || 0;
-  const mobile = canvas.width <= 500;
+  const mobile = canvas.getBoundingClientRect().width <= 520;
   const pressure = enemyCount + effectCount * .34 + damageCount * .45;
-  const reduced = pressure > (mobile ? 34 : 58)
+  const reduced = state.motionReduced
+    || pressure > (mobile ? 34 : 58)
     || enemyCount > (mobile ? 12 : PERFORMANCE_SOFT_ENEMY_COUNT)
     || state.lastFrameCostMs > BATTLE_EFFECT_TARGET_MS;
   return {
@@ -2957,22 +3147,33 @@ function drawBattleBackground(ctx, canvas) {
     background.height = height;
     const backgroundCtx = background.getContext('2d');
     const bg = backgroundCtx.createLinearGradient(0, 0, width, height);
-    bg.addColorStop(0, '#161d1c');
-    bg.addColorStop(.52, '#171912');
-    bg.addColorStop(1, '#111419');
+    bg.addColorStop(0, '#172126');
+    bg.addColorStop(.48, '#151812');
+    bg.addColorStop(1, '#172019');
     backgroundCtx.fillStyle = bg;
     backgroundCtx.fillRect(0, 0, width, height);
 
     const topBand = backgroundCtx.createLinearGradient(0, 0, 0, height * .34);
-    topBand.addColorStop(0, 'rgba(131,184,199,.12)');
-    topBand.addColorStop(1, 'rgba(131,184,199,.015)');
+    topBand.addColorStop(0, 'rgba(98,170,196,.18)');
+    topBand.addColorStop(1, 'rgba(98,170,196,.02)');
     backgroundCtx.fillStyle = topBand;
     backgroundCtx.fillRect(0, 0, width, height * .34);
     const bottomBand = backgroundCtx.createLinearGradient(0, height * .66, 0, height);
-    bottomBand.addColorStop(0, 'rgba(130,184,120,.015)');
-    bottomBand.addColorStop(1, 'rgba(130,184,120,.12)');
+    bottomBand.addColorStop(0, 'rgba(208,163,79,.02)');
+    bottomBand.addColorStop(1, 'rgba(130,184,120,.17)');
     backgroundCtx.fillStyle = bottomBand;
     backgroundCtx.fillRect(0, height * .66, width, height * .34);
+    backgroundCtx.strokeStyle = 'rgba(131,184,199,.16)';
+    backgroundCtx.lineWidth = Math.max(1, width * .0015);
+    backgroundCtx.beginPath();
+    backgroundCtx.moveTo(0, height * .355);
+    backgroundCtx.lineTo(width, height * .355);
+    backgroundCtx.stroke();
+    backgroundCtx.strokeStyle = 'rgba(208,163,79,.18)';
+    backgroundCtx.beginPath();
+    backgroundCtx.moveTo(0, height * .645);
+    backgroundCtx.lineTo(width, height * .645);
+    backgroundCtx.stroke();
     for (let index = 0; index < 46; index += 1) {
       const px = ((index * 83) % 997) / 997 * width;
       const py = ((index * 47) % 991) / 991 * height;
@@ -3014,6 +3215,16 @@ function drawRoute(ctx, canvas) {
     ctx.stroke();
     ctx.setLineDash([]);
   }
+  ctx.strokeStyle = 'rgba(255,230,170,.56)';
+  ctx.lineWidth = Math.max(2, width * .004);
+  for (const py of [.17, .83]) {
+    const direction = py < .5 ? 1 : -1;
+    ctx.beginPath();
+    ctx.moveTo(x(.065), y(py - direction * .025));
+    ctx.lineTo(x(.09), y(py));
+    ctx.lineTo(x(.115), y(py - direction * .025));
+    ctx.stroke();
+  }
   const coreGlow = ctx.createRadialGradient(x(.94), y(.5), 0, x(.94), y(.5), width * .065);
   coreGlow.addColorStop(0, 'rgba(255,225,130,.75)');
   coreGlow.addColorStop(.35, 'rgba(208,163,79,.28)');
@@ -3022,6 +3233,23 @@ function drawRoute(ctx, canvas) {
   ctx.beginPath();
   ctx.arc(x(.94), y(.5), width * .065, 0, Math.PI * 2);
   ctx.fill();
+  ctx.save();
+  ctx.translate(x(.94), y(.5));
+  ctx.strokeStyle = 'rgba(255,242,189,.8)';
+  ctx.fillStyle = 'rgba(71,58,32,.88)';
+  ctx.lineWidth = Math.max(2, width * .004);
+  ctx.beginPath();
+  for (let corner = 0; corner < 6; corner += 1) {
+    const angle = -Math.PI / 2 + corner * Math.PI / 3;
+    const px = Math.cos(angle) * width * .039;
+    const py = Math.sin(angle) * width * .039;
+    if (!corner) ctx.moveTo(px, py);
+    else ctx.lineTo(px, py);
+  }
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
+  ctx.restore();
   ctx.fillStyle = '#f7dc93';
   ctx.beginPath();
   ctx.arc(x(.94), y(.5), width * .024, 0, Math.PI * 2);
@@ -3030,7 +3258,7 @@ function drawRoute(ctx, canvas) {
   ctx.beginPath();
   ctx.arc(x(.952), y(.49), width * .022, 0, Math.PI * 2);
   ctx.fill();
-  ctx.strokeStyle = 'rgba(255,242,189,.72)';
+  ctx.strokeStyle = 'rgba(255,242,189,.9)';
   ctx.lineWidth = width * .003;
   ctx.beginPath();
   ctx.arc(x(.94), y(.5), width * .031, 0, Math.PI * 2);
@@ -3041,7 +3269,7 @@ function drawBoards(ctx, canvas, match, viewer, options, visualProfile = {}) {
   const width = canvas.width;
   const height = canvas.height;
   const cellWidth = width * (visualProfile.mobile ? .145 : .13);
-  const cellHeight = height * (visualProfile.mobile ? .062 : .052);
+  const cellHeight = height * (visualProfile.mobile ? .064 : .054);
   for (const playerId of ['p1', 'p2']) {
     const player = match.players?.[playerId];
     if (!player) continue;
@@ -3064,7 +3292,7 @@ function drawBoards(ctx, canvas, match, viewer, options, visualProfile = {}) {
       ctx.stroke();
       if (mergeTarget || placementTarget) {
         ctx.save();
-        ctx.globalAlpha = .28 + Math.sin(performance.now() / 170) * .12;
+        ctx.globalAlpha = state.motionReduced ? .34 : .28 + Math.sin(performance.now() / 170) * .12;
         ctx.strokeStyle = mergeTarget ? '#a9e69d' : '#a9e9fa';
         ctx.lineWidth = Math.max(2, width * .004);
         ctx.stroke();
@@ -3081,7 +3309,7 @@ function drawBoards(ctx, canvas, match, viewer, options, visualProfile = {}) {
         ctx.fill();
         ctx.stroke();
       }
-      drawSpriteCell(ctx, towerSprite, TOWER_SPRITES[tower.cardId], 4, 4, pos.x * width - cellHeight * .55, pos.y * height - cellHeight * .58, cellHeight * 1.1, cellHeight * 1.1);
+      drawSpriteCell(ctx, towerSprite, TOWER_SPRITES[tower.cardId], 4, 4, pos.x * width - cellHeight * .61, pos.y * height - cellHeight * .64, cellHeight * 1.22, cellHeight * 1.22);
       ctx.beginPath();
       ctx.arc(pos.x * width, pos.y * height, cellHeight * .62, 0, Math.PI * 2);
       ctx.strokeStyle = rarity.color;
@@ -3436,11 +3664,21 @@ function drawEffects(ctx, canvas, match, viewer, interpolateSeconds = 0, enemyPr
       ctx.strokeStyle = effect.color;
       ctx.stroke();
     } else {
+      ctx.globalAlpha = Math.min(1, life * 1.65);
       ctx.beginPath();
       ctx.moveTo(fromX, fromY);
       ctx.lineTo(currentX, currentY);
       ctx.lineWidth = width * (effect.type === 'burst' ? .006 : .003) * life;
       ctx.stroke();
+      if (effect.type === 'burst') {
+        for (let ray = 0; ray < 5; ray += 1) {
+          const angle = ray * Math.PI * .4 + progress;
+          ctx.beginPath();
+          ctx.moveTo(currentX, currentY);
+          ctx.lineTo(currentX + Math.cos(angle) * width * .025, currentY + Math.sin(angle) * width * .025);
+          ctx.stroke();
+        }
+      }
       ctx.beginPath();
       ctx.arc(currentX, currentY, width * (effect.crit ? .012 : .008), 0, Math.PI * 2);
       ctx.fill();
@@ -3450,6 +3688,15 @@ function drawEffects(ctx, canvas, match, viewer, interpolateSeconds = 0, enemyPr
         ctx.globalAlpha = life;
         ctx.lineWidth = width * .004;
         ctx.stroke();
+      }
+      if (effect.type === 'slow' && progress > .68) {
+        for (let spoke = 0; spoke < 4; spoke += 1) {
+          const angle = spoke * Math.PI / 2;
+          ctx.beginPath();
+          ctx.moveTo(targetX - Math.cos(angle) * width * .018, targetY - Math.sin(angle) * width * .018);
+          ctx.lineTo(targetX + Math.cos(angle) * width * .018, targetY + Math.sin(angle) * width * .018);
+          ctx.stroke();
+        }
       }
       if (effect.type === 'dot') {
         for (let particle = 0; particle < 4; particle += 1) {
@@ -3537,7 +3784,7 @@ function battleCellFromPoint(point) {
   const canvasRect = battleCanvas.getBoundingClientRect();
   const touchLayout = canvasRect.width <= 520;
   const hitRadiusX = touchLayout ? .085 : .075;
-  const hitRadiusY = touchLayout ? .043 : .0325;
+  const hitRadiusY = touchLayout ? .052 : .038;
   for (let index = 0; index < GAME.rows * GAME.cols; index += 1) {
     const pos = viewedBoardPosition(state.playerId, state.playerId, index);
     const dx = Math.abs(point.x - pos.x) / hitRadiusX;
@@ -3681,8 +3928,8 @@ function bindEvents() {
     if (card) openCardDetail(card.dataset.card);
   });
   byId('deckStrip').addEventListener('click', (event) => {
-    const remove = event.target.closest('[data-remove]');
-    if (remove) removeDeckCard(Number(remove.dataset.remove));
+    const remove = event.target.closest('[data-remove-card]');
+    if (remove) removeDeckCardById(remove.dataset.removeCard);
   });
   byId('collectionFilter').addEventListener('change', (event) => {
     state.collectionFilter = event.currentTarget.value;
@@ -3717,6 +3964,10 @@ function bindEvents() {
     state.selectedTower = null;
     renderBattleUi();
   });
+  byId('battleInfoToggle').addEventListener('click', () => {
+    state.infoExpanded = !state.infoExpanded;
+    syncBattleInfoExpansion();
+  });
   battleCanvas.addEventListener('pointerdown', handleBattlePointerDown);
   battleCanvas.addEventListener('pointermove', handleBattlePointerMove);
   battleCanvas.addEventListener('pointerup', (event) => finishTowerDrag(event));
@@ -3725,8 +3976,7 @@ function bindEvents() {
   byId('soundBtn').addEventListener('click', () => {
     state.soundEnabled = !state.soundEnabled;
     localStorage.setItem('defense-sound', state.soundEnabled ? 'on' : 'off');
-    byId('soundBtn').classList.toggle('muted', !state.soundEnabled);
-    byId('soundBtn').textContent = state.soundEnabled ? '♪' : '×';
+    updateSoundButton();
     if (state.soundEnabled) {
       ensureAudio();
       tone(520, 0.08, 'triangle', 0.035);
@@ -3744,11 +3994,24 @@ function bindEvents() {
     closeModal('resultModal');
     await leaveRoom();
   });
+  byId('gachaRevealContinue').addEventListener('click', () => {
+    const cardId = state.gachaRevealCardId;
+    state.gachaRevealCardId = null;
+    closeModal('gachaRevealModal');
+    if (cardId) openCardDetail(cardId);
+  });
+  byId('gachaRevealModal').addEventListener('click', (event) => {
+    if (event.target !== byId('gachaRevealModal')) return;
+    const cardId = state.gachaRevealCardId;
+    state.gachaRevealCardId = null;
+    closeModal('gachaRevealModal');
+    if (cardId) openCardDetail(cardId);
+  });
 }
 
 bindEvents();
-byId('soundBtn').classList.toggle('muted', !state.soundEnabled);
-byId('soundBtn').textContent = state.soundEnabled ? '♪' : '×';
+updateSoundButton();
+syncBattleInfoExpansion();
 const demoMode = urlParams.get('demo') === '1';
 if (demoMode) {
   state.playerId = 'p1';

@@ -19,6 +19,25 @@
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
 
+        .icon-sprite {
+            position: absolute;
+            width: 0;
+            height: 0;
+            overflow: hidden;
+        }
+        .icon {
+            width: 1em;
+            height: 1em;
+            display: inline-block;
+            flex: 0 0 auto;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 1.8;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            vertical-align: middle;
+        }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, sans-serif;
             background: radial-gradient(ellipse at top, #302818 0%, #1E1912 60%);
@@ -38,10 +57,22 @@
             text-align: center;
         }
         .header-icon {
-            font-size: 44px;
+            width: 70px;
+            height: 70px;
             animation: float 3s ease-in-out infinite;
-            display: block;
-            margin-bottom: 10px;
+            display: grid;
+            place-items: center;
+            margin: 0 auto 12px;
+            color: #F2D98A;
+            border: 1px solid rgba(242,217,138,0.28);
+            border-radius: 22px;
+            background: rgba(200,160,100,0.09);
+            box-shadow: 0 12px 30px rgba(0,0,0,0.18), inset 0 1px rgba(255,255,255,0.04);
+        }
+        .header-icon .icon {
+            width: 38px;
+            height: 38px;
+            stroke-width: 1.65;
         }
         @keyframes float {
             0%,100% { transform: translateY(0); }
@@ -112,7 +143,18 @@
             border-radius: 0 2px 2px 0;
         }
         .anno-inner { display: flex; align-items: flex-start; gap: 10px; }
-        .anno-icon  { font-size: 18px; flex-shrink: 0; }
+        .anno-icon  {
+            width: 30px;
+            height: 30px;
+            display: grid;
+            place-items: center;
+            flex-shrink: 0;
+            color: var(--anno-accent, #BF8F42);
+            border: 1px solid color-mix(in srgb, var(--anno-accent, #BF8F42) 34%, transparent);
+            border-radius: 9px;
+            background: color-mix(in srgb, var(--anno-accent, #BF8F42) 10%, transparent);
+        }
+        .anno-icon .icon { width: 17px; height: 17px; }
         .anno-title { font-weight: 700; font-size: 13px; color: var(--text); }
         .anno-text  { font-size: 12px; color: rgba(239,232,216,0.6); line-height: 1.5; margin-top: 2px; }
         .anno-date  { font-size: 10px; color: var(--muted); margin-left: auto; flex-shrink: 0; padding-left: 8px; }
@@ -152,7 +194,17 @@
         }
         .player-card:hover  { transform: translateY(-4px); filter: brightness(1.12); }
         .player-card:active { transform: scale(0.97); }
-        .player-card .p-ico  { font-size: 38px; }
+        .player-card .p-ico  {
+            width: 58px;
+            height: 58px;
+            display: grid;
+            place-items: center;
+            border-radius: 18px;
+            border: 1px solid currentColor;
+            background: rgba(255,255,255,0.035);
+            box-shadow: inset 0 1px rgba(255,255,255,0.06);
+        }
+        .player-card .p-ico .icon { width: 31px; height: 31px; stroke-width: 1.65; }
         .player-card .p-name { font-size: 16px; font-weight: 900; }
         .player-card .p-sub  { font-size: 11px; color: var(--muted); }
         .card-p1 { border-color: rgba(141,200,122,0.3); color: var(--p1); }
@@ -197,7 +249,15 @@
             gap: 8px;
         }
         .hp-row:last-child { border-bottom: none; }
-        .hp-lbl { color: var(--muted); font-weight: 500; white-space: nowrap; }
+        .hp-lbl {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--muted);
+            font-weight: 500;
+            white-space: nowrap;
+        }
+        .hp-lbl .icon { width: 14px; height: 14px; }
         .hp-val { font-weight: 700; color: var(--text); text-align: right; }
 
         /* ── Feature grid (2×2) ── */
@@ -220,17 +280,27 @@
         }
         .feature-card:hover  { transform: translateY(-3px); filter: brightness(1.12); }
         .feature-card:active { transform: scale(0.97); }
-        .feature-card .f-ico  { font-size: 28px; }
+        .feature-card .f-ico  {
+            width: 42px;
+            height: 42px;
+            display: grid;
+            place-items: center;
+            border: 1px solid rgba(var(--feature-rgb),0.28);
+            border-radius: 12px;
+            background: rgba(var(--feature-rgb),0.1);
+            box-shadow: inset 0 1px rgba(255,255,255,0.04);
+        }
+        .feature-card .f-ico .icon { width: 23px; height: 23px; stroke-width: 1.7; }
         .feature-card .f-name { font-size: 14px; font-weight: 800; }
         .feature-card .f-sub  { font-size: 11px; color: var(--muted); line-height: 1.4; }
 
-        .feat-split    { border-color: rgba(200,164,74,0.3);  color: #C8A44A; }
+        .feat-split    { --feature-rgb: 200,164,74; border-color: rgba(200,164,74,0.3);  color: #C8A44A; }
         .feat-split:hover  { box-shadow: 0 6px 20px rgba(200,164,74,0.12); border-color: rgba(200,164,74,0.5); }
-        .feat-grip     { border-color: rgba(196,140,80,0.3);  color: #C48C50; }
+        .feat-grip     { --feature-rgb: 196,140,80; border-color: rgba(196,140,80,0.3);  color: #C48C50; }
         .feat-grip:hover   { box-shadow: 0 6px 20px rgba(196,140,80,0.12); border-color: rgba(196,140,80,0.5); }
-        .feat-budget   { border-color: rgba(118,166,104,0.3); color: #76A668; }
+        .feat-budget   { --feature-rgb: 118,166,104; border-color: rgba(118,166,104,0.3); color: #76A668; }
         .feat-budget:hover { box-shadow: 0 6px 20px rgba(118,166,104,0.12); border-color: rgba(118,166,104,0.5); }
-        .feat-defense  { border-color: rgba(150,128,184,0.34); color: #B59AD8; }
+        .feat-defense  { --feature-rgb: 181,154,216; border-color: rgba(150,128,184,0.34); color: #B59AD8; }
         .feat-defense:hover { box-shadow: 0 6px 20px rgba(150,128,184,0.16); border-color: rgba(181,154,216,0.58); }
         /* ── Changelog button ── */
         .changelog-btn {
@@ -250,6 +320,7 @@
             margin-top: 10px;
         }
         .changelog-btn:hover { color: var(--text); border-color: rgba(200,160,100,0.45); background: rgba(200,160,100,0.06); }
+        .changelog-btn .icon { width: 15px; height: 15px; }
         .changelog-dot {
             position: absolute;
             top: -3px; right: -3px;
@@ -307,12 +378,22 @@
             border-bottom: 1px solid rgba(200,160,100,0.18);
             flex-shrink: 0;
         }
-        .cl-title { font-size: 15px; font-weight: 800; letter-spacing: 0.5px; }
+        .cl-title {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 15px;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+        }
+        .cl-title .icon { width: 18px; height: 18px; color: #C8A44A; }
         .cl-close {
-            font-size: 18px; color: var(--muted); cursor: pointer;
-            background: none; border: none; padding: 4px 6px; line-height: 1;
+            width: 36px; height: 36px; color: var(--muted); cursor: pointer;
+            display: grid; place-items: center;
+            background: none; border: none; padding: 0; line-height: 1;
             border-radius: 8px; transition: background 0.15s;
         }
+        .cl-close .icon { width: 18px; height: 18px; }
         .cl-close:hover { background: rgba(255,255,255,0.07); color: var(--text); }
         .cl-scroll {
             flex: 1;
@@ -350,8 +431,9 @@
             font-size: 12px; font-weight: 700;
             color: var(--muted);
             margin-bottom: 6px;
-            display: flex; align-items: center; gap: 5px;
+            display: flex; align-items: center; gap: 7px;
         }
+        .cl-group-title .icon { width: 16px; height: 16px; color: #C8A44A; }
         .cl-items { list-style: none; display: flex; flex-direction: column; gap: 5px; }
         .cl-item {
             font-size: 13px;
@@ -372,13 +454,40 @@
         }
         body > *:not(#bg-canvas):not(.cl-overlay) { position: relative; z-index: 1; }
     </style>
+    <link rel="stylesheet" href="system-ui.css">
+    <style>
+        .sb-index .entry-paused { cursor: not-allowed; opacity: .58; }
+        .sb-index .entry-paused:hover,
+        .sb-index .entry-paused:active { transform: none; filter: none; box-shadow: none; }
+        .sb-index .entry-paused .hp-panel { display: none; }
+    </style>
 </head>
-<body>
+<body class="sb-page sb-index">
+<svg class="icon-sprite" aria-hidden="true">
+    <symbol id="icon-home" viewBox="0 0 24 24"><path d="m3 10 9-7 9 7"/><path d="M5 9v11h14V9"/><path d="M9 20v-6h6v6"/><path d="M8.5 9.5h.01M15.5 9.5h.01"/></symbol>
+    <symbol id="icon-clipboard" viewBox="0 0 24 24"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4.5V3h6v1.5M9 9h6M9 13h6M9 17h4"/></symbol>
+    <symbol id="icon-megaphone" viewBox="0 0 24 24"><path d="M3 11v2a2 2 0 0 0 2 2h2l2.5 5h3l-2-5 8-3.5v-7L7 9H5a2 2 0 0 0-2 2Z"/><path d="M18.5 8a3 3 0 0 1 0 5"/></symbol>
+    <symbol id="icon-flame" viewBox="0 0 24 24"><path d="M12 22c4 0 7-3 7-7 0-3-1.5-5.5-4.5-8 .1 2-1 3.6-2.3 4.7.1-3.1-1.4-6.1-4.2-8.7.2 4-3 6.3-3 11.7C5 18.8 8.1 22 12 22Z"/><path d="M9.5 17.5c0 1.4 1.1 2.5 2.5 2.5s2.5-1.1 2.5-2.5c0-1.2-.6-2.2-1.8-3.2 0 1-.5 1.7-1.2 2.2 0-1.3-.6-2.4-1.6-3.4.1 1.7-.4 2.7-.4 4.4Z"/></symbol>
+    <symbol id="icon-sparkles" viewBox="0 0 24 24"><path d="m12 3 1.2 3.8L17 8l-3.8 1.2L12 13l-1.2-3.8L7 8l3.8-1.2L12 3Z"/><path d="m5 14 .8 2.2L8 17l-2.2.8L5 20l-.8-2.2L2 17l2.2-.8L5 14ZM19 13l.7 1.8 1.8.7-1.8.7L19 18l-.7-1.8-1.8-.7 1.8-.7L19 13Z"/></symbol>
+    <symbol id="icon-coins" viewBox="0 0 24 24"><ellipse cx="9" cy="6" rx="5" ry="2.5"/><path d="M4 6v4c0 1.4 2.2 2.5 5 2.5s5-1.1 5-2.5V6"/><path d="M4 10v4c0 1.4 2.2 2.5 5 2.5 1.1 0 2.1-.2 3-.5"/><path d="M4 14v4c0 1.4 2.2 2.5 5 2.5 1.4 0 2.6-.3 3.5-.7"/><path d="M14 11.5c.6-.2 1.3-.3 2-.3 2.8 0 5 1.1 5 2.5s-2.2 2.5-5 2.5-5-1.1-5-2.5c0-.5.3-1 .8-1.4"/><path d="M11 13.7v4c0 1.4 2.2 2.5 5 2.5s5-1.1 5-2.5v-4"/></symbol>
+    <symbol id="icon-mail" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m4 7 8 6 8-6"/></symbol>
+    <symbol id="icon-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M5 21a7 7 0 0 1 14 0"/></symbol>
+    <symbol id="icon-ledger" viewBox="0 0 24 24"><path d="M7 3h11a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z"/><path d="M9 7h7M9 11h7M9 15h4M3 7h4M3 12h4M3 17h4"/></symbol>
+    <symbol id="icon-dumbbell" viewBox="0 0 24 24"><path d="M6 7v10M3.5 9v6M18 7v10M20.5 9v6M6 12h12"/></symbol>
+    <symbol id="icon-wallet" viewBox="0 0 24 24"><path d="M4 6.5A2.5 2.5 0 0 1 6.5 4H18a2 2 0 0 1 2 2v2H7a3 3 0 0 0 0 6h13v4a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6.5Z"/><path d="M7 8h14v6H7a3 3 0 0 1 0-6Z"/><path d="M17 11h.01"/></symbol>
+    <symbol id="icon-shield-moon" viewBox="0 0 24 24"><path d="M12 3 5 6v5c0 4.7 2.8 8.2 7 10 4.2-1.8 7-5.3 7-10V6l-7-3Z"/><path d="M14.8 8.1a4.2 4.2 0 1 0 1.1 6.8 4.7 4.7 0 0 1-1.1-6.8Z"/></symbol>
+    <symbol id="icon-close" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></symbol>
+    <symbol id="icon-bug" viewBox="0 0 24 24"><path d="M8 9h8v8a4 4 0 0 1-8 0V9Z"/><path d="M9 9a3 3 0 0 1 6 0M4 13h4M16 13h4M5 19l3-2M19 19l-3-2M7 5l2 2M17 5l-2 2M12 9v11"/></symbol>
+    <symbol id="icon-scroll" viewBox="0 0 24 24"><path d="M6 4h13v13a3 3 0 0 1-3 3H6a3 3 0 0 0 3-3V4a3 3 0 0 0-6 0v2h3"/><path d="M12 8h4M12 12h4"/></symbol>
+    <symbol id="icon-dice" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M8 8h.01M16 8h.01M12 12h.01M8 16h.01M16 16h.01"/></symbol>
+    <symbol id="icon-store" viewBox="0 0 24 24"><path d="M4 10v10h16V10M3 10l2-6h14l2 6"/><path d="M3 10a3 3 0 0 0 5 2 3 3 0 0 0 4 0 3 3 0 0 0 4 0 3 3 0 0 0 5-2M9 20v-5h6v5"/></symbol>
+    <symbol id="icon-wrench" viewBox="0 0 24 24"><path d="M14.7 6.3a4 4 0 0 0-5-5l2.2 2.2-2.8 2.8L6.9 4.1a4 4 0 0 0 5 5L20 17.2a2 2 0 1 1-2.8 2.8l-8.1-8.1"/></symbol>
+</svg>
 <canvas id="bg-canvas"></canvas>
 
     <!-- Header -->
     <div class="header">
-        <span class="header-icon">🏠</span>
+        <div class="header-icon" aria-hidden="true"><svg class="icon"><use href="#icon-home"></use></svg></div>
         <div class="header-title">宿舍系統</div>
         <div class="header-sub">每日 00:00 – 02:00 準時打卡</div>
         <div class="time-pill">
@@ -387,7 +496,8 @@
         </div>
         <div style="display:flex; gap:8px; align-items:center;">
             <button class="changelog-btn" onclick="openChangelog()">
-                📋 更新記錄
+                <svg class="icon" aria-hidden="true"><use href="#icon-clipboard"></use></svg>
+                更新記錄
                 <span class="changelog-dot" id="cl-dot"></span>
             </button>
         </div>
@@ -396,7 +506,7 @@
     <!-- Announcement -->
     <div class="anno-card" id="anno-card">
         <div class="anno-inner">
-            <div class="anno-icon" id="anno-icon">📢</div>
+            <div class="anno-icon" id="anno-icon" aria-hidden="true"><svg class="icon"><use href="#icon-megaphone"></use></svg></div>
             <div style="flex:1; min-width:0;">
                 <div class="anno-title" id="anno-title"></div>
                 <div class="anno-text"  id="anno-text"></div>
@@ -409,25 +519,25 @@
     <div class="section">
         <div class="section-label">選擇身分</div>
         <div class="player-grid">
-            <a href="player.html?player=p1" class="player-card card-p1">
+            <a class="player-card card-p1 entry-paused" role="link" aria-disabled="true" aria-label="至凱睡眠金庫，暫停開放">
                 <div class="hp-panel" id="hp-p1">
-                    <div class="hp-row"><span class="hp-lbl">💰 點數</span><span class="hp-val" id="hp-pts-p1">—</span></div>
-                    <div class="hp-row"><span class="hp-lbl">🔥 連勝</span><span class="hp-val" id="hp-str-p1">—</span></div>
-                    <div class="hp-row"><span class="hp-lbl">💌 未讀</span><span class="hp-val" id="hp-mail-p1">—</span></div>
+                    <div class="hp-row"><span class="hp-lbl"><svg class="icon" aria-hidden="true"><use href="#icon-coins"></use></svg>點數</span><span class="hp-val" id="hp-pts-p1">—</span></div>
+                    <div class="hp-row"><span class="hp-lbl"><svg class="icon" aria-hidden="true"><use href="#icon-flame"></use></svg>連勝</span><span class="hp-val" id="hp-str-p1">—</span></div>
+                    <div class="hp-row"><span class="hp-lbl"><svg class="icon" aria-hidden="true"><use href="#icon-mail"></use></svg>未讀</span><span class="hp-val" id="hp-mail-p1">—</span></div>
                 </div>
-                <div class="p-ico">👦🏻</div>
+                <div class="p-ico" aria-hidden="true"><svg class="icon"><use href="#icon-user"></use></svg></div>
                 <div class="p-name">至凱</div>
-                <div class="p-sub">睡眠金庫</div>
+                <div class="p-sub">睡眠金庫 · 暫停開放</div>
             </a>
-            <a href="player.html?player=p2" class="player-card card-p2">
+            <a class="player-card card-p2 entry-paused" role="link" aria-disabled="true" aria-label="柏致睡眠金庫，暫停開放">
                 <div class="hp-panel" id="hp-p2">
-                    <div class="hp-row"><span class="hp-lbl">💰 點數</span><span class="hp-val" id="hp-pts-p2">—</span></div>
-                    <div class="hp-row"><span class="hp-lbl">🔥 連勝</span><span class="hp-val" id="hp-str-p2">—</span></div>
-                    <div class="hp-row"><span class="hp-lbl">💌 未讀</span><span class="hp-val" id="hp-mail-p2">—</span></div>
+                    <div class="hp-row"><span class="hp-lbl"><svg class="icon" aria-hidden="true"><use href="#icon-coins"></use></svg>點數</span><span class="hp-val" id="hp-pts-p2">—</span></div>
+                    <div class="hp-row"><span class="hp-lbl"><svg class="icon" aria-hidden="true"><use href="#icon-flame"></use></svg>連勝</span><span class="hp-val" id="hp-str-p2">—</span></div>
+                    <div class="hp-row"><span class="hp-lbl"><svg class="icon" aria-hidden="true"><use href="#icon-mail"></use></svg>未讀</span><span class="hp-val" id="hp-mail-p2">—</span></div>
                 </div>
-                <div class="p-ico">👦🏼</div>
+                <div class="p-ico" aria-hidden="true"><svg class="icon"><use href="#icon-user"></use></svg></div>
                 <div class="p-name">柏致</div>
-                <div class="p-sub">睡眠金庫</div>
+                <div class="p-sub">睡眠金庫 · 暫停開放</div>
             </a>
         </div>
     </div>
@@ -437,24 +547,24 @@
         <div class="section-label">功能</div>
         <div class="feature-grid">
             <a href="split.html" class="feature-card feat-split">
-                <div class="f-ico">📒</div>
+                <div class="f-ico" aria-hidden="true"><svg class="icon"><use href="#icon-ledger"></use></svg></div>
                 <div class="f-name">帳本</div>
                 <div class="f-sub">宿舍費用分帳</div>
             </a>
             <a href="grip.html" class="feature-card feat-grip">
-                <div class="f-ico">🤜</div>
+                <div class="f-ico" aria-hidden="true"><svg class="icon"><use href="#icon-dumbbell"></use></svg></div>
                 <div class="f-name">握力日記</div>
                 <div class="f-sub">訓練紀錄與趨勢</div>
             </a>
             <a href="budget.html" class="feature-card feat-budget">
-                <div class="f-ico">🏦</div>
+                <div class="f-ico" aria-hidden="true"><svg class="icon"><use href="#icon-wallet"></use></svg></div>
                 <div class="f-name">每日額度</div>
                 <div class="f-sub">本月預算與金庫</div>
             </a>
-            <a href="defense.html" class="feature-card feat-defense">
-                <div class="f-ico">🌙</div>
+            <a class="feature-card feat-defense entry-paused" role="link" aria-disabled="true" aria-label="宿舍守睡戰，暫停開放">
+                <div class="f-ico" aria-hidden="true"><svg class="icon"><use href="#icon-shield-moon"></use></svg></div>
                 <div class="f-name">宿舍守睡戰</div>
-                <div class="f-sub">雙人合作守住夢境</div>
+                <div class="f-sub">暫停開放</div>
             </a>
         </div>
     </div>
@@ -464,8 +574,8 @@
         <div class="cl-sheet">
             <div class="cl-handle"></div>
             <div class="cl-header">
-                <div class="cl-title">📋 更新記錄</div>
-                <button class="cl-close" onclick="closeChangelog()">✕</button>
+                <div class="cl-title"><svg class="icon" aria-hidden="true"><use href="#icon-clipboard"></use></svg>更新記錄</div>
+                <button class="cl-close" onclick="closeChangelog()" aria-label="關閉更新記錄"><svg class="icon" aria-hidden="true"><use href="#icon-close"></use></svg></button>
             </div>
             <div class="cl-scroll" id="cl-scroll"></div>
         </div>
@@ -483,9 +593,9 @@
                 document.getElementById('anno-title').innerText = d.title || '';
                 document.getElementById('anno-text').innerText  = d.text  || '';
                 document.getElementById('anno-date').innerText  = d.date  || '';
-                const map = { event:['🔥','#C8A44A'], update:['✨','#76A668'] };
-                const [icon, accent] = map[d.type] || ['📢','#BF8F42'];
-                document.getElementById('anno-icon').innerText = icon;
+                const map = { event:['flame','#C8A44A'], update:['sparkles','#76A668'] };
+                const [icon, accent] = map[d.type] || ['megaphone','#BF8F42'];
+                document.getElementById('anno-icon').innerHTML = iconSvg(icon);
                 card.style.setProperty('--anno-accent', accent);
                 card.style.display = 'block';
             } else {
@@ -508,7 +618,7 @@
                 isNew: true,
                 groups: [
                     {
-                        icon: '🤜',
+                        icon: 'dumbbell',
                         title: '握力日記',
                         items: [
                             '左右手 PR 分開追蹤，各自獨立比較最高值，不再以均值計算',
@@ -523,7 +633,7 @@
                         ]
                     },
                     {
-                        icon: '🏠',
+                        icon: 'home',
                         title: '首頁',
                         items: [
                             '動態星空背景：130 顆緩移閃爍星點、22 顆浮動粒子（漸入漸出生命週期）',
@@ -531,7 +641,7 @@
                         ]
                     },
                     {
-                        icon: '🐛',
+                        icon: 'bug',
                         title: 'Bug 修復',
                         items: [
                             '握力日記：兩手相同數值被誤判為舊版格式，導致單值顯示',
@@ -547,24 +657,24 @@
                 isNew: false,
                 groups: [
                     {
-                        icon: '🏠',
+                        icon: 'home',
                         title: '首頁儀表板',
                         items: [
                             '新增懸停面板：電腦版滑鼠移上玩家卡片，向上展開資訊欄（max-height + opacity 動畫）',
-                            '面板顯示：💰 點數、🔥 連勝天數、💌 未讀信件數',
+                            '面板顯示：點數、連勝天數、未讀信件數',
                             '點數與連勝透過 Firebase 即時同步',
                         ]
                     },
                     {
-                        icon: '📜',
+                        icon: 'scroll',
                         title: '重大事件卷軸',
                         items: [
-                            '首頁新增「📜 重大消息」卡片，顯示最近 20 則全系統重大動態，Firebase 即時推送',
+                            '首頁新增「重大消息」卡片，顯示最近 20 則全系統重大動態，Firebase 即時推送',
                             '時間戳記自動格式化（剛剛 / N 分鐘前 / N 小時前 / N 天前）',
-                            '觸發事件：🛌 連勝里程碑（第 7 / 14 / 30 / 50 天）',
-                            '觸發事件：⭐ 神話出金（單抽 100pt 頭獎、神話道具、10連抽神話）',
-                            '觸發事件：🎉 共鳴發財夢使用（單次與批次）',
-                            '觸發事件：🔄 黑市刷新券、💸 劫奪令、🔒 封印、🎫 萬能作息券',
+                            '觸發事件：連勝里程碑（第 7 / 14 / 30 / 50 天）',
+                            '觸發事件：神話出金（單抽 100pt 頭獎、神話道具、10連抽神話）',
+                            '觸發事件：共鳴發財夢使用（單次與批次）',
+                            '觸發事件：黑市刷新券、劫奪令、封印、萬能作息券',
                         ]
                     }
                 ]
@@ -575,26 +685,26 @@
                 isNew: false,
                 groups: [
                     {
-                        icon: '🎰',
+                        icon: 'dice',
                         title: '抽獎系統',
                         items: [
                             '修復單抽動畫卡住問題（音效函式未定義導致流程中斷）',
                             '重構單抽動畫：結果預先載入於 overlay 後方，動畫結束即揭露，穩定不卡頓',
-                            '新增神話出金預警：單抽 overlay 變金色光暈＋⭐＋上行音階（2.2 秒）',
+                            '新增神話出金預警：單抽 overlay 顯示金色光暈、星芒與上行音階（2.2 秒）',
                             '新增十連抽神話預警：翻牌前全螢幕金色光暈＋音階（1.9 秒），無文字干擾',
                             '道具取得描述修正：expOnly 道具（抽獎券 / 保底幸運草 / 萬能作息券）顯示正確來源',
                             '史詩稀有度道具取得描述修正，移除錯誤的「黑市盲盒」標示',
                         ]
                     },
                     {
-                        icon: '🏪',
+                        icon: 'store',
                         title: '黑市',
                         items: [
                             '抽獎券黑市售價固定為 20 點，不再隨市場波動',
                         ]
                     },
                     {
-                        icon: '🛠️',
+                        icon: 'wrench',
                         title: '系統優化',
                         items: [
                             '移除通知功能（平台限制無法背景推播，相關程式碼與設定一併清除）',
@@ -602,7 +712,7 @@
                         ]
                     },
                     {
-                        icon: '🎰',
+                        icon: 'dice',
                         title: '抽獎 / 道具',
                         items: [
                             '開啟抽獎選擇頁面不再強制需要足夠資源，可直接查看現有抽獎券與能量餘額',
@@ -618,7 +728,7 @@
                 isNew: false,
                 groups: [
                     {
-                        icon: '🎰',
+                        icon: 'dice',
                         title: '抽獎系統',
                         items: [
                             '能量轉換加速：普通 +10、稀有 +20、史詩 +50；神話與道具不可分解',
@@ -628,7 +738,7 @@
                         ]
                     },
                     {
-                        icon: '🏪',
+                        icon: 'store',
                         title: '黑市',
                         items: [
                             '抽獎券每次刷新固定 1 張（原為隨機 1–3 張）',
@@ -640,6 +750,10 @@
 
         const LATEST_VER = CHANGELOG[0].version;
         const CL_KEY = 'sb_changelog_read';
+
+        function iconSvg(name) {
+            return `<svg class="icon" aria-hidden="true"><use href="#icon-${name}"></use></svg>`;
+        }
 
         function initChangelog() {
             if (localStorage.getItem(CL_KEY) !== LATEST_VER) {
@@ -672,7 +786,7 @@
                     </div>
                     ${entry.groups.map(g => `
                         <div class="cl-group">
-                            <div class="cl-group-title">${g.icon} ${g.title}</div>
+                            <div class="cl-group-title">${iconSvg(g.icon)}<span>${g.title}</span></div>
                             <ul class="cl-items">
                                 ${g.items.map(i => `<li class="cl-item">${i}</li>`).join('')}
                             </ul>

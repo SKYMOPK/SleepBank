@@ -11,20 +11,47 @@
   <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
   <link rel="stylesheet" href="defense.css?v=17">
+  <link rel="stylesheet" href="system-ui.css">
 </head>
-<body>
+<body class="sb-page sb-defense">
+  <svg class="icon-sprite" aria-hidden="true">
+    <symbol id="icon-arrow-left" viewBox="0 0 24 24"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></symbol>
+    <symbol id="icon-home" viewBox="0 0 24 24"><path d="m3 10 9-7 9 7"/><path d="M5 9v11h14V9"/><path d="M9 20v-6h6v6"/></symbol>
+    <symbol id="icon-shield-moon" viewBox="0 0 24 24"><path d="M12 3 5 6v5c0 4.7 2.8 8.2 7 10 4.2-1.8 7-5.3 7-10V6l-7-3Z"/><path d="M14.8 8.1a4.2 4.2 0 1 0 1.1 6.8 4.7 4.7 0 0 1-1.1-6.8Z"/></symbol>
+    <symbol id="icon-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M5 21a7 7 0 0 1 14 0"/></symbol>
+    <symbol id="icon-door-plus" viewBox="0 0 24 24"><path d="M4 21h12V3H4v18Z"/><path d="M9 12h.01M16 8h5M18.5 5.5v5"/></symbol>
+    <symbol id="icon-log-in" viewBox="0 0 24 24"><path d="M14 8V4H4v16h10v-4"/><path d="M9 12h12M17 8l4 4-4 4"/></symbol>
+    <symbol id="icon-swords" viewBox="0 0 24 24"><path d="m14.5 5.5 4-3 3 3-3 4M13 7l4 4M4 20l7-7"/><path d="m9.5 5.5-4-3-3 3 3 4M11 7l-4 4M20 20l-7-7"/></symbol>
+    <symbol id="icon-cards" viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 7h6M9 11h6M9 15h4"/></symbol>
+    <symbol id="icon-collection" viewBox="0 0 24 24"><path d="M4 5h16v14H4z"/><path d="M8 3v4M16 3v4M8 11h8M8 15h5"/></symbol>
+    <symbol id="icon-deck" viewBox="0 0 24 24"><rect x="4" y="6" width="14" height="14" rx="2"/><path d="M8 3h12v14M8 10h6M8 14h4"/></symbol>
+    <symbol id="icon-link" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.1.1l2-2a5 5 0 0 0-7.1-7.1l-1.1 1.1"/><path d="M14 11a5 5 0 0 0-7.1-.1l-2 2A5 5 0 0 0 12 20l1.1-1.1"/></symbol>
+    <symbol id="icon-heart" viewBox="0 0 24 24"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8Z"/></symbol>
+    <symbol id="icon-wave" viewBox="0 0 24 24"><path d="M3 8c3-3 5 3 8 0s5 3 10 0M3 12c3-3 5 3 8 0s5 3 10 0M3 16c3-3 5 3 8 0s5 3 10 0"/></symbol>
+    <symbol id="icon-boss" viewBox="0 0 24 24"><path d="m4 9 3-5 5 4 5-4 3 5-2 11H6L4 9Z"/><path d="M8 14h.01M16 14h.01M9 18h6"/></symbol>
+    <symbol id="icon-sparkles" viewBox="0 0 24 24"><path d="m12 3 1.2 3.8L17 8l-3.8 1.2L12 13l-1.2-3.8L7 8l3.8-1.2L12 3Z"/><path d="m5 14 .8 2.2L8 17l-2.2.8L5 20l-.8-2.2L2 17l2.2-.8L5 14ZM19 13l.7 1.8 1.8.7-1.8.7L19 18l-.7-1.8-1.8-.7 1.8-.7L19 13Z"/></symbol>
+    <symbol id="icon-coins" viewBox="0 0 24 24"><ellipse cx="12" cy="6" rx="7" ry="3"/><path d="M5 6v5c0 1.7 3.1 3 7 3s7-1.3 7-3V6M5 11v5c0 1.7 3.1 3 7 3s7-1.3 7-3v-5"/></symbol>
+    <symbol id="icon-volume" viewBox="0 0 24 24"><path d="M11 5 6 9H3v6h3l5 4V5Z"/><path d="M15 9a4 4 0 0 1 0 6M17.5 6.5a8 8 0 0 1 0 11"/></symbol>
+    <symbol id="icon-volume-off" viewBox="0 0 24 24"><path d="m11 5-5 4H3v6h3l5 4V5ZM16 9l5 5M21 9l-5 5"/></symbol>
+    <symbol id="icon-close" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></symbol>
+    <symbol id="icon-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="icon-minus" viewBox="0 0 24 24"><path d="M5 12h14"/></symbol>
+    <symbol id="icon-chevron" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+    <symbol id="icon-check" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></symbol>
+    <symbol id="icon-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+  </svg>
   <div id="toast" role="status"></div>
 
   <header class="topbar">
-    <a class="icon-btn" href="index.html" aria-label="返回首頁" title="返回首頁">←</a>
+    <a class="icon-btn" href="index.html" aria-label="返回首頁" title="返回首頁"><svg class="icon"><use href="#icon-arrow-left"></use></svg></a>
     <div class="brand">
-      <span class="brand-mark" aria-hidden="true"></span>
+      <span class="brand-mark" aria-hidden="true"><svg class="icon"><use href="#icon-shield-moon"></use></svg></span>
       <div>
         <h1>宿舍守睡戰</h1>
         <p>雙人合作守住夢境</p>
       </div>
     </div>
-    <button class="icon-btn" id="homeBtn" aria-label="遊戲首頁" title="遊戲首頁">⌂</button>
+    <button class="icon-btn" id="homeBtn" aria-label="遊戲首頁" title="遊戲首頁"><svg class="icon"><use href="#icon-home"></use></svg></button>
   </header>
 
   <main>
@@ -34,6 +61,8 @@
           <span class="moon" aria-hidden="true"></span>
           <span class="cloud cloud-a" aria-hidden="true"></span>
           <span class="cloud cloud-b" aria-hidden="true"></span>
+          <span class="identity-tower identity-tower-a" style="--sx:0%;--sy:0%"></span>
+          <span class="identity-tower identity-tower-b" style="--sx:66.6667%;--sy:66.6667%"></span>
         </div>
         <div class="section-heading">
           <span class="eyebrow">DORM DEFENSE</span>
@@ -42,10 +71,10 @@
         </div>
         <div class="identity-grid">
           <button class="identity-btn p1" data-player="p1">
-            <span class="avatar avatar-p1">凱</span><strong>至凱</strong><small>自己視角 · 下方</small>
+            <span class="avatar avatar-p1"><svg class="icon"><use href="#icon-user"></use></svg><span class="avatar-label">凱</span></span><strong>至凱</strong><small>自己視角 · 下方</small>
           </button>
           <button class="identity-btn p2" data-player="p2">
-            <span class="avatar avatar-p2">柏</span><strong>柏致</strong><small>自己視角 · 下方</small>
+            <span class="avatar avatar-p2"><svg class="icon"><use href="#icon-user"></use></svg><span class="avatar-label">柏</span></span><strong>柏致</strong><small>自己視角 · 下方</small>
           </button>
         </div>
       </div>
@@ -66,20 +95,20 @@
       </div>
 
       <nav class="hub-tabs" aria-label="遊戲功能">
-        <button class="tab-btn active" data-tab="rooms">對戰</button>
-        <button class="tab-btn" data-tab="collection">收藏</button>
-        <button class="tab-btn" data-tab="deck">牌組</button>
+        <button class="tab-btn active" data-tab="rooms"><svg class="icon"><use href="#icon-swords"></use></svg><span>對戰</span></button>
+        <button class="tab-btn" data-tab="collection"><svg class="icon"><use href="#icon-collection"></use></svg><span>收藏</span></button>
+        <button class="tab-btn" data-tab="deck"><svg class="icon"><use href="#icon-deck"></use></svg><span>牌組</span></button>
       </nav>
 
       <div class="hub-tab active" id="roomsTab">
         <div class="room-actions">
           <section class="action-panel create-room">
-            <span class="panel-icon">房</span>
+            <span class="panel-icon"><svg class="icon"><use href="#icon-door-plus"></use></svg></span>
             <div><h3>建立合作房間</h3><p>產生六位房間碼，等待夥伴加入。</p></div>
             <button class="primary-btn" id="createRoomBtn">建立房間</button>
           </section>
           <section class="action-panel">
-            <span class="panel-icon">加</span>
+            <span class="panel-icon"><svg class="icon"><use href="#icon-log-in"></use></svg></span>
             <div><h3>加入房間</h3><p>輸入夥伴分享的六位房間碼。</p></div>
             <div class="join-row">
               <input id="roomCodeInput" maxlength="6" autocomplete="off" placeholder="房間碼" aria-label="房間碼">
@@ -154,9 +183,9 @@
         <button class="secondary-btn" id="leaveRoomBtn">離開房間</button>
       </div>
       <div class="players-ready">
-        <div class="ready-player" id="readyP1"><span class="avatar avatar-p1">凱</span><div><strong>至凱</strong><small>等待加入</small></div><b>未準備</b></div>
-        <div class="link-pulse">⟷</div>
-        <div class="ready-player" id="readyP2"><span class="avatar avatar-p2">柏</span><div><strong>柏致</strong><small>等待加入</small></div><b>未準備</b></div>
+        <div class="ready-player" id="readyP1"><span class="avatar avatar-p1"><svg class="icon"><use href="#icon-user"></use></svg><span class="avatar-label">凱</span></span><div><strong>至凱</strong><small>等待加入</small></div><em class="player-role" id="roleP1"></em><b>未準備</b></div>
+        <div class="link-pulse"><svg class="icon"><use href="#icon-link"></use></svg></div>
+        <div class="ready-player" id="readyP2"><span class="avatar avatar-p2"><svg class="icon"><use href="#icon-user"></use></svg><span class="avatar-label">柏</span></span><div><strong>柏致</strong><small>等待加入</small></div><em class="player-role" id="roleP2"></em><b>未準備</b></div>
       </div>
       <div class="lobby-actions">
         <button class="secondary-btn" id="readyBtn">準備</button>
@@ -167,40 +196,50 @@
 
     <section class="screen battle-screen" id="battleScreen">
       <div class="battle-status">
-        <div><small>波數</small><strong id="waveValue">0</strong></div>
-        <div><small>下一個 Boss</small><strong id="nextBossValue">10 波</strong></div>
-        <div><small>夢境核心</small><strong id="livesValue">3 / 3</strong></div>
-        <div><small>隊友資源</small><strong id="partnerValue">30 ✦</strong></div>
-        <div><small>同步</small><strong id="syncValue">房主</strong></div>
+        <div class="battle-stat primary-stat"><svg class="icon"><use href="#icon-wave"></use></svg><small>波數</small><strong id="waveValue">0</strong></div>
+        <div class="battle-stat secondary-stat"><svg class="icon"><use href="#icon-boss"></use></svg><small>下一個 Boss</small><strong id="nextBossValue">10 波</strong></div>
+        <div class="battle-stat primary-stat"><svg class="icon"><use href="#icon-heart"></use></svg><small>夢境核心</small><strong id="livesValue">3 / 3</strong></div>
+        <div class="battle-stat primary-stat resource-hud"><svg class="icon"><use href="#icon-sparkles"></use></svg><small>我的資源</small><strong id="resourceHudValue">30</strong></div>
+        <div class="battle-stat secondary-stat"><svg class="icon"><use href="#icon-coins"></use></svg><small>隊友資源</small><strong id="partnerValue">30</strong></div>
+        <div class="battle-stat secondary-stat"><svg class="icon"><use href="#icon-link"></use></svg><small>同步</small><strong id="syncValue">房主</strong></div>
       </div>
       <div class="wave-track"><span id="waveProgress"></span><b id="waveTrackText">距離 Boss：10 波</b><em id="battleState">準備中</em></div>
       <div class="battle-alerts" id="battleAlerts"></div>
-      <div class="battle-frame">
-        <canvas id="battleCanvas" width="1000" height="1000" aria-label="宿舍守睡戰戰場"></canvas>
-        <div class="battle-moment" id="battleMoment" aria-live="polite"><strong>完美防守</strong><span>連續 1 波零漏怪</span></div>
-        <div class="battle-overlay" id="battleOverlay"><strong>等待房主開始</strong><span></span></div>
-      </div>
-      <div class="battle-controls">
-        <div class="resource-pill">✦ <strong id="resourceValue">30</strong></div>
-        <div class="hand" id="hand"></div>
-      </div>
-      <div class="battle-help" id="battleHelp">所有塔皆可攻擊全線。點擊手牌放置，或點擊兩座同種同階塔合成。</div>
-      <div class="battle-card-info" id="battleCardInfo">
-        <span class="tower-art battle-info-art" id="battleInfoArt" aria-hidden="true"></span>
-        <div>
-          <strong id="battleInfoName">選擇卡牌或塔</strong>
-          <span id="battleInfoDescription">選取後可查看攻擊方式與目前階級數值。</span>
+      <div class="battle-workspace">
+        <div class="battle-stage">
+          <div class="battle-frame">
+            <canvas id="battleCanvas" width="1000" height="1000" aria-label="宿舍守睡戰戰場"></canvas>
+            <div class="battle-moment" id="battleMoment" aria-live="polite"><strong>完美防守</strong><span>連續 1 波零漏怪</span></div>
+            <div class="battle-overlay" id="battleOverlay"><strong>等待房主開始</strong><span></span><small id="reconnectCountdown"></small></div>
+          </div>
         </div>
-        <small id="battleInfoStats">拖曳同種同階塔即可合成</small>
+        <aside class="battle-command-rail">
+          <div class="resource-pill"><svg class="icon"><use href="#icon-sparkles"></use></svg><span>可用資源</span><strong id="resourceValue">30</strong></div>
+          <div class="hand" id="hand"></div>
+          <div class="battle-help" id="battleHelp">所有塔皆可攻擊全線。點擊手牌放置，或點擊兩座同種同階塔合成。</div>
+          <button class="battle-info-toggle" id="battleInfoToggle" aria-expanded="true" aria-controls="battleCardInfo">
+            <span>塔牌資訊</span><svg class="icon"><use href="#icon-chevron"></use></svg>
+          </button>
+          <div class="battle-card-info" id="battleCardInfo">
+            <span class="tower-art battle-info-art" id="battleInfoArt" aria-hidden="true"></span>
+            <div>
+              <strong id="battleInfoName">選擇卡牌或塔</strong>
+              <span id="battleInfoDescription">選取後可查看攻擊方式與目前階級數值。</span>
+            </div>
+            <small id="battleInfoStats">拖曳同種同階塔即可合成</small>
+          </div>
+          <div class="battle-command-actions">
+            <button class="sound-btn" id="soundBtn" title="切換音效" aria-label="切換音效" aria-pressed="true"><svg class="icon"><use id="soundIconUse" href="#icon-volume"></use></svg></button>
+            <button class="secondary-btn leave-battle" id="leaveBattleBtn">離開對局</button>
+          </div>
+        </aside>
       </div>
-      <button class="sound-btn" id="soundBtn" title="切換音效" aria-label="切換音效">♪</button>
-      <button class="secondary-btn leave-battle" id="leaveBattleBtn">離開對局</button>
     </section>
   </main>
 
   <div class="modal-overlay" id="cardModal" aria-hidden="true">
     <div class="card-detail-modal">
-      <button class="modal-close icon-btn" id="closeCardModal" aria-label="關閉">×</button>
+      <button class="modal-close icon-btn" id="closeCardModal" aria-label="關閉"><svg class="icon"><use href="#icon-close"></use></svg></button>
       <div class="card-detail-info">
         <span class="detail-icon tower-art" id="detailIcon"></span>
         <div><span class="eyebrow" id="detailRarity">攻擊預覽</span><h2 id="detailName"></h2><p id="detailDescription"></p></div>
@@ -217,13 +256,28 @@
       <span class="result-icon" aria-hidden="true"></span>
       <span class="eyebrow">守夜結束</span>
       <p class="result-reason" id="resultReason">夢境核心失守</p>
-      <h2 id="resultWave">抵達第 0 波</h2>
-      <p id="resultReward">獲得 0 枚夢境代幣</p>
-      <p class="result-streak" id="resultStreak">最高完美防守 ×0</p>
+      <div class="result-stats">
+        <div><strong id="resultWave">第 0 波</strong><small>最終波數</small></div>
+        <div><strong id="resultBosses">0</strong><small>Boss 擊殺</small></div>
+        <div><strong id="resultReward">0</strong><small>夢境代幣</small></div>
+        <div><strong id="resultStreak">×0</strong><small>最高完美防守</small></div>
+      </div>
       <button class="primary-btn" id="resultHomeBtn">返回大廳</button>
     </div>
   </div>
 
-  <script src="defense-bundle.js?v=13"></script>
+  <div class="modal-overlay" id="gachaRevealModal" aria-hidden="true">
+    <div class="gacha-reveal-modal">
+      <span class="eyebrow">夢境召喚</span>
+      <div class="gacha-reveal-card" id="gachaRevealCard">
+        <span class="tower-art" id="gachaRevealArt" aria-hidden="true"></span>
+        <small id="gachaRevealRarity"></small>
+        <strong id="gachaRevealName"></strong>
+      </div>
+      <button class="primary-btn" id="gachaRevealContinue">查看卡牌</button>
+    </div>
+  </div>
+
+  <script src="defense-bundle.js?v=14"></script>
 </body>
 </html>

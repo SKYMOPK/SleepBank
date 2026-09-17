@@ -310,7 +310,7 @@ export function boardPosition(playerId, cellIndex) {
   const col = cellIndex % GAME.cols;
   return {
     x: 0.18 + col * 0.16,
-    y: (playerId === 'p1' ? 0.72 : 0.08) + row * 0.065,
+    y: (playerId === 'p1' ? 0.7 : 0.075) + row * 0.075,
   };
 }
 
@@ -324,7 +324,7 @@ export function viewedBoardPosition(viewer, playerId, cellIndex) {
   const col = cellIndex % GAME.cols;
   return {
     x: 0.18 + col * 0.16,
-    y: (viewer === playerId ? 0.72 : 0.08) + row * 0.065,
+    y: (viewer === playerId ? 0.7 : 0.075) + row * 0.075,
   };
 }
 
@@ -627,7 +627,7 @@ function auraMultiplier(player, playerId, targetIndex) {
     if (!tower || tower.cardId !== 'gravity_blanket' || index === targetIndex) return;
     const stats = cardStats(tower.cardId, tower.rank);
     const origin = boardPosition(playerId, index);
-    const cellDistance = Math.hypot((origin.x - target.x) / 0.16, (origin.y - target.y) / 0.065);
+    const cellDistance = Math.hypot((origin.x - target.x) / 0.16, (origin.y - target.y) / 0.075);
     if (cellDistance <= stats.auraRange) multiplier += stats.auraBoost;
   });
   return multiplier;
