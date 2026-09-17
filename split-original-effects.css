@@ -1,0 +1,880 @@
+/* Legacy effect choreography retained for the ledger cosmetics system. */
+        /* ── 造型主題：貓咪萌系（限定）── */
+        .ledger-original-theme.theme-cat {
+            --primary: #D470A0; --gold: #E060A8; --green: #B878B0;
+            --border: rgba(210,100,160,0.28);
+            background: linear-gradient(150deg,
+                #4A0A28 0%, #220A38 25%,
+                #180620 50%, #38082A 75%,
+                #1E0630 100%
+            );
+            background-size: 400% 400%;
+            animation: catColorBreath 9s ease-in-out infinite;
+        }
+        @keyframes catColorBreath {
+            0%   { background-position: 0% 50%; }
+            25%  { background-position: 80% 20%; }
+            50%  { background-position: 100% 70%; }
+            75%  { background-position: 20% 100%; }
+            100% { background-position: 0% 50%; }
+        }
+        .ledger-original-theme.theme-cat .app-title {
+            background: linear-gradient(90deg, #f9a8d4, #c084fc, #fce7f3, #f472b6, #f9a8d4);
+            background-size: 300% 100%;
+            -webkit-background-clip: text; color: transparent;
+            animation: catTitleShimmer 4s linear infinite;
+        }
+        @keyframes catTitleShimmer { 0% { background-position:0% 50%; } 100% { background-position:200% 50%; } }
+        .ledger-original-theme.theme-cat .card { border-color: rgba(210,100,160,0.22); }
+        .ledger-original-theme.theme-cat .card:hover { box-shadow: 0 16px 48px rgba(0,0,0,0.55), 0 0 24px rgba(210,100,160,0.12); }
+        .ledger-original-theme.theme-cat .sidebar { background: rgba(30,6,20,0.96); border-right-color: rgba(210,100,160,0.2); }
+        .ledger-original-theme.theme-cat .nav-item.active { background: rgba(210,100,160,0.14); border-color: rgba(210,100,160,0.35); }
+
+        /* ── 造型主題：深夜星空（常駐）── */
+        .ledger-original-theme.theme-star {
+            --primary: #6090CC; --gold: #90B8D8; --green: #5AAAB8;
+            --border: rgba(90,140,200,0.28);
+            background:
+                radial-gradient(ellipse at 30% 10%, rgba(30,60,120,0.7) 0%, transparent 45%),
+                radial-gradient(ellipse at 80% 85%, rgba(15,40,90,0.6) 0%, transparent 45%),
+                #060C1C;
+        }
+        .ledger-original-theme.theme-star .app-title {
+            background: linear-gradient(90deg, #bfdbfe, #e0e7ff, #93c5fd, #bfdbfe);
+            background-size: 300% 100%;
+            -webkit-background-clip: text; color: transparent;
+            animation: catTitleShimmer 5s linear infinite;
+        }
+        .ledger-original-theme.theme-star .card { border-color: rgba(90,140,200,0.2); }
+        .ledger-original-theme.theme-star .card:hover { box-shadow: 0 16px 48px rgba(0,0,0,0.65), 0 0 24px rgba(90,140,200,0.1); }
+        .ledger-original-theme.theme-star .sidebar { background: rgba(6,12,30,0.97); border-right-color: rgba(90,140,200,0.18); }
+        .ledger-original-theme.theme-star .nav-item.active { background: rgba(90,140,200,0.14); border-color: rgba(90,140,200,0.35); }
+
+        /* ── 造型主題：雷霆（限定）── */
+        .ledger-original-theme.theme-thunder {
+            --primary: #7C3AED; --gold: #A78BFA; --green: #6EE7B7;
+            --border: rgba(124,58,237,0.3);
+            background: linear-gradient(145deg,
+                #0E0420 0%, #1A0640 22%,
+                #090215 42%, #220855 62%,
+                #0C0320 80%, #160538 100%
+            );
+            background-size: 400% 400%;
+            animation: thunderBreath 9s ease-in-out infinite;
+        }
+        @keyframes thunderBreath {
+            0%   { background-position: 0%   0%;   }
+            20%  { background-position: 90%  30%;  }
+            40%  { background-position: 60%  100%; }
+            60%  { background-position: 10%  80%;  }
+            80%  { background-position: 80%  10%;  }
+            100% { background-position: 0%   0%;   }
+        }
+        .ledger-original-theme.theme-thunder .app-title {
+            background: linear-gradient(90deg, #ede9fe, #a78bfa, #ffffff, #7c3aed, #c4b5fd, #ede9fe);
+            background-size: 400% 100%;
+            -webkit-background-clip: text; color: transparent;
+            animation: catTitleShimmer 3.5s linear infinite;
+        }
+        .ledger-original-theme.theme-thunder .card { border-color: rgba(124,58,237,0.22); background: rgba(18,8,40,0.72); }
+        .ledger-original-theme.theme-thunder .card:hover { box-shadow: 0 16px 48px rgba(0,0,0,0.75), 0 0 28px rgba(124,58,237,0.18); }
+        .ledger-original-theme.theme-thunder .sidebar { background: rgba(8,3,20,0.98); border-right-color: rgba(124,58,237,0.25); }
+        .ledger-original-theme.theme-thunder .nav-item.active { background: rgba(124,58,237,0.18); border-color: rgba(167,139,250,0.45); color: #c4b5fd; }
+
+        /* ── 造型主題：抹茶靜心（常駐）── */
+        .ledger-original-theme.theme-matcha {
+            --primary: #4ADE80; --gold: #86EFAC; --green: #34D399;
+            --border: rgba(74,222,128,0.22);
+            background:
+                radial-gradient(ellipse at 30% 20%, rgba(20,60,35,0.85) 0%, transparent 55%),
+                radial-gradient(ellipse at 75% 80%, rgba(10,45,25,0.6) 0%, transparent 50%),
+                #050D07;
+        }
+        .ledger-original-theme.theme-matcha .app-title {
+            background: linear-gradient(90deg, #86efac, #4ade80, #d1fae5, #6ee7b7, #86efac);
+            background-size: 300% 100%;
+            -webkit-background-clip: text; color: transparent;
+            animation: catTitleShimmer 5s linear infinite;
+        }
+        .ledger-original-theme.theme-matcha .card { border-color: rgba(74,222,128,0.18); }
+        .ledger-original-theme.theme-matcha .card:hover { box-shadow: 0 16px 48px rgba(0,0,0,0.65), 0 0 24px rgba(74,222,128,0.1); }
+        .ledger-original-theme.theme-matcha .sidebar { background: rgba(3,8,5,0.97); border-right-color: rgba(74,222,128,0.18); }
+        .ledger-original-theme.theme-matcha .nav-item.active { background: rgba(74,222,128,0.12); border-color: rgba(74,222,128,0.38); color: #4ade80; }
+
+        /* ── 造型主題：王棋對弈（預備）── */
+        .ledger-original-theme.theme-chess {
+            --primary: #E7C777; --gold: #F6E7B4; --green: #B8D8A8;
+            --border: rgba(231,199,119,0.28);
+            background:
+                linear-gradient(45deg, rgba(255,255,255,0.035) 25%, transparent 25%, transparent 75%, rgba(255,255,255,0.035) 75%),
+                linear-gradient(45deg, rgba(255,255,255,0.035) 25%, transparent 25%, transparent 75%, rgba(255,255,255,0.035) 75%),
+                radial-gradient(ellipse at 18% 18%, rgba(246,231,180,0.14) 0%, transparent 36%),
+                radial-gradient(ellipse at 84% 82%, rgba(120,80,35,0.28) 0%, transparent 44%),
+                linear-gradient(145deg, #070604 0%, #17120B 38%, #0C0906 68%, #24180B 100%);
+            background-position: 0 0, 18px 18px, 0 0, 0 0, 0 0;
+            background-size: 36px 36px, 36px 36px, auto, auto, auto;
+        }
+        .ledger-original-theme.theme-chess .app-title {
+            background: linear-gradient(90deg, #f8efd0, #c99b42, #fff8dc, #8a6428, #f8efd0);
+            background-size: 320% 100%;
+            -webkit-background-clip: text; color: transparent;
+            animation: catTitleShimmer 4.8s linear infinite;
+        }
+        .ledger-original-theme.theme-chess .card { border-color: rgba(231,199,119,0.22); background: rgba(18,13,8,0.76); }
+        .ledger-original-theme.theme-chess .card:hover { box-shadow: 0 16px 48px rgba(0,0,0,0.68), 0 0 24px rgba(231,199,119,0.13); }
+        .ledger-original-theme.theme-chess .sidebar { background: rgba(8,6,4,0.98); border-right-color: rgba(231,199,119,0.22); }
+        .ledger-original-theme.theme-chess .nav-item.active { background: rgba(231,199,119,0.13); border-color: rgba(231,199,119,0.42); color: #f6e7b4; }
+
+        /* ── 造型主題：霧雨玻璃（常駐預備）── */
+        .ledger-original-theme.theme-rain {
+            --primary: #8FD3E8; --gold: #C7EAF4; --green: #9DE0C2;
+            --border: rgba(143,211,232,0.24);
+            background:
+                linear-gradient(115deg, rgba(255,255,255,0.045) 0 1px, transparent 1px 24px),
+                radial-gradient(ellipse at 22% 18%, rgba(143,211,232,0.20) 0%, transparent 40%),
+                radial-gradient(ellipse at 78% 86%, rgba(65,120,145,0.26) 0%, transparent 46%),
+                linear-gradient(145deg, #061016 0%, #102632 42%, #07131A 70%, #183445 100%);
+        }
+        .ledger-original-theme.theme-rain .app-title {
+            background: linear-gradient(90deg, #d8f7ff, #8fd3e8, #ffffff, #6fb7cf, #d8f7ff);
+            background-size: 320% 100%;
+            -webkit-background-clip: text; color: transparent;
+            animation: catTitleShimmer 5.5s linear infinite;
+        }
+        .ledger-original-theme.theme-rain .card {
+            border-color: rgba(143,211,232,0.20);
+            background: rgba(8,22,30,0.68);
+            backdrop-filter: blur(22px);
+        }
+        .ledger-original-theme.theme-rain .card:hover { box-shadow: 0 16px 48px rgba(0,0,0,0.62), 0 0 24px rgba(143,211,232,0.12); }
+        .ledger-original-theme.theme-rain .sidebar { background: rgba(4,12,18,0.97); border-right-color: rgba(143,211,232,0.18); }
+        .ledger-original-theme.theme-rain .nav-item.active { background: rgba(143,211,232,0.12); border-color: rgba(143,211,232,0.36); color: #c7eaf4; }
+
+        /* ── 打卡特效覆蓋層 ── */
+        #effect-overlay { position:fixed; inset:0; pointer-events:none; z-index:9000; overflow:hidden; }
+
+        /* ── CSS 貓咪角色（橘貓）── */
+        .ccat-wrap {
+            position: absolute;
+            left: 50%;
+            pointer-events: none;
+            z-index: 9001;
+            filter: drop-shadow(0 0 28px rgba(255,150,60,0.72)) drop-shadow(0 0 60px rgba(255,100,20,0.28));
+            animation: ccatMain 3.8s cubic-bezier(0.22,0.61,0.36,1) forwards;
+        }
+        @keyframes ccatMain {
+            0%   { bottom: -280px; opacity: 0; transform: translateX(-50%) scale(0.38); }
+            13%  { opacity: 1; }
+            27%  { bottom: 18%; transform: translateX(-50%) scale(1.10); }
+            31%  { bottom: 15%; transform: translateX(-50%) scale(0.97); }
+            35%  { bottom: 17%; transform: translateX(-50%) scale(1.03); }
+            39%  { bottom: 16%; transform: translateX(-50%) scale(1.00); }
+            77%  { bottom: 16%; opacity: 1;  transform: translateX(-50%) scale(1.00); }
+            100% { bottom: 28%; opacity: 0;  transform: translateX(-50%) scale(0.88); }
+        }
+        .ccat {
+            position: relative;
+            width: 180px; height: 240px;
+            animation: ccatBob 1.3s ease-in-out 0.55s infinite;
+        }
+        @keyframes ccatBob {
+            0%   { transform: translateY(0px)  rotate(-1.8deg); }
+            50%  { transform: translateY(-8px) rotate(1.8deg); }
+            100% { transform: translateY(0px)  rotate(-1.8deg); }
+        }
+        /* 尾巴：底部固定於身體，頂端晃動 */
+        .ccat-tail {
+            position: absolute;
+            right: 36px; bottom: 8px;
+            width: 22px; height: 72px;
+            background: linear-gradient(0deg, #FF8020 0%, #FFA040 55%, #FFBE60 100%);
+            border-radius: 55% 45% 8% 8% / 55% 55% 8% 8%;
+            border: 2px solid rgba(180,80,10,0.35);
+            transform-origin: 50% 100%;
+            animation: catTailWag 0.55s ease-in-out infinite alternate;
+        }
+        @keyframes catTailWag {
+            from { transform: rotate(-22deg); }
+            to   { transform: rotate(22deg); }
+        }
+        /* 身體：胖嘟嘟圓形 */
+        .ccat-body {
+            position: absolute;
+            bottom: 8px; left: 50%;
+            transform: translateX(-50%);
+            width: 84px; height: 82px;
+            background: linear-gradient(175deg, #FFAA50 0%, #FF8C2E 65%, #F07018 100%);
+            border-radius: 42px 42px 36px 36px;
+            border: 2.5px solid rgba(175,75,10,0.30);
+        }
+        .ccat-body::before {
+            content: '';
+            position: absolute;
+            bottom: 8px; left: 50%;
+            transform: translateX(-50%);
+            width: 50px; height: 44px;
+            background: radial-gradient(ellipse, #FFF8EC 0%, #FFEACC 55%, transparent 100%);
+            border-radius: 50%;
+        }
+        /* 手臂：pivot 在手臂頂端，交錯揮動 */
+        .ccat-arm {
+            position: absolute;
+            bottom: 22px;
+            width: 24px; height: 46px;
+            background: linear-gradient(180deg, #FFAA50, #FF8820);
+            border-radius: 13px 13px 11px 11px;
+            border: 2px solid rgba(175,75,10,0.28);
+            transform-origin: 50% 11%;
+        }
+        .ccat-arm-l {
+            left: 10px;
+            animation: catArmLWave 0.52s ease-in-out 0.55s infinite alternate;
+        }
+        .ccat-arm-r {
+            right: 10px;
+            animation: catArmRWave 0.58s ease-in-out 0.55s infinite alternate-reverse;
+        }
+        @keyframes catArmLWave {
+            from { transform: rotate(-75deg); }
+            to   { transform: rotate(-105deg); }
+        }
+        @keyframes catArmRWave {
+            from { transform: rotate(75deg); }
+            to   { transform: rotate(105deg); }
+        }
+        /* 頭部：大頭 chibi 比例，加嘴巴 */
+        .ccat-head {
+            position: absolute;
+            bottom: 76px; left: 50%;
+            transform: translateX(-50%);
+            width: 108px; height: 100px;
+            background: linear-gradient(160deg, #FFCC80 0%, #FFB040 60%, #FF9020 100%);
+            border-radius: 52% 52% 44% 44%;
+            border: 2.5px solid rgba(175,75,10,0.30);
+            overflow: visible;
+        }
+        /* 微笑嘴巴 */
+        .ccat-head::after {
+            content: '';
+            position: absolute;
+            top: 68px; left: 50%;
+            transform: translateX(-50%);
+            width: 18px; height: 9px;
+            border: 2px solid rgba(185,65,45,0.60);
+            border-top: none;
+            border-radius: 0 0 12px 12px;
+        }
+        /* 耳朵 */
+        .ccat-ear {
+            position: absolute;
+            top: -26px;
+            width: 0; height: 0;
+            border-left: 19px solid transparent;
+            border-right: 19px solid transparent;
+            border-bottom: 34px solid #FF9020;
+        }
+        .ccat-ear::after {
+            content: '';
+            position: absolute;
+            top: 11px; left: -10px;
+            width: 0; height: 0;
+            border-left: 10px solid transparent;
+            border-right: 10px solid transparent;
+            border-bottom: 18px solid #FFCCA8;
+        }
+        .ccat-ear-l { left: 14px; transform: rotate(-10deg); }
+        .ccat-ear-r { right: 14px; transform: rotate(10deg); }
+        /* 眼睛：大而圓 */
+        .ccat-eye {
+            position: absolute;
+            top: 32px;
+            width: 20px; height: 22px;
+            background: radial-gradient(circle at 35% 35%, #3A1A08, #1A0806);
+            border-radius: 50%;
+            overflow: hidden;
+            animation: catEyeBlink 3.2s ease-in-out infinite;
+        }
+        .ccat-eye::before {
+            content: '';
+            position: absolute;
+            top: 3px; right: 3px;
+            width: 7px; height: 7px;
+            background: white;
+            border-radius: 50%;
+        }
+        .ccat-eye::after {
+            content: '';
+            position: absolute;
+            top: 12px; left: 5px;
+            width: 3px; height: 3px;
+            background: rgba(255,255,255,0.50);
+            border-radius: 50%;
+        }
+        .ccat-eye-l { left: 17px; }
+        .ccat-eye-r { right: 17px; }
+        @keyframes catEyeBlink {
+            0%, 87%, 100% { transform: scaleY(1); }
+            92% { transform: scaleY(0.06); }
+        }
+        /* 鼻子 */
+        .ccat-nose {
+            position: absolute;
+            top: 57px; left: 50%;
+            transform: translateX(-50%);
+            width: 0; height: 0;
+            border-left: 6px solid transparent;
+            border-right: 6px solid transparent;
+            border-top: 7px solid #E85050;
+        }
+        /* 腮紅 */
+        .ccat-blush {
+            position: absolute;
+            top: 54px;
+            width: 24px; height: 13px;
+            background: rgba(255,120,50,0.28);
+            border-radius: 50%;
+            filter: blur(4px);
+        }
+        .ccat-blush-l { left: 4px; }
+        .ccat-blush-r { right: 4px; }
+        /* 鬍鬚 */
+        .ccat-wsk {
+            position: absolute;
+            top: 60px;
+            height: 1.5px;
+            background: rgba(95,45,8,0.36);
+            border-radius: 1px;
+        }
+        .ccat-wsk-l1 { left: -22px; width: 26px; transform: rotate(-5deg); }
+        .ccat-wsk-l2 { left: -22px; width: 26px; top: 68px; transform: rotate(8deg); }
+        .ccat-wsk-r1 { right: -22px; width: 26px; transform: rotate(5deg); }
+        .ccat-wsk-r2 { right: -22px; width: 26px; top: 68px; transform: rotate(-8deg); }
+        /* 閃爍星星 */
+        .ccat-sp {
+            position: absolute;
+            pointer-events: none;
+            color: #FFD060;
+            text-shadow: 0 0 10px rgba(255,180,40,0.9), 0 0 22px rgba(255,120,20,0.5);
+            animation: catSpPulse var(--spdur, 1.0s) ease-in-out var(--spdelay, 0s) infinite alternate;
+        }
+        @keyframes catSpPulse {
+            from { opacity: 0.35; transform: scale(0.75) rotate(0deg); }
+            to   { opacity: 1.00; transform: scale(1.30) rotate(28deg); }
+        }
+        .ccat-sp-1 { font-size: 18px; top: -12px; left: -22px; --spdur: 0.90s; --spdelay: 0.00s; }
+        .ccat-sp-2 { font-size: 14px; top: -20px; right: -16px;--spdur: 0.70s; --spdelay: 0.18s; }
+        .ccat-sp-3 { font-size: 16px; top: 16px;  left: -30px; --spdur: 1.10s; --spdelay: 0.40s; }
+        .ccat-sp-4 { font-size: 12px; top: 10px;  right: -28px;--spdur: 0.82s; --spdelay: 0.12s; }
+
+        /* 愛心向上飄 */
+        .heart-float {
+            position: absolute;
+            pointer-events: none;
+            animation: heartRise var(--hdur, 1.8s) ease-out var(--hdelay, 0s) forwards;
+        }
+        @keyframes heartRise {
+            0%   { bottom: 26%; opacity: 0; transform: translateX(0) scale(0.4); }
+            12%  { opacity: 1; }
+            55%  { transform: translateX(var(--hx, 12px)) scale(1.05); }
+            100% { bottom: 62%; opacity: 0; transform: translateX(calc(var(--hx, 12px) * -0.4)) scale(0.7); }
+        }
+        /* 星爆放射 */
+        .cat-burst {
+            position: fixed;
+            pointer-events: none;
+            z-index: 9002;
+            animation: catBurstOut 0.75s ease-out forwards;
+        }
+        @keyframes catBurstOut {
+            0%   { opacity: 0; transform: scale(0.2) rotate(0deg); }
+            28%  { opacity: 1; transform: scale(1.5) rotate(130deg); }
+            100% { opacity: 0; transform: scale(0.6) rotate(340deg); }
+        }
+
+        /* 花瓣飄落 */
+        .petal-fall {
+            position: absolute;
+            top: -40px;
+            pointer-events: none;
+            animation: petalDrift var(--pdur, 2.8s) ease-in-out var(--pdelay, 0s) forwards;
+        }
+        @keyframes petalDrift {
+            0%   { opacity: 0; transform: translateY(0) rotate(0deg) translateX(0); }
+            8%   { opacity: 0.9; }
+            50%  { transform: translateY(45vh) rotate(var(--prot, 40deg)) translateX(var(--px, 20px)); }
+            92%  { opacity: 0.6; }
+            100% { opacity: 0; transform: translateY(100vh) rotate(calc(var(--prot, 40deg) * 1.8)) translateX(calc(var(--px, 20px) * -0.5)); }
+        }
+
+        /* 流星線條（限定比常駐精緻，用 dot；常駐用線條） */
+        .meteor-line {
+            position: absolute;
+            height: 2px;
+            border-radius: 999px;
+            background: linear-gradient(90deg, rgba(255,255,255,0.95) 0%, rgba(180,210,255,0.7) 40%, transparent 100%);
+            transform-origin: right center;
+            box-shadow: 0 0 8px 2px rgba(255,255,255,0.5), 0 0 20px 5px rgba(130,180,255,0.2);
+            animation: meteorDash var(--mdur, 0.7s) ease-in var(--mdelay, 0s) forwards;
+            opacity: 0;
+        }
+        @keyframes meteorDash {
+            0%   { opacity:0; transform:rotate(-32deg) translateX(-20px); }
+            8%   { opacity:1; }
+            100% { opacity:0; transform:rotate(-32deg) translateX(calc(150vw)); }
+        }
+
+        /* 星點閃爍 */
+        .star-sparkle {
+            position: absolute;
+            pointer-events: none;
+            color: white;
+            text-shadow: 0 0 10px #fff, 0 0 24px rgba(160,200,255,0.9);
+            animation: sparkleAppear var(--sdur, 0.6s) ease-out var(--sdelay, 0s) forwards;
+        }
+        @keyframes sparkleAppear {
+            0%   { opacity:0; transform:scale(0) rotate(0deg); }
+            35%  { opacity:1; transform:scale(1.4) rotate(160deg); }
+            100% { opacity:0; transform:scale(0) rotate(360deg); }
+        }
+
+        /* ── 訊息樣式：貓咪萌系（限定）── */
+        body.msg-cat .toast {
+            background: linear-gradient(135deg, rgba(100,15,55,0.82) 0%, rgba(70,15,90,0.78) 100%) !important;
+            border: 1px solid rgba(230,110,170,0.5) !important;
+            border-left: 4px solid #E060A8 !important;
+            border-radius: 20px 20px 20px 8px !important;
+            box-shadow: 0 8px 32px rgba(160,40,110,0.35), 0 0 0 1px rgba(230,110,170,0.15) !important;
+            padding-top: 26px !important;
+        }
+        body.msg-cat .toast::before {
+            content: '🐱';
+            position: absolute;
+            top: -18px; left: 14px;
+            font-size: 26px;
+            filter: drop-shadow(0 2px 8px rgba(230,110,170,0.8));
+            animation: catFaceWobble 2.5s ease-in-out infinite;
+        }
+        body.msg-cat .toast::after { display: none; }
+        @keyframes catFaceWobble {
+            0%,100% { transform: rotate(-8deg) scale(1); }
+            50%     { transform: rotate(8deg) scale(1.12); }
+        }
+
+        /* ── 訊息樣式：深夜星空（常駐）── */
+        body.msg-star .toast {
+            background: rgba(5,10,26,0.97) !important;
+            border: 1px solid rgba(90,140,210,0.45) !important;
+            border-left: 4px solid #5B8AC4 !important;
+            border-radius: 12px !important;
+            box-shadow: 0 8px 32px rgba(20,60,160,0.3), 0 0 12px rgba(90,140,210,0.15) !important;
+            overflow: hidden;
+        }
+        body.msg-star .toast::before {
+            content: '';
+            position: absolute; inset: 0; pointer-events: none;
+            background:
+                radial-gradient(circle at 15% 25%, rgba(255,255,255,0.75) 0%, rgba(255,255,255,0.75) 1px, transparent 1px),
+                radial-gradient(circle at 82% 18%, rgba(200,220,255,0.65) 0%, rgba(200,220,255,0.65) 1px, transparent 1px),
+                radial-gradient(circle at 48% 72%, rgba(255,255,255,0.60) 0%, rgba(255,255,255,0.60) 1px, transparent 1px),
+                radial-gradient(circle at 90% 62%, rgba(200,220,255,0.50) 0%, rgba(200,220,255,0.50) 1px, transparent 1px),
+                radial-gradient(circle at 33% 88%, rgba(255,255,255,0.55) 0%, rgba(255,255,255,0.55) 1px, transparent 1px),
+                radial-gradient(circle at 68% 40%, rgba(200,220,255,0.70) 0%, rgba(200,220,255,0.70) 1px, transparent 1px),
+                radial-gradient(circle at 8%  65%, rgba(255,255,255,0.40) 0%, rgba(255,255,255,0.40) 1px, transparent 1px),
+                radial-gradient(circle at 55% 10%, rgba(200,220,255,0.60) 0%, rgba(200,220,255,0.60) 1px, transparent 1px);
+            animation: starsBlink 3.5s ease-in-out infinite;
+        }
+        body.msg-star .toast::after {
+            content: '🌙'; position: absolute; top: 8px; right: 12px;
+            font-size: 18px; opacity: 0.9;
+            animation: moonGlow 3s ease-in-out infinite;
+        }
+        @keyframes starsBlink { 0%,100%{ opacity:0.55; } 50%{ opacity:1; } }
+        @keyframes moonGlow { 0%,100%{ filter:drop-shadow(0 0 4px rgba(180,210,255,0.4)); } 50%{ filter:drop-shadow(0 0 10px rgba(180,210,255,0.9)); } }
+
+        /* ── 訊息樣式：雷霆（限定）── */
+        body.msg-thunder .toast {
+            background: rgba(10,7,22,0.97) !important;
+            border: 1px solid rgba(139,92,246,0.45) !important;
+            border-left: 4px solid #8B5CF6 !important;
+            border-radius: 10px !important;
+            box-shadow: 0 8px 32px rgba(60,20,160,0.35), 0 0 18px rgba(139,92,246,0.22) !important;
+            overflow: hidden;
+        }
+        body.msg-thunder .toast::before {
+            content: '';
+            position: absolute; inset: 0; pointer-events: none;
+            background: linear-gradient(135deg, rgba(139,92,246,0.1) 0%, transparent 55%);
+        }
+        body.msg-thunder .toast::after {
+            content: '⚡';
+            position: absolute; top: 8px; right: 12px;
+            font-size: 16px;
+            animation: thunderFlicker 2.5s ease-in-out infinite;
+        }
+        @keyframes thunderFlicker {
+            0%,100% { opacity:0.75; filter:drop-shadow(0 0 4px rgba(167,139,250,0.5)); }
+            45%     { opacity:0.3; }
+            50%     { opacity:1;   filter:drop-shadow(0 0 12px rgba(167,139,250,1)); }
+            55%     { opacity:0.55; }
+        }
+
+        /* ── 訊息樣式：抹茶靜心（常駐）── */
+        body.msg-matcha .toast {
+            background: rgba(3,10,6,0.97) !important;
+            border: 1px solid rgba(74,222,128,0.35) !important;
+            border-left: 4px solid #4ADE80 !important;
+            border-radius: 14px !important;
+            box-shadow: 0 8px 32px rgba(10,60,30,0.3), 0 0 12px rgba(74,222,128,0.12) !important;
+        }
+        body.msg-matcha .toast::before {
+            content: '';
+            position: absolute; inset: 0; pointer-events: none;
+            background: radial-gradient(ellipse at bottom left, rgba(74,222,128,0.07) 0%, transparent 60%);
+        }
+        body.msg-matcha .toast::after {
+            content: '🍵'; position: absolute; top: 8px; right: 12px;
+            font-size: 16px; opacity: 0.85;
+        }
+
+        /* ── 訊息樣式：王棋對弈（預備）── */
+        body.msg-chess .toast {
+            background: rgba(10,7,4,0.98) !important;
+            border: 1px solid rgba(231,199,119,0.36) !important;
+            border-left: 4px solid #E7C777 !important;
+            border-radius: 12px !important;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.38), 0 0 18px rgba(231,199,119,0.13) !important;
+        }
+        body.msg-chess .toast::before {
+            content: '';
+            position: absolute; inset: 0; pointer-events: none;
+            background: linear-gradient(45deg, rgba(246,231,180,0.05) 25%, transparent 25%, transparent 75%, rgba(246,231,180,0.05) 75%);
+            background-size: 18px 18px;
+        }
+        body.msg-chess .toast::after {
+            content: '♚'; position: absolute; top: 7px; right: 13px;
+            font-size: 18px; color: #f6e7b4; opacity: 0.9;
+        }
+
+        /* ── 訊息樣式：霧雨玻璃（常駐預備）── */
+        body.msg-rain .toast {
+            background: rgba(5,18,26,0.94) !important;
+            border: 1px solid rgba(143,211,232,0.34) !important;
+            border-left: 4px solid #8FD3E8 !important;
+            border-radius: 15px !important;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.34), 0 0 18px rgba(143,211,232,0.13) !important;
+            backdrop-filter: blur(18px) !important;
+        }
+        body.msg-rain .toast::before {
+            content: '';
+            position: absolute; inset: 0; pointer-events: none;
+            background: linear-gradient(120deg, transparent 0%, rgba(255,255,255,0.06) 42%, transparent 70%);
+        }
+        body.msg-rain .toast::after {
+            content: '◌'; position: absolute; top: 6px; right: 13px;
+            font-size: 19px; color: #c7eaf4; opacity: 0.86;
+        }
+
+        /* ── 打卡特效：雷霆（積雨雲層 + SVG 閃電描繪）── */
+        .thunder-canopy-wrap {
+            position: fixed;
+            left: 50%;
+            top: -1vh;
+            width: min(112vw, 680px);
+            height: clamp(72px, 19vh, 168px);
+            transform: translateX(-50%);
+            pointer-events: none;
+            z-index: 9001;
+            overflow: hidden;
+            border-radius: 50% 50% 36% 36% / 38% 38% 62% 62%;
+            animation: thunderCanopyDrift 2.5s ease-out forwards;
+        }
+        @keyframes thunderCanopyDrift {
+            0%   { transform: translateX(-50%) translateY(-24px) scaleX(0.9); }
+            16%  { transform: translateX(-50%) translateY(0) scaleX(1); }
+            68%  { transform: translateX(-50%) translateY(0) scaleX(1); }
+            100% { transform: translateX(-50%) translateY(-8px) scaleX(0.97); }
+        }
+        .thunder-canopy {
+            position: absolute;
+            inset: 0;
+            overflow: visible;
+        }
+        .thunder-canopy-slab {
+            position: absolute;
+            left: 50%;
+            top: 18%;
+            transform: translateX(-50%);
+            width: 96%;
+            height: 62%;
+            border-radius: 50% 50% 40% 40% / 44% 44% 56% 56%;
+            opacity: 0;
+            background: linear-gradient(180deg,
+                rgba(45,14,92,0.92) 0%,
+                rgba(67,24,132,0.88) 45%,
+                rgba(28,8,58,0.98) 100%);
+            box-shadow:
+                0 18px 52px rgba(0,0,0,0.55),
+                0 0 36px rgba(124,58,237,0.22),
+                inset 0 -16px 36px rgba(0,0,0,0.4),
+                inset 0 4px 18px rgba(124,58,237,0.12);
+            animation: thunderSlabLife 2.5s ease-out forwards;
+        }
+        @keyframes thunderSlabLife {
+            0%   { opacity: 0; transform: translateX(-50%) scaleY(0.88); }
+            18%  { opacity: 1; transform: translateX(-50%) scaleY(1); }
+            68%  { opacity: 1; }
+            100% { opacity: 0; transform: translateX(-50%) scaleY(0.96); }
+        }
+        .thunder-canopy-slab::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            background: radial-gradient(ellipse at 50% 55%, rgba(233,213,255,0.22) 0%, transparent 68%);
+            opacity: 0;
+            pointer-events: none;
+        }
+        .thunder-canopy-slab.flash-hit::after {
+            animation: thunderCanopyFlash 0.1s ease-out forwards;
+        }
+        @keyframes thunderCanopyFlash {
+            0%   { opacity: 0; }
+            40%  { opacity: 0.85; }
+            100% { opacity: 0; }
+        }
+        .thunder-canopy-rim {
+            position: absolute;
+            left: 12%;
+            right: 12%;
+            bottom: 10%;
+            height: 20%;
+            border-radius: 50%;
+            background: radial-gradient(ellipse at 50% 100%,
+                rgba(167,139,250,0.28) 0%,
+                rgba(124,58,237,0.12) 40%,
+                transparent 72%);
+            opacity: 0;
+            animation: thunderRimPulse 0.2s ease-in-out 0.42s 4;
+        }
+        @keyframes thunderRimPulse {
+            0%, 100% { opacity: 0.35; }
+            50%      { opacity: 0.75; }
+        }
+        .thunder-strike-wrap {
+            position: fixed;
+            left: 50%;
+            top: clamp(52px, 14vh, 128px);
+            width: min(26vw, 132px);
+            height: min(58vh, 440px);
+            transform: translateX(-50%);
+            pointer-events: none;
+            z-index: 9003;
+            opacity: 0;
+        }
+        .thunder-strike-wrap.live {
+            opacity: 1;
+            animation: thunderStrikeWrapFade 1.35s ease-out forwards;
+        }
+        @keyframes thunderStrikeWrapFade {
+            0%   { opacity: 0; }
+            8%   { opacity: 1; }
+            55%  { opacity: 1; }
+            100% { opacity: 0; }
+        }
+        .thunder-fork-svg {
+            width: 100%;
+            height: 100%;
+            overflow: visible;
+        }
+        .thunder-fork-halo {
+            fill: none;
+            stroke: rgba(196,181,253,0.55);
+            stroke-width: 5;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            stroke-dasharray: 720;
+            stroke-dashoffset: 720;
+            filter: blur(5px);
+        }
+        .thunder-fork-core {
+            fill: none;
+            stroke: #fff;
+            stroke-width: 2.4;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            stroke-dasharray: 720;
+            stroke-dashoffset: 720;
+            filter: drop-shadow(0 0 3px #fff) drop-shadow(0 0 10px #e9d5ff) drop-shadow(0 0 22px #a78bfa);
+        }
+        .thunder-strike-wrap.live .thunder-fork-halo,
+        .thunder-strike-wrap.live .thunder-fork-core {
+            animation: thunderForkDraw 0.34s cubic-bezier(0.15,0.92,0.28,1) forwards;
+        }
+        @keyframes thunderForkDraw {
+            to { stroke-dashoffset: 0; }
+        }
+        .thunder-branch-wrap {
+            position: fixed;
+            pointer-events: none;
+            z-index: 9002;
+            width: min(18vw, 96px);
+            height: min(28vh, 200px);
+            opacity: 0;
+        }
+        .thunder-branch-wrap.live {
+            animation: thunderBranchFade 0.55s ease-out forwards;
+        }
+        @keyframes thunderBranchFade {
+            0%   { opacity: 0; }
+            12%  { opacity: 0.92; }
+            70%  { opacity: 0.5; }
+            100% { opacity: 0; }
+        }
+        .thunder-branch-svg {
+            width: 100%;
+            height: 100%;
+            overflow: visible;
+        }
+        .thunder-branch-path {
+            fill: none;
+            stroke: rgba(237,233,254,0.88);
+            stroke-width: 1.6;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            stroke-dasharray: 280;
+            stroke-dashoffset: 280;
+            filter: drop-shadow(0 0 6px #c4b5fd);
+        }
+        .thunder-branch-wrap.live .thunder-branch-path {
+            animation: thunderForkDraw 0.28s cubic-bezier(0.2,0.9,0.3,1) forwards;
+        }
+        .thunder-impact-glow {
+            position: fixed;
+            left: 50%;
+            top: 52%;
+            width: 200px;
+            height: 88px;
+            transform: translate(-50%, -50%) scale(0.2);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 8999;
+            background: radial-gradient(ellipse,
+                rgba(255,255,255,0.55) 0%,
+                rgba(196,181,253,0.35) 28%,
+                rgba(124,58,237,0.12) 55%,
+                transparent 72%);
+            opacity: 0;
+            animation: thunderImpactGlow 0.85s ease-out forwards;
+        }
+        @keyframes thunderImpactGlow {
+            0%   { opacity: 0; transform: translate(-50%,-50%) scale(0.2); }
+            18%  { opacity: 1; transform: translate(-50%,-50%) scale(1.15); }
+            100% { opacity: 0; transform: translate(-50%,-50%) scale(1.65); }
+        }
+        .thunder-filament {
+            position: fixed;
+            height: 1.5px;
+            pointer-events: none;
+            z-index: 9002;
+            border-radius: 1px;
+            background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.95) 35%, rgba(196,181,253,0.85) 65%, transparent 100%);
+            box-shadow: 0 0 6px rgba(255,255,255,0.8), 0 0 14px rgba(167,139,250,0.65);
+            transform-origin: left center;
+            opacity: 0;
+            animation: thunderFilament 0.48s ease-out forwards;
+        }
+        @keyframes thunderFilament {
+            0%   { opacity: 0; transform: rotate(var(--frot,0deg)) scaleX(0.05); }
+            22%  { opacity: 1; transform: rotate(var(--frot,0deg)) scaleX(1); }
+            100% { opacity: 0; transform: rotate(var(--frot,0deg)) scaleX(0.35); }
+        }
+        .thunder-ember {
+            position: fixed;
+            width: 3px;
+            height: 3px;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9002;
+            background: #fff;
+            box-shadow: 0 0 6px #fff, 0 0 14px #c4b5fd;
+            opacity: 0;
+            animation: thunderEmber var(--edur,0.55s) ease-out var(--edelay,0s) forwards;
+        }
+        @keyframes thunderEmber {
+            0%   { opacity: 0; transform: translate(0,0) scale(0.4); }
+            15%  { opacity: 1; transform: translate(calc(var(--ex,0px)*0.2), calc(var(--ey,0px)*0.2)) scale(1); }
+            100% { opacity: 0; transform: translate(var(--ex,0px), var(--ey,0px)) scale(0.2); }
+        }
+        .thunder-shockwave {
+            position: fixed;
+            pointer-events: none;
+            z-index: 9000;
+            left: 50%;
+            top: 50%;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            border: 3px solid rgba(233,213,255,0.9);
+            box-shadow: 0 0 20px rgba(196,181,253,0.8), 0 0 48px rgba(124,58,237,0.45);
+            transform: translate(-50%, -50%);
+            animation: thunderShockwave 0.78s cubic-bezier(0.08,0.6,0.25,1) forwards;
+        }
+        @keyframes thunderShockwave {
+            0%   { width: 12px; height: 12px; opacity: 1; border-width: 3px; }
+            42%  { opacity: 0.6; }
+            100% { width: min(105vw, 105vh); height: min(105vw, 105vh); opacity: 0; border-width: 1px; }
+        }
+        @keyframes thunderShake {
+            0%   { transform: translate(0,0); }
+            18%  { transform: translate(-4px,2px); }
+            36%  { transform: translate(4px,-3px); }
+            54%  { transform: translate(-3px,2px); }
+            72%  { transform: translate(2px,-1px); }
+            100% { transform: translate(0,0); }
+        }
+        .thunder-shake { animation: thunderShake 0.32s ease-out !important; }
+        @media (prefers-reduced-motion: reduce) {
+            .thunder-shake { animation: none !important; }
+            .thunder-canopy-rim { animation: none; }
+            .thunder-fork-halo, .thunder-fork-core, .thunder-branch-path { animation-duration: 0.01s !important; }
+        }
+
+        /* ── 打卡特效：抹茶墨滴中心 ── */
+        .matcha-drop {
+            position: absolute; top:50%; left:50%;
+            width:20px; height:20px; border-radius:50%;
+            background: radial-gradient(circle, rgba(187,247,208,0.98), rgba(74,222,128,0.85));
+            box-shadow: 0 0 30px rgba(74,222,128,0.95), 0 0 70px rgba(52,211,153,0.65), 0 0 120px rgba(34,197,94,0.3);
+            transform: translate(-50%,-50%);
+            animation: matchaDrop 0.68s cubic-bezier(0.1,0.68,0.2,1) forwards;
+        }
+        @keyframes matchaDrop {
+            0%   { width:20px;  height:20px;  opacity:1; }
+            28%  { width:115px; height:115px; opacity:0.88; }
+            100% { width:230px; height:230px; opacity:0; }
+        }
+        /* ── 打卡特效：抹茶漣漪 ── */
+        .matcha-ripple {
+            position: absolute; top:50%; left:50%;
+            width:16px; height:16px; border-radius:50%;
+            background: transparent;
+            border: 2px solid transparent;
+            box-shadow: 0 0 0 2.5px rgba(74,222,128,0.88), 0 0 22px rgba(74,222,128,0.58), 0 0 52px rgba(52,211,153,0.28);
+            transform: translate(-50%,-50%);
+            animation: matchaRipple 2.0s ease-out forwards;
+        }
+        @keyframes matchaRipple {
+            0%   { width:16px; height:16px; opacity:1; box-shadow:0 0 0 3px rgba(74,222,128,0.95), 0 0 28px rgba(74,222,128,0.65), 0 0 60px rgba(52,211,153,0.35); }
+            100% { width:min(105vw,105vh); height:min(105vw,105vh); opacity:0; box-shadow:0 0 0 1px rgba(74,222,128,0.1), 0 0 8px rgba(74,222,128,0.06); }
+        }
+        /* ── 打卡特效：抹茶蒸氣 ── */
+        .matcha-steam {
+            position: absolute; border-radius:50%; pointer-events:none;
+            background: radial-gradient(circle, rgba(187,247,208,0.75), rgba(74,222,128,0.32));
+            animation: matchaSteam var(--sdur,1.4s) ease-out var(--sdelay,0s) forwards;
+        }
+        @keyframes matchaSteam {
+            0%   { opacity:0.82; transform:translate(var(--sx,0px), 0px) scale(1); }
+            100% { opacity:0;    transform:translate(calc(var(--sx,0px)*1.3), -130px) scale(0.35); }
+        }
+

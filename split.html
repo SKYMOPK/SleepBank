@@ -8,6 +8,15 @@
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
     <script src="split-core.js"></script>
+    <script src="split-pass-config.js"></script>
+    <script src="split-pass-core.js"></script>
+    <script src="split-cosmetics.js"></script>
+    <script src="split-badges.js"></script>
+    <script src="assets/vendor/confetti-1.6.0.min.js"></script>
+    <script src="split-original-effects.js"></script>
+    <script src="split-extras.js?v=badge-relief-20260917-4"></script>
+    <link rel="stylesheet" href="split-extras.css?v=badge-relief-20260917-4">
+    <link rel="stylesheet" href="split-original-effects.css">
     <style>
         :root {
             --bg: #1E1912;
@@ -1043,6 +1052,7 @@
             ? { ...afterRecord, budgetSync: { opId, before, after, createdAt: Date.now() } }
             : { ...beforeRecord, deletedAt: Date.now(), budgetSync: { opId, before, after: null, deleteAfterSync: true, createdAt: Date.now() } };
         await db.ref('split/records/' + key).set(pending);
+        SplitExtras.changed(key, beforeRecord, afterRecord);
         await reconcileRecordBudget(key, pending);
     }
 
@@ -1183,6 +1193,7 @@
     function updatePreview() {
         const p1 = Number(document.getElementById('inp_p1').value) || 0;
         const p2 = Number(document.getElementById('inp_p2').value) || 0;
+        SplitExtras.amountPreview(p1 + p2);
         const el = document.getElementById('previewText');
         const validation = ledgerCore.validateRecordDraft({ p1_bought: p1, p2_bought: p2, payer: currentPayer });
         document.getElementById('submitBtn').disabled = !validation.valid || !recordsLoaded || isSubmitting;
@@ -1235,6 +1246,7 @@
                 { label: '消費金額', value: amountsLine },
                 { label: '先付款', value: payerName },
                 { label: '新增結果', value: preview },
+                { label: '通行證', value: document.querySelector('.le-xp-preview').textContent },
             ]),
             async () => {
                 if (isSubmitting) return;
@@ -1242,15 +1254,20 @@
                 updatePreview();
                 const ref = db.ref('split/records').push();
                 try {
+                    await SplitExtras.prepare(ref.key, record);
+                    record.timestamp = Date.now();
                     await commitRecordChange(ref.key, null, record);
+                    SplitExtras.saved(ref.key, record);
                     resetInputForm();
                     playSound('add');
+                    SplitExtras.added();
                     offerUndo('已新增帳目', async () => {
                         const snapshot = await ref.once('value');
                         const current = snapshot.val();
                         if (current) await commitRecordChange(ref.key, current, null);
                     });
                 } catch (error) {
+                    SplitExtras.failed(ref.key);
                     console.error(error);
                     showToast('新增失敗，請檢查網路', 'var(--red)');
                 } finally {
@@ -1675,6 +1692,8 @@
         }
         updatePreview();
     }
+
+    SplitExtras.init(db);
 
     let storedBalance = null;
     db.ref('split/balance').on('value', snap => {

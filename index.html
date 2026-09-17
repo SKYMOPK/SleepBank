@@ -460,6 +460,8 @@
         .sb-index .entry-paused:hover,
         .sb-index .entry-paused:active { transform: none; filter: none; box-shadow: none; }
         .sb-index .entry-paused .hp-panel { display: none; }
+        .sb-index .entry-paused, .sb-index .section:has(.player-grid) { display: none; }
+        .sb-index .feat-budget { grid-column: 1 / -1; }
     </style>
 </head>
 <body class="sb-page sb-index">
@@ -489,7 +491,7 @@
     <div class="header">
         <div class="header-icon" aria-hidden="true"><svg class="icon"><use href="#icon-home"></use></svg></div>
         <div class="header-title">宿舍系統</div>
-        <div class="header-sub">每日 00:00 – 02:00 準時打卡</div>
+        <div class="header-sub">帳務、預算與日常紀錄</div>
         <div class="time-pill">
             <div class="dot"></div>
             <span id="clock">載入中...</span>
@@ -515,33 +517,6 @@
         </div>
     </div>
 
-    <!-- Player section -->
-    <div class="section">
-        <div class="section-label">選擇身分</div>
-        <div class="player-grid">
-            <a class="player-card card-p1 entry-paused" role="link" aria-disabled="true" aria-label="至凱睡眠金庫，暫停開放">
-                <div class="hp-panel" id="hp-p1">
-                    <div class="hp-row"><span class="hp-lbl"><svg class="icon" aria-hidden="true"><use href="#icon-coins"></use></svg>點數</span><span class="hp-val" id="hp-pts-p1">—</span></div>
-                    <div class="hp-row"><span class="hp-lbl"><svg class="icon" aria-hidden="true"><use href="#icon-flame"></use></svg>連勝</span><span class="hp-val" id="hp-str-p1">—</span></div>
-                    <div class="hp-row"><span class="hp-lbl"><svg class="icon" aria-hidden="true"><use href="#icon-mail"></use></svg>未讀</span><span class="hp-val" id="hp-mail-p1">—</span></div>
-                </div>
-                <div class="p-ico" aria-hidden="true"><svg class="icon"><use href="#icon-user"></use></svg></div>
-                <div class="p-name">至凱</div>
-                <div class="p-sub">睡眠金庫 · 暫停開放</div>
-            </a>
-            <a class="player-card card-p2 entry-paused" role="link" aria-disabled="true" aria-label="柏致睡眠金庫，暫停開放">
-                <div class="hp-panel" id="hp-p2">
-                    <div class="hp-row"><span class="hp-lbl"><svg class="icon" aria-hidden="true"><use href="#icon-coins"></use></svg>點數</span><span class="hp-val" id="hp-pts-p2">—</span></div>
-                    <div class="hp-row"><span class="hp-lbl"><svg class="icon" aria-hidden="true"><use href="#icon-flame"></use></svg>連勝</span><span class="hp-val" id="hp-str-p2">—</span></div>
-                    <div class="hp-row"><span class="hp-lbl"><svg class="icon" aria-hidden="true"><use href="#icon-mail"></use></svg>未讀</span><span class="hp-val" id="hp-mail-p2">—</span></div>
-                </div>
-                <div class="p-ico" aria-hidden="true"><svg class="icon"><use href="#icon-user"></use></svg></div>
-                <div class="p-name">柏致</div>
-                <div class="p-sub">睡眠金庫 · 暫停開放</div>
-            </a>
-        </div>
-    </div>
-
     <!-- Feature section -->
     <div class="section">
         <div class="section-label">功能</div>
@@ -560,11 +535,6 @@
                 <div class="f-ico" aria-hidden="true"><svg class="icon"><use href="#icon-wallet"></use></svg></div>
                 <div class="f-name">每日額度</div>
                 <div class="f-sub">本月預算與金庫</div>
-            </a>
-            <a class="feature-card feat-defense entry-paused" role="link" aria-disabled="true" aria-label="宿舍守睡戰，暫停開放">
-                <div class="f-ico" aria-hidden="true"><svg class="icon"><use href="#icon-shield-moon"></use></svg></div>
-                <div class="f-name">宿舍守睡戰</div>
-                <div class="f-sub">暫停開放</div>
             </a>
         </div>
     </div>
@@ -613,9 +583,25 @@
         // 新版本加在陣列最前面，isNew 設 true，其他改 false
         const CHANGELOG = [
             {
+                version: 'v1.4',
+                date: '2026-09-17',
+                isNew: true,
+                groups: [
+                    {
+                        icon: 'wrench',
+                        title: '系統整理',
+                        items: [
+                            '首頁移除已退休的睡眠金庫與宿舍守睡戰入口',
+                            '移除舊點數、連勝與信箱的 Firebase 即時監聽',
+                            '首頁聚焦現役功能：帳本、握力日記、每日額度',
+                        ]
+                    }
+                ]
+            },
+            {
                 version: 'v1.3',
                 date: '2026-04-27',
-                isNew: true,
+                isNew: false,
                 groups: [
                     {
                         icon: 'dumbbell',
@@ -805,38 +791,6 @@
         document.getElementById('cl-overlay').addEventListener('click', e => {
             if (e.target === e.currentTarget) closeChangelog();
         });
-
-        // ── Hover Panel ────────────────────────────────────────
-        const _hp = { p1: {}, p2: {} };
-
-        function _updateHoverPanel(p) {
-            const d = _hp[p];
-            const ptsEl  = document.getElementById(`hp-pts-${p}`);
-            const strEl  = document.getElementById(`hp-str-${p}`);
-            const mailEl = document.getElementById(`hp-mail-${p}`);
-            if (ptsEl)  ptsEl.textContent  = d.points != null ? `${d.points} 點` : '—';
-            if (strEl)  strEl.textContent  = d.streak  != null ? `${d.streak} 天`  : '—';
-            if (mailEl) mailEl.textContent = d.unread  != null ? (d.unread > 0 ? `${d.unread} 封` : '無') : '—';
-        }
-
-        ['p1', 'p2'].forEach(p => {
-            db.ref(`economy/${p}`).on('value', s => {
-                _hp[p].points = s.val() || 0;
-                _updateHoverPanel(p);
-            });
-            db.ref(`users/${p}/streak`).on('value', s => {
-                _hp[p].streak = s.val() || 0;
-                _updateHoverPanel(p);
-            });
-            db.ref(`mailbox/${p}`).on('value', s => {
-                let u = 0;
-                s.forEach(c => { if (!c.val().claimed) u++; });
-                _hp[p].unread = u;
-                _updateHoverPanel(p);
-            });
-        });
-
-        setInterval(() => ['p1', 'p2'].forEach(_updateHoverPanel), 60000);
 
         initChangelog();
     </script>
