@@ -14,6 +14,7 @@
         return seasons.find(s => s.enabled && Number.isFinite(s.startAt) && time >= s.startAt && time < seasonEnd(s)) || null;
     }
     function level(xp) { return Math.min(40, 1 + Math.floor(Math.max(0, xp || 0) / 40)); }
+    function rewardIds(reward) { return Array.isArray(reward) ? reward : reward ? [reward] : []; }
     function validate(seasons, catalog) {
         const errors = [];
         const ids = new Set();
@@ -24,10 +25,13 @@
             if (s.startAt !== null && (!Number.isFinite(s.startAt) || (s.startAt + 8 * 3600000) % DAY !== 4 * 3600000)) errors.push('開始時間必須為台灣時間 04:00');
             if (s.enabled && s.startAt === null) errors.push('啟用賽季缺少開始時間');
             const rewards = new Set();
-            for (const [lv, id] of Object.entries(s.rewards || {})) {
+            for (const [lv, reward] of Object.entries(s.rewards || {})) {
+                if (!rewardIds(reward).length) errors.push('獎勵不可為空');
+                for (const id of rewardIds(reward)) {
                 if (!/^\d+$/.test(lv) || Number(lv) < 1 || Number(lv) > 40 || !catalog[id]) errors.push('獎勵等級或外觀 ID 無效');
                 if (rewards.has(id)) errors.push('同季外觀獎勵重複');
                 rewards.add(id);
+                }
             }
             if (s.enabled && !rewards.size) errors.push('啟用賽季必須先確認獎勵');
             if (s.enabled) enabled.push(s);
@@ -127,13 +131,13 @@
     function claim(data, season, lv, claimedAt = Date.now()) {
         const state = normalize(data);
         const s = seasonState(state, season.id);
-        const id = season.rewards?.[lv];
-        if (!id || Number(lv) > s.peakLevel || s.claimed[lv]) return state;
-        s.claimed[lv] = id;
+        const reward = season.rewards?.[lv], ids = rewardIds(reward);
+        if (!ids.length || Number(lv) > s.peakLevel || s.claimed[lv]) return state;
+        s.claimed[lv] = reward;
         s.claimedAt ||= {};
         s.claimedAt[lv] = claimedAt;
-        state.collection[id] = true;
+        for (const id of ids) state.collection[id] = true;
         return state;
     }
-    root.SplitPassCore = { dayKey, baseXp, seasonEnd, seasonAt, level, validate, normalize, register, finalizeRegistration, discardPending, award, revoke, restore, claim };
+    root.SplitPassCore = { rewardIds, dayKey, baseXp, seasonEnd, seasonAt, level, validate, normalize, register, finalizeRegistration, discardPending, award, revoke, restore, claim };
 })(globalThis);

@@ -18,17 +18,7 @@
             75%  { background-position: 20% 100%; }
             100% { background-position: 0% 50%; }
         }
-        .ledger-original-theme.theme-cat .app-title {
-            background: linear-gradient(90deg, #f9a8d4, #c084fc, #fce7f3, #f472b6, #f9a8d4);
-            background-size: 300% 100%;
-            -webkit-background-clip: text; color: transparent;
-            animation: catTitleShimmer 4s linear infinite;
-        }
         @keyframes catTitleShimmer { 0% { background-position:0% 50%; } 100% { background-position:200% 50%; } }
-        .ledger-original-theme.theme-cat .card { border-color: rgba(210,100,160,0.22); }
-        .ledger-original-theme.theme-cat .card:hover { box-shadow: 0 16px 48px rgba(0,0,0,0.55), 0 0 24px rgba(210,100,160,0.12); }
-        .ledger-original-theme.theme-cat .sidebar { background: rgba(30,6,20,0.96); border-right-color: rgba(210,100,160,0.2); }
-        .ledger-original-theme.theme-cat .nav-item.active { background: rgba(210,100,160,0.14); border-color: rgba(210,100,160,0.35); }
 
         /* ── 造型主題：深夜星空（常駐）── */
         .ledger-original-theme.theme-star {
@@ -39,16 +29,6 @@
                 radial-gradient(ellipse at 80% 85%, rgba(15,40,90,0.6) 0%, transparent 45%),
                 #060C1C;
         }
-        .ledger-original-theme.theme-star .app-title {
-            background: linear-gradient(90deg, #bfdbfe, #e0e7ff, #93c5fd, #bfdbfe);
-            background-size: 300% 100%;
-            -webkit-background-clip: text; color: transparent;
-            animation: catTitleShimmer 5s linear infinite;
-        }
-        .ledger-original-theme.theme-star .card { border-color: rgba(90,140,200,0.2); }
-        .ledger-original-theme.theme-star .card:hover { box-shadow: 0 16px 48px rgba(0,0,0,0.65), 0 0 24px rgba(90,140,200,0.1); }
-        .ledger-original-theme.theme-star .sidebar { background: rgba(6,12,30,0.97); border-right-color: rgba(90,140,200,0.18); }
-        .ledger-original-theme.theme-star .nav-item.active { background: rgba(90,140,200,0.14); border-color: rgba(90,140,200,0.35); }
 
         /* ── 造型主題：雷霆（限定）── */
         .ledger-original-theme.theme-thunder {
@@ -70,16 +50,6 @@
             80%  { background-position: 80%  10%;  }
             100% { background-position: 0%   0%;   }
         }
-        .ledger-original-theme.theme-thunder .app-title {
-            background: linear-gradient(90deg, #ede9fe, #a78bfa, #ffffff, #7c3aed, #c4b5fd, #ede9fe);
-            background-size: 400% 100%;
-            -webkit-background-clip: text; color: transparent;
-            animation: catTitleShimmer 3.5s linear infinite;
-        }
-        .ledger-original-theme.theme-thunder .card { border-color: rgba(124,58,237,0.22); background: rgba(18,8,40,0.72); }
-        .ledger-original-theme.theme-thunder .card:hover { box-shadow: 0 16px 48px rgba(0,0,0,0.75), 0 0 28px rgba(124,58,237,0.18); }
-        .ledger-original-theme.theme-thunder .sidebar { background: rgba(8,3,20,0.98); border-right-color: rgba(124,58,237,0.25); }
-        .ledger-original-theme.theme-thunder .nav-item.active { background: rgba(124,58,237,0.18); border-color: rgba(167,139,250,0.45); color: #c4b5fd; }
 
         /* ── 造型主題：抹茶靜心（常駐）── */
         .ledger-original-theme.theme-matcha {
@@ -90,16 +60,6 @@
                 radial-gradient(ellipse at 75% 80%, rgba(10,45,25,0.6) 0%, transparent 50%),
                 #050D07;
         }
-        .ledger-original-theme.theme-matcha .app-title {
-            background: linear-gradient(90deg, #86efac, #4ade80, #d1fae5, #6ee7b7, #86efac);
-            background-size: 300% 100%;
-            -webkit-background-clip: text; color: transparent;
-            animation: catTitleShimmer 5s linear infinite;
-        }
-        .ledger-original-theme.theme-matcha .card { border-color: rgba(74,222,128,0.18); }
-        .ledger-original-theme.theme-matcha .card:hover { box-shadow: 0 16px 48px rgba(0,0,0,0.65), 0 0 24px rgba(74,222,128,0.1); }
-        .ledger-original-theme.theme-matcha .sidebar { background: rgba(3,8,5,0.97); border-right-color: rgba(74,222,128,0.18); }
-        .ledger-original-theme.theme-matcha .nav-item.active { background: rgba(74,222,128,0.12); border-color: rgba(74,222,128,0.38); color: #4ade80; }
 
         /* ── 造型主題：王棋對弈（預備）── */
         .ledger-original-theme.theme-chess {
@@ -114,16 +74,6 @@
             background-position: 0 0, 18px 18px, 0 0, 0 0, 0 0;
             background-size: 36px 36px, 36px 36px, auto, auto, auto;
         }
-        .ledger-original-theme.theme-chess .app-title {
-            background: linear-gradient(90deg, #f8efd0, #c99b42, #fff8dc, #8a6428, #f8efd0);
-            background-size: 320% 100%;
-            -webkit-background-clip: text; color: transparent;
-            animation: catTitleShimmer 4.8s linear infinite;
-        }
-        .ledger-original-theme.theme-chess .card { border-color: rgba(231,199,119,0.22); background: rgba(18,13,8,0.76); }
-        .ledger-original-theme.theme-chess .card:hover { box-shadow: 0 16px 48px rgba(0,0,0,0.68), 0 0 24px rgba(231,199,119,0.13); }
-        .ledger-original-theme.theme-chess .sidebar { background: rgba(8,6,4,0.98); border-right-color: rgba(231,199,119,0.22); }
-        .ledger-original-theme.theme-chess .nav-item.active { background: rgba(231,199,119,0.13); border-color: rgba(231,199,119,0.42); color: #f6e7b4; }
 
         /* ── 造型主題：霧雨玻璃（常駐預備）── */
         .ledger-original-theme.theme-rain {
@@ -135,20 +85,6 @@
                 radial-gradient(ellipse at 78% 86%, rgba(65,120,145,0.26) 0%, transparent 46%),
                 linear-gradient(145deg, #061016 0%, #102632 42%, #07131A 70%, #183445 100%);
         }
-        .ledger-original-theme.theme-rain .app-title {
-            background: linear-gradient(90deg, #d8f7ff, #8fd3e8, #ffffff, #6fb7cf, #d8f7ff);
-            background-size: 320% 100%;
-            -webkit-background-clip: text; color: transparent;
-            animation: catTitleShimmer 5.5s linear infinite;
-        }
-        .ledger-original-theme.theme-rain .card {
-            border-color: rgba(143,211,232,0.20);
-            background: rgba(8,22,30,0.68);
-            backdrop-filter: blur(22px);
-        }
-        .ledger-original-theme.theme-rain .card:hover { box-shadow: 0 16px 48px rgba(0,0,0,0.62), 0 0 24px rgba(143,211,232,0.12); }
-        .ledger-original-theme.theme-rain .sidebar { background: rgba(4,12,18,0.97); border-right-color: rgba(143,211,232,0.18); }
-        .ledger-original-theme.theme-rain .nav-item.active { background: rgba(143,211,232,0.12); border-color: rgba(143,211,232,0.36); color: #c7eaf4; }
 
         /* ── 打卡特效覆蓋層 ── */
         #effect-overlay { position:fixed; inset:0; pointer-events:none; z-index:9000; overflow:hidden; }
@@ -438,79 +374,16 @@
         }
 
         /* ── 訊息樣式：貓咪萌系（限定）── */
-        body.msg-cat .toast {
-            background: linear-gradient(135deg, rgba(100,15,55,0.82) 0%, rgba(70,15,90,0.78) 100%) !important;
-            border: 1px solid rgba(230,110,170,0.5) !important;
-            border-left: 4px solid #E060A8 !important;
-            border-radius: 20px 20px 20px 8px !important;
-            box-shadow: 0 8px 32px rgba(160,40,110,0.35), 0 0 0 1px rgba(230,110,170,0.15) !important;
-            padding-top: 26px !important;
-        }
-        body.msg-cat .toast::before {
-            content: '🐱';
-            position: absolute;
-            top: -18px; left: 14px;
-            font-size: 26px;
-            filter: drop-shadow(0 2px 8px rgba(230,110,170,0.8));
-            animation: catFaceWobble 2.5s ease-in-out infinite;
-        }
-        body.msg-cat .toast::after { display: none; }
         @keyframes catFaceWobble {
             0%,100% { transform: rotate(-8deg) scale(1); }
             50%     { transform: rotate(8deg) scale(1.12); }
         }
 
         /* ── 訊息樣式：深夜星空（常駐）── */
-        body.msg-star .toast {
-            background: rgba(5,10,26,0.97) !important;
-            border: 1px solid rgba(90,140,210,0.45) !important;
-            border-left: 4px solid #5B8AC4 !important;
-            border-radius: 12px !important;
-            box-shadow: 0 8px 32px rgba(20,60,160,0.3), 0 0 12px rgba(90,140,210,0.15) !important;
-            overflow: hidden;
-        }
-        body.msg-star .toast::before {
-            content: '';
-            position: absolute; inset: 0; pointer-events: none;
-            background:
-                radial-gradient(circle at 15% 25%, rgba(255,255,255,0.75) 0%, rgba(255,255,255,0.75) 1px, transparent 1px),
-                radial-gradient(circle at 82% 18%, rgba(200,220,255,0.65) 0%, rgba(200,220,255,0.65) 1px, transparent 1px),
-                radial-gradient(circle at 48% 72%, rgba(255,255,255,0.60) 0%, rgba(255,255,255,0.60) 1px, transparent 1px),
-                radial-gradient(circle at 90% 62%, rgba(200,220,255,0.50) 0%, rgba(200,220,255,0.50) 1px, transparent 1px),
-                radial-gradient(circle at 33% 88%, rgba(255,255,255,0.55) 0%, rgba(255,255,255,0.55) 1px, transparent 1px),
-                radial-gradient(circle at 68% 40%, rgba(200,220,255,0.70) 0%, rgba(200,220,255,0.70) 1px, transparent 1px),
-                radial-gradient(circle at 8%  65%, rgba(255,255,255,0.40) 0%, rgba(255,255,255,0.40) 1px, transparent 1px),
-                radial-gradient(circle at 55% 10%, rgba(200,220,255,0.60) 0%, rgba(200,220,255,0.60) 1px, transparent 1px);
-            animation: starsBlink 3.5s ease-in-out infinite;
-        }
-        body.msg-star .toast::after {
-            content: '🌙'; position: absolute; top: 8px; right: 12px;
-            font-size: 18px; opacity: 0.9;
-            animation: moonGlow 3s ease-in-out infinite;
-        }
         @keyframes starsBlink { 0%,100%{ opacity:0.55; } 50%{ opacity:1; } }
         @keyframes moonGlow { 0%,100%{ filter:drop-shadow(0 0 4px rgba(180,210,255,0.4)); } 50%{ filter:drop-shadow(0 0 10px rgba(180,210,255,0.9)); } }
 
         /* ── 訊息樣式：雷霆（限定）── */
-        body.msg-thunder .toast {
-            background: rgba(10,7,22,0.97) !important;
-            border: 1px solid rgba(139,92,246,0.45) !important;
-            border-left: 4px solid #8B5CF6 !important;
-            border-radius: 10px !important;
-            box-shadow: 0 8px 32px rgba(60,20,160,0.35), 0 0 18px rgba(139,92,246,0.22) !important;
-            overflow: hidden;
-        }
-        body.msg-thunder .toast::before {
-            content: '';
-            position: absolute; inset: 0; pointer-events: none;
-            background: linear-gradient(135deg, rgba(139,92,246,0.1) 0%, transparent 55%);
-        }
-        body.msg-thunder .toast::after {
-            content: '⚡';
-            position: absolute; top: 8px; right: 12px;
-            font-size: 16px;
-            animation: thunderFlicker 2.5s ease-in-out infinite;
-        }
         @keyframes thunderFlicker {
             0%,100% { opacity:0.75; filter:drop-shadow(0 0 4px rgba(167,139,250,0.5)); }
             45%     { opacity:0.3; }
@@ -519,60 +392,10 @@
         }
 
         /* ── 訊息樣式：抹茶靜心（常駐）── */
-        body.msg-matcha .toast {
-            background: rgba(3,10,6,0.97) !important;
-            border: 1px solid rgba(74,222,128,0.35) !important;
-            border-left: 4px solid #4ADE80 !important;
-            border-radius: 14px !important;
-            box-shadow: 0 8px 32px rgba(10,60,30,0.3), 0 0 12px rgba(74,222,128,0.12) !important;
-        }
-        body.msg-matcha .toast::before {
-            content: '';
-            position: absolute; inset: 0; pointer-events: none;
-            background: radial-gradient(ellipse at bottom left, rgba(74,222,128,0.07) 0%, transparent 60%);
-        }
-        body.msg-matcha .toast::after {
-            content: '🍵'; position: absolute; top: 8px; right: 12px;
-            font-size: 16px; opacity: 0.85;
-        }
 
         /* ── 訊息樣式：王棋對弈（預備）── */
-        body.msg-chess .toast {
-            background: rgba(10,7,4,0.98) !important;
-            border: 1px solid rgba(231,199,119,0.36) !important;
-            border-left: 4px solid #E7C777 !important;
-            border-radius: 12px !important;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.38), 0 0 18px rgba(231,199,119,0.13) !important;
-        }
-        body.msg-chess .toast::before {
-            content: '';
-            position: absolute; inset: 0; pointer-events: none;
-            background: linear-gradient(45deg, rgba(246,231,180,0.05) 25%, transparent 25%, transparent 75%, rgba(246,231,180,0.05) 75%);
-            background-size: 18px 18px;
-        }
-        body.msg-chess .toast::after {
-            content: '♚'; position: absolute; top: 7px; right: 13px;
-            font-size: 18px; color: #f6e7b4; opacity: 0.9;
-        }
 
         /* ── 訊息樣式：霧雨玻璃（常駐預備）── */
-        body.msg-rain .toast {
-            background: rgba(5,18,26,0.94) !important;
-            border: 1px solid rgba(143,211,232,0.34) !important;
-            border-left: 4px solid #8FD3E8 !important;
-            border-radius: 15px !important;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.34), 0 0 18px rgba(143,211,232,0.13) !important;
-            backdrop-filter: blur(18px) !important;
-        }
-        body.msg-rain .toast::before {
-            content: '';
-            position: absolute; inset: 0; pointer-events: none;
-            background: linear-gradient(120deg, transparent 0%, rgba(255,255,255,0.06) 42%, transparent 70%);
-        }
-        body.msg-rain .toast::after {
-            content: '◌'; position: absolute; top: 6px; right: 13px;
-            font-size: 19px; color: #c7eaf4; opacity: 0.86;
-        }
 
         /* ── 打卡特效：雷霆（積雨雲層 + SVG 閃電描繪）── */
         .thunder-canopy-wrap {

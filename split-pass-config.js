@@ -6,7 +6,7 @@
             9: 'badge_supplies', 10: 'cat_color', 12: 'badge_laundry', 14: 'badge_fridge',
             15: 'matcha_color', 17: 'badge_supper', 19: 'badge_together', 20: 'thunder_color',
             23: 'badge_rain', 25: 'matcha_effect', 27: 'badge_desk', 30: 'thunder_effect',
-            33: 'badge_accounts', 35: 'rain_color', 38: 'badge_season', 40: 'chess_color',
+            33: 'badge_accounts', 35: 'rain_color', 38: 'badge_season', 40: ['dorm_color', 'homecoming_effect'],
         } }],
         levels: 40,
         xpPerLevel: 40,

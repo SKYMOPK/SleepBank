@@ -21,11 +21,18 @@
     let panel, reveal, overlay, entry, previewNode, previousFocus, revealId, busy = false, syncing = false;
     let passError = '', lastClockKey = '';
     let timer, toastTimer;
+    let revealQueue = [];
+    function showRewards(ids) { revealQueue = ids.slice(1); showReveal(ids[0]); }
+    function closeReward() {
+        reveal.classList.remove('open');
+        if (revealQueue.length) showReveal(revealQueue.shift());
+        else panel.querySelector('.le-close').focus();
+    }
     const now = () => Date.now() + serverOffset;
     const validSeasons = config.seasons;
     const configErrors = core.validate(validSeasons, catalog);
     const settings = () => preferences.shared;
-    const has = id => !!data.collection[id];
+    const has = id => !!data.collection[id] || catalog[id]?.trial === true;
     const active = () => configErrors.length ? null : core.seasonAt(validSeasons, now());
     const selectedSeason = () => validSeasons.find(s => s.id === panel?.querySelector('#le-season')?.value) || active() || validSeasons.at(-1);
     function applyBackground() {
@@ -35,6 +42,9 @@
         const scene = document.querySelector('#ledger-original-background');
         if (scene) scene.className = permitted ? `ledger-original-theme theme-${item.family}` : '';
         document.body.classList.toggle('le-themed', !!permitted);
+        document.body.dataset.theme = permitted ? item.family : 'default';
+        if (permitted && item.family === 'dorm') root.DormBackground?.mount(scene);
+        else root.DormBackground?.cleanup();
         if (permitted) {
             document.body.style.setProperty('--ledger-bg', item.bg);
             document.body.style.setProperty('--ledger-scene', cosmetics.backdrop(id));
@@ -65,7 +75,12 @@
         document.body.append(el); toastTimer = setTimeout(() => el.remove(), 3200);
     }
     function play(id) {
-        root.LedgerOriginalEffects.play(id, matchMedia('(prefers-reduced-motion: reduce)').matches, preferences.muted);
+        // Presentation errors must never escape into the successful save/undo path.
+        try {
+            if (id === 'homecoming_effect') return root.HomecomingEffect?.play({ muted: preferences.muted });
+            root.HomecomingEffect?.cleanup();
+            root.LedgerOriginalEffects.play(id, matchMedia('(prefers-reduced-motion: reduce)').matches, preferences.muted);
+        } catch (error) { console.warn('Effect unavailable', error); }
     }
     function open(next) {
         mode = next; previousFocus = document.activeElement;
@@ -81,14 +96,21 @@
         if (item.type === 'effect') play(id);
         else {
             document.body.classList.add('le-themed'); document.body.style.setProperty('--ledger-bg', item.bg);
+            document.body.dataset.theme = item.family;
             document.body.style.setProperty('--ledger-scene', cosmetics.backdrop(id));
             document.querySelector('#ledger-original-background').className = `ledger-original-theme theme-${item.family}`;
+            if (item.family === 'dorm') root.DormBackground?.mount(document.querySelector('#ledger-original-background'));
+            else root.DormBackground?.cleanup();
             toast('背景預覽 · 關閉面板後恢復原設定');
         }
     }
     function equip(id) {
         if (!has(id) || catalog[id]?.type === 'badge') return;
         settings()[catalog[id].type] = id;
+        if (id === 'homecoming_effect') {
+            root.HomecomingEffect?.enable();
+            root.HomecomingEffect?.prepare().catch(() => {});
+        }
         writeLocal(storageKey, preferences); applyBackground(); render(); toast('已套用 · 僅影響此裝置');
     }
     function render() {
@@ -115,7 +137,7 @@
                     continue;
                 }
                 const selected = settings()[tab] === item.id;
-                html += `<article class="le-card${selected ? ' selected' : ''}${!available ? ' locked' : ''}"><div class="le-art ledger-original-theme theme-${item.family}" data-family="${item.family}" style="--art-bg:${item.bg}">${tab === 'effect' ? cosmetics.art(item.id) : ''}${selected && available ? '<span class="le-equipped-badge">使用中</span>' : ''}</div><div class="le-card-info"><strong>${item.name}</strong><small>${selected && available ? '此裝置已套用' : available ? '可立即使用' : '未解鎖 · 可預覽'}</small><div class="le-card-actions"><button data-preview="${item.id}">預覽</button><button data-equip="${item.id}" ${!available || selected ? 'disabled' : ''}>${selected && available ? '已套用' : available ? '套用' : '未解鎖'}</button></div></div></article>`;
+                html += `<article class="le-card${selected ? ' selected' : ''}${!available ? ' locked' : ''}"><div class="le-art ledger-original-theme theme-${item.family}" data-family="${item.family}" style="--art-bg:${item.bg}">${tab === 'effect' ? cosmetics.art(item.id) : ''}${selected && available && tab !== 'color' ? '<span class="le-equipped-badge">使用中</span>' : ''}</div><div class="le-card-info"><strong>${item.name}</strong><small>${selected && available ? '此裝置已套用' : available ? '可立即使用' : '未解鎖 · 可預覽'}</small><div class="le-card-actions"><button data-preview="${item.id}">預覽</button><button data-equip="${item.id}" ${!available || selected ? 'disabled' : ''}>${selected && available ? '已套用' : available ? '套用' : '未解鎖'}</button></div></div></article>`;
             }
             html += '</div>';
             }
@@ -134,9 +156,11 @@
             if (Object.keys(outbox).length) html += '<div class="le-status">有待同步的經驗紀錄，連線後會自動重試；不影響帳目儲存。</div>';
             html += `<div class="le-track-heading"><strong>賽季獎勵</strong><span>40 個等級 · 共用進度</span></div><div class="le-pass-track" style="--track-progress:${Math.min(1, xp / 1560) * 100}%"><div class="le-track-line"><div></div></div>`;
             for (let i = 1; i <= 40; i++) {
-                const id = season.rewards?.[i], item = catalog[id], claimed = state.claimed?.[i];
+                const ids = core.rewardIds(season.rewards?.[i]), id = ids[0], first = catalog[id];
+                const item = ids.length > 1 ? { ...first, name: ids.map(key => catalog[key].name).join(' ＋ ') } : first;
+                const claimed = state.claimed?.[i];
                 const unlocked = (state.peakLevel || lv) >= i && season.enabled && season.startAt !== null && now() >= season.startAt;
-                html += `<div class="le-pass-row${i <= lv ? ' reached' : ''}${i === lv ? ' current' : ''}${claimed ? ' claimed' : ''}"><div class="le-track-label"><span class="le-row-level">LV ${i}</span><small>${(i - 1) * 40} EXP</small>${i === lv ? '<em>目前等級</em>' : ''}</div><span class="le-track-node" aria-hidden="true">${i}</span><div class="le-track-reward"><div class="le-reward-art">${item ? cosmetics.art(id) : '<span class="le-empty-art">—</span>'}</div><div><strong>${item ? item.name : '本級無獎勵'}</strong><small>${item ? item.type === 'badge' ? '紀念徽章' : item.limited ? '限定外觀' : '常駐外觀' : '持續累積進度'}${claimed ? ' · 已領取' : item && !season.enabled ? ' · 尚未開季' : item && unlocked ? ' · 可領取' : ''}</small></div>${item ? `<button class="le-secondary" data-preview="${id}">預覽</button><button class="${unlocked ? 'le-primary' : 'le-secondary'}" data-claim="${i}" ${!unlocked || !connected || busy ? 'disabled' : ''}>${claimed ? '重看' : busy ? '處理中' : '領取'}</button>` : ''}</div></div>`;
+                html += `<div class="le-pass-row${i <= lv ? ' reached' : ''}${i === lv ? ' current' : ''}${claimed ? ' claimed' : ''}"><div class="le-track-label"><span class="le-row-level">LV ${i}</span><small>${(i - 1) * 40} EXP</small>${i === lv ? '<em>目前等級</em>' : ''}</div><span class="le-track-node" aria-hidden="true">${i}</span><div class="le-track-reward${ids.length > 1 ? ' le-reward-bundle' : ''}"><div class="le-reward-art${ids.length > 1 ? ' le-reward-fan' : ''}">${ids.length > 1 ? ids.map(key => `<span class="le-reward-fan-card" title="${catalog[key].name}">${cosmetics.art(key)}</span>`).join('') : item ? cosmetics.art(id) : '<span class="le-empty-art">—</span>'}</div><div><strong>${item ? item.name : '本級無獎勵'}</strong><small>${item ? item.type === 'badge' ? '紀念徽章' : item.limited ? '限定外觀' : '常駐外觀' : '持續累積進度'}${claimed ? ' · 已領取' : item && !season.enabled ? ' · 尚未開季' : item && unlocked ? ' · 可領取' : ''}</small></div>${item ? `${ids.map(key => `<button class="le-secondary" data-preview="${key}">${ids.length > 1 ? catalog[key].type === 'color' ? '背景預覽' : '特效預覽' : '預覽'}</button>`).join('')}<button class="${unlocked ? 'le-primary' : 'le-secondary'}" data-claim="${i}" ${!unlocked || !connected || busy ? 'disabled' : ''}>${claimed ? '重看' : busy ? '處理中' : '領取'}</button>` : ''}</div></div>`;
             }
             html += '</div>';
         }
@@ -148,15 +172,16 @@
         return result.snapshot.val();
     }
     async function claim(lv) {
-        const season = selectedSeason(), id = season.rewards[lv];
+        const season = selectedSeason(), ids = core.rewardIds(season.rewards[lv]), id = ids[0];
         if (!catalog[id] || busy || configErrors.length || !season.enabled || now() < season.startAt) return;
-        if (data.seasons[season.id]?.claimed?.[lv]) return showReveal(id);
+        if (data.seasons[season.id]?.claimed?.[lv]) return showRewards(ids);
         busy = true; render();
         try {
             const claimedAt = now();
             const value = await transact(value => core.claim(value, season, lv, claimedAt));
             if (!value?.seasons?.[season.id]?.claimed?.[lv]) throw new Error('not-unlocked');
-            showReveal(id);
+            showRewards(ids);
+            if (ids.length > 1) toast(`已共同解鎖：${ids.map(key => catalog[key].name).join('、')}`);
         } catch { toast('領取未完成，請確認連線後重試'); }
         finally { busy = false; render(); }
     }
@@ -190,8 +215,8 @@
         resetBadgeTilt();
         reveal.querySelector('h2').textContent = item.name;
         reveal.querySelector('.le-eyebrow').textContent = item.type === 'badge' ? `${item.tier === 'special' ? '特別紀念' : '日常紀念'} / ${has(id) ? '已收藏' : '設計預覽 · 尚未解鎖'}` : 'SHARED COLLECTION / 雙方共同解鎖';
-        const source = validSeasons.find(s => Object.values(s.rewards || {}).includes(id));
-        const rewardLevel = source && Object.entries(source.rewards).find(([, reward]) => reward === id)?.[0];
+        const source = validSeasons.find(s => Object.values(s.rewards || {}).some(reward => core.rewardIds(reward).includes(id)));
+        const rewardLevel = source && Object.entries(source.rewards).find(([, reward]) => core.rewardIds(reward).includes(id))?.[0];
         const obtainedAt = source && data.seasons[source.id]?.claimedAt?.[rewardLevel];
         reveal.querySelector('p').textContent = item.type === 'badge' ? `${item.desc} · ${source?.name || '賽季紀念'} · LV${rewardLevel || '—'}${obtainedAt ? ` · ${new Date(obtainedAt).toLocaleDateString('zh-TW', { timeZone: 'Asia/Taipei' })}取得` : ''}` : '收藏永久保留，外觀可隨時更換。';
         reveal.querySelector('[data-reveal-equip]').hidden = item.type === 'badge';
@@ -371,16 +396,16 @@
             if (b.dataset.tab) { tab = b.dataset.tab; render(); panel.querySelector('.le-content').scrollTop = 0; }
             if (b.dataset.preview) preview(b.dataset.preview);
             if (b.dataset.equip) equip(b.dataset.equip);
-            if (b.hasAttribute('data-disable')) { settings()[tab] = null; writeLocal(storageKey, preferences); applyBackground(); render(); }
+            if (b.hasAttribute('data-disable')) { if (tab === 'effect') root.HomecomingEffect?.cleanup(); settings()[tab] = null; writeLocal(storageKey, preferences); applyBackground(); render(); }
             if (b.hasAttribute('data-mute')) { preferences.muted = !preferences.muted; writeLocal(storageKey, preferences); render(); }
             if (b.dataset.claim) claim(Number(b.dataset.claim));
         });
         panel.addEventListener('change', e => { if (e.target.id === 'le-season') render(); });
         reveal.addEventListener('click', e => {
             const b = e.target.closest('button'); if (!b) return;
-            if (b.hasAttribute('data-reveal-close')) { reveal.classList.remove('open'); panel.querySelector('.le-close').focus(); }
+            if (b.hasAttribute('data-reveal-close')) closeReward();
             if (b.hasAttribute('data-reveal-preview')) { reveal.classList.remove('open'); preview(revealId); panel.querySelector('.le-close').focus(); }
-            if (b.hasAttribute('data-reveal-equip')) { equip(revealId); reveal.classList.remove('open'); panel.querySelector('.le-close').focus(); }
+            if (b.hasAttribute('data-reveal-equip')) { equip(revealId); closeReward(); }
         });
         document.addEventListener('keydown', e => {
             const target = reveal.classList.contains('open') ? reveal : panel.classList.contains('open') ? panel : null;

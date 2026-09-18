@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>每日額度</title>
+<title>每日預算</title>
 <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
 <style>
@@ -113,7 +113,7 @@ body.sb-budget { --bg:#141310; --card:#211d17; --card2:#29231b; --text:#f3eddf; 
     <p>確定要重設本月預算與金庫嗎？<br>此操作會將本月預算與金庫恢復為初始狀態。</p>
     <div class="reset-actions"><button class="btn secondary" id="resetCancel" onclick="closeResetDialog()">取消</button><button class="btn danger" id="resetConfirm" onclick="confirmResetMonth()">確認重設</button></div>
 </dialog>
-<header class="header"><a class="header-back" href="index.html" aria-label="返回首頁"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5m7-7-7 7 7 7"/></svg></a><div class="header-title">每日額度</div><div class="header-sub">安排每天可以使用的預算</div><span class="sync-status" id="syncStatus" role="status">同步中</span></header>
+<header class="header"><a class="header-back" href="index.html" aria-label="返回首頁"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5m7-7-7 7 7 7"/></svg></a><div class="header-title">每日預算</div><div class="header-sub">安排每天可以使用的預算</div><span class="sync-status" id="syncStatus" role="status">同步中</span></header>
 <div class="wrap">
     <div class="user-switch">
         <button class="user-btn active" id="tab-p1" onclick="selectUser('p1')">至凱</button>

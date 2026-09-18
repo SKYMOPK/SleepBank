@@ -8,15 +8,19 @@
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
     <script src="split-core.js"></script>
-    <script src="split-pass-config.js"></script>
-    <script src="split-pass-core.js"></script>
-    <script src="split-cosmetics.js"></script>
+    <script src="split-pass-config.js?v=season1-lv40-set"></script>
+    <script src="split-pass-core.js?v=reward-bundle-1"></script>
+    <script src="split-cosmetics.js?v=locked-dorm-set"></script>
     <script src="split-badges.js"></script>
     <script src="assets/vendor/confetti-1.6.0.min.js"></script>
     <script src="split-original-effects.js"></script>
-    <script src="split-extras.js?v=badge-relief-20260917-4"></script>
-    <link rel="stylesheet" href="split-extras.css?v=badge-relief-20260917-4">
-    <link rel="stylesheet" href="split-original-effects.css">
+    <script src="split-homecoming.js?v=20260918-1"></script>
+    <script src="split-homecoming-audio.js?v=20260918-1"></script>
+    <script src="split-dorm-background.js?v=20260918-1"></script>
+    <link rel="stylesheet" href="split-homecoming.css?v=20260918-1">
+    <script src="split-extras.js?v=reward-fan-2"></script>
+    <link rel="stylesheet" href="split-extras.css?v=reward-fan-2">
+    <link rel="stylesheet" href="split-original-effects.css?v=themes-20260918-1">
     <style>
         :root {
             --bg: #1E1912;
@@ -635,8 +639,9 @@
         @media (min-width: 601px) { .sb-split .page-wrapper { padding-top: 8px; } .sb-split .balance-amount { font-size: 58px; } }
         @media (prefers-reduced-motion: reduce) { .sb-split .view.active { animation: none; } }
     </style>
+    <link rel="stylesheet" href="split-themes.css?v=20260918-5">
 </head>
-<body class="sb-page sb-split">
+<body class="sb-page sb-split" data-theme="default">
 
 <svg aria-hidden="true" focusable="false" width="0" height="0" style="position:absolute;overflow:hidden">
     <symbol id="icon-ledger" viewBox="0 0 24 24"><path d="M7 3h10a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z"/><path d="M9 7h6M9 11h6M9 15h4"/></symbol>
@@ -1170,7 +1175,7 @@
             });
         } catch (error) {
             console.error(error);
-            showToast('每日額度同步待重試', 'var(--red)');
+            showToast('每日預算同步待重試', 'var(--red)');
             throw error;
         } finally {
             if (syncingBudgetKeys.get(key) === task) syncingBudgetKeys.delete(key);
@@ -1540,7 +1545,7 @@
                 { label: '帳目', value: r.note },
                 { label: '先付款', value: payerName },
                 { label: '影響', value: getResultText(r) },
-            ], '欠款與每日額度會一併撤銷，完成後可在 6 秒內復原。', true),
+            ], '欠款與每日預算會一併撤銷，完成後可在 6 秒內復原。', true),
             async () => {
                 try {
                     await commitRecordChange(key, r, null);

@@ -14,9 +14,12 @@
             catalog[id] = { ...item, id, family, type, limited: ['cat', 'thunder', 'chess'].includes(family), name: `${item.name} · ${type === 'color' ? '背景' : '新增特效'}` };
         }
     }
+    catalog.homecoming_effect = { id: 'homecoming_effect', family: 'homecoming', type: 'effect', name: '回到宿舍', limited: true, accent: '#d7b68d', bg: '#211b15', desc: '推開木門，回到熟悉的暖光裡' };
+    catalog.dorm_color = { id: 'dorm_color', family: 'dorm', type: 'color', name: '第一季 · 宿舍夜燈', limited: true, accent: '#d3b788', bg: '#171411', desc: '夜燈亮著，日常留在這裡' };
     function art(id) {
         const item = catalog[id];
         if (!item) return '';
+        if (id === 'dorm_color' || id === 'homecoming_effect') return `<img class="homecoming-art" src="assets/homecoming/${id === 'dorm_color' ? 'dorm-preview' : 'preview'}.jpg" alt="暖光中的雙人宿舍" loading="lazy">`;
         if (item.type === 'badge') return `<svg class="le-badge-art" viewBox="0 0 120 120" aria-hidden="true"><defs><linearGradient id="${id}-metal" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fff2c7"/><stop offset=".35" stop-color="#c4a877"/><stop offset=".6" stop-color="#faf0cf"/><stop offset="1" stop-color="#997346"/></linearGradient></defs><g stroke="url(#${id}-metal)" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">${item.shape}</g></svg>`;
         return `<svg viewBox="0 0 120 120" aria-hidden="true" style="color:${item.accent}">${item.shape}</svg>`;
     }

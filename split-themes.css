@@ -1,0 +1,208 @@
+/* Theme definitions only supply shared colors. Background art stays independent. */
+body.sb-split {
+    --theme-page-bg: #141310;
+    --theme-surface-main: rgba(33,29,23,.56);
+    --theme-surface-soft: rgba(38,33,26,.34);
+    --theme-surface-raised: rgba(37,32,23,.82);
+    --theme-border: rgba(215,177,91,.20);
+    --theme-accent: #d7b15b;
+    --theme-accent-soft: rgba(215,177,91,.12);
+    --theme-text: #f3eddf;
+    --theme-muted: #aaa196;
+    --theme-on-accent: #191611;
+    --theme-backdrop: rgba(18,16,12,.68);
+    --text: var(--theme-text);
+    --muted: var(--theme-muted);
+    --orange: var(--theme-accent);
+    --border: var(--theme-border);
+    --sb-focus: var(--theme-accent);
+    background-color: var(--theme-page-bg);
+}
+body.sb-split[data-theme="dorm"] {
+    --theme-page-bg: #171411;
+    --theme-surface-main: rgba(29,26,22,.66);
+    --theme-surface-soft: rgba(34,30,25,.44);
+    --theme-surface-raised: rgba(35,30,25,.94);
+    --theme-border: rgba(224,207,178,.13);
+    --theme-accent: #d3b788;
+    --theme-accent-soft: rgba(211,183,136,.13);
+    --theme-muted: #b7ada0;
+    --theme-backdrop: rgba(20,17,14,.74);
+}
+.theme-dorm {
+    background: #171411 url('assets/homecoming/dorm-preview.jpg?v=clean-room-2') center / cover no-repeat;
+}
+#ledger-original-background.theme-dorm { overflow: hidden; }
+#ledger-original-background.theme-dorm canvas { width: 100%; height: 100%; display: block; }
+#ledger-original-background.theme-dorm::after {
+    content: ''; position: absolute; inset: 0; pointer-events: none;
+    background: linear-gradient(180deg, rgba(18,16,14,.60), rgba(18,16,14,.38) 45%, rgba(18,16,14,.52));
+}
+body.sb-split[data-theme="star"] {
+    --theme-page-bg: #0f141f;
+    --theme-surface-main: rgba(23,31,45,.58);
+    --theme-surface-soft: rgba(30,39,55,.36);
+    --theme-surface-raised: rgba(28,36,51,.82);
+    --theme-border: rgba(167,200,226,.22);
+    --theme-accent: #adc8e0;
+    --theme-accent-soft: rgba(167,200,226,.12);
+    --theme-backdrop: rgba(10,15,24,.70);
+}
+body.sb-split[data-theme="thunder"] {
+    --theme-page-bg: #15121d;
+    --theme-surface-main: rgba(32,28,43,.64);
+    --theme-surface-soft: rgba(40,35,52,.40);
+    --theme-surface-raised: rgba(37,32,48,.82);
+    --theme-border: rgba(191,179,220,.22);
+    --theme-accent: #c2b7dc;
+    --theme-accent-soft: rgba(191,179,220,.12);
+    --theme-backdrop: rgba(16,12,24,.70);
+}
+body.sb-split[data-theme="matcha"] {
+    --theme-page-bg: #111912;
+    --theme-surface-main: rgba(27,38,29,.56);
+    --theme-surface-soft: rgba(34,47,36,.34);
+    --theme-surface-raised: rgba(31,43,33,.82);
+    --theme-border: rgba(165,195,149,.22);
+    --theme-accent: #b2c69a;
+    --theme-accent-soft: rgba(165,195,149,.12);
+    --theme-backdrop: rgba(10,18,12,.70);
+}
+body.sb-split[data-theme="chess"] {
+    --theme-page-bg: #15120e;
+    --theme-surface-main: rgba(35,29,20,.60);
+    --theme-surface-soft: rgba(43,35,24,.38);
+    --theme-surface-raised: rgba(40,33,23,.82);
+    --theme-border: rgba(224,199,140,.22);
+    --theme-accent: #dcc493;
+    --theme-accent-soft: rgba(224,199,140,.12);
+}
+body.sb-split[data-theme="rain"] {
+    --theme-page-bg: #10191e;
+    --theme-surface-main: rgba(26,37,43,.62);
+    --theme-surface-soft: rgba(33,47,54,.38);
+    --theme-surface-raised: rgba(30,43,50,.82);
+    --theme-border: rgba(165,195,205,.22);
+    --theme-accent: #aec8cc;
+    --theme-accent-soft: rgba(165,195,205,.12);
+    --theme-backdrop: rgba(10,18,23,.70);
+}
+body.sb-split[data-theme="cat"] {
+    --theme-page-bg: #1c1417;
+    --theme-surface-main: rgba(45,32,37,.66);
+    --theme-surface-soft: rgba(53,38,43,.40);
+    --theme-surface-raised: rgba(49,35,40,.82);
+    --theme-border: rgba(215,172,187,.22);
+    --theme-accent: #d8b0bd;
+    --theme-accent-soft: rgba(215,172,187,.12);
+    --theme-backdrop: rgba(24,14,18,.70);
+}
+
+/* One UI mapping for every theme, including default. */
+.sb-split .header {
+    background: var(--theme-surface-soft);
+    border-bottom-color: transparent;
+    backdrop-filter: blur(14px) saturate(118%);
+    -webkit-backdrop-filter: blur(14px) saturate(118%);
+}
+.sb-split .view.active {
+    margin: 10px auto 0;
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+}
+.sb-split .view.active .page-wrapper { max-width: 600px; padding: 0 14px 30px; }
+.sb-split .view.active .balance-card,
+.sb-split .view.active .input-card,
+.sb-split .month-group {
+    margin: 0 0 16px;
+    padding: 20px 18px;
+    border: 1px solid rgba(255,255,255,.08);
+    border-radius: 26px;
+    background: linear-gradient(165deg, rgba(255,255,255,.035), rgba(0,0,0,.025)), var(--theme-surface-main);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.055), 0 12px 38px rgba(0,0,0,.12);
+    backdrop-filter: blur(16px) saturate(120%) brightness(1.02);
+    -webkit-backdrop-filter: blur(16px) saturate(120%) brightness(1.02);
+}
+.sb-split .view-records-btn {
+    background: var(--theme-surface-soft);
+    border: 1px solid rgba(255,255,255,.06);
+    border-radius: 22px;
+    padding: 14px 18px;
+    margin-bottom: 10px;
+    backdrop-filter: blur(12px) saturate(115%);
+    -webkit-backdrop-filter: blur(12px) saturate(115%);
+}
+.sb-split .record-card, .sb-split .record-tools { background: transparent; }
+.sb-split .record-tools,
+.sb-split .settlement-heading, .sb-split .calc-panel { background: var(--theme-surface-soft); }
+.sb-split .payer-row, .sb-split .record-filter, .sb-split .record-search { background: var(--theme-surface-soft); }
+.sb-split .amount-input, .sb-split .note-input, .sb-split .calc-input {
+    background: rgba(255,255,255,.035);
+    border: 1px solid rgba(255,255,255,.065);
+    border-radius: 16px;
+    padding: 10px 12px;
+}
+.sb-split .amount-input { font-size: 25px; }
+.sb-split .amount-row { gap: 12px; }
+.sb-split .payer-row { border-radius: 17px; border-color: rgba(255,255,255,.07); }
+.sb-split .payer-btn { border-radius: 13px; }
+.sb-split :is(.submit-btn,.edit-save,.confirm-btns button,.edit-cancel,.settle-btn) { border-radius: 16px; }
+.sb-split :is(.view-records-badge,.le-equipped-badge) { border-radius: 999px; }
+.sb-split :is(.input-card,.view-records-btn,.record-card,.month-heading,.payer-row,.amount-input,.note-input,.record-filter,.record-search,.calc-panel,.calc-input,.settlement-heading) { border-color: var(--theme-border); }
+.sb-split :is(.amount-input,.note-input,.record-search,.record-filter,.calc-input):focus { border-color: var(--theme-accent); box-shadow: none; }
+.sb-split .amount-input::placeholder, .sb-split .note-input::placeholder { color: var(--theme-muted); }
+.sb-split .payer-btn.selected { color: var(--theme-accent); background: var(--theme-accent-soft); box-shadow: inset 0 0 0 1px var(--theme-border); }
+.sb-split :is(.submit-btn,.edit-save,.confirm-ok) { color: var(--theme-on-accent); background: var(--theme-accent); border-color: var(--theme-border); }
+.sb-split :is(.submit-btn,.edit-save):disabled { background: var(--theme-surface-soft); color: var(--theme-muted); border-color: var(--theme-border); }
+.sb-split :is(.edit-sheet,.confirm-box,.selection-bar,.undo-toast,#toast,.le-toast) {
+    background: linear-gradient(135deg, rgba(255,255,255,.07), transparent 42%), var(--theme-surface-raised);
+    border-color: rgba(255,255,255,.09);
+    color: var(--theme-text);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.06), 0 18px 52px rgba(0,0,0,.16);
+    backdrop-filter: blur(18px) saturate(118%);
+    -webkit-backdrop-filter: blur(18px) saturate(118%);
+}
+.sb-split :is(.edit-sheet,.confirm-box) { border-radius: 28px; }
+.sb-split :is(.selection-bar,.undo-toast,#toast,.le-toast) { border-radius: 20px; }
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .sb-split .view.active :is(.balance-card,.input-card), .sb-split .month-group { background: var(--theme-surface-raised); }
+}
+.sb-split :is(.edit-overlay,.confirm-overlay,.le-backdrop,.le-reveal) { background: var(--theme-backdrop); }
+.sb-split :is(.selection-bar strong,.record-result,.le-eyebrow) { color: var(--theme-accent); }
+.sb-split :is(.selection-bar button,.undo-toast button) { color: var(--theme-accent); border-color: var(--theme-border); background: var(--theme-accent-soft); }
+.sb-split .record-checkbox::before { border-color: var(--theme-border); background: var(--theme-surface-soft); }
+.sb-split .record-checkbox.checked::before { background: var(--theme-accent); border-color: var(--theme-accent); box-shadow: none; }
+.sb-split .record-checkbox.checked .icon { color: var(--theme-on-accent); }
+.sb-split :is(.record-filter option,.record-actions[open]) { background: var(--theme-surface-raised); }
+.sb-split .le-panel, .sb-split .le-reveal-box { background: var(--theme-surface-raised); color: var(--theme-text); }
+.sb-split :is(.le-content p,.le-card-info small,.le-segments button,.le-entry small) { color: var(--theme-muted); }
+.sb-split :is(.le-heading,.le-segments,.le-card,.le-close,.le-card-actions button,.le-secondary) { border-color: var(--theme-border); }
+.sb-split :is(.le-segments,.le-card,.le-secondary) { background: var(--theme-surface-soft); }
+.sb-split .le-segments button[aria-pressed="true"], .sb-split .le-card.selected { border-color: var(--theme-accent); }
+.sb-split .le-segments button[aria-pressed="true"] { background: var(--theme-accent-soft); color: var(--theme-accent); }
+.sb-split .le-primary { background: var(--theme-accent); color: var(--theme-on-accent); }
+.sb-split .le-card-actions button { background: var(--theme-accent-soft); color: var(--theme-text); }
+.sb-split :is(.le-status,.le-progress,.le-equipped,.le-track-reward) { border-color: var(--theme-border); }
+.sb-split .le-status:not(.error), .sb-split .le-track-reward { background: var(--theme-surface-soft); }
+.sb-split :is(.le-pass-row small,.le-track-heading span,.le-track-label .le-row-level,.le-level span,.le-status:not(.error)) { color: var(--theme-muted); }
+.sb-split .le-bar div, .sb-split .le-track-line > div, .sb-split .le-equipped-badge { background: var(--theme-accent); }
+.sb-split .le-equipped-badge { color: var(--theme-on-accent); }
+.sb-split .le-track-node { background: var(--theme-surface-soft); border-color: var(--theme-border); color: var(--theme-muted); }
+.sb-split .reached .le-track-node, .sb-split .current .le-track-node { background: var(--theme-accent); border-color: var(--theme-accent); color: var(--theme-on-accent); box-shadow:none; }
+.sb-split .current .le-track-label .le-row-level { color: var(--theme-accent); }
+.sb-split :is(.edit-actions button,.edit-header .icon-action):focus-visible { outline-color: var(--theme-accent); }
+
+/* Semantic status colors deliberately remain outside theme definitions. */
+.sb-split .balance-amount.owed, .sb-split .balance-mini-amount.owed { color:#d7b15b; }
+.sb-split .balance-amount.owe, .sb-split .balance-mini-amount.owe { color:var(--red); }
+.sb-split .balance-amount.zero, .sb-split .balance-mini-amount.zero { color:var(--green); }
+.sb-split .confirm-ok.danger { background: #d38b8614; border-color: #d38b8640; color: var(--red); }
+.sb-split .settle-btn.secondary { background: var(--theme-accent-soft); color: var(--theme-accent); border-color: var(--theme-border); }
+@media (hover:hover) {
+    .sb-split :is(.submit-btn,.edit-save,.confirm-ok):not(:disabled):not(.danger):hover { background: var(--theme-accent); filter: brightness(1.05); }
+    .sb-split .record-card:hover, .sb-split .edit-cancel:hover, .sb-split .edit-header .icon-action:hover { background: var(--theme-accent-soft); }
+}

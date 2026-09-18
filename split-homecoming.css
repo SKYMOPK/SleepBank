@@ -1,0 +1,36 @@
+.homecoming-overlay {
+    position: fixed; inset: 0; z-index: 1300; overflow: hidden;
+    opacity: 0; background: #100f0d; touch-action: none;
+    transition: opacity 200ms ease; isolation: isolate;
+}
+.homecoming-overlay canvas { width: 100%; height: 100%; display: block; }
+.homecoming-overlay::after {
+    content: ''; position: absolute; inset: 0; pointer-events: none;
+    background: radial-gradient(ellipse at 50% 46%, transparent 38%, #09080745 100%);
+}
+.homecoming-skip {
+    position: absolute; right: max(16px,env(safe-area-inset-right));
+    top: max(16px,env(safe-area-inset-top)); z-index: 2;
+    min-width: 60px; min-height: 44px; padding: 8px 14px;
+    border: 1px solid #ffffff20; border-radius: 999px;
+    background: #17130e60; color: #e4d8c6; font: inherit; font-size: 13px;
+    cursor: pointer; backdrop-filter: blur(8px);
+}
+.homecoming-skip:focus-visible { outline: 2px solid #e4c99a; outline-offset: 3px; }
+.sb-split.homecoming-playing > :is(.header,.view,.le-backdrop) {
+    filter: blur(2px) brightness(.65); transition: filter 350ms ease;
+}
+.sb-split.homecoming-playing.homecoming-returning > :is(.header,.view,.le-backdrop) { filter: none; }
+/* Keep the existing six-second undo window usable throughout the scene. */
+.sb-split.homecoming-playing .undo-toast { z-index: 1400; }
+.homecoming-afterglow {
+    position: fixed; inset: 0; z-index: 1299; pointer-events: none;
+    background: linear-gradient(135deg,#deb47212,transparent 50%,#b57c3410);
+    animation: homecoming-cool 450ms ease-out forwards;
+}
+@keyframes homecoming-cool { to { opacity: 0; } }
+.le-art .homecoming-art { width: 100%; height: 100%; object-fit: cover; }
+@media (prefers-reduced-motion: reduce) {
+    .sb-split.homecoming-playing > :is(.header,.view,.le-backdrop) { filter: brightness(.85); }
+    .homecoming-afterglow { animation-duration: 200ms; }
+}

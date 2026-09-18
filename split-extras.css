@@ -75,7 +75,6 @@ body.le-themed::before { display: none; }
 .original-fx-host * { pointer-events: none !important; }
 .original-confetti { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 9010; }
 .original-fx-message { position: absolute; left: 50%; top: 40%; transform: translate(-50%,-50%); padding: 14px 24px; border: 1px solid #a6d8c860; background: #19372f; color: white; border-radius: 6px; }
-body.le-themed .input-card, body.le-themed .balance-card { background: #192024f2; }
 @keyframes le-pop { 0% { opacity: 0; transform: translateY(50px) scale(.65); } 25%,65% { opacity: 1; transform: translateY(0) scale(1); } 100% { opacity: 0; transform: translateY(-25px) scale(1.05); } }
 @keyframes le-meteor { 0% { opacity: 0; transform: translate(100px,-100px); } 30%,65% { opacity: 1; transform: none; } 100% { opacity: 0; transform: translate(-60px,60px); } }
 @keyframes le-flash { 0%,10%,30% { opacity: 0; } 15%,35%,65% { opacity: 1; } 100% { opacity: 0; } }
@@ -120,6 +119,14 @@ body.le-themed .input-card, body.le-themed .balance-card { background: #192024f2
 .current .le-track-label .le-row-level { color: #edcc85; }
 .le-track-reward { display: grid; grid-template-columns: 42px minmax(0,1fr); align-items: center; gap: 10px; margin-left: 12px; padding: 12px; border: 1px solid #ffffff18; background: #ffffff03; border-radius: 6px; min-height: 80px; }
 .le-track-reward svg { width: 40px; height: 40px; }
+.le-reward-art { min-width: 0; }
+.le-reward-art > img { display: block; width: 40px; height: 40px; object-fit: cover; border-radius: 5px; }
+.le-track-reward.le-reward-bundle { grid-template-columns: minmax(0,1fr); }
+.le-reward-fan { position: relative; width: 104px; height: 88px; margin: 2px auto 4px; }
+.le-reward-fan-card { position: absolute; top: 8px; width: 58px; height: 72px; overflow: hidden; border: 1px solid rgba(239,221,188,.22); border-radius: 7px; background: #211d17; box-shadow: 0 3px 9px #00000028; }
+.le-reward-fan-card:first-child { left: 9px; transform: rotate(-12deg); }
+.le-reward-fan-card:last-child { left: 42px; transform: rotate(12deg); }
+.le-reward-fan-card img { display: block; width: 100%; height: 100%; object-fit: cover; }
 .le-track-reward .le-empty-art { width: 38px; height: 38px; }
 .le-track-reward button { grid-column: 1 / -1; width: 100%; }
 .current .le-track-reward { border-color: #edcc8550; }
