@@ -2,7 +2,7 @@
 <html lang="zh-TW">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>每日額度</title>
 <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
@@ -54,14 +54,70 @@ body { font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; color
 @media (max-width:380px) { .hero-value { font-size:44px; } .stat-val { font-size:15px; } .form-row { grid-template-columns:1fr 70px; } }
 </style>
 <link rel="stylesheet" href="system-ui.css">
+<style>
+body.sb-budget { --bg:#141310; --card:#211d17; --card2:#29231b; --text:#f3eddf; --muted:#aaa196; --green:#8bb584; --gold:#d7b15b; --red:#d38b86; --border:#d7b15b20; background:radial-gradient(ellipse 600px 740px at 50% 30%,#8d673018,transparent 82%),linear-gradient(125deg,#12110f,#171510 55%,#12110f); background-attachment:fixed; }
+.sb-budget .wrap { max-width:600px; padding:0 20px 32px; }
+.sb-budget .header { max-width:600px; margin:auto; min-height:78px; padding:16px 90px 16px 64px; text-align:left; background:#141310f5; backdrop-filter:none; border:0; }
+.sb-budget .header-title { color:var(--text); font-size:19px; font-weight:650; letter-spacing:0; }
+.sb-budget .header-sub { color:var(--muted); font-size:12px; margin-top:5px; }
+.sb-budget .header-back { display:grid; place-items:center; left:12px; width:44px; height:44px; border:0; background:none; }
+.sb-budget .ui-icon { width:20px; height:20px; fill:none; stroke:currentColor; stroke-width:1.6; stroke-linecap:round; stroke-linejoin:round; }
+.sb-budget .sync-status { position:absolute; right:20px; top:32px; color:var(--muted); font-size:11px; }
+.sb-budget .user-switch { gap:4px; margin-top:8px; border:1px solid #d7b15b14; border-radius:8px; background:#211d17; }
+.sb-budget .user-btn { min-height:44px; border-radius:5px; font-size:14px; font-weight:550; }
+.sb-budget .user-btn.active { background:#8bb58418; color:#b4cdaa; box-shadow:inset 0 0 0 1px #8bb58430; }
+.sb-budget .hero { margin-top:20px; padding:24px 0; border:0; border-radius:0; background:linear-gradient(110deg,#33402b18,#30261b24,transparent); box-shadow:none; animation:none; }
+.sb-budget .hero::before { display:none; }
+.sb-budget .hero-label { font-weight:500; letter-spacing:0; font-size:13px; }
+.sb-budget .lock-pill { padding:0; border:0; border-radius:0; background:none; font-weight:400; }
+.sb-budget .hero-value { font-size:52px; font-weight:650; letter-spacing:0; line-height:1.2; overflow-wrap:anywhere; }
+.sb-budget .hero.unconfigured .hero-value { font-size:24px; color:var(--text); margin-top:16px; }
+.sb-budget .hero.unconfigured .progress { display:none; }
+.sb-budget .hero-sub { font-size:13px; font-weight:400; line-height:1.65; }
+.sb-budget .setup-link { margin-top:10px; min-height:44px; border:0; padding:0; background:none; color:var(--green); font:inherit; font-size:14px; cursor:pointer; }
+.sb-budget .setup-link[hidden] { display:none; }
+.sb-budget .progress { height:3px; margin-top:20px; background:#d7b15b12; }
+.sb-budget .stats { grid-template-columns:repeat(2,minmax(0,1fr)); gap:20px 24px; margin-top:24px; }
+.sb-budget .stat { text-align:left; padding:0; background:none; border:0; border-radius:0; }
+.sb-budget .stat-val { font-size:20px; font-weight:550; white-space:normal; overflow-wrap:anywhere; }
+.sb-budget .stat-name { font-size:12px; font-weight:400; margin-top:6px; }
+.sb-budget .panel { margin-top:8px; border:0; border-radius:0; background:none; animation:none; }
+.sb-budget .panel-row { padding:24px 0; border-top:1px solid var(--border); border-bottom:0; background:linear-gradient(110deg,#30261c22,transparent); }
+.sb-budget .row-title { font-size:14px; font-weight:550; letter-spacing:0; margin-bottom:16px; }
+.sb-budget .form-row { grid-template-columns:minmax(0,1fr) 80px; gap:16px; }
+.sb-budget .input { min-width:0; height:50px; border:0; border-bottom:1px solid #d7b15b30; border-radius:0; padding:8px 0; background:none; font-size:24px; font-weight:550; text-align:left; }
+.sb-budget .input:focus { border-color:var(--green); box-shadow:none; }
+.sb-budget .input:disabled { opacity:.65; }
+.sb-budget .input:user-invalid { border-color:var(--red); }
+.sb-budget .btn { min-height:48px; border:0; border-radius:8px; background:#8bb584; color:#182116; font-size:14px; font-weight:600; box-shadow:none; }
+.sb-budget .btn:disabled { opacity:1; background:#303529; color:#929b88; }
+.sb-budget .btn.secondary,.sb-budget .btn.danger { border:0; background:none; border-radius:5px; font-weight:500; }
+.sb-budget .btn.secondary { color:var(--muted); }
+.sb-budget .btn.danger { color:var(--red); }
+.sb-budget .actions { display:flex; gap:12px; justify-content:flex-end; }
+.sb-budget .note { text-align:left; color:var(--muted); font-size:12px; line-height:1.7; margin-top:16px; }
+.sb-budget #toast { background:#252017; border:1px solid #d7b15b24; border-left:3px solid var(--green); border-radius:10px; font-weight:500; white-space:normal; width:max-content; line-height:1.6; bottom:max(20px,env(safe-area-inset-bottom)); }
+.sb-budget #resetDialog { margin:auto; width:calc(100% - 32px); max-width:400px; max-height:calc(100dvh - 32px); overflow:auto; padding:24px 20px; background:#252017; color:var(--text); border:1px solid #d7b15b24; border-radius:12px; box-shadow:0 16px 48px #0004; }
+.sb-budget #resetDialog::backdrop { background:#12100cad; }
+.sb-budget #resetDialog h2 { font-size:19px; font-weight:650; margin-bottom:16px; }
+.sb-budget #resetDialog p { font-size:14px; color:var(--muted); line-height:1.8; }
+.sb-budget .reset-actions { display:grid; grid-template-columns:1fr 1.5fr; gap:12px; margin-top:24px; }
+.sb-budget .reset-actions .btn.danger { background:#d38b8614; color:var(--red); border:1px solid #d38b8640; }
+@media (hover:hover) { .sb-budget .btn:not(:disabled):hover { filter:none; transform:none; background:#9ec496; } .sb-budget .btn.secondary:hover,.sb-budget .btn.danger:hover { background:#d7b15b08; } }
+</style>
 </head>
 <body class="sb-page sb-budget">
-<div id="toast"></div>
-<header class="header"><a class="header-back" href="index.html">← 返回</a><div class="header-title">🏦 每日額度</div></header>
+<div id="toast" role="status" aria-live="polite"></div>
+<dialog id="resetDialog" aria-labelledby="resetTitle">
+    <h2 id="resetTitle">重設本月資料</h2>
+    <p>確定要重設本月預算與金庫嗎？<br>此操作會將本月預算與金庫恢復為初始狀態。</p>
+    <div class="reset-actions"><button class="btn secondary" id="resetCancel" onclick="closeResetDialog()">取消</button><button class="btn danger" id="resetConfirm" onclick="confirmResetMonth()">確認重設</button></div>
+</dialog>
+<header class="header"><a class="header-back" href="index.html" aria-label="返回首頁"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5m7-7-7 7 7 7"/></svg></a><div class="header-title">每日額度</div><div class="header-sub">安排每天可以使用的預算</div><span class="sync-status" id="syncStatus" role="status">同步中</span></header>
 <div class="wrap">
     <div class="user-switch">
-        <button class="user-btn active" id="tab-p1" onclick="selectUser('p1')">👦🏻 至凱</button>
-        <button class="user-btn" id="tab-p2" onclick="selectUser('p2')">👦🏼 柏致</button>
+        <button class="user-btn active" id="tab-p1" onclick="selectUser('p1')">至凱</button>
+        <button class="user-btn" id="tab-p2" onclick="selectUser('p2')">柏致</button>
     </div>
 
     <section class="hero">
@@ -71,6 +127,7 @@ body { font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; color
         </div>
         <div class="hero-value" id="todayRemain">$0</div>
         <div class="hero-sub" id="todaySub">設定本月預算後開始計算</div>
+        <button class="setup-link" id="setupBudget" onclick="document.getElementById('budgetInput').focus()" hidden>設定預算 →</button>
         <div class="progress"><div class="progress-fill" id="progressFill"></div></div>
         <div class="stats">
             <div class="stat"><div class="stat-val" id="dailyLimit">$0</div><div class="stat-name">每日</div></div>
@@ -103,19 +160,22 @@ function dateKey(ts = Date.now()) { const d = new Date(ts); return `${d.getFullY
 function monthKey(dateStr = dateKey()) { return dateStr.slice(0,7); }
 function daysInMonth(mk) { const [y,m] = mk.split('-').map(Number); return new Date(y,m,0).getDate(); }
 function addDays(dateStr,n){ const d=new Date(dateStr+'T00:00:00'); d.setDate(d.getDate()+n); return dateKey(d.getTime()); }
-function money(v){ const n=Math.round((Number(v)||0)*100)/100; return '$'+(Number.isInteger(n)?n:n.toFixed(2)); }
+function money(v){ return '$'+Math.round(Number(v)||0).toLocaleString('zh-TW'); }
 function showToast(msg,color='var(--green)'){ const t=document.getElementById('toast'); t.innerText=msg; t.style.borderLeftColor=color; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2200); }
 function defaultState(){ const today=dateKey(); return { monthKey: monthKey(today), monthBudget:0, locked:false, vault:0, spentToday:0, lastSettledDate:today, updatedAt:Date.now() }; }
 function settleState(raw){ let b = raw ? {...raw} : defaultState(); const today=dateKey(), cm=monthKey(today); let vault=Number(b.vault)||0; if(b.monthKey!==cm){ return { monthKey:cm, monthBudget:0, locked:false, vault:0, spentToday:0, lastSettledDate:today, updatedAt:Date.now() }; }
  if(!b.lastSettledDate) b.lastSettledDate=today; if(b.lastSettledDate<today && b.monthBudget>0){ const limit=Number(b.monthBudget)/daysInMonth(b.monthKey); let d=b.lastSettledDate; while(d<today && monthKey(d)===b.monthKey){ vault += limit - (d===b.lastSettledDate ? Number(b.spentToday||0) : 0); d=addDays(d,1); } b.spentToday=0; b.lastSettledDate=today; } b.vault=Math.round(vault*100)/100; return b; }
 function dailyLimit(b){ return b && b.monthBudget ? Number(b.monthBudget)/daysInMonth(b.monthKey) : 0; }
-function render(){ const b=budgetData || defaultState(); const limit=dailyLimit(b); const spent=Number(b.spentToday)||0; const remain=limit-spent; const remainEl=document.getElementById('todayRemain'); remainEl.innerText=money(remain); remainEl.classList.toggle('negative',remain<0); document.getElementById('todaySub').innerText=b.monthBudget?`今天基準 ${money(limit)}，月底金庫 ${money(b.vault)}`:'尚未設定本月預算'; document.getElementById('dailyLimit').innerText=money(limit); document.getElementById('spentToday').innerText=money(spent); document.getElementById('vault').innerText=money(b.vault); const today=new Date(); document.getElementById('daysLeft').innerText=daysInMonth(monthKey())-today.getDate()+1; document.getElementById('budgetInput').value=b.monthBudget||''; document.getElementById('budgetInput').disabled=!!b.locked; document.getElementById('saveBtn').disabled=!!b.locked; document.getElementById('lockPill').innerText=b.locked?'🔒 已鎖定':'🔓 可修改'; const pct=limit>0?Math.max(0,Math.min(120,spent/limit*100)):0; const fill=document.getElementById('progressFill'); fill.style.width=Math.min(100,pct)+'%'; fill.className='progress-fill'+(spent>limit?' over':pct>80?' warn':''); }
-function load(){ db.ref('budget/'+currentUser).off(); db.ref('budget/'+currentUser).on('value', snap=>{ const settled=settleState(snap.val()); budgetData=settled; render(); if(JSON.stringify(settled)!==JSON.stringify(snap.val()||{})) db.ref('budget/'+currentUser).set(settled); }); }
+function render(){ const b=budgetData || defaultState(); const limit=dailyLimit(b); const spent=Number(b.spentToday)||0; const remain=limit-spent; const configured=Number(b.monthBudget)>0; const remainEl=document.getElementById('todayRemain'); remainEl.innerText=configured?money(remain):'尚未設定本月預算'; remainEl.closest('.hero').classList.toggle('unconfigured',!configured); document.getElementById('setupBudget').hidden=configured; remainEl.classList.toggle('negative',configured&&remain<0); document.getElementById('todaySub').innerText=configured?`今天基準 ${money(limit)}，月底金庫 ${money(b.vault)}`:`已支出 ${money(spent)}，設定預算後即可查看今日額度`; document.getElementById('dailyLimit').innerText=money(limit); document.getElementById('spentToday').innerText=money(spent); document.getElementById('vault').innerText=money(b.vault); const today=new Date(); document.getElementById('daysLeft').innerText=daysInMonth(monthKey())-today.getDate()+1; document.getElementById('budgetInput').value=b.monthBudget||''; document.getElementById('budgetInput').disabled=!!b.locked; document.getElementById('saveBtn').disabled=!!b.locked; document.getElementById('lockPill').innerText=b.locked?'預算已鎖定':configured?'預算可修改':'未設定'; const pct=limit>0?Math.max(0,Math.min(120,spent/limit*100)):0; const fill=document.getElementById('progressFill'); fill.style.width=Math.min(100,pct)+'%'; fill.className='progress-fill'+(spent>limit?' over':pct>80?' warn':''); }
+function load(){ document.getElementById('syncStatus').innerText='同步中'; db.ref('budget/'+currentUser).off(); db.ref('budget/'+currentUser).on('value', snap=>{ const settled=settleState(snap.val()); budgetData=settled; render(); document.getElementById('syncStatus').innerText='已同步'; if(JSON.stringify(settled)!==JSON.stringify(snap.val()||{})) db.ref('budget/'+currentUser).set(settled).catch(()=>{ document.getElementById('syncStatus').innerText='同步失敗'; showToast('同步失敗，請檢查連線','var(--red)'); }); },()=>{ document.getElementById('syncStatus').innerText='同步失敗'; showToast('無法讀取預算，請稍後重試','var(--red)'); }); }
 function selectUser(uid){ currentUser=uid; document.getElementById('tab-p1').classList.toggle('active',uid==='p1'); document.getElementById('tab-p2').classList.toggle('active',uid==='p2'); load(); }
-function saveBudget(){ const amount=Number(document.getElementById('budgetInput').value)||0; if(amount<=0) return showToast('請輸入本月可用金額','var(--red)'); const b=settleState(budgetData); b.monthBudget=Math.round(amount*100)/100; b.locked=true; b.updatedAt=Date.now(); db.ref('budget/'+currentUser).set(b).then(()=>showToast('已設定本月預算')); }
-function unlockBudget(){ const b=settleState(budgetData); b.locked=false; db.ref('budget/'+currentUser).set(b).then(()=>showToast('已解鎖')); }
-function resetMonth(){ if(!confirm('確定重設本月預算與金庫？')) return; db.ref('budget/'+currentUser).set(defaultState()).then(()=>showToast('已重設本月')); }
-function addVault(){ const amount=Number(document.getElementById('extraInput').value)||0; if(amount<=0) return showToast('請輸入追加金額','var(--red)'); const b=settleState(budgetData); b.vault=Math.round(((Number(b.vault)||0)+amount)*100)/100; b.updatedAt=Date.now(); db.ref('budget/'+currentUser).set(b).then(()=>{ document.getElementById('extraInput').value=''; showToast('已追加到金庫'); }); }
+function saveBudget(){ const amount=Number(document.getElementById('budgetInput').value)||0; if(amount<=0) return showToast('請輸入本月可用金額','var(--red)'); const b=settleState(budgetData); b.monthBudget=Math.round(amount*100)/100; b.locked=true; b.updatedAt=Date.now(); db.ref('budget/'+currentUser).set(b).then(()=>showToast('已設定本月預算')).catch(()=>showToast('儲存失敗，請重試','var(--red)')); }
+function unlockBudget(){ const b=settleState(budgetData); b.locked=false; db.ref('budget/'+currentUser).set(b).then(()=>showToast('已解鎖')).catch(()=>showToast('解鎖失敗，請重試','var(--red)')); }
+function resetMonth(){ document.getElementById('resetDialog').showModal(); document.getElementById('resetCancel').focus(); }
+function closeResetDialog(){ document.getElementById('resetDialog').close(); }
+function confirmResetMonth(){ closeResetDialog(); db.ref('budget/'+currentUser).set(defaultState()).then(()=>showToast('已重設本月')).catch(()=>showToast('重設失敗，請重試','var(--red)')); }
+function addVault(){ const amount=Number(document.getElementById('extraInput').value)||0; if(amount<=0) return showToast('請輸入追加金額','var(--red)'); const b=settleState(budgetData); b.vault=Math.round(((Number(b.vault)||0)+amount)*100)/100; b.updatedAt=Date.now(); db.ref('budget/'+currentUser).set(b).then(()=>{ document.getElementById('extraInput').value=''; showToast('已追加到金庫'); }).catch(()=>showToast('追加失敗，請重試','var(--red)')); }
+db.ref('.info/connected').on('value',snap=>{ document.getElementById('syncStatus').innerText=snap.val()?'已連線':'離線'; });
 load();
 </script>
 </body>

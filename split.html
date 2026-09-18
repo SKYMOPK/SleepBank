@@ -2,7 +2,7 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>宿舍帳本</title>
     <link rel="icon" href="data:,">
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
@@ -500,6 +500,141 @@
         }
     </style>
     <link rel="stylesheet" href="system-ui.css">
+    <style>
+        /* Ledger-only mobile-first presentation. Transaction handlers stay unchanged. */
+        body.sb-split { --text: #f3eddf; --muted: #aaa196; --orange: #d7b15b; --red: #d38b86; --green: #8bb584; --border: #d7b15b24; background-color: #141310; }
+        body.sb-split:not(.le-themed) {
+            background-image:
+                radial-gradient(circle at 6% 18%,#ddd0af26 0 .7px,transparent 1.2px),
+                radial-gradient(circle at 94% 11%,#ddd0af20 0 .6px,transparent 1.1px),
+                radial-gradient(circle at 13% 62%,#ddd0af1c 0 .6px,transparent 1.1px),
+                radial-gradient(circle at 88% 46%,#ddd0af22 0 .7px,transparent 1.2px),
+                radial-gradient(circle at 97% 81%,#ddd0af18 0 .6px,transparent 1.1px),
+                radial-gradient(ellipse 580px 760px at 50% 38%,#8d67301a,transparent 82%),
+                linear-gradient(125deg,#12110f,#171510 55%,#12110f);
+            background-attachment: fixed;
+        }
+        body.sb-split.le-themed { background: transparent; }
+        .sb-split .page-wrapper { max-width: 600px; padding: 0 20px 36px; }
+        .sb-split .header { max-width: 600px; margin: auto; padding: 12px 88px 12px 64px; min-height: 78px; background: #141310f5; border: 0; backdrop-filter: none; justify-content: flex-start; }
+        .sb-split .header-back { left: 12px; min-width: 44px; min-height: 44px; justify-content: center; border: 0; border-radius: 6px; background: none; padding: 0; }
+        .sb-split .header-back .icon { width: 21px; height: 21px; }
+        .sb-split .header-title { font-size: 19px; font-weight: 650; color: var(--text); letter-spacing: 0; justify-content: flex-start; }
+        .sb-split .header-title > .icon { display: none; }
+        .ledger-subtitle { font-size: 12px; color: var(--muted); margin-top: 5px; }
+        .sb-split .sync-pill { right: 16px; border: 0; background: none; font-weight: 500; padding: 0; }
+        .sb-split .sync-pill::before { width: 4px; height: 4px; box-shadow: none; }
+        .sb-split .ledger-extras { margin: 0 0 8px; gap: 20px; }
+        .sb-split .ledger-extras .le-entry { border: 0; background: none; padding: 0; color: var(--muted); font-size: 13px; gap: 6px; border-radius: 4px; }
+        .sb-split .ledger-extras .le-entry svg { width: 15px; height: 15px; color: #bca778; }
+        .sb-split .ledger-extras .le-entry small { color: #bca778; }
+        .sb-split .balance-card { margin: 0; padding: 24px 0 26px; text-align: left; border: 0; border-radius: 0; box-shadow: none; background: radial-gradient(ellipse at 18% 48%,#94714014,transparent 76%),linear-gradient(105deg,#30261b48,#211c1618 78%,transparent); backdrop-filter: none; }
+        .sb-split .balance-card::before { display: none; }
+        .sb-split .balance-label { font-size: 12px; letter-spacing: 0; font-weight: 500; margin-bottom: 12px; }
+        .sb-split .balance-amount { font-size: 52px; line-height: 1.1; font-weight: 700; filter: none; overflow-wrap: anywhere; }
+        .sb-split .balance-desc { margin-top: 10px; font-size: 15px; font-weight: 550; }
+        .sb-split .input-card { margin: 0; padding: 20px 0 24px; border: 0; border-top: 1px solid #d7b15b20; border-radius: 0; background: linear-gradient(110deg,#30261c32,#211c1626 65%,transparent); box-shadow: none; backdrop-filter: none; }
+        .sb-split .input-card-header { margin-bottom: 18px; }
+        .sb-split .section-kicker { font-size: 16px; letter-spacing: 0; color: var(--text); font-weight: 600; }
+        .sb-split .section-kicker .icon { display: none; }
+        .sb-split .calc-toggle { min-height: 44px; border: 0; background: none; padding: 0 2px 0 12px; font-size: 12px; font-weight: 500; }
+        .sb-split .amount-row { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 20px; margin-bottom: 18px; }
+        .sb-split .amount-group { min-width: 0; }
+        .sb-split .amount-group label { font-size: 12px; letter-spacing: 0; font-weight: 500; color: var(--muted); }
+        .sb-split .amount-input { min-width: 0; min-height: 58px; padding: 8px 0; border: 0; border-bottom: 1px solid #d7b15b28; border-radius: 0; background: none; text-align: left; font-size: 28px; font-weight: 600; }
+        .sb-split .amount-input::placeholder { color: #a89e8e; font-size: 28px; }
+        .sb-split .amount-input:focus, .sb-split .note-input:focus { border-color: #d7b15b80; box-shadow: none; }
+        .sb-split .note-input { min-height: 48px; padding: 10px 0; border: 0; border-bottom: 1px solid #d7b15b20; border-radius: 0; background: none; font-size: 16px; margin-bottom: 20px; }
+        .sb-split .note-input::placeholder { color: #aaa196; }
+        .sb-split .payer-row { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 4px; padding: 4px; background: #211d17; border: 1px solid #d7b15b14; border-radius: 8px; margin-bottom: 12px; }
+        .sb-split .payer-btn { min-height: 44px; padding: 10px; border: 0; border-radius: 5px; background: none; font-size: 14px; font-weight: 550; box-shadow: none; }
+        .sb-split .payer-btn .icon { display: none; }
+        .sb-split .payer-btn.selected { background: #d7b15b18; color: #ead098; box-shadow: inset 0 0 0 1px #d7b15b38; }
+        .sb-split .preview-text { padding: 4px 0; border: 0; border-radius: 0; background: none; text-align: left; font-weight: 400; font-size: 12px; line-height: 1.6; margin-bottom: 14px; }
+        .sb-split .preview-text.has-value { background: none; }
+        .sb-split .le-xp-preview { font-size: 12px; color: var(--muted); margin-top: 5px; }
+        .sb-split .submit-btn { min-height: 52px; border-radius: 8px; border: 1px solid #d7b15b40; background: #d7b15b; color: #211b10; font-size: 15px; font-weight: 650; box-shadow: none; }
+        .sb-split .submit-btn:hover { transform: none; background: #e0bc70; box-shadow: none; }
+        .sb-split .submit-btn:disabled { background: #29241b; color: #9e927b; border-color: #d7b15b20; opacity: 1; }
+        .records-section-title { font-size: 14px; font-weight: 600; padding: 12px 0 8px; color: var(--text); }
+        .sb-split .view-records-btn { width: 100%; min-height: 76px; display: flex; justify-content: space-between; align-items: center; gap: 12px; margin: 0; padding: 14px 0; border: 0; border-bottom: 1px solid #d7b15b16; border-radius: 0; background: none; box-shadow: none; text-align: left; font: inherit; cursor: pointer; color: var(--text); }
+        .sb-split .view-records-label { font-size: 15px; font-weight: 550; }
+        .record-entry-desc { display: block; margin-top: 6px; color: var(--muted); font-size: 12px; font-weight: 400; }
+        .sb-split .view-records-label > .icon { display: none; }
+        .sb-split .view-records-badge { background: #d7b15b0c; border: 0; color: var(--muted); font-size: 12px; }
+        .sb-split .balance-mini { margin: 8px 0 18px; padding: 16px 0; border: 0; border-bottom: 1px solid #d7b15b20; border-radius: 0; background: none; box-shadow: none; }
+        .sb-split .settle-card { margin: 0 0 16px; padding: 0; border: 0; background: none; box-shadow: none; }
+        .sb-split .settle-btn { min-height: 44px; border-radius: 6px; font-size: 12px; }
+        .sb-split .settle-btn.secondary { color: #c6bba8; border-color: #d7b15b28; background: #d7b15b06; }
+        .sb-split .record-tools { margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 8px; }
+        .sb-split .record-search { grid-column: 1 / -1; }
+        .sb-split .record-search, .sb-split .record-filter { width: 100%; min-width: 0; min-height: 44px; border: 0; border-bottom: 1px solid #d7b15b20; border-radius: 0; background: #201c1630; font-size: 14px; }
+        .sb-split .filter-result { margin: 12px 0; font-size: 12px; }
+        .sb-split .list-section { margin: 0; padding: 0; }
+        .sb-split .month-group { margin-bottom: 24px; }
+        .sb-split .month-heading { padding: 12px 0; background: none; border: 0; border-bottom: 1px solid #d7b15b20; border-radius: 0; gap: 6px; }
+        .sb-split .month-heading strong { font-size: 14px; font-weight: 600; }
+        .sb-split .month-heading strong > .icon { display: none; }
+        .sb-split .month-heading > span { font-size: 12px; color: var(--muted); }
+        .sb-split .record-card { grid-template-columns: 36px minmax(0,1fr) auto; align-items: start; gap: 8px; margin: 0; padding: 18px 0; background: none; border: 0; border-bottom: 1px solid #d7b15b12; border-radius: 0; box-shadow: none; backdrop-filter: none; }
+        .sb-split .record-card:hover, .sb-split .record-card:active { box-shadow: none; transform: none; background: #d7b15b03; }
+        .sb-split .record-note { font-size: 15px; font-weight: 550; white-space: normal; overflow-wrap: anywhere; }
+        .sb-split .record-title-row { display: block; margin-bottom: 8px; }
+        .sb-split .record-time { font-size: 12px; font-weight: 400; color: var(--muted); text-align: left; margin: 0; }
+        .sb-split .record-meta-row { gap: 5px 10px; margin-bottom: 8px; }
+        .sb-split .record-amounts { display: none; }
+        .sb-split .record-payer-tag { border: 0; background: none; padding: 0; font-size: 12px; font-weight: 400; color: var(--muted); }
+        .sb-split .record-payer-tag > .icon { display: none; }
+        .sb-split .record-result { font-size: 12px; font-weight: 450; color: #c2ad82; }
+        .sb-split .record-side { grid-column: 3; margin: 0; display: flex; flex-direction: column; gap: 4px; align-items: flex-end; }
+        .record-total { font-size: 16px; font-weight: 600; color: var(--text); max-width: 100px; overflow-wrap: anywhere; text-align: right; }
+        .record-actions { position: relative; }
+        .record-actions summary { list-style: none; min-height: 44px; min-width: 44px; display: grid; place-items: center; cursor: pointer; color: var(--muted); border-radius: 4px; }
+        .record-actions summary::-webkit-details-marker { display: none; }
+        .record-actions summary .icon { width: 20px; height: 20px; }
+        .sb-split .record-actions .record-delete-btn { width: auto; min-width: 80px; min-height: 44px; padding: 8px; border-radius: 5px; font-size: 12px; gap: 6px; }
+        .sb-split .record-checkbox { margin: -5px 0 0 -8px; }
+        .sb-split .record-checkbox.checked::before { background: #9b8046; border-color: #d7b15b; box-shadow: none; }
+        .sb-split .record-spacer { width: 0; }
+        .sb-split .record-card.settled { grid-template-columns: minmax(0,1fr) auto; opacity: 1; }
+        .sb-split .record-card.settled .record-spacer { display: none; }
+        .sb-split .record-card.settled .record-side { grid-column: 2; }
+        .sb-split .settlement-heading { border: 0; border-left: 1px solid #d7b15b30; border-radius: 0; background: none; padding: 12px; margin-top: 12px; }
+        .sb-split .confirm-box, .sb-split .edit-sheet { background: #211d17; border-color: #d7b15b24; border-radius: 12px; }
+        .sb-split .edit-overlay { padding: 16px; padding-bottom: max(16px,env(safe-area-inset-bottom)); background: rgba(18,16,12,.68); backdrop-filter: none; }
+        .sb-split .edit-sheet { background: #252017; padding: 20px; max-height: calc(100svh - 32px - env(safe-area-inset-bottom)); max-height: calc(100dvh - 32px - env(safe-area-inset-bottom)); overflow-y: auto; overscroll-behavior: contain; box-shadow: 0 16px 48px #0004; }
+        .sb-split .edit-header { margin-bottom: 20px; gap: 12px; }
+        .sb-split .edit-header strong { color: var(--text); font-size: 19px; font-weight: 650; }
+        .sb-split .edit-header .icon-action { width: 44px; height: 44px; flex: 0 0 44px; border: 0; border-radius: 6px; background: none; }
+        .sb-split .edit-sheet .input-card-title { color: var(--muted); font-size: 12px; font-weight: 500; margin-bottom: 10px; }
+        .sb-split .edit-sheet .preview-text { font-size: 14px; color: var(--text); margin: 14px 0 0; min-height: 28px; }
+        .sb-split .edit-actions { grid-template-columns: 1fr 1.6fr; gap: 12px; margin-top: 20px; }
+        .sb-split .edit-actions button { min-height: 48px; border-radius: 8px; font-weight: 600; }
+        .sb-split .edit-cancel { border: 0; background: none; color: var(--muted); }
+        .sb-split .edit-save { border: 0; background: #d7b15b; color: #211b10; }
+        .sb-split .edit-save:disabled { background: #393125; color: #aaa196; cursor: default; }
+        .sb-split .edit-readonly { border: 0; border-radius: 0; background: none; padding: 12px 0 0; text-align: left; }
+        .sb-split .edit-actions button:focus-visible, .sb-split .edit-header .icon-action:focus-visible { outline: 2px solid #d7b15b; outline-offset: 3px; }
+        @media (hover: hover) { .sb-split .edit-cancel:hover, .sb-split .edit-header .icon-action:hover { background: #d7b15b0a; color: var(--text); } .sb-split .edit-save:not(:disabled):hover { background: #dfbc70; } }
+        .sb-split .undo-toast button { min-height: 44px; }
+        .sb-split #toast, .sb-split .undo-toast { background:#252017; border-color:#d7b15b24; border-radius:10px; backdrop-filter:none; box-shadow:0 8px 24px #0003; white-space:normal; line-height:1.6; }
+        .sb-split .undo-toast span { font-weight:500; }
+        .sb-split .undo-toast button { background:#d7b15b14; border-color:#d7b15b30; border-radius:6px; font-weight:600; }
+        .sb-split .selection-bar { background:#252017; border-color:#d7b15b30; border-radius:10px; backdrop-filter:none; box-shadow:0 8px 24px #0003; }
+        .sb-split .selection-bar strong { color:#ead098; font-weight:550; }
+        .sb-split .selection-bar button { min-height:44px; height:auto; background:#d7b15b14; border-color:#d7b15b30; color:#ead098; border-radius:6px; font-weight:600; }
+        .sb-split:has(.undo-toast.show) .selection-bar { bottom:112px; }
+        .sb-split .confirm-overlay { background:#12100cad; backdrop-filter:none; -webkit-backdrop-filter:none; }
+        .sb-split .confirm-box { backdrop-filter:none; box-shadow:0 16px 48px #0004; max-height:calc(100dvh - 40px); overflow-y:auto; }
+        .sb-split .confirm-title { font-weight:650; }
+        .sb-split .confirm-row { border:0; border-radius:0; background:none; padding:8px 0; }
+        .sb-split .confirm-btns button { min-height:48px; border-radius:8px; }
+        .sb-split .confirm-cancel { border:0; background:none; }
+        .sb-split .confirm-ok { border:0; background:#d7b15b; color:#211b10; }
+        .sb-split .confirm-ok.danger { border:1px solid #d38b8640; background:#d38b8614; color:var(--red); }
+        @media (min-width: 601px) { .sb-split .page-wrapper { padding-top: 8px; } .sb-split .balance-amount { font-size: 58px; } }
+        @media (prefers-reduced-motion: reduce) { .sb-split .view.active { animation: none; } }
+    </style>
 </head>
 <body class="sb-page sb-split">
 
@@ -566,8 +701,8 @@
 </div>
 
 <header class="header">
-    <span class="header-back" onclick="handleBack()" style="cursor:pointer;"><svg class="icon"><use href="#icon-arrow-left"></use></svg><span>返回</span></span>
-    <div class="header-title" id="headerTitle"><svg class="icon"><use href="#icon-ledger"></use></svg><span>宿舍帳本</span></div>
+    <button class="header-back" type="button" onclick="handleBack()" aria-label="返回"><svg class="icon" aria-hidden="true"><use href="#icon-arrow-left"></use></svg></button>
+    <div><div class="header-title" id="headerTitle"><svg class="icon"><use href="#icon-ledger"></use></svg><span>宿舍帳本</span></div><div class="ledger-subtitle">共同帳務紀錄</div></div>
     <span class="sync-pill" id="syncPill">同步中</span>
 </header>
 
@@ -576,7 +711,7 @@
 <div class="page-wrapper">
 
     <div class="balance-card">
-        <div class="balance-label">目前欠款</div>
+        <div class="balance-label">目前帳務</div>
         <div class="balance-amount zero" id="balanceAmount">$0</div>
         <div class="balance-desc zero" id="balanceDesc">互不相欠</div>
     </div>
@@ -637,18 +772,19 @@
         <button class="submit-btn" id="submitBtn" onclick="addRecord()" disabled><svg class="icon"><use href="#icon-plus"></use></svg><span>新增這筆</span></button>
     </div>
 
-    <div class="view-records-btn" onclick="switchView('unsettled')">
-        <span class="view-records-label"><svg class="icon"><use href="#icon-list"></use></svg><span>未結清帳目</span></span>
+    <h2 class="records-section-title">帳目紀錄</h2>
+    <button class="view-records-btn" type="button" onclick="switchView('unsettled')">
+        <span><span class="view-records-label">未結清帳目</span><span class="record-entry-desc">目前尚未結清的共同支出</span></span>
         <span>
             <span class="view-records-badge" id="unsettled-badge">0</span>
             <svg class="icon" style="color:var(--muted); margin-left:4px;"><use href="#icon-arrow-right"></use></svg>
         </span>
-    </div>
+    </button>
 
-    <div class="view-records-btn" onclick="switchView('settled')" style="margin-top:8px; border-color:rgba(255,255,255,0.05);">
-        <span class="view-records-label" style="color:rgba(255,255,255,0.45);"><svg class="icon"><use href="#icon-archive"></use></svg><span>已結清紀錄</span></span>
+    <button class="view-records-btn" type="button" onclick="switchView('settled')">
+        <span><span class="view-records-label">已結清紀錄</span><span class="record-entry-desc">查看過去已完成的帳務</span></span>
         <svg class="icon" style="color:var(--muted);"><use href="#icon-arrow-right"></use></svg>
-    </div>
+    </button>
 
 </div>
 </div>
@@ -1541,7 +1677,7 @@
             const selectable = !r.settled && !r.budgetSync;
             const safeKey = escapeHtml(k);
             const safeNote = escapeHtml(r.note);
-            const deleteBtn = selectable ? `<button class="record-delete-btn" onclick="event.stopPropagation();confirmDeleteRecord('${safeKey}')" title="刪除此筆" aria-label="刪除此筆">${icon('trash')}</button>` : '';
+            const deleteBtn = selectable ? `<details class="record-actions" onclick="event.stopPropagation()"><summary aria-label="更多帳目操作"><svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></svg></summary><button class="record-delete-btn" onclick="event.stopPropagation();confirmDeleteRecord('${safeKey}')" title="刪除此筆" aria-label="刪除此筆">${icon('trash')}刪除此筆</button></details>` : '';
             const syncText = r.budgetSync ? ' · 同步中' : '';
             return `
             <div class="record-card${r.settled ? ' settled' : ''}" data-record-key="${safeKey}" onclick="openRecordEditor('${safeKey}')">
@@ -1549,13 +1685,13 @@
                 <div class="record-body">
                     <div class="record-title-row">
                         <div class="record-note">${safeNote}</div>
-                        <div class="record-time">${formatTime(r.timestamp)}</div>
                     </div>
                     <div class="record-amounts">${escapeHtml(amountsText || '未填消費金額')}</div>
-                    <div class="record-meta-row"><span class="record-payer-tag">${icon('card')}<span>${payerName}代付${escapeHtml(syncText)}</span></span></div>
+                    <div class="record-meta-row"><span class="record-payer-tag">${icon('card')}<span>${payerName}付款${escapeHtml(syncText)}</span></span><span class="record-time">${formatTime(r.timestamp)}</span>${r.settled ? '<span class="record-time">已結清</span>' : ''}</div>
                     <div class="record-result${delta === 0 ? ' zero' : ''}">${getResultText(r)}</div>
                 </div>
                 <div class="record-side">
+                    <span class="record-total">$${Number((Number(r.p1_bought || 0) + Number(r.p2_bought || 0)).toFixed(2)).toLocaleString('zh-TW')}</span>
                     ${deleteBtn}
                 </div>
             </div>`;

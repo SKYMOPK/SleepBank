@@ -2,7 +2,7 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>宿舍系統</title>
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
@@ -172,93 +172,6 @@
             color: var(--muted);
             margin-bottom: 10px;
         }
-
-        /* ── Player cards (side by side) ── */
-        .player-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-        }
-        .player-card {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 20px 12px;
-            border-radius: 20px;
-            text-decoration: none;
-            border: 1px solid var(--border);
-            background: rgba(44,36,22,0.70);
-            transition: all 0.2s;
-            gap: 8px;
-        }
-        .player-card:hover  { transform: translateY(-4px); filter: brightness(1.12); }
-        .player-card:active { transform: scale(0.97); }
-        .player-card .p-ico  {
-            width: 58px;
-            height: 58px;
-            display: grid;
-            place-items: center;
-            border-radius: 18px;
-            border: 1px solid currentColor;
-            background: rgba(255,255,255,0.035);
-            box-shadow: inset 0 1px rgba(255,255,255,0.06);
-        }
-        .player-card .p-ico .icon { width: 31px; height: 31px; stroke-width: 1.65; }
-        .player-card .p-name { font-size: 16px; font-weight: 900; }
-        .player-card .p-sub  { font-size: 11px; color: var(--muted); }
-        .card-p1 { border-color: rgba(141,200,122,0.3); color: var(--p1); }
-        .card-p1:hover { box-shadow: 0 8px 24px rgba(141,200,122,0.12); border-color: rgba(141,200,122,0.5); }
-        .card-p2 { border-color: rgba(122,187,200,0.3); color: var(--p2); }
-        .card-p2:hover { box-shadow: 0 8px 24px rgba(122,187,200,0.12); border-color: rgba(122,187,200,0.5); }
-
-        /* ── Hover Dashboard Panel ── */
-        .hp-panel {
-            position: absolute;
-            bottom: calc(100% + 8px);
-            left: -1px; right: -1px;
-            background: rgba(20,16,10,0.97);
-            border: 1px solid rgba(200,160,100,0.28);
-            border-radius: 16px;
-            padding: 10px 14px;
-            overflow: hidden;
-            max-height: 0;
-            opacity: 0;
-            pointer-events: none;
-            transform: translateY(8px);
-            transition: max-height 0.42s cubic-bezier(0.4,0,0.2,1),
-                        opacity   0.30s ease,
-                        transform 0.36s cubic-bezier(0.4,0,0.2,1);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            z-index: 20;
-            box-shadow: 0 -6px 28px rgba(0,0,0,0.5);
-        }
-        .player-card:hover .hp-panel {
-            max-height: 200px;
-            opacity: 1;
-            transform: translateY(0);
-        }
-        .hp-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 5px 0;
-            border-bottom: 1px solid rgba(200,160,100,0.08);
-            font-size: 12px;
-            gap: 8px;
-        }
-        .hp-row:last-child { border-bottom: none; }
-        .hp-lbl {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            color: var(--muted);
-            font-weight: 500;
-            white-space: nowrap;
-        }
-        .hp-lbl .icon { width: 14px; height: 14px; }
-        .hp-val { font-weight: 700; color: var(--text); text-align: right; }
 
         /* ── Feature grid (2×2) ── */
         .feature-grid {
@@ -461,7 +374,108 @@
         .sb-index .entry-paused:active { transform: none; filter: none; box-shadow: none; }
         .sb-index .entry-paused .hp-panel { display: none; }
         .sb-index .entry-paused, .sb-index .section:has(.player-grid) { display: none; }
-        .sb-index .feat-budget { grid-column: 1 / -1; }
+        /* Home-only composition; shared styles remain unchanged. */
+        body.sb-index { --text: #F2ECDD; --muted: #AAA091; --border: rgba(215,177,91,.14); padding: 0 20px max(32px, env(safe-area-inset-bottom)); background: #141310; }
+        .sb-index .feat-split { --feature-rgb: 215,177,91; }
+        .sb-index .feat-budget { --feature-rgb: 127,180,119; }
+        .sb-index .feat-grip { --feature-rgb: 201,138,88; }
+        .sb-index .header { order: 0; max-width: 640px; padding: 72px 0 0; text-align: left; }
+        .sb-index .header-title { font-size: 34px; font-weight: 700; letter-spacing: 0; margin-bottom: 10px; }
+        .sb-index .header-sub { font-size: 14px; margin-bottom: 18px; color: #AAA091; }
+        .sb-index .time-pill { min-height: 0; border: 0; background: none; padding: 0; gap: 10px; font-size: 12px; font-weight: 400; font-variant-numeric: tabular-nums; }
+        .sb-index .dot { width: 4px; height: 4px; background: #bba171; animation: none; }
+        .sb-index .section { order: 1; width: 100%; max-width: 640px; margin-top: 28px; }
+        .sb-index .feature-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+        .sb-index .feature-card { position: relative; min-height: 150px; padding: 22px; gap: 0; border-radius: 18px; border: 1px solid rgba(215,177,91,.14); background: #211D17; color: #F2ECDD; box-shadow: 0 3px 12px #0001; transition: background .2s ease, border-color .2s ease; }
+        .sb-index .feat-split { grid-column: 1 / -1; min-height: 150px; border-radius: 20px; background: #242018; }
+        .sb-index .feat-budget { grid-column: auto; }
+        .sb-index .feature-card:hover { transform: none; filter: none; box-shadow: 0 3px 12px #0001; }
+        .sb-index .feature-card:active { transform: none; background: #29231B; }
+        .sb-index .f-ico { width: 36px; height: 36px; margin-bottom: 16px; border-radius: 12px; color: rgb(var(--feature-rgb)); background: rgba(var(--feature-rgb),.06); border-color: rgba(var(--feature-rgb),.12); }
+        .sb-index .f-ico .icon { width: 21px; height: 21px; }
+        .entry-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 6px; width: 100%; }
+        .sb-index .f-name { font-size: 18px; font-weight: 650; margin-bottom: 0; }
+        .sb-index .feat-split .f-name { font-size: 21px; }
+        .sb-index .f-sub { font-size: 13px; line-height: 1.65; color: #AAA091; padding-right: 18px; }
+        .entry-arrow { width: 16px; height: 16px; color: #D7B15B; opacity: .65; transition: transform .2s ease; }
+        .sb-index .anno-card { order: 2; width: 100%; max-width: 640px; margin: 22px 0 0; padding: 16px 18px; background: #1c1915; border-color: rgba(215,177,91,.14); border-radius: 12px; backdrop-filter: none; animation: none; }
+        .sb-index .anno-inner { flex-wrap: wrap; gap: 10px; }
+        .sb-index .anno-text { font-size: 13px; line-height: 1.7; color: #AAA091; overflow-wrap: anywhere; }
+        .sb-index .anno-date { padding-left: 40px; margin-left: 0; width: 100%; font-size: 11px; }
+        .home-footer { order: 3; width: 100%; max-width: 640px; margin-top: 24px; }
+        .sb-index .changelog-btn { min-height: 44px; padding: 8px 0; border: 0; border-radius: 6px; background: none; color: #AAA091; font-size: 12px; }
+        .sb-index .changelog-btn:hover { background: none; color: #e4d8c3; }
+        .sb-index .changelog-dot { position: static; width: 5px; height: 5px; border: 0; background: #D7B15B; animation: none; }
+        .sb-index .cl-sheet { max-width: 640px; background: #211D17; border-color: rgba(215,177,91,.14); }
+        .sb-index .cl-title .icon { color: #D7B15B; }
+        .sb-index .cl-title { letter-spacing: 0; font-weight: 650; }
+        .sb-index .cl-close { width: 44px; height: 44px; }
+        .sb-index .cl-scroll { padding: 18px 24px max(32px, env(safe-area-inset-bottom)); }
+        @media (hover: hover) and (pointer: fine) {
+            .sb-index .feature-card:hover { background: #29231B; border-color: rgba(215,177,91,.28); }
+            .sb-index .feature-card:hover .entry-arrow { transform: translateX(2px); }
+        }
+        @media (max-width: 600px) {
+            .sb-index .header { padding-top: 44px; }
+            .sb-index .header-title { font-size: 29px; }
+            .sb-index .section { margin-top: 26px; }
+            .sb-index .feature-grid { gap: 12px; }
+            .sb-index .feature-card { min-height: 150px; padding: 18px 16px; }
+            .sb-index .feat-split { min-height: 142px; padding: 20px; }
+            .sb-index .f-ico { margin-bottom: 14px; }
+            .sb-index .f-name { font-size: 17px; }
+            .sb-index .f-sub { padding-right: 0; font-size: 13px; }
+            .entry-heading { gap: 8px; }
+        }
+        @media (prefers-reduced-motion: reduce) { .sb-index .feature-card:hover, .sb-index .feature-card:active { transform: none; } }
+
+        /* Abstract depth, with no literal room or object illustration. */
+        body.sb-index { position: relative; isolation: isolate; min-height: 100svh; display: grid; grid-template-columns: minmax(0,1fr) minmax(0,310px) minmax(0,520px) minmax(0,1fr); column-gap: 28px; align-content: center; align-items: start; background: linear-gradient(118deg,#12110f 30%,#211c141f 68%,#12110f),#12110f; padding-top: 60px; padding-bottom: 50px; }
+        .sb-index .header { grid-column: 2; grid-row: 1; width: 100%; max-width: none; padding: 34px 0 0; }
+        .sb-index .header-title { font-size: 36px; }
+        .sb-index .header-sub { margin-bottom: 16px; }
+        .sb-index .time-pill { color: #918a7e; }
+        .sb-index .section { grid-column: 3; grid-row: 1 / 3; width: 100%; max-width: none; padding: 0; margin: 0; }
+        .sb-index .section::before { content: ''; position: absolute; inset: -36px -26px; background: radial-gradient(ellipse at 45% 40%,rgba(183,141,68,.035),transparent 72%); pointer-events: none; z-index: -1; }
+        .sb-index .feature-grid { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 34px 26px; align-items: start; }
+        .sb-index .feature-card { border-radius: 0; border: 0; border-top: 1px solid rgba(var(--feature-rgb),.2); background: linear-gradient(135deg,#262119bb,#201c1630); padding: 22px 18px; min-height: 170px; box-shadow: none; overflow: hidden; }
+        .sb-index .feat-split { grid-column: 1 / -1; min-height: 182px; padding: 24px 32px; border-top: 0; border-left: 2px solid #d7b15b60; background: linear-gradient(115deg,#262119,#201c1655); }
+        .sb-index .feat-split::before { content: ''; position: absolute; left: 7px; top: 20px; bottom: 20px; width: 1px; background: #d7b15b18; }
+        .sb-index .feat-split::after { content: ''; position: absolute; width: 94px; height: 65px; top: 22px; right: -12px; transform: skewY(-12deg); background: repeating-linear-gradient(0deg,transparent 0 12px,#d7b15b09 12px 13px); border-bottom: 1px solid #d7b15b10; pointer-events: none; }
+        .sb-index .feat-budget { grid-column: 1; margin-top: 0; }
+        .sb-index .feat-grip { grid-column: 2; margin-top: 0; }
+        .sb-index .feat-budget::after { content: ''; position: absolute; top: 12px; right: 18px; width: 48px; height: 5px; background: repeating-linear-gradient(90deg,#7fb47730 0 1px,transparent 1px 8px); }
+        .sb-index .feat-grip::after { content: ''; position: absolute; top: 14px; right: 18px; width: 42px; height: 12px; border-left: 1px solid #c98a5830; border-bottom: 1px solid #c98a5830; transform: skewY(-8deg); }
+        .sb-index .f-ico { width: 28px; height: 28px; margin-bottom: 18px; background: transparent; border: 0; border-radius: 0; place-items: start; }
+        .sb-index .feat-split .f-ico { margin-bottom: 20px; }
+        .sb-index .feature-card:not(.feat-split) .entry-heading { min-height: 24px; }
+        .sb-index .feat-split .f-name { font-size: 24px; }
+        .sb-index .entry-heading { position: relative; z-index: 1; }
+        .sb-index .f-sub { color: #aaa196; padding: 0; }
+        .sb-index .feature-card:hover { box-shadow: none; }
+        .sb-index .anno-card { grid-column: 2; grid-row: 2; width: 100%; max-width: none; background: none; border: 0; border-radius: 0; padding: 12px 0 12px 14px; margin-top: 32px; }
+        .sb-index .anno-card::before { width: 1px; opacity: .55; }
+        .sb-index .anno-icon { width: 22px; height: 24px; border: 0; background: none; }
+        .sb-index .anno-date { padding-left: 32px; }
+        .home-footer { grid-column: 2 / 4; grid-row: 3; max-width: none; width: 100%; margin-top: 28px; padding-right: 18px; display: flex; justify-content: flex-end; }
+        @media (hover:hover) and (pointer:fine) {
+            .sb-index .feature-card:hover { background: linear-gradient(135deg,#2b251d,#211d1660); border-color: rgba(var(--feature-rgb),.4); }
+        }
+        @media (max-width:800px) {
+            body.sb-index { display: flex; padding-top: 0; align-items: center; }
+            .sb-index .header { max-width: 560px; padding: 36px 0 0; }
+            .sb-index .header-title { font-size: 30px; }
+            .sb-index .section { max-width: 560px; margin-top: 26px; }
+            .sb-index .section::before { left: -12px; right: -12px; }
+            .sb-index .feature-grid { gap: 24px 14px; }
+            .sb-index .feat-split { min-height: 160px; padding: 20px 24px; }
+            .sb-index .feature-card:not(.feat-split) { min-height: 176px; padding: 20px 12px; }
+            .sb-index .feat-grip { margin-top: 0; }
+            .sb-index .f-name { font-size: 17px; }
+            .sb-index .feat-split .f-name { font-size: 23px; }
+            .sb-index .anno-card { max-width: 560px; margin-top: 30px; }
+            .home-footer { max-width: 560px; margin-top: 16px; padding-right: 12px; }
+        }
     </style>
 </head>
 <body class="sb-page sb-index">
@@ -488,22 +502,13 @@
 <canvas id="bg-canvas"></canvas>
 
     <!-- Header -->
-    <div class="header">
-        <div class="header-icon" aria-hidden="true"><svg class="icon"><use href="#icon-home"></use></svg></div>
-        <div class="header-title">宿舍系統</div>
+    <header class="header">
+        <h1 class="header-title">宿舍系統</h1>
         <div class="header-sub">帳務、預算與日常紀錄</div>
         <div class="time-pill">
-            <div class="dot"></div>
             <span id="clock">載入中...</span>
         </div>
-        <div style="display:flex; gap:8px; align-items:center;">
-            <button class="changelog-btn" onclick="openChangelog()">
-                <svg class="icon" aria-hidden="true"><use href="#icon-clipboard"></use></svg>
-                更新記錄
-                <span class="changelog-dot" id="cl-dot"></span>
-            </button>
-        </div>
-    </div>
+    </header>
 
     <!-- Announcement -->
     <div class="anno-card" id="anno-card">
@@ -518,26 +523,28 @@
     </div>
 
     <!-- Feature section -->
-    <div class="section">
-        <div class="section-label">功能</div>
-        <div class="feature-grid">
+    <main class="section">
+        <nav class="feature-grid" aria-label="宿舍生活入口">
             <a href="split.html" class="feature-card feat-split">
                 <div class="f-ico" aria-hidden="true"><svg class="icon"><use href="#icon-ledger"></use></svg></div>
-                <div class="f-name">帳本</div>
-                <div class="f-sub">宿舍費用分帳</div>
-            </a>
-            <a href="grip.html" class="feature-card feat-grip">
-                <div class="f-ico" aria-hidden="true"><svg class="icon"><use href="#icon-dumbbell"></use></svg></div>
-                <div class="f-name">握力日記</div>
-                <div class="f-sub">訓練紀錄與趨勢</div>
+                <div class="entry-heading"><div class="f-name">宿舍帳本</div><svg class="icon entry-arrow" aria-hidden="true" viewBox="0 0 24 24"><path d="M4 12h16m-6-6 6 6-6 6"/></svg></div>
+                <div class="f-sub">記錄與整理共同支出</div>
             </a>
             <a href="budget.html" class="feature-card feat-budget">
                 <div class="f-ico" aria-hidden="true"><svg class="icon"><use href="#icon-wallet"></use></svg></div>
-                <div class="f-name">每日額度</div>
-                <div class="f-sub">本月預算與金庫</div>
+                <div class="entry-heading"><div class="f-name">每日額度</div><svg class="icon entry-arrow" aria-hidden="true" viewBox="0 0 24 24"><path d="M4 12h16m-6-6 6 6-6 6"/></svg></div>
+                <div class="f-sub">安排每天可以使用的預算</div>
             </a>
-        </div>
-    </div>
+            <a href="grip.html" class="feature-card feat-grip">
+                <div class="f-ico" aria-hidden="true"><svg class="icon"><use href="#icon-dumbbell"></use></svg></div>
+                <div class="entry-heading"><div class="f-name">握力日記</div><svg class="icon entry-arrow" aria-hidden="true" viewBox="0 0 24 24"><path d="M4 12h16m-6-6 6 6-6 6"/></svg></div>
+                <div class="f-sub">留下每次訓練與進步</div>
+            </a>
+        </nav>
+    </main>
+    <footer class="home-footer">
+        <button class="changelog-btn" onclick="openChangelog()"><svg class="icon" aria-hidden="true"><use href="#icon-clipboard"></use></svg>更新記錄<span class="changelog-dot" id="cl-dot"></span></button>
+    </footer>
 
     <!-- Changelog bottom sheet -->
     <div class="cl-overlay" id="cl-overlay">
@@ -574,7 +581,9 @@
         });
 
         function updateClock() {
-            document.getElementById('clock').innerText = new Date().toLocaleTimeString('zh-TW', { hour12:false, hour:'2-digit', minute:'2-digit', second:'2-digit' });
+            const date = new Date();
+            const time = date.toLocaleTimeString('zh-TW', { hour12:false, hour:'2-digit', minute:'2-digit' });
+            document.getElementById('clock').innerText = `${date.getMonth() + 1} 月 ${date.getDate()} 日 · ${time}`;
         }
         setInterval(updateClock, 1000);
         updateClock();
@@ -622,7 +631,7 @@
                         icon: 'home',
                         title: '首頁',
                         items: [
-                            '動態星空背景：130 顆緩移閃爍星點、22 顆浮動粒子（漸入漸出生命週期）',
+                            '動態星空背景：130 顆緩移閃爍星點與流星效果',
                             '不定時流星劃過（每 3.5–9 秒隨機），帶漸層尾跡',
                         ]
                     },
@@ -822,7 +831,7 @@
 
         // ── 浮動粒子 ──────────────────────────────────
         const COLORS = ['rgba(242,217,138,', 'rgba(200,164,74,', 'rgba(141,200,122,', 'rgba(122,187,200,'];
-        const PART_COUNT = 22;
+        const PART_COUNT = 0;
         function mkParticle() {
             return {
                 x: Math.random() * window.innerWidth,
@@ -847,7 +856,8 @@
 
         // ── 流星 ──────────────────────────────────────
         let shooters = [];
-        let nextShoot = 2000 + Math.random() * 4000;
+        const motionPreference = matchMedia('(prefers-reduced-motion: reduce)');
+        let nextShoot = 12000 + Math.random() * 10000;
 
         function spawnShooter() {
             const angle = (22 + Math.random() * 28) * Math.PI / 180;
@@ -876,7 +886,8 @@
                 if (s.x > canvas.width)  s.x = 0;
                 if (s.y < 0) s.y = canvas.height;
                 if (s.y > canvas.height) s.y = 0;
-                const a = s.base * (0.55 + 0.45 * Math.sin(s.phase));
+                const edge = Math.min(1, Math.abs(s.x - canvas.width / 2) / (canvas.width * .35));
+                const a = s.base * (.15 + edge * .6) * (0.55 + 0.45 * Math.sin(s.phase));
                 ctx.beginPath();
                 ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
                 ctx.fillStyle = `rgba(242,235,216,${a.toFixed(3)})`;
@@ -903,9 +914,9 @@
 
             // 流星計時
             nextShoot -= dt;
-            if (nextShoot <= 0) {
+            if (!motionPreference.matches && nextShoot <= 0) {
                 shooters.push(spawnShooter());
-                nextShoot = 3500 + Math.random() * 5500;
+                nextShoot = 14000 + Math.random() * 12000;
             }
 
             // 流星繪製
@@ -928,8 +939,10 @@
                 return s.life < s.max;
             });
 
-            requestAnimationFrame(frame);
+            if (!motionPreference.matches) requestAnimationFrame(frame);
         }
+        motionPreference.addEventListener('change', () => { shooters = []; last = performance.now(); if (!motionPreference.matches) requestAnimationFrame(frame); });
+        window.addEventListener('resize', () => { if (motionPreference.matches) frame(performance.now()); });
         requestAnimationFrame(frame);
     })();
     </script>

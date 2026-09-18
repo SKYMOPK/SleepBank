@@ -2,7 +2,7 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>握力日記</title>
     <!--
     ╔══════════════════════════════════════════╗
@@ -451,8 +451,8 @@
         .stat-box-wide { grid-column: 1 / -1; }
         .stat-split-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; align-items: end; }
         .stat-mini-val { font-size: 22px; font-weight: 900; letter-spacing: -0.5px; line-height: 1; }
-        .stat-mini-val.left { color: #5AC8FA; }
-        .stat-mini-val.right { color: #FF8C00; }
+        .stat-mini-val.left { color: #a5b69a; }
+        .stat-mini-val.right { color: #c98a58; }
         .stat-mini-label { font-size: 10px; color: var(--text2); margin-top: 4px; font-weight: 700; }
         .stat-gap-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; text-align: left; }
         .stat-gap-row .stat-extra { margin-top: 0; text-align: right; line-height: 1.7; }
@@ -525,7 +525,7 @@
         .leg-dash {
             display: inline-block;
             width: 14px; height: 0;
-            border-top: 2px dashed #8E8E9A;
+            border-top: 2px dashed #aaa196;
             vertical-align: middle;
             margin-right: 3px;
         }
@@ -704,8 +704,8 @@
             line-height: 1;
         }
 
-        .hand-chip-l .hand-chip-val { color: #5AC8FA; }
-        .hand-chip-r .hand-chip-val { color: #FF8C00; }
+        .hand-chip-l .hand-chip-val { color: #a5b69a; }
+        .hand-chip-r .hand-chip-val { color: #c98a58; }
 
         .hand-chip-unit {
             font-size: 12px;
@@ -721,7 +721,7 @@
         .hand-chip-fill.good { background: var(--green); }
         .hand-chip-fill.stable { background: var(--accent-lt); }
         .hand-chip-fill.low { background: var(--red); }
-        .hand-chip-fill.cold { background: #8E8E9A; }
+        .hand-chip-fill.cold { background: #aaa196; }
 
         /* ── Records hover ── */
         .rec-row { transition: background 0.15s; border-radius: 12px; margin: 0 -8px; padding: 12px 8px; }
@@ -826,28 +826,117 @@
         .tt-rows { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
     </style>
     <link rel="stylesheet" href="system-ui.css">
+    <style>
+    body.sb-grip { --bg:#141310; --card:#211d17; --card2:#29231b; --text:#f3eddf; --text2:#aaa196; --text3:#91887c; --border:#d7b15b20; --accent:#c98a58; --accent-lt:#dfaa80; --accent-glow:transparent; --green:#8bb584; --red:#d38b86; background:radial-gradient(ellipse 600px 740px at 50% 30%,#8d673018,transparent 82%),linear-gradient(125deg,#12110f,#171510 55%,#12110f); background-attachment:fixed; }
+    .sb-grip #app { max-width:600px; padding:0 20px calc(100px + env(safe-area-inset-bottom)); }
+    .sb-grip .header { min-height:78px; padding:12px 0; margin:0; background:#141310f5; backdrop-filter:none; -webkit-backdrop-filter:none; border:0; gap:8px; }
+    .sb-grip .header-title { font-size:19px; font-weight:650; }
+    .sb-grip .back-btn { display:grid; place-items:center; min-width:44px; min-height:44px; padding:0; border:0; background:none; border-radius:5px; }
+    .sb-grip .ui-icon { width:20px; height:20px; fill:none; stroke:currentColor; stroke-width:1.6; stroke-linecap:round; stroke-linejoin:round; }
+    .sb-grip .user-chip { min-height:44px; padding:10px 0 10px 8px; border:0; background:none; border-radius:5px; font-size:12px; white-space:nowrap; }
+    .sb-grip #user-select { min-height:100svh; padding:48px 20px; align-items:stretch; max-width:600px; margin:auto; justify-content:center; }
+    .sb-grip .logo-wrap { text-align:left; margin-bottom:32px; }
+    .sb-grip .logo-icon { display:none; }
+    .sb-grip .logo-title { color:var(--text); font-size:32px; font-weight:650; letter-spacing:0; }
+    .sb-grip .logo-sub { color:var(--text2); font-size:14px; line-height:1.7; }
+    .sb-grip .user-cards { display:grid; grid-template-columns:1fr; gap:0; width:100%; }
+    .sb-grip .user-card { width:100%; min-height:90px; padding:20px 0; display:grid; grid-template-columns:1fr auto; text-align:left; border:0; border-top:1px solid var(--border); border-radius:0; background:linear-gradient(110deg,#30261c22,transparent); box-shadow:none; cursor:pointer; color:var(--text); }
+    .sb-grip .user-card .av { display:none; }
+    .sb-grip .user-card .name { margin:0; font-size:18px; font-weight:550; }
+    .sb-grip .user-card .role { grid-column:1; font-size:13px; margin-top:6px; }
+    .sb-grip .user-card .ui-icon { grid-column:2; grid-row:1 / 3; align-self:center; color:var(--accent); }
+    .sb-grip .status-card { padding:24px 0; margin:8px 0 0; border:0; border-radius:0; background:linear-gradient(110deg,#47302124,#30261b18,transparent); box-shadow:none; }
+    .sb-grip .status-card::after { display:none; }
+    .sb-grip .status-date { font-size:13px; letter-spacing:0; margin-bottom:20px; }
+    .sb-grip .status-emoji { display:none; }
+    .sb-grip .status-value { font-size:44px; font-weight:650; letter-spacing:0; }
+    .sb-grip .status-info:has(#s-value:empty) .status-unit { display:none; }
+    .sb-grip .status-label { font-size:17px; font-weight:550; }
+    .sb-grip .status-diff { font-size:13px; line-height:1.65; }
+    .sb-grip .input-card { padding:24px 0; margin:0; border:0; border-top:1px solid var(--border); border-radius:0; background:linear-gradient(110deg,#30261c22,transparent); box-shadow:none; }
+    .sb-grip .input-label,.sb-grip .section-label { font-size:14px; color:var(--text2); letter-spacing:0; font-weight:550; text-transform:none; }
+    .sb-grip .grip-input,.sb-grip .modal-input { width:100%; min-width:0; min-height:60px; padding:10px 0; background:none; border:0; border-bottom:1px solid #d7b15b30; border-radius:0; text-align:left; font-size:30px; font-weight:550; color:var(--text); }
+    .sb-grip .grip-input:focus,.sb-grip .modal-input:focus { border-color:var(--accent); box-shadow:none; }
+    .sb-grip .grip-input:user-invalid,.sb-grip .modal-input:user-invalid { border-color:var(--red); }
+    .sb-grip .hand-input { display:flex; align-items:center; gap:8px; }
+    .sb-grip .hand-input span { color:var(--text2); font-size:13px; }
+    .sb-grip .submit-btn,.sb-grip .modal-btn-confirm { min-height:52px; border-radius:8px; background:var(--accent); color:#24180f; font-weight:650; letter-spacing:0; box-shadow:none; }
+    .sb-grip .submit-btn:disabled { background:#393125; color:#aaa196; }
+    .sb-grip .recorded-line { justify-content:flex-start; font-size:13px; }
+    .sb-grip .recorded-line button { min-height:44px; min-width:44px; }
+    .sb-grip .stats-row { gap:0 24px; }
+    .sb-grip .stat-box { border:0; border-radius:0; background:none; padding:20px 0; text-align:left; border-bottom:1px solid var(--border); }
+    .sb-grip .stat-val { font-size:30px; font-weight:600; letter-spacing:0; }
+    .sb-grip #stat-pr-l { color:#a5b69a !important; }
+    .sb-grip #stat-pr-r { color:var(--accent-lt) !important; }
+    .sb-grip .stat-name { font-size:12px; color:var(--text2); line-height:1.6; }
+    .sb-grip .stat-extra { font-size:12px; line-height:1.7; }
+    .sb-grip .stat-mini-val.left { color:#a5b69a; }
+    .sb-grip .stat-mini-val.right { color:var(--accent-lt); }
+    .sb-grip .hand-chip { background:none; border:0; border-radius:0; padding:14px 0; }
+    .sb-grip .hand-chip-l .hand-chip-val { color:#a5b69a; }
+    .sb-grip .hand-chip-r .hand-chip-val { color:var(--accent-lt); }
+    .sb-grip .stat-mini-val { font-weight:550; letter-spacing:0; }
+    .sb-grip .stats-subheading { grid-column:1 / -1; margin:24px 0 0; font-size:14px; color:var(--text2); font-weight:550; }
+    .sb-grip .stat-split-row,.sb-grip .stats-row { min-width:0; }
+    .sb-grip .stat-box { min-width:0; }
+    .sb-grip .stat-box.pr-today { animation:none; box-shadow:none; border-color:var(--border); }
+    .sb-grip .stat-gap-row { flex-wrap:wrap; }
+    .sb-grip .stat-val::after,.sb-grip .stat-mini-val::after { content:' kg'; font-size:12px; color:var(--text2); font-weight:400; }
+    .sb-grip .tag { border-radius:4px; font-size:11px; font-weight:500; }
+    .sb-grip .rec-right { gap:6px; flex-wrap:wrap; min-width:0; }
+    .sb-grip .rec-right button { min-height:44px; min-width:44px; }
+    .sb-grip .fatigue-wrap { background:#d38b8609; border:0; border-left:2px solid #d38b8640; border-radius:0; padding:14px; }
+    .sb-grip .fatigue-icon { font-size:0; }
+    .sb-grip .fatigue-icon::after { content:'!'; font-size:20px; color:var(--red); }
+    .sb-grip .chart-card,.sb-grip .records-card,.sb-grip .accordion-card { border:0; border-radius:0; background:none; box-shadow:none; }
+    .sb-grip .chart-card { padding:16px 0; }
+    .sb-grip .card-head { flex-wrap:wrap; gap:12px; }
+    .sb-grip .chart-tools { flex-wrap:wrap; }
+    .sb-grip .chart-mode-row { background:#211d17; padding:4px; border:1px solid #d7b15b14; border-radius:8px; }
+    .sb-grip .chart-mode-btn { min-height:44px; min-width:56px; border:0; border-radius:5px; background:none; color:var(--text2); }
+    .sb-grip .chart-mode-btn.active { background:#c98a5818; color:var(--accent-lt); box-shadow:none; }
+    .sb-grip .expand-chart-btn,.sb-grip .chart-close-btn { min-height:44px; padding:8px 12px; border:0; border-radius:5px; background:none; color:var(--text2); }
+    .sb-grip .accordion-head { min-height:56px; padding:16px 0; border-top:1px solid var(--border); }
+    .sb-grip .rec-row { background:none; min-height:60px; }
+    .sb-grip .rec-edit,.sb-grip .rec-delete { min-height:44px; min-width:44px; background:none; border:0; }
+    .sb-grip .empty-state { padding:28px 0; color:var(--text2); }
+    .sb-grip .empty-icon { display:none; }
+    .sb-grip .tab-bar { background:#1a1712; backdrop-filter:none; padding:8px 20px max(12px,env(safe-area-inset-bottom)); border-top:1px solid var(--border); }
+    .sb-grip .tab-btn { min-height:48px; border:0; border-radius:6px; background:none; font-size:14px; }
+    .sb-grip .tab-btn.active { background:#c98a580a; color:var(--accent-lt); }
+    .sb-grip .modal-overlay,.sb-grip .chart-modal { background:#12100cad; backdrop-filter:none; padding:16px; }
+    .sb-grip .modal-box,.sb-grip .chart-modal-box { max-width:560px; width:100%; max-height:calc(100dvh - 32px); overflow-y:auto; background:#252017; border:1px solid #d7b15b24; border-radius:12px; padding:20px; box-shadow:0 16px 48px #0004; }
+    .sb-grip .modal-btn { min-height:48px; border-radius:8px; }
+    .sb-grip .modal-btn-cancel { background:none; color:var(--text2); }
+    .sb-grip #toast { background:#252017; border:1px solid #d7b15b24; border-radius:10px; white-space:normal; width:max-content; font-size:13px; line-height:1.6; bottom:100px; box-shadow:0 8px 24px #0003; opacity:0; transition:opacity .2s,transform .2s; }
+    .sb-grip #toast.show { opacity:1; }
+    .sb-grip #chart-tt { background:#252017; border-color:#d7b15b24; border-radius:8px; }
+    .sb-grip .user-card:hover { transform:none; box-shadow:none; }
+    .sb-grip .submit-btn:hover:not(:disabled) { transform:none; box-shadow:none; }
+    @media (hover:hover) { .sb-grip .user-card:hover { transform:none; background:#d7b15b06; border-color:var(--border); box-shadow:none; } .sb-grip .submit-btn:hover:not(:disabled) { transform:none; box-shadow:none; background:#dfaa80; } }
+    </style>
 </head>
 <body class="sb-page sb-grip">
 
 <!-- ── User Selection Screen ── -->
 <div id="user-select">
+    <a href="index.html" class="back-btn" aria-label="返回首頁" style="align-self:flex-start;margin-bottom:20px"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5m7-7-7 7 7 7"/></svg></a>
     <div class="logo-wrap">
-        <span class="logo-icon">🤜</span>
+        <span class="logo-icon"></span>
         <div class="logo-title">握力日記</div>
-        <div class="logo-sub">記錄每日握力，見證你的進步</div>
+        <div class="logo-sub">記錄每次訓練與進步</div>
         <div style="margin-top:8px;font-size:11px;color:var(--text3);font-weight:600;letter-spacing:0.5px">v1.3</div>
     </div>
     <div class="user-cards">
-        <div class="user-card" onclick="selectUser('p1')">
-            <div class="av">🧑‍💻</div>
+        <button class="user-card" onclick="selectUser('p1')">
+            <div class="av"></div>
             <div class="name">至凱</div>
-            <div class="role">偶爾記錄</div>
-        </div>
-        <div class="user-card" onclick="selectUser('p2')">
-            <div class="av">🏋️</div>
+            <div class="role">偶爾記錄</div><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg></button>
+        <button class="user-card" onclick="selectUser('p2')">
+            <div class="av"></div>
             <div class="name">柏致</div>
-            <div class="role">主力訓練</div>
-        </div>
+            <div class="role">主力訓練</div><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg></button>
     </div>
 </div>
 
@@ -855,10 +944,10 @@
 <div id="app">
     <div class="header">
         <div style="display:flex;align-items:center;gap:10px">
-            <a href="index.html" class="back-btn">← 首頁</a>
-            <div class="header-title">🤜 握力日記</div>
+            <a href="index.html" class="back-btn" aria-label="返回首頁"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5m7-7-7 7 7 7"/></svg></a>
+            <div class="header-title"> 握力日記</div>
         </div>
-        <div class="user-chip" id="user-chip" onclick="switchUser()">— · 切換</div>
+        <button class="user-chip" id="user-chip" onclick="switchUser()">— · 切換</button>
     </div>
 
     <!-- Tab panel: 記錄 -->
@@ -867,7 +956,7 @@
         <div class="status-card">
             <div class="status-date" id="status-date">載入中...</div>
             <div class="status-main">
-                <div class="status-emoji" id="s-emoji">⏳</div>
+                <div class="status-emoji" id="s-emoji"></div>
                 <div class="status-info">
                     <div>
                         <span class="status-value" id="s-value">—</span>
@@ -885,14 +974,14 @@
             <div class="input-label">輸入今日握力 (kg)</div>
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px;">
                 <div>
-                    <div style="font-size:11px; color:var(--text2); margin-bottom:6px; text-align:center; font-weight:600;">🤜 左手</div>
-                    <input type="number" id="grip-input-l" class="grip-input"
-                           placeholder="0" min="1" max="200" step="0.5">
+                    <div style="font-size:11px; color:var(--text2); margin-bottom:6px; text-align:center; font-weight:600;"> 左手</div>
+                    <div class="hand-input"><input type="number" id="grip-input-l" class="grip-input"
+                           placeholder="0" inputmode="decimal" min="1" max="200" step="0.5"><span>kg</span></div>
                 </div>
                 <div>
-                    <div style="font-size:11px; color:var(--text2); margin-bottom:6px; text-align:center; font-weight:600;">🤛 右手</div>
-                    <input type="number" id="grip-input-r" class="grip-input"
-                           placeholder="0" min="1" max="200" step="0.5">
+                    <div style="font-size:11px; color:var(--text2); margin-bottom:6px; text-align:center; font-weight:600;"> 右手</div>
+                    <div class="hand-input"><input type="number" id="grip-input-r" class="grip-input"
+                           placeholder="0" min="1" max="200" step="0.5" inputmode="decimal"><span>kg</span></div>
                 </div>
             </div>
             <button class="submit-btn" id="submit-btn" onclick="submitToday()" style="width:100%; padding:14px 26px;">記錄</button>
@@ -906,27 +995,28 @@
     <!-- Tab panel: 統計 -->
     <div class="tab-panel" id="panel-stats">
         <!-- Stats -->
-        <div class="section-label">數據分析</div>
+        <div class="section-label">個人最佳</div>
         <div class="stats-row">
             <div class="stat-box" id="stat-box-prl">
-                <div class="stat-val" id="stat-pr-l" style="color:#5AC8FA">—</div>
-                <div class="stat-name">🤜 左手 PR</div>
+                <div class="stat-val" id="stat-pr-l" style="color:#a5b69a">—</div>
+                <div class="stat-name"> 左手 PR</div>
                 <div class="stat-extra" id="stat-pr-l-date"></div>
             </div>
             <div class="stat-box" id="stat-box-prr">
-                <div class="stat-val" id="stat-pr-r" style="color:#FF8C00">—</div>
-                <div class="stat-name">🤛 右手 PR</div>
+                <div class="stat-val" id="stat-pr-r" style="color:#c98a58">—</div>
+                <div class="stat-name"> 右手 PR</div>
                 <div class="stat-extra" id="stat-pr-r-date"></div>
             </div>
+            <div class="stats-subheading">近期狀態</div>
             <div class="stat-box">
                 <div class="stat-split-row">
                     <div>
                         <div class="stat-mini-val left" id="stat-7avg-l">—</div>
-                        <div class="stat-mini-label">🤜 左手</div>
+                        <div class="stat-mini-label"> 左手</div>
                     </div>
                     <div>
                         <div class="stat-mini-val right" id="stat-7avg-r">—</div>
-                        <div class="stat-mini-label">🤛 右手</div>
+                        <div class="stat-mini-label"> 右手</div>
                     </div>
                 </div>
                 <div class="stat-name">7日均值</div>
@@ -936,11 +1026,11 @@
                 <div class="stat-split-row">
                     <div>
                         <div class="stat-mini-val left" id="stat-30avg-l">—</div>
-                        <div class="stat-mini-label">🤜 左手</div>
+                        <div class="stat-mini-label"> 左手</div>
                     </div>
                     <div>
                         <div class="stat-mini-val right" id="stat-30avg-r">—</div>
-                        <div class="stat-mini-label">🤛 右手</div>
+                        <div class="stat-mini-label"> 右手</div>
                     </div>
                 </div>
                 <div class="stat-name">30日均值</div>
@@ -959,7 +1049,7 @@
 
         <!-- Fatigue warning -->
         <div class="fatigue-wrap" id="fatigue-wrap">
-            <div class="fatigue-icon">⚠️</div>
+            <div class="fatigue-icon"></div>
             <div>
                 <div class="fatigue-title">連續疲勞警告</div>
                 <div class="fatigue-sub" id="fatigue-sub"></div>
@@ -987,14 +1077,14 @@
         <!-- Recent records accordion -->
         <div class="accordion-card">
             <div class="accordion-head" onclick="toggleRecords()">
-                <span class="accordion-head-title">📋 近期紀錄</span>
+                <span class="accordion-head-title"> 近期紀錄</span>
                 <span class="accordion-arrow" id="records-arrow">▾</span>
             </div>
             <div class="accordion-body" id="records-body">
                 <div class="records-card" id="records-card"
                      style="border-radius:0;border:none;border-top:1px solid var(--border);margin:0">
                     <div class="empty-state">
-                        <div class="empty-icon">💪</div>
+                        <div class="empty-icon"></div>
                         <div class="empty-text">開始你的第一次記錄吧！</div>
                     </div>
                 </div>
@@ -1005,27 +1095,27 @@
 
 <!-- Tab bar -->
 <div class="tab-bar" id="tab-bar">
-    <button class="tab-btn active" id="tab-record" onclick="switchTab('record')">📝 記錄</button>
-    <button class="tab-btn" id="tab-stats" onclick="switchTab('stats')">📊 統計</button>
+    <button class="tab-btn active" id="tab-record" onclick="switchTab('record')"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h4"/></svg>記錄</button>
+    <button class="tab-btn" id="tab-stats" onclick="switchTab('stats')"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4v16h16M8 15l4-5 4 2 4-6"/></svg>統計</button>
 </div>
 
-<div id="toast"></div>
+<div id="toast" role="status" aria-live="polite"></div>
 
 <!-- Edit Modal -->
 <div class="modal-overlay" id="edit-modal" onclick="closeEditModal(event)">
-    <div class="modal-box">
-        <div class="modal-title">修改紀錄</div>
+    <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="grip-edit-title">
+        <div class="modal-title" id="grip-edit-title">修改紀錄</div>
         <div class="modal-sub" id="edit-modal-sub"></div>
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:14px;">
             <div>
-                <div style="font-size:11px; color:#8E8E9A; margin-bottom:6px; text-align:center; font-weight:600;">🤜 左手</div>
+                <div style="font-size:11px; color:#aaa196; margin-bottom:6px; text-align:center; font-weight:600;"> 左手</div>
                 <input type="number" class="modal-input" id="edit-modal-input-l"
-                       min="1" max="200" step="0.5" placeholder="0">
+                       min="1" max="200" step="0.5" placeholder="0" inputmode="decimal">
             </div>
             <div>
-                <div style="font-size:11px; color:#8E8E9A; margin-bottom:6px; text-align:center; font-weight:600;">🤛 右手</div>
+                <div style="font-size:11px; color:#aaa196; margin-bottom:6px; text-align:center; font-weight:600;"> 右手</div>
                 <input type="number" class="modal-input" id="edit-modal-input-r"
-                       min="1" max="200" step="0.5" placeholder="0">
+                       min="1" max="200" step="0.5" placeholder="0" inputmode="decimal">
             </div>
         </div>
         <div class="modal-actions">
@@ -1037,9 +1127,9 @@
 
 <!-- Chart Modal -->
 <div class="chart-modal" id="chart-modal" onclick="closeChartModal(event)">
-    <div class="chart-modal-box">
+    <div class="chart-modal-box" role="dialog" aria-modal="true" aria-labelledby="grip-chart-title">
         <div class="chart-modal-head">
-            <div class="chart-modal-title">📈 握力趨勢</div>
+            <div class="chart-modal-title" id="grip-chart-title">握力趨勢</div>
             <button class="chart-close-btn" onclick="closeChartModal()">關閉</button>
         </div>
         <div class="chart-modal-controls">
@@ -1191,19 +1281,19 @@ function summarizeHandStatus(lStatus, rStatus) {
         { key: 'l', name: '左手', ...lStatus },
         { key: 'r', name: '右手', ...rStatus }
     ].filter(h => h.type !== 'missing');
-    if (!active.length) return { emoji: '💪', label: '已記錄', detail: '', cls: '' };
-    if (active.every(h => h.type === 'cold')) return { emoji: '📈', label: '累積基準中', detail: '再多記錄幾次後，就能判斷近期狀態', cls: '' };
+    if (!active.length) return { emoji: '', label: '已記錄', detail: '', cls: '' };
+    if (active.every(h => h.type === 'cold')) return { emoji: '', label: '累積基準中', detail: '再多記錄幾次後，就能判斷近期狀態', cls: '' };
     const ready = active.filter(h => h.type !== 'cold');
     const rest = ready.filter(h => h.type === 'rest');
     const low = ready.filter(h => h.type === 'low');
     const good = ready.filter(h => h.type === 'good');
     const parts = ready.map(h => `${h.name}${h.label}`).join('，');
-    if (rest.length === active.length || (rest.length && rest.length + low.length === active.length)) return { emoji: '🛌', label: '今天偏疲勞', detail: parts, cls: 'down' };
-    if (rest.length) return { emoji: '🟠', label: `${rest[0].name}明顯偏低`, detail: parts, cls: 'down' };
-    if (low.length) return { emoji: '🟡', label: `${low[0].name}偏低`, detail: parts, cls: 'down' };
-    if (good.length === ready.length && ready.length === active.length) return { emoji: '🔥', label: '今天狀態很好', detail: parts, cls: 'up' };
-    if (good.length) return { emoji: '💪', label: '狀態不錯', detail: parts, cls: 'up' };
-    return { emoji: '🟢', label: '狀態穩定', detail: parts, cls: 'up' };
+    if (rest.length === active.length || (rest.length && rest.length + low.length === active.length)) return { emoji: '', label: '今天偏疲勞', detail: parts, cls: 'down' };
+    if (rest.length) return { emoji: '', label: `${rest[0].name}明顯偏低`, detail: parts, cls: 'down' };
+    if (low.length) return { emoji: '', label: `${low[0].name}偏低`, detail: parts, cls: 'down' };
+    if (good.length === ready.length && ready.length === active.length) return { emoji: '', label: '今天狀態很好', detail: parts, cls: 'up' };
+    if (good.length) return { emoji: '', label: '狀態不錯', detail: parts, cls: 'up' };
+    return { emoji: '', label: '狀態穩定', detail: parts, cls: 'up' };
 }
 
 function handChipHTML(hand, status) {
@@ -1211,7 +1301,7 @@ function handChipHTML(hand, status) {
     const colorClass = status.type === 'good' ? 'good' : (status.type === 'low' || status.type === 'rest') ? 'low' : status.type === 'cold' ? 'cold' : 'stable';
     const fillWidth = status.pct === null ? 50 : Math.max(12, Math.min(100, 50 + status.pct * 260));
     return `<div class="hand-chip ${isLeft ? 'hand-chip-l' : 'hand-chip-r'}">
-        <div class="hand-chip-label">${isLeft ? '🤜 左手' : '🤛 右手'}</div>
+        <div class="hand-chip-label">${isLeft ? ' 左手' : ' 右手'}</div>
         <div class="hand-chip-val">${status.value ? status.value.toFixed(1) : '—'}<span class="hand-chip-unit">kg</span></div>
         <div class="hand-chip-status">${status.label}</div>
         <div class="hand-chip-meta">${status.meta}</div>
@@ -1253,8 +1343,8 @@ function rollingAvgAt(sorted, i, hand) {
 }
 
 const CHART_MODE = {
-    r: { label:'右手趨勢', short:'右手', color:'#FF8C00', grad:'gradR', modalGrad:'mgradR' },
-    l: { label:'左手趨勢', short:'左手', color:'#5AC8FA', grad:'gradL', modalGrad:'mgradL' }
+    r: { label:'右手趨勢', short:'右手', color:'#c98a58', grad:'gradR', modalGrad:'mgradR' },
+    l: { label:'左手趨勢', short:'左手', color:'#a5b69a', grad:'gradL', modalGrad:'mgradL' }
 };
 function chartValueAt(sorted, d, mode) {
     return d[mode] || 0;
@@ -1346,8 +1436,8 @@ function renderStatusCard(sorted, today, hasToday) {
     const extraEl = document.getElementById('s-extra');
 
     if (!hasToday) {
-        emojiEl.textContent = sorted.length === 0 ? '💪' : '⏳';
-        valEl.textContent = '—';
+        emojiEl.textContent = sorted.length === 0 ? '' : '';
+        valEl.textContent = '';
         lblEl.textContent = '今日尚未記錄';
         diffEl.textContent = sorted.length === 0 ? '開始第一次紀錄後，這裡會顯示今日狀態' : '記錄後會和近期狀態比較';
         diffEl.className = 'status-diff';
@@ -1357,7 +1447,7 @@ function renderStatusCard(sorted, today, hasToday) {
 
     const todayRec = sorted.find(r => r.date === today);
     if (!todayRec) {
-        emojiEl.textContent = '💪';
+        emojiEl.textContent = '';
         valEl.textContent = '—';
         lblEl.textContent = '已記錄';
         diffEl.textContent = '';
@@ -1413,7 +1503,7 @@ function renderStats(sorted) {
         const isTodayL = prL.date === today;
         prLEl.textContent = prL.l.toFixed(1);
         prLDate.innerHTML = isTodayL
-            ? `<span class="tag" style="background:rgba(90,200,250,0.15);color:#5AC8FA">✨ 今天！</span>`
+            ? `<span class="tag" style="background:rgba(90,200,250,0.15);color:#a5b69a"> 今天！</span>`
             : `<span class="tag tag-muted">${fmtShort(prL.date)}</span>`;
         document.getElementById('stat-box-prl').classList.toggle('pr-today', isTodayL);
     } else {
@@ -1426,7 +1516,7 @@ function renderStats(sorted) {
         const isTodayR = prR.date === today;
         prREl.textContent = prR.r.toFixed(1);
         prRDate.innerHTML = isTodayR
-            ? `<span class="tag" style="background:rgba(255,140,0,0.15);color:#FF8C00">✨ 今天！</span>`
+            ? `<span class="tag" style="background:rgba(255,140,0,0.15);color:#c98a58"> 今天！</span>`
             : `<span class="tag tag-muted">${fmtShort(prR.date)}</span>`;
         document.getElementById('stat-box-prr').classList.toggle('pr-today', isTodayR);
     } else {
@@ -1503,7 +1593,7 @@ function renderChart(sorted) {
     updateChartModeButtons();
     const cfg = CHART_MODE[chartMode];
     if (sorted.length < 2) {
-        svg.innerHTML = `<text x="260" y="80" text-anchor="middle" fill="#3A3A45" font-size="13" font-family="-apple-system,sans-serif">需要更多數據（至少 2 筆）</text>`;
+        svg.innerHTML = `<text x="260" y="80" text-anchor="middle" fill="#aaa196" font-size="13" font-family="-apple-system,sans-serif">需要更多數據（至少 2 筆）</text>`;
         return;
     }
 
@@ -1512,7 +1602,7 @@ function renderChart(sorted) {
     const avgValues = data.map(d => chartAvgAt(sorted, d, chartMode)).filter(v => v > 0);
     const values = actualValues.concat(avgValues);
     if (actualValues.length < 2) {
-        svg.innerHTML = `<text x="260" y="80" text-anchor="middle" fill="#3A3A45" font-size="13" font-family="-apple-system,sans-serif">${cfg.short}需要更多數據</text>`;
+        svg.innerHTML = `<text x="260" y="80" text-anchor="middle" fill="#aaa196" font-size="13" font-family="-apple-system,sans-serif">${cfg.short}需要更多數據</text>`;
         return;
     }
 
@@ -1522,14 +1612,14 @@ function renderChart(sorted) {
     const xOf=ds=>PL+((new Date(ds).getTime()-t0)/tSpan)*cW, yOf=v=>PT+cH-((v-minV)/range)*cH;
     const segs=buildLineSegs(data,xOf,yOf,d=>chartValueAt(sorted,d,chartMode));
     const avgSegs=buildLineSegs(data,xOf,yOf,d=>chartAvgAt(sorted,d,chartMode));
-    const grid=[0.25,0.5,0.75].map(f=>`<line x1="${PL}" y1="${PT+cH*f}" x2="${W-PR}" y2="${PT+cH*f}" stroke="#1C1C27" stroke-width="1"/>`).join('');
-    const yLabels=[minV,(minV+maxV)/2,maxV].map(v=>`<text x="${PL-4}" y="${yOf(v)}" text-anchor="end" dominant-baseline="middle" fill="#3A3A45" font-size="9" font-family="-apple-system,sans-serif">${Math.round(v)}</text>`).join('');
+    const grid=[0.25,0.5,0.75].map(f=>`<line x1="${PL}" y1="${PT+cH*f}" x2="${W-PR}" y2="${PT+cH*f}" stroke="#514635" stroke-width="1"/>`).join('');
+    const yLabels=[minV,(minV+maxV)/2,maxV].map(v=>`<text x="${PL-4}" y="${yOf(v)}" text-anchor="end" dominant-baseline="middle" fill="#aaa196" font-size="9" font-family="-apple-system,sans-serif">${Math.round(v)}</text>`).join('');
     const step=Math.max(1,Math.floor(data.length/5));
-    const xLabels=data.map((d,i)=>(i%step!==0&&i!==data.length-1)?'':`<text x="${xOf(d.date)}" y="${H-3}" text-anchor="middle" fill="#3A3A45" font-size="9" font-family="-apple-system,sans-serif">${fmtShort(d.date)}</text>`).join('');
+    const xLabels=data.map((d,i)=>(i%step!==0&&i!==data.length-1)?'':`<text x="${xOf(d.date)}" y="${H-3}" text-anchor="middle" fill="#aaa196" font-size="9" font-family="-apple-system,sans-serif">${fmtShort(d.date)}</text>`).join('');
     const area=segs.map(pts=>pts.length<2?'':`<polygon points="${[...pts,`${parseFloat(pts[pts.length-1].split(',')[0])},${bottomY}`,`${parseFloat(pts[0].split(',')[0])},${bottomY}`].join(' ')}" fill="url(#${cfg.grad})"/>`).join('');
     const dots=data.map(d=>{ const v=chartValueAt(sorted,d,chartMode); if(!(v>0)) return ''; const isT=d.date===todayStr(); return `<circle cx="${xOf(d.date)}" cy="${yOf(v)}" r="${isT?5:2.8}" fill="${cfg.color}" stroke="${isT?'#fff':'none'}" stroke-width="${isT?1.5:0}"/>`; }).join('');
-    const avgLine=avgSegs.map(pts=>`<polyline points="${pts.join(' ')}" fill="none" stroke="#8E8E9A" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="5,4"/>`).join('');
-    svg.innerHTML = `<defs><linearGradient id="gradR" x1="0" y1="${PT}" x2="0" y2="${bottomY}" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#FF8C00" stop-opacity="0.42"/><stop offset="100%" stop-color="#FF8C00" stop-opacity="0"/></linearGradient><linearGradient id="gradL" x1="0" y1="${PT}" x2="0" y2="${bottomY}" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#5AC8FA" stop-opacity="0.34"/><stop offset="100%" stop-color="#5AC8FA" stop-opacity="0"/></linearGradient></defs>${grid}<line x1="${PL}" y1="${PT}" x2="${PL}" y2="${bottomY}" stroke="#1C1C27" stroke-width="1"/><line x1="${PL}" y1="${bottomY}" x2="${W-PR}" y2="${bottomY}" stroke="#1C1C27" stroke-width="1"/>${yLabels}${xLabels}${area}${avgLine}${segs.map(pts=>`<polyline points="${pts.join(' ')}" fill="none" stroke="${cfg.color}" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>`).join('')}${dots}`;
+    const avgLine=avgSegs.map(pts=>`<polyline points="${pts.join(' ')}" fill="none" stroke="#aaa196" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="5,4"/>`).join('');
+    svg.innerHTML = `<defs><linearGradient id="gradR" x1="0" y1="${PT}" x2="0" y2="${bottomY}" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#c98a58" stop-opacity="0.42"/><stop offset="100%" stop-color="#c98a58" stop-opacity="0"/></linearGradient><linearGradient id="gradL" x1="0" y1="${PT}" x2="0" y2="${bottomY}" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#a5b69a" stop-opacity="0.34"/><stop offset="100%" stop-color="#a5b69a" stop-opacity="0"/></linearGradient></defs>${grid}<line x1="${PL}" y1="${PT}" x2="${PL}" y2="${bottomY}" stroke="#514635" stroke-width="1"/><line x1="${PL}" y1="${bottomY}" x2="${W-PR}" y2="${bottomY}" stroke="#514635" stroke-width="1"/>${yLabels}${xLabels}${area}${avgLine}${segs.map(pts=>`<polyline points="${pts.join(' ')}" fill="none" stroke="${cfg.color}" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>`).join('')}${dots}`;
 }
 // ── Records List ──────────────────────────────────────────────────────
 function renderList(sorted) {
@@ -1538,7 +1628,7 @@ function renderList(sorted) {
     if (sorted.length === 0) {
         el.innerHTML = `
             <div class="empty-state">
-                <div class="empty-icon">💪</div>
+                <div class="empty-icon"></div>
                 <div class="empty-text">開始你的第一次記錄吧！</div>
                 <div class="empty-sub">每天一次，見證自己的成長</div>
             </div>`;
@@ -1562,8 +1652,8 @@ function renderList(sorted) {
         const handHTML = isLegacy
             ? `<div class="rec-val">${r.value}<span style="font-size:12px;color:var(--text2);font-weight:400"> kg</span></div>`
             : `<div style="display:flex;flex-direction:column;align-items:flex-end;gap:1px;">
-                <div style="font-size:13px;font-weight:700;color:#5AC8FA">🤜 ${r.l}<span style="font-size:11px;font-weight:400"> kg</span></div>
-                <div style="font-size:13px;font-weight:700;color:#FF8C00">🤛 ${r.r}<span style="font-size:11px;font-weight:400"> kg</span></div>
+                <div style="font-size:13px;font-weight:700;color:#a5b69a"> ${r.l}<span style="font-size:11px;font-weight:400"> kg</span></div>
+                <div style="font-size:13px;font-weight:700;color:#c98a58"> ${r.r}<span style="font-size:11px;font-weight:400"> kg</span></div>
                </div>`;
 
         return `<div class="rec-row">
@@ -1571,7 +1661,7 @@ function renderList(sorted) {
             <div class="rec-right">
                 ${handHTML}
                 ${deltaHTML}
-                <button onclick="openEditModalDate('${r.date}')" style="margin-left:6px;background:none;border:none;color:var(--text2);font-size:13px;cursor:pointer;padding:2px 4px;border-radius:6px;transition:color 0.15s" title="編輯" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--text2)'">✏️</button>
+                <button onclick="openEditModalDate('${r.date}')" style="margin-left:6px;background:none;border:none;color:var(--text2);cursor:pointer;padding:8px;border-radius:6px" title="編輯" aria-label="編輯紀錄"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m15 5 4 4M4 20l4-1L20 7a2.8 2.8 0 0 0-4-4L4 15Z"/></svg></button>
             </div>
         </div>`;
     }).join('');
@@ -1624,16 +1714,16 @@ function confirmEdit() {
     const rawR = document.getElementById('edit-modal-input-r').value;
     const l = parseFloat(rawL), r = parseFloat(rawR);
     if ((!rawL && !rawR) || (rawL && (isNaN(l) || l <= 0 || l > 200)) || (rawR && (isNaN(r) || r <= 0 || r > 200))) {
-        showToast('⚠️ 請輸入有效握力值（1–200 kg）');
+        showToast(' 請輸入有效握力值（1–200 kg）');
         return;
     }
     const finalL = rawL ? Math.round(l * 10) / 10 : 0;
     const finalR = rawR ? Math.round(r * 10) / 10 : 0;
-    if (finalL === 0 && finalR === 0) { showToast('⚠️ 請至少輸入一手的握力值'); return; }
+    if (finalL === 0 && finalR === 0) { showToast(' 請至少輸入一手的握力值'); return; }
     const date = editingDate || todayStr();
     db.ref(`grip/${ME}/records/${date}`).set({ l: finalL, r: finalR })
-        .then(() => { sfxRecord(); showToast('✅ 紀錄已更新！'); document.getElementById('edit-modal').classList.remove('show'); editingDate = null; })
-        .catch(() => { sfxError(); showToast('❌ 儲存失敗，請重試'); });
+        .then(() => { sfxRecord(); showToast(' 紀錄已更新！'); document.getElementById('edit-modal').classList.remove('show'); editingDate = null; })
+        .catch(() => { sfxError(); showToast(' 儲存失敗，請重試'); });
 }
 
 // ── Submit ────────────────────────────────────────────────────────────
@@ -1642,16 +1732,16 @@ function submitToday() {
     const rawR = document.getElementById('grip-input-r').value;
     const l = parseFloat(rawL), r = parseFloat(rawR);
 
-    if (!rawL && !rawR) { showToast('⚠️ 請輸入左手或右手的握力值'); return; }
-    if (rawL && (isNaN(l) || l <= 0 || l > 200)) { showToast('⚠️ 左手數值無效（1–200 kg）'); return; }
-    if (rawR && (isNaN(r) || r <= 0 || r > 200)) { showToast('⚠️ 右手數值無效（1–200 kg）'); return; }
+    if (!rawL && !rawR) { showToast(' 請輸入左手或右手的握力值'); return; }
+    if (rawL && (isNaN(l) || l <= 0 || l > 200)) { showToast(' 左手數值無效（1–200 kg）'); return; }
+    if (rawR && (isNaN(r) || r <= 0 || r > 200)) { showToast(' 右手數值無效（1–200 kg）'); return; }
 
     const finalL = rawL ? Math.round(l * 10) / 10 : 0;
     const finalR = rawR ? Math.round(r * 10) / 10 : 0;
 
     db.ref(`grip/${ME}/records/${todayStr()}`).set({ l: finalL, r: finalR })
-        .then(() => { sfxRecord(); showToast('✅ 今日握力已記錄！'); })
-        .catch(() => { sfxError(); showToast('❌ 儲存失敗，請重試'); });
+        .then(() => { sfxRecord(); showToast(' 今日握力已記錄！'); })
+        .catch(() => { sfxError(); showToast(' 儲存失敗，請重試'); });
 }
 
 // ── Accordion ─────────────────────────────────────────────────────────
@@ -1681,13 +1771,13 @@ function renderChartModal(sorted) {
     const cfg = CHART_MODE[chartMode];
     const legend = document.getElementById('chart-modal-legend');
     if (legend) legend.innerHTML = `<span><span class="leg-line" style="background:${cfg.color}"></span>${cfg.short}</span><span><span class="leg-dash"></span>同手7日均</span><span style="color:var(--text3)">點擊圖表可查看當日紀錄</span>`;
-    if (sorted.length < 2) { svg.innerHTML = `<text x="300" y="120" text-anchor="middle" fill="#3A3A45" font-size="14" font-family="-apple-system,sans-serif">需要更多數據（至少 2 筆）</text>`; return; }
+    if (sorted.length < 2) { svg.innerHTML = `<text x="300" y="120" text-anchor="middle" fill="#aaa196" font-size="14" font-family="-apple-system,sans-serif">需要更多數據（至少 2 筆）</text>`; return; }
 
     const data=sorted.slice(-30);
     const actualValues=data.map(d=>chartValueAt(sorted,d,chartMode)).filter(v=>v>0);
     const avgValues=data.map(d=>chartAvgAt(sorted,d,chartMode)).filter(v=>v>0);
     const values=actualValues.concat(avgValues);
-    if (actualValues.length < 2) { svg.innerHTML = `<text x="300" y="120" text-anchor="middle" fill="#3A3A45" font-size="14" font-family="-apple-system,sans-serif">${cfg.short}需要更多數據</text>`; return; }
+    if (actualValues.length < 2) { svg.innerHTML = `<text x="300" y="120" text-anchor="middle" fill="#aaa196" font-size="14" font-family="-apple-system,sans-serif">${cfg.short}需要更多數據</text>`; return; }
     const W=600,H=240,PL=40,PR=12,PT=16,PB=34,cW=W-PL-PR,cH=H-PT-PB,bottomY=PT+cH;
     const minV=Math.min(...values), maxV=Math.max(...values), range=maxV-minV||1;
     const t0=new Date(data[0].date).getTime(), t1=new Date(data[data.length-1].date).getTime(), tSpan=t1-t0||1;
@@ -1695,14 +1785,14 @@ function renderChartModal(sorted) {
     _chartModalState = { data, sorted, xOf, yOf, W, H, mode: chartMode };
     const segs=buildLineSegs(data,xOf,yOf,d=>chartValueAt(sorted,d,chartMode));
     const avgSegs=buildLineSegs(data,xOf,yOf,d=>chartAvgAt(sorted,d,chartMode));
-    const grid=[0.25,0.5,0.75].map(f=>`<line x1="${PL}" y1="${PT+cH*f}" x2="${W-PR}" y2="${PT+cH*f}" stroke="#1C1C27" stroke-width="1"/>`).join('');
-    const yLabels=[0,0.25,0.5,0.75,1].map(f=>minV+range*f).map(v=>`<text x="${PL-5}" y="${yOf(v)}" text-anchor="end" dominant-baseline="middle" fill="#3A3A45" font-size="10" font-family="-apple-system,sans-serif">${Math.round(v)}</text>`).join('');
+    const grid=[0.25,0.5,0.75].map(f=>`<line x1="${PL}" y1="${PT+cH*f}" x2="${W-PR}" y2="${PT+cH*f}" stroke="#514635" stroke-width="1"/>`).join('');
+    const yLabels=[0,0.25,0.5,0.75,1].map(f=>minV+range*f).map(v=>`<text x="${PL-5}" y="${yOf(v)}" text-anchor="end" dominant-baseline="middle" fill="#aaa196" font-size="10" font-family="-apple-system,sans-serif">${Math.round(v)}</text>`).join('');
     const step=Math.max(1,Math.floor(data.length/8));
-    const xLabels=data.map((d,i)=>(i%step!==0&&i!==data.length-1)?'':`<text x="${xOf(d.date)}" y="${H-6}" text-anchor="middle" fill="#3A3A45" font-size="10" font-family="-apple-system,sans-serif">${fmtShort(d.date)}</text>`).join('');
+    const xLabels=data.map((d,i)=>(i%step!==0&&i!==data.length-1)?'':`<text x="${xOf(d.date)}" y="${H-6}" text-anchor="middle" fill="#aaa196" font-size="10" font-family="-apple-system,sans-serif">${fmtShort(d.date)}</text>`).join('');
     const area=segs.map(pts=>pts.length<2?'':`<polygon points="${[...pts,`${parseFloat(pts[pts.length-1].split(',')[0])},${bottomY}`,`${parseFloat(pts[0].split(',')[0])},${bottomY}`].join(' ')}" fill="url(#${cfg.modalGrad})"/>`).join('');
     const dots=data.map(d=>{ const v=chartValueAt(sorted,d,chartMode); if(!(v>0)) return ''; const isT=d.date===todayStr(); return `<circle cx="${xOf(d.date)}" cy="${yOf(v)}" r="${isT?6:4}" fill="${cfg.color}" stroke="${isT?'#fff':'none'}" stroke-width="${isT?2:0}"/>`; }).join('');
-    const avgLine=avgSegs.map(p=>`<polyline points="${p.join(' ')}" fill="none" stroke="#8E8E9A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="6,4"/>`).join('');
-    svg.innerHTML = `<defs><linearGradient id="mgradR" x1="0" y1="${PT}" x2="0" y2="${bottomY}" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#FF8C00" stop-opacity="0.42"/><stop offset="100%" stop-color="#FF8C00" stop-opacity="0"/></linearGradient><linearGradient id="mgradL" x1="0" y1="${PT}" x2="0" y2="${bottomY}" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#5AC8FA" stop-opacity="0.34"/><stop offset="100%" stop-color="#5AC8FA" stop-opacity="0"/></linearGradient></defs>${grid}<line x1="${PL}" y1="${PT}" x2="${PL}" y2="${bottomY}" stroke="#1C1C27" stroke-width="1"/><line x1="${PL}" y1="${bottomY}" x2="${W-PR}" y2="${bottomY}" stroke="#1C1C27" stroke-width="1"/>${yLabels}${xLabels}${area}${avgLine}${segs.map(p=>`<polyline points="${p.join(' ')}" fill="none" stroke="${cfg.color}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>`).join('')}${dots}<line id="tt-vline" x1="0" y1="${PT}" x2="0" y2="${bottomY}" stroke="rgba(255,255,255,0.15)" stroke-width="1.5" stroke-dasharray="4,3" display="none"/>`;
+    const avgLine=avgSegs.map(p=>`<polyline points="${p.join(' ')}" fill="none" stroke="#aaa196" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="6,4"/>`).join('');
+    svg.innerHTML = `<defs><linearGradient id="mgradR" x1="0" y1="${PT}" x2="0" y2="${bottomY}" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#c98a58" stop-opacity="0.42"/><stop offset="100%" stop-color="#c98a58" stop-opacity="0"/></linearGradient><linearGradient id="mgradL" x1="0" y1="${PT}" x2="0" y2="${bottomY}" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#a5b69a" stop-opacity="0.34"/><stop offset="100%" stop-color="#a5b69a" stop-opacity="0"/></linearGradient></defs>${grid}<line x1="${PL}" y1="${PT}" x2="${PL}" y2="${bottomY}" stroke="#514635" stroke-width="1"/><line x1="${PL}" y1="${bottomY}" x2="${W-PR}" y2="${bottomY}" stroke="#514635" stroke-width="1"/>${yLabels}${xLabels}${area}${avgLine}${segs.map(p=>`<polyline points="${p.join(' ')}" fill="none" stroke="${cfg.color}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>`).join('')}${dots}<line id="tt-vline" x1="0" y1="${PT}" x2="0" y2="${bottomY}" stroke="rgba(255,255,255,0.15)" stroke-width="1.5" stroke-dasharray="4,3" display="none"/>`;
     _chartTtActiveDate = null;
     document.getElementById('chart-tt').style.display = 'none';
     svg.onclick = svg.ontouchstart = null;
@@ -1722,7 +1812,7 @@ function renderChartModal(sorted) {
         const current = chartValueAt(sorted, closest, mode);
         const avg = chartAvgAt(sorted, closest, mode);
         rows.push(`<span style="color:${cfg.color};font-weight:800">${cfg.short} ${current.toFixed(1)} kg</span>`);
-        if (avg !== null) rows.push(`<span style="color:#8E8E9A;font-weight:800">7日均 ${avg.toFixed(1)} kg</span>`);
+        if (avg !== null) rows.push(`<span style="color:#aaa196;font-weight:800">7日均 ${avg.toFixed(1)} kg</span>`);
         const otherHand = mode === 'l' ? 'r' : 'l';
         const otherCfg = CHART_MODE[otherHand];
         if (closest[otherHand] > 0) rows.push(`<span style="color:${otherCfg.color};font-weight:700">${otherCfg.short} ${closest[otherHand]} kg</span>`);
