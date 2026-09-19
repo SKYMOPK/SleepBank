@@ -16,9 +16,17 @@
     }
     catalog.homecoming_effect = { id: 'homecoming_effect', family: 'homecoming', type: 'effect', name: '回到宿舍', limited: true, accent: '#d7b68d', bg: '#211b15', desc: '推開木門，回到熟悉的暖光裡' };
     catalog.dorm_color = { id: 'dorm_color', family: 'dorm', type: 'color', name: '第一季 · 宿舍夜燈', limited: true, accent: '#d3b788', bg: '#171411', desc: '夜燈亮著，日常留在這裡' };
+    for (const id of ['thunder_color', 'thunder_effect']) {
+        Object.assign(catalog[id], { quality: 'special', accent: '#b9c8db', bg: '#151a24', desc: '厚雲壓境，悶雷從遠方滾過' });
+    }
+    for (const id of ['chess_color', 'chess_effect']) {
+        Object.assign(catalog[id], { quality: 'special', accent: '#d6bc8b', bg: '#1b1612', desc: '深色棋桌前，關鍵一步安靜落下' });
+    }
     function art(id) {
         const item = catalog[id];
         if (!item) return '';
+        if (id === 'thunder_color' || id === 'thunder_effect') return '<img class="storm-art" src="assets/storm/preview.jpg?v=storm-1" alt="深灰藍的厚重雷暴雲層" loading="lazy">';
+        if (id === 'chess_color' || id === 'chess_effect') return '<img class="chess-art" src="assets/chess/preview.jpg?v=chess-1" alt="暖光下的深木棋桌與立體王棋" loading="lazy">';
         if (id === 'dorm_color' || id === 'homecoming_effect') return `<img class="homecoming-art" src="assets/homecoming/${id === 'dorm_color' ? 'dorm-preview' : 'preview'}.jpg" alt="暖光中的雙人宿舍" loading="lazy">`;
         if (item.type === 'badge') return `<svg class="le-badge-art" viewBox="0 0 120 120" aria-hidden="true"><defs><linearGradient id="${id}-metal" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fff2c7"/><stop offset=".35" stop-color="#c4a877"/><stop offset=".6" stop-color="#faf0cf"/><stop offset="1" stop-color="#997346"/></linearGradient></defs><g stroke="url(#${id}-metal)" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">${item.shape}</g></svg>`;
         return `<svg viewBox="0 0 120 120" aria-hidden="true" style="color:${item.accent}">${item.shape}</svg>`;
@@ -26,6 +34,7 @@
     function backdrop(id) {
         const item = catalog[id];
         if (!item) return 'none';
+        if (item.family === 'chess') return 'none';
         const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="280" height="280" viewBox="0 0 280 280"><g transform="translate(85 85)" color="${item.accent}" opacity=".055">${item.shape}</g></svg>`;
         return `url("data:image/svg+xml,${encodeURIComponent(svg)}")`;
     }

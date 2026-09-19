@@ -49,14 +49,14 @@ body.sb-split[data-theme="star"] {
     --theme-backdrop: rgba(10,15,24,.70);
 }
 body.sb-split[data-theme="thunder"] {
-    --theme-page-bg: #15121d;
-    --theme-surface-main: rgba(32,28,43,.64);
-    --theme-surface-soft: rgba(40,35,52,.40);
-    --theme-surface-raised: rgba(37,32,48,.82);
-    --theme-border: rgba(191,179,220,.22);
-    --theme-accent: #c2b7dc;
-    --theme-accent-soft: rgba(191,179,220,.12);
-    --theme-backdrop: rgba(16,12,24,.70);
+    --theme-page-bg: #121720;
+    --theme-surface-main: rgba(24,30,42,.64);
+    --theme-surface-soft: rgba(31,37,49,.40);
+    --theme-surface-raised: rgba(28,34,46,.88);
+    --theme-border: rgba(185,200,220,.18);
+    --theme-accent: #b9c8db;
+    --theme-accent-soft: rgba(185,200,220,.12);
+    --theme-backdrop: rgba(12,17,25,.70);
 }
 body.sb-split[data-theme="matcha"] {
     --theme-page-bg: #111912;
@@ -70,12 +70,13 @@ body.sb-split[data-theme="matcha"] {
 }
 body.sb-split[data-theme="chess"] {
     --theme-page-bg: #15120e;
-    --theme-surface-main: rgba(35,29,20,.60);
-    --theme-surface-soft: rgba(43,35,24,.38);
-    --theme-surface-raised: rgba(40,33,23,.82);
-    --theme-border: rgba(224,199,140,.22);
-    --theme-accent: #dcc493;
-    --theme-accent-soft: rgba(224,199,140,.12);
+    --theme-surface-main: rgba(28,26,23,.65);
+    --theme-surface-soft: rgba(35,31,27,.42);
+    --theme-surface-raised: rgba(35,31,26,.91);
+    --theme-border: rgba(224,199,140,.17);
+    --theme-accent: #d6bc8b;
+    --theme-accent-soft: rgba(214,188,139,.11);
+    --theme-backdrop: rgba(17,15,13,.73);
 }
 body.sb-split[data-theme="rain"] {
     --theme-page-bg: #10191e;

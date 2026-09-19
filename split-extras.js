@@ -45,6 +45,10 @@
         document.body.dataset.theme = permitted ? item.family : 'default';
         if (permitted && item.family === 'dorm') root.DormBackground?.mount(scene);
         else root.DormBackground?.cleanup();
+        if (permitted && item.family === 'thunder') root.SpecialThemes?.thunder.ambient.mount(scene);
+        else root.SpecialThemes?.thunder.ambient.cleanup();
+        if (permitted && item.family === 'chess') root.SpecialThemes?.chess.ambient.mount(scene);
+        else root.SpecialThemes?.chess.ambient.cleanup();
         if (permitted) {
             document.body.style.setProperty('--ledger-bg', item.bg);
             document.body.style.setProperty('--ledger-scene', cosmetics.backdrop(id));
@@ -77,8 +81,13 @@
     function play(id) {
         // Presentation errors must never escape into the successful save/undo path.
         try {
+            root.SpecialThemes?.thunder.stop();
+            root.SpecialThemes?.chess.stop();
+            root.LedgerOriginalEffects.stop();
             if (id === 'homecoming_effect') return root.HomecomingEffect?.play({ muted: preferences.muted });
             root.HomecomingEffect?.cleanup();
+            if (id === 'thunder_effect') return root.SpecialThemes.thunder.onAdd({ muted: preferences.muted });
+            if (id === 'chess_effect') return root.SpecialThemes.chess.onAdd({ muted: preferences.muted });
             root.LedgerOriginalEffects.play(id, matchMedia('(prefers-reduced-motion: reduce)').matches, preferences.muted);
         } catch (error) { console.warn('Effect unavailable', error); }
     }
@@ -101,6 +110,10 @@
             document.querySelector('#ledger-original-background').className = `ledger-original-theme theme-${item.family}`;
             if (item.family === 'dorm') root.DormBackground?.mount(document.querySelector('#ledger-original-background'));
             else root.DormBackground?.cleanup();
+            if (item.family === 'thunder') root.SpecialThemes?.thunder.ambient.mount(document.querySelector('#ledger-original-background'));
+            else root.SpecialThemes?.thunder.ambient.cleanup();
+            if (item.family === 'chess') root.SpecialThemes?.chess.ambient.mount(document.querySelector('#ledger-original-background'));
+            else root.SpecialThemes?.chess.ambient.cleanup();
             toast('背景預覽 · 關閉面板後恢復原設定');
         }
     }
@@ -111,6 +124,7 @@
             root.HomecomingEffect?.enable();
             root.HomecomingEffect?.prepare().catch(() => {});
         }
+        if (id === 'chess_effect') root.SpecialThemes?.chess.prepare().catch(() => {});
         writeLocal(storageKey, preferences); applyBackground(); render(); toast('已套用 · 僅影響此裝置');
     }
     function render() {
@@ -389,15 +403,26 @@
         const background = document.createElement('div');
         background.id = 'ledger-original-background'; background.setAttribute('aria-hidden', 'true'); document.body.prepend(background);
         entry.addEventListener('click', e => { const button = e.target.closest('[data-open]'); if (button) open(button.dataset.open); });
+        document.querySelector('#confirmOkBtn').addEventListener('click', () => {
+            if (settings().effect === 'thunder_effect' && has('thunder_effect')) {
+                root.StormAudio?.prime(preferences.muted || matchMedia('(prefers-reduced-motion: reduce)').matches);
+            }
+            if (document.querySelector('#confirmTitle')?.textContent === '確認新增' && settings().effect === 'chess_effect' && has('chess_effect')) {
+                root.ChessAudio?.prime(preferences.muted || matchMedia('(prefers-reduced-motion: reduce)').matches);
+            }
+        }, { capture: true });
         panel.addEventListener('click', e => {
             const b = e.target.closest('button');
             if (e.target === panel || b?.classList.contains('le-close')) return close();
             if (!b) return;
             if (b.dataset.tab) { tab = b.dataset.tab; render(); panel.querySelector('.le-content').scrollTop = 0; }
-            if (b.dataset.preview) preview(b.dataset.preview);
+            if (b.dataset.preview) {
+                if (b.dataset.preview === 'chess_effect') root.ChessAudio?.prime(preferences.muted || matchMedia('(prefers-reduced-motion: reduce)').matches);
+                preview(b.dataset.preview);
+            }
             if (b.dataset.equip) equip(b.dataset.equip);
-            if (b.hasAttribute('data-disable')) { if (tab === 'effect') root.HomecomingEffect?.cleanup(); settings()[tab] = null; writeLocal(storageKey, preferences); applyBackground(); render(); }
-            if (b.hasAttribute('data-mute')) { preferences.muted = !preferences.muted; writeLocal(storageKey, preferences); render(); }
+            if (b.hasAttribute('data-disable')) { if (tab === 'effect') { root.HomecomingEffect?.cleanup(); root.SpecialThemes?.thunder.stop(); root.SpecialThemes?.chess.stop(); root.StormAudio?.clearPrime(); root.ChessAudio?.clearPrime(); root.LedgerOriginalEffects.stop(); } settings()[tab] = null; writeLocal(storageKey, preferences); applyBackground(); render(); }
+            if (b.hasAttribute('data-mute')) { preferences.muted = !preferences.muted; if (preferences.muted) { root.StormAudio?.clearPrime(); root.ChessAudio?.clearPrime(); } writeLocal(storageKey, preferences); render(); }
             if (b.dataset.claim) claim(Number(b.dataset.claim));
         });
         panel.addEventListener('change', e => { if (e.target.id === 'le-season') render(); });
@@ -443,5 +468,9 @@
         window.addEventListener('pageshow', event => { if (event.persisted) { startTimer(); flush(); } });
         applyBackground(); amountPreview(0);
     }
-    root.SplitExtras = { init, prepare, changed, saved, failed, amountPreview, added: () => { const id = settings().effect; if (has(id)) play(id); } };
+    root.SplitExtras = {
+        init, prepare, changed, saved, failed, amountPreview,
+        needsAddChime: () => settings().effect !== 'chess_effect' || !has('chess_effect'),
+        added: () => { const id = settings().effect; if (has(id)) play(id); },
+    };
 })(globalThis);

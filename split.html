@@ -10,17 +10,22 @@
     <script src="split-core.js"></script>
     <script src="split-pass-config.js?v=season1-lv40-set"></script>
     <script src="split-pass-core.js?v=reward-bundle-1"></script>
-    <script src="split-cosmetics.js?v=locked-dorm-set"></script>
+    <script src="split-cosmetics.js?v=chess-1"></script>
     <script src="split-badges.js"></script>
     <script src="assets/vendor/confetti-1.6.0.min.js"></script>
-    <script src="split-original-effects.js"></script>
+    <script src="split-original-effects.js?v=chess-1"></script>
     <script src="split-homecoming.js?v=20260918-1"></script>
     <script src="split-homecoming-audio.js?v=20260918-1"></script>
     <script src="split-dorm-background.js?v=20260918-1"></script>
+    <script src="split-storm-audio.js?v=storm-1"></script>
+    <script src="assets/storm/textures.js?v=storm-1"></script>
+    <script src="split-storm.js?v=storm-1"></script>
+    <script src="split-chess-audio.js?v=chess-1"></script>
+    <script src="split-chess.js?v=chess-1"></script>
     <link rel="stylesheet" href="split-homecoming.css?v=20260918-1">
-    <script src="split-extras.js?v=reward-fan-2"></script>
+    <script src="split-extras.js?v=chess-1"></script>
     <link rel="stylesheet" href="split-extras.css?v=reward-fan-2">
-    <link rel="stylesheet" href="split-original-effects.css?v=themes-20260918-1">
+    <link rel="stylesheet" href="split-original-effects.css?v=chess-1">
     <style>
         :root {
             --bg: #1E1912;
@@ -639,7 +644,9 @@
         @media (min-width: 601px) { .sb-split .page-wrapper { padding-top: 8px; } .sb-split .balance-amount { font-size: 58px; } }
         @media (prefers-reduced-motion: reduce) { .sb-split .view.active { animation: none; } }
     </style>
-    <link rel="stylesheet" href="split-themes.css?v=20260918-5">
+    <link rel="stylesheet" href="split-themes.css?v=chess-1">
+    <link rel="stylesheet" href="split-storm.css?v=storm-1">
+    <link rel="stylesheet" href="split-chess.css?v=chess-1">
 </head>
 <body class="sb-page sb-split" data-theme="default">
 
@@ -1400,7 +1407,7 @@
                     await commitRecordChange(ref.key, null, record);
                     SplitExtras.saved(ref.key, record);
                     resetInputForm();
-                    playSound('add');
+                    if (SplitExtras.needsAddChime()) playSound('add');
                     SplitExtras.added();
                     offerUndo('已新增帳目', async () => {
                         const snapshot = await ref.once('value');

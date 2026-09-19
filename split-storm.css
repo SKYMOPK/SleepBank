@@ -1,0 +1,14 @@
+/* Storm surfaces share the ordinary theme tokens; only environment light is local. */
+.ledger-original-theme.theme-thunder {
+    background: #10151f url('assets/storm/preview.jpg?v=storm-1') center / cover no-repeat;
+    animation: none;
+}
+.storm-ambient { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.le-art .storm-art, .le-reveal-art > .storm-art { display: block; width: 100%; height: 100%; object-fit: cover; }
+.storm-effect { position: fixed; inset: 0; z-index: 1250; pointer-events: none; overflow: hidden; }
+.storm-effect canvas { display: block; width: 100%; height: 100%; }
+.storm-skip { position: absolute; top: max(16px,env(safe-area-inset-top)); right: max(16px,env(safe-area-inset-right)); pointer-events: auto; min-width: 60px; min-height: 44px; border: 1px solid #c9d4e324; border-radius: 999px; background: #171d29a0; color: #d8dee8; font: inherit; font-size: 13px; padding: 8px 14px; cursor: pointer; }
+.storm-skip:focus-visible { outline: 2px solid #c1cfdf; outline-offset: 3px; }
+.sb-split.storm-playing .undo-toast { z-index: 1400; }
+.sb-split.storm-lit::after { content: ''; position: fixed; inset: 0; z-index: 1260; pointer-events: none; background: linear-gradient(135deg,rgba(172,196,224,var(--storm-reflection)),transparent 65%); }
+@media (prefers-reduced-motion: reduce) { .sb-split.storm-lit::after { display: none; } }
