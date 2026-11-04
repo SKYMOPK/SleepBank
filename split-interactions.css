@@ -1,0 +1,191 @@
+/* Shared, theme-aware controls for creating and editing a ledger entry. */
+.sb-split :is(#view-input,.edit-sheet) .amount-row {
+    gap: 12px;
+    overflow: visible;
+    border: 0;
+    border-radius: 0;
+    background: none;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+}
+.sb-split :is(#view-input,.edit-sheet) .amount-group {
+    position: relative;
+    min-width: 0;
+    padding: 16px;
+    border: 1px solid var(--theme-border);
+    border-radius: 16px;
+    background: var(--theme-surface-main);
+    box-shadow: inset 0 1px rgba(255,255,255,.06);
+    backdrop-filter: blur(14px) saturate(115%);
+    -webkit-backdrop-filter: blur(14px) saturate(115%);
+    transition: border-color .2s ease, background-color .2s ease, box-shadow .2s ease;
+}
+.sb-split :is(#view-input,.edit-sheet) .amount-group + .amount-group { border-left: 1px solid var(--theme-border); }
+.sb-split :is(#view-input,.edit-sheet) .amount-group:focus-within {
+    border-color: var(--theme-accent);
+    background: var(--theme-surface-raised);
+    box-shadow: inset 0 -2px var(--theme-accent);
+}
+.sb-split :is(#view-input,.edit-sheet) .amount-group label { display: block; margin: 0 0 12px; color: var(--theme-muted); font-size: 13px; font-weight: 500; }
+.sb-split :is(#view-input,.edit-sheet) .money-field { display: flex; align-items: baseline; gap: 5px; min-width: 0; }
+.sb-split :is(#view-input,.edit-sheet) .money-unit { color: var(--theme-muted); font-size: 17px; font-weight: 500; transition: color .2s ease; }
+.sb-split :is(#view-input,.edit-sheet) .amount-group:focus-within .money-unit { color: var(--theme-accent); }
+.sb-split :is(#view-input,.edit-sheet) .amount-group .amount-input,
+.sb-split :is(#view-input,.edit-sheet) .amount-group .amount-input:focus {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    min-height: 44px;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    outline: none;
+    background: transparent;
+    box-shadow: none;
+    color: var(--theme-text);
+    font-size: 30px;
+    font-weight: 600;
+    line-height: 1.2;
+    font-variant-numeric: tabular-nums;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+}
+.sb-split :is(#view-input,.edit-sheet) .amount-group .amount-input::placeholder { color: var(--theme-muted); font-size: 30px; opacity: .75; }
+
+.sb-split :is(#view-input,.edit-sheet) .payer-row {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0,1fr));
+    gap: 10px;
+    margin: 10px 0 16px;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: none;
+}
+.sb-split :is(#view-input,.edit-sheet) .payer-btn {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 10px;
+    min-width: 0;
+    min-height: 68px;
+    padding: 10px 12px;
+    border: 1px solid var(--theme-border);
+    border-radius: 14px;
+    background: var(--theme-surface-main);
+    color: var(--theme-text);
+    text-align: left;
+    box-shadow: inset 0 1px rgba(255,255,255,.035);
+    transition: border-color .2s ease, background-color .2s ease, transform .16s ease;
+}
+.sb-split :is(#view-input,.edit-sheet) .payer-btn.selected {
+    border-color: var(--theme-accent);
+    background: var(--theme-accent-soft);
+    color: var(--theme-text);
+    box-shadow: inset 0 1px rgba(255,255,255,.06);
+}
+.sb-split :is(#view-input,.edit-sheet) .payer-btn:not(:disabled):active { transform: scale(.98); }
+.sb-split :is(#view-input,.edit-sheet) .payer-avatar {
+    display: grid;
+    place-items: center;
+    flex: 0 0 34px;
+    width: 34px;
+    height: 34px;
+    border: 1px solid var(--theme-border);
+    border-radius: 10px;
+    color: var(--theme-accent);
+    background: var(--theme-accent-soft);
+}
+.sb-split :is(#view-input,.edit-sheet) .payer-avatar .icon { display: block; width: 18px; height: 18px; stroke-width: 1.6; }
+.sb-split :is(#view-input,.edit-sheet) .payer-copy { display: grid; gap: 3px; min-width: 0; }
+.sb-split :is(#view-input,.edit-sheet) .payer-copy strong { color: var(--theme-text); font-size: 14px; font-weight: 600; }
+.sb-split :is(#view-input,.edit-sheet) .payer-copy small { color: var(--theme-muted); font-size: 11px; font-weight: 400; white-space: nowrap; }
+.sb-split :is(#view-input,.edit-sheet) .payer-check {
+    display: grid;
+    place-items: center;
+    flex: 0 0 20px;
+    width: 20px;
+    height: 20px;
+    margin-left: auto;
+    border: 1px solid var(--theme-border);
+    border-radius: 50%;
+    color: var(--theme-on-accent);
+    transition: background-color .2s ease, border-color .2s ease;
+}
+.sb-split :is(#view-input,.edit-sheet) .payer-check .icon { display: block; width: 12px; height: 12px; opacity: 0; transform: scale(.7); transition: opacity .2s ease, transform .2s ease; }
+.sb-split :is(#view-input,.edit-sheet) .payer-btn.selected .payer-check { border-color: var(--theme-accent); background: var(--theme-accent); }
+.sb-split :is(#view-input,.edit-sheet) .payer-btn.selected .payer-check .icon { opacity: 1; transform: scale(1); }
+.sb-split :is(#view-input,.edit-sheet) .payer-btn:focus-visible { outline: 2px solid var(--theme-accent); outline-offset: 3px; }
+
+.sb-split :is(#view-input,.edit-sheet) .result-preview {
+    display: grid;
+    gap: 6px;
+    margin: 0 0 16px;
+    padding: 12px 0 12px 14px;
+    border-left: 2px solid var(--theme-border);
+    transition: border-color .2s ease, background-color .2s ease;
+}
+.sb-split :is(#view-input,.edit-sheet) .result-preview:has(.has-value) { border-left-color: var(--theme-accent); background: var(--theme-accent-soft); }
+.sb-split :is(#view-input,.edit-sheet) .result-preview-label { color: var(--theme-muted); font-size: 12px; }
+.sb-split :is(#view-input,.edit-sheet) .result-preview .preview-text {
+    min-height: 0;
+    margin: 0;
+    padding: 0 10px 0 0;
+    border: 0;
+    background: none;
+    color: var(--theme-text);
+    font-size: 14px;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+}
+.sb-split :is(#view-input,.edit-sheet) .result-preview .preview-text:not(.has-value) { color: var(--theme-muted); }
+.sb-split #view-input .submit-btn {
+    display: grid;
+    grid-template-columns: 20px 1fr 20px;
+    gap: 12px;
+    align-items: center;
+    min-height: 56px;
+    padding: 0 18px;
+    text-align: center;
+}
+.sb-split #view-input .submit-btn .icon { width: 20px; height: 20px; }
+.sb-split #view-input .submit-btn .submit-arrow { transition: transform .2s ease; }
+.sb-split #view-input .submit-btn.is-loading { grid-template-columns: 20px 1fr 20px; }
+.sb-split #view-input .submit-btn:disabled { opacity: .75; }
+
+.sb-split .confirm-overlay { padding: 20px; }
+.sb-split .confirm-box { max-width: 420px; padding: 24px; border-radius: 22px; }
+.sb-split .confirm-title { margin: 0 0 20px; text-align: left; font-size: 20px; }
+.sb-split .confirm-details { gap: 0; margin: 0; }
+.sb-split .confirm-row { grid-template-columns: 84px minmax(0,1fr); gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--theme-border); }
+.sb-split .confirm-row span:first-child { font-size: 13px; font-weight: 400; }
+.sb-split .confirm-row span:last-child { font-size: 14px; font-weight: 600; }
+.sb-split .confirm-btns { grid-template-columns: minmax(0,.8fr) minmax(0,1.2fr); gap: 10px; }
+.sb-split .confirm-btns button { min-height: 52px; border-radius: 12px; }
+
+@media (hover: hover) and (pointer: fine) {
+    .sb-split :is(#view-input,.edit-sheet) .payer-btn:not(:disabled):hover { border-color: var(--theme-accent); }
+    .sb-split #view-input .submit-btn:not(:disabled):hover .submit-arrow { transform: translateX(4px); }
+}
+@media (max-width: 380px) {
+    .sb-split :is(#view-input,.edit-sheet) .amount-group { padding: 12px; }
+    .sb-split :is(#view-input,.edit-sheet) .payer-btn { gap: 7px; padding: 10px 8px; }
+    .sb-split :is(#view-input,.edit-sheet) .payer-avatar { flex-basis: 30px; width: 30px; height: 30px; }
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .sb-split :is(#view-input,.edit-sheet) .amount-group,
+    .sb-split :is(#view-input,.edit-sheet) .payer-btn { background: var(--theme-surface-raised); }
+    .sb-split :is(#view-input,.edit-sheet) .payer-btn.selected { background: linear-gradient(var(--theme-accent-soft), var(--theme-accent-soft)), var(--theme-surface-raised); }
+}
+@media (prefers-reduced-motion: no-preference) {
+    .sb-split .confirm-overlay.show .confirm-box { animation: ledger-dialog-enter .28s cubic-bezier(.2,.75,.25,1) both; }
+    .sb-split #view-input .submit-btn.is-loading > .icon { animation: ledger-sync-spin 1s linear infinite; }
+    @keyframes ledger-dialog-enter {
+        from { opacity: 0; transform: translateY(12px) scale(.985); }
+        to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    @keyframes ledger-sync-spin { to { transform: rotate(360deg); } }
+}
+@media (prefers-reduced-motion: reduce) {
+    .sb-split :is(#view-input,.edit-sheet) :is(.amount-group,.money-unit,.payer-btn,.payer-check,.payer-check .icon,.result-preview,.submit-arrow) { transition: none; }
+}

@@ -1,0 +1,199 @@
+/* Ledger composition; the selected theme still owns the background and color tokens. */
+.sb-split .header {
+    max-width: 1040px;
+    min-height: 76px;
+    background: var(--theme-surface-soft);
+    border-bottom: 1px solid var(--theme-border);
+}
+.sb-split .header-title > .icon {
+    display: inline-block;
+    width: 22px;
+    height: 22px;
+    color: var(--theme-accent);
+    stroke-width: 1.5;
+}
+.sb-split .header-title { gap: 10px; }
+.sb-split .ledger-subtitle { margin-left: 32px; }
+.sb-split #view-input.active .page-wrapper {
+    max-width: 1040px;
+    padding: 4px 16px 48px;
+}
+.sb-split #view-input .ledger-extras { margin: 0 0 14px; }
+.sb-split #view-input .ledger-extras .le-entry {
+    min-height: 44px;
+    padding: 0 14px;
+    border-radius: 8px;
+}
+
+/* A statement-like summary, with the real balance as the central visual. */
+.sb-split #view-input .balance-card {
+    display: flex;
+    flex-direction: column;
+    min-height: 194px;
+    margin-bottom: 18px;
+    padding: 24px;
+    border-radius: 22px;
+    background:
+        linear-gradient(120deg, rgba(255,255,255,.075), transparent 46%),
+        var(--theme-surface-main);
+    box-shadow: inset 0 1px rgba(255,255,255,.08), 0 16px 40px rgba(0,0,0,.14);
+}
+.sb-split #view-input .balance-card::before {
+    left: auto;
+    right: 24px;
+    top: 24px;
+    width: 42px;
+    height: 28px;
+    background: repeating-linear-gradient(0deg, var(--theme-accent) 0 1px, transparent 1px 9px);
+    opacity: .28;
+}
+.sb-split #view-input .balance-topline { display: flex; align-items: center; gap: 10px; padding-right: 54px; }
+.sb-split #view-input .balance-label { margin: 0; color: var(--theme-text); font-size: 14px; font-weight: 600; }
+.sb-split #view-input .balance-caption { color: var(--theme-muted); font-size: 12px; }
+.sb-split #view-input .balance-caption::before { content: ''; display: inline-block; width: 3px; height: 3px; margin: 0 9px 3px 0; border-radius: 50%; background: var(--theme-muted); }
+.sb-split #view-input .balance-amount {
+    margin: 20px 0 18px;
+    font-size: 58px;
+    font-weight: 650;
+    line-height: 1.05;
+    overflow-wrap: anywhere;
+}
+.sb-split #view-input .balance-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: auto;
+    padding-top: 16px;
+    border-top: 1px solid var(--theme-border);
+}
+.sb-split #view-input .balance-footer-label { color: var(--theme-muted); font-size: 12px; white-space: nowrap; }
+.sb-split #view-input .balance-desc { margin: 0; font-size: 14px; text-align: right; overflow-wrap: anywhere; }
+
+/* The form is an open work surface instead of another large framed card. */
+.sb-split #view-input.active .input-card {
+    margin: 0 0 20px;
+    padding: 18px 4px 8px;
+    border: 0;
+    border-radius: 0;
+    background: none;
+    box-shadow: none;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+}
+.sb-split #view-input .input-card-header { margin-bottom: 16px; }
+.sb-split #view-input .section-kicker { font-size: 19px; font-weight: 650; }
+.sb-split #view-input .section-kicker .icon { width: 20px; height: 20px; }
+.sb-split #view-input .calc-toggle { min-height: 44px; color: var(--theme-accent); }
+.sb-split #view-input .amount-row { gap: 12px; margin-bottom: 16px; }
+.sb-split #view-input .amount-group label { margin: 0 0 9px; color: var(--theme-muted); font-size: 13px; }
+.sb-split #view-input .amount-input,
+.sb-split #view-input .note-input {
+    background: var(--theme-surface-main);
+    border: 1px solid var(--theme-border);
+    box-shadow: inset 0 1px rgba(255,255,255,.035);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+}
+.sb-split #view-input .amount-input { min-height: 64px; padding: 12px 14px; border-radius: 14px; font-size: 28px; }
+.sb-split #view-input .note-input { min-height: 54px; padding: 12px 14px; border-radius: 14px; }
+.sb-split #view-input .amount-row,
+.sb-split .edit-sheet .amount-row {
+    gap: 0;
+    overflow: hidden;
+    border: 1px solid var(--theme-border);
+    border-radius: 16px;
+    background: var(--theme-surface-main);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+}
+.sb-split #view-input .amount-group,
+.sb-split .edit-sheet .amount-group {
+    min-width: 0;
+    padding: 14px;
+    transition: background-color .2s ease, box-shadow .2s ease;
+}
+.sb-split #view-input .amount-group + .amount-group,
+.sb-split .edit-sheet .amount-group + .amount-group { border-left: 1px solid var(--theme-border); }
+.sb-split #view-input .amount-group:focus-within,
+.sb-split .edit-sheet .amount-group:focus-within { background: var(--theme-accent-soft); box-shadow: inset 0 -2px var(--theme-accent); }
+.sb-split #view-input .amount-group .amount-input,
+.sb-split .edit-sheet .amount-group .amount-input,
+.sb-split #view-input .amount-group .amount-input:focus,
+.sb-split .edit-sheet .amount-group .amount-input:focus {
+    min-height: 44px;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+}
+.sb-split #view-input .amount-group .amount-input:focus-visible,
+.sb-split .edit-sheet .amount-group .amount-input:focus-visible { outline: none; }
+.sb-split #view-input .amount-group .amount-input,
+.sb-split .edit-sheet .amount-group .amount-input { appearance: textfield; -moz-appearance: textfield; }
+.sb-split :is(#view-input,.edit-sheet) .amount-input::-webkit-inner-spin-button,
+.sb-split :is(#view-input,.edit-sheet) .amount-input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+.sb-split #view-input .payer-row { padding: 4px; border-radius: 14px; background: var(--theme-surface-main); }
+.sb-split #view-input .payer-btn { min-height: 48px; }
+.sb-split #view-input .preview-text { margin: 12px 0 16px; }
+.sb-split #view-input .submit-btn { min-height: 56px; border-radius: 14px; }
+
+.sb-split #view-input .records-hub {
+    padding: 20px 20px 4px;
+    border: 1px solid var(--theme-border);
+    border-radius: 20px;
+    background: var(--theme-surface-main);
+    box-shadow: inset 0 1px rgba(255,255,255,.04);
+    backdrop-filter: blur(16px) saturate(115%);
+    -webkit-backdrop-filter: blur(16px) saturate(115%);
+}
+.sb-split #view-input .records-section-title { padding: 0 0 12px; font-size: 16px; }
+.sb-split #view-input .view-records-btn {
+    min-height: 76px;
+    margin: 0;
+    padding: 14px 0;
+    border: 0;
+    border-top: 1px solid var(--theme-border);
+    border-radius: 0;
+    background: none;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+}
+.sb-split #view-input .record-entry-icon { border-radius: 8px; }
+.sb-split #view-input .view-records-label { font-size: 15px; }
+
+@media (min-width: 900px) {
+    .sb-split #view-input.active .page-wrapper {
+        display: grid;
+        grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr);
+        grid-template-rows: auto auto 1fr;
+        align-items: start;
+        gap: 0 56px;
+        padding-top: 28px;
+    }
+    .sb-split #view-input .ledger-extras { grid-column: 1; grid-row: 1; }
+    .sb-split #view-input .balance-card { grid-column: 1; grid-row: 2; min-height: 220px; }
+    .sb-split #view-input.active .input-card { grid-column: 2; grid-row: 1 / 4; margin: 0; padding: 20px 0 8px; }
+    .sb-split #view-input .records-hub { grid-column: 1; grid-row: 3; }
+}
+@media (max-width: 380px) {
+    .sb-split #view-input .balance-card { min-height: 188px; padding: 20px; }
+    .sb-split #view-input .balance-amount { font-size: 50px; }
+    .sb-split #view-input .records-hub { padding-right: 16px; padding-left: 16px; }
+}
+@media (hover: hover) and (pointer: fine) {
+    .sb-split #view-input .view-records-btn:hover { background: var(--theme-accent-soft); }
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .sb-split #view-input .amount-row,
+    .sb-split .edit-sheet .amount-row,
+    .sb-split #view-input .note-input,
+    .sb-split #view-input .records-hub { background: var(--theme-surface-raised); }
+}
+@media (prefers-reduced-motion: reduce) {
+    .sb-split #view-input .amount-group,
+    .sb-split .edit-sheet .amount-group { transition: none; }
+}

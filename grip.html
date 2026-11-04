@@ -916,6 +916,7 @@
     .sb-grip .submit-btn:hover:not(:disabled) { transform:none; box-shadow:none; }
     @media (hover:hover) { .sb-grip .user-card:hover { transform:none; background:#d7b15b06; border-color:var(--border); box-shadow:none; } .sb-grip .submit-btn:hover:not(:disabled) { transform:none; box-shadow:none; background:#dfaa80; } }
     </style>
+    <link rel="stylesheet" href="grip-experience.css?v=20261104-1">
 </head>
 <body class="sb-page sb-grip">
 
@@ -926,15 +927,14 @@
         <span class="logo-icon"></span>
         <div class="logo-title">握力日記</div>
         <div class="logo-sub">記錄每次訓練與進步</div>
-        <div style="margin-top:8px;font-size:11px;color:var(--text3);font-weight:600;letter-spacing:0.5px">v1.3</div>
     </div>
     <div class="user-cards">
         <button class="user-card" onclick="selectUser('p1')">
-            <div class="av"></div>
+            <div class="av" aria-hidden="true">凱</div>
             <div class="name">至凱</div>
             <div class="role">偶爾記錄</div><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg></button>
         <button class="user-card" onclick="selectUser('p2')">
-            <div class="av"></div>
+            <div class="av" aria-hidden="true">致</div>
             <div class="name">柏致</div>
             <div class="role">主力訓練</div><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg></button>
     </div>
@@ -974,12 +974,12 @@
             <div class="input-label">輸入今日握力 (kg)</div>
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px;">
                 <div>
-                    <div style="font-size:11px; color:var(--text2); margin-bottom:6px; text-align:center; font-weight:600;"> 左手</div>
+                    <label class="hand-label" for="grip-input-l">左手</label>
                     <div class="hand-input"><input type="number" id="grip-input-l" class="grip-input"
                            placeholder="0" inputmode="decimal" min="1" max="200" step="0.5"><span>kg</span></div>
                 </div>
                 <div>
-                    <div style="font-size:11px; color:var(--text2); margin-bottom:6px; text-align:center; font-weight:600;"> 右手</div>
+                    <label class="hand-label" for="grip-input-r">右手</label>
                     <div class="hand-input"><input type="number" id="grip-input-r" class="grip-input"
                            placeholder="0" min="1" max="200" step="0.5" inputmode="decimal"><span>kg</span></div>
                 </div>

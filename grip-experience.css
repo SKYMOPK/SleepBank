@@ -1,0 +1,46 @@
+/* A training journal with quiet structure and direct entry controls. */
+body.sb-grip { background:#171614; color:#f2eee6; }
+.sb-grip #user-select { max-width:920px; min-height:100svh; padding:36px 24px 72px; justify-content:center; }
+.sb-grip #user-select .back-btn { margin-bottom:32px !important; }
+.sb-grip .logo-wrap { margin-bottom:28px; }
+.sb-grip .logo-title { font-size:34px; line-height:1.2; }
+.sb-grip .logo-sub { margin-top:10px; }
+.sb-grip .user-cards { grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
+.sb-grip .user-card { grid-template-columns:44px minmax(0,1fr) 20px; grid-template-rows:auto auto; align-items:center; column-gap:14px; min-height:112px; padding:20px; border:1px solid rgba(238,225,210,.12); border-radius:14px; background:#24211e; }
+.sb-grip .user-card .av { grid-column:1; grid-row:1/3; display:grid; place-items:center; width:44px; height:44px; margin:0; border-radius:12px; background:#44554a; color:#d0e5d3; font-size:16px; font-weight:650; }
+.sb-grip .user-card:nth-child(2) .av { background:#5e4640; color:#f0c8b8; }
+.sb-grip .user-card .name { grid-column:2; font-size:17px; }
+.sb-grip .user-card .role { grid-column:2; margin-top:3px; }
+.sb-grip .user-card .ui-icon { grid-column:3; }
+.sb-grip #app { max-width:900px; padding:0 24px calc(112px + env(safe-area-inset-bottom)); }
+.sb-grip .header { min-height:76px; border-bottom:1px solid rgba(255,255,255,.1); background:#171614; }
+.sb-grip .user-chip { padding:0 14px; border:1px solid rgba(238,225,210,.13); border-radius:10px; background:#27231e; }
+.sb-grip #panel-record.active { display:grid; grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr); gap:28px; align-items:start; padding-top:32px; }
+.sb-grip .status-card { min-width:0; margin:0; padding:26px; border:1px solid rgba(238,225,210,.1); border-radius:18px; background:#24211f; }
+.sb-grip .status-date { color:#c6a58b; }
+.sb-grip .status-label { color:#eee9df; }
+.sb-grip .input-card { min-width:0; margin:0; padding:26px; border:1px solid rgba(238,225,210,.13); border-radius:18px; background:#211f1c; }
+.sb-grip .input-label { margin-bottom:20px; color:#f2eee6; font-size:16px; font-weight:650; }
+.sb-grip .hand-label { display:block; margin-bottom:8px; color:var(--text2); font-size:13px; font-weight:600; }
+.sb-grip .hand-input { min-width:0; gap:8px; padding:0 12px; border:1px solid rgba(238,225,210,.16); border-radius:10px; background:rgba(255,255,255,.04); }
+.sb-grip .hand-input:focus-within { border-color:var(--accent); background:rgba(201,138,88,.08); }
+.sb-grip .hand-input .grip-input,.sb-grip .hand-input .grip-input:focus { min-height:60px; border:0; outline:0; background:none; box-shadow:none; }
+.sb-grip .submit-btn { margin-top:16px; }
+.sb-grip #panel-stats.active { padding:28px 0 12px; }
+.sb-grip .tab-bar { max-width:900px; left:50%; right:auto; width:100%; transform:translateX(-50%); background:rgba(27,25,22,.97); }
+.sb-grip :is(.back-btn,.user-card,.user-chip,.tab-btn,.submit-btn):focus-visible { outline:2px solid #d8aa85; outline-offset:3px; }
+.sb-grip :is(.user-card,.user-chip,.tab-btn,.submit-btn) { transition:background-color .2s ease,border-color .2s ease,color .2s ease,transform .2s ease; }
+.sb-grip .tab-panel.active { animation:grip-panel-enter .22s ease-out; }
+@keyframes grip-panel-enter { from { opacity:.65; transform:translateY(5px); } to { opacity:1; transform:translateY(0); } }
+@media (hover:hover) and (pointer:fine) { .sb-grip .user-card:hover { border-color:rgba(224,179,140,.4); background:#2b2723; } }
+@media (max-width:720px) {
+    .sb-grip #user-select { padding:32px 20px 64px; }
+    .sb-grip .user-cards { grid-template-columns:1fr; }
+    .sb-grip .user-card { min-height:96px; }
+    .sb-grip #app { padding:0 16px calc(112px + env(safe-area-inset-bottom)); }
+    .sb-grip #panel-record.active { display:block; padding-top:20px; }
+    .sb-grip .status-card { padding:22px; }
+    .sb-grip .input-card { margin-top:16px; padding:22px; }
+}
+@media (max-width:380px) { .sb-grip .status-card,.sb-grip .input-card { padding:18px; } }
+@media (prefers-reduced-motion:reduce) { .sb-grip :is(.user-card,.user-chip,.tab-btn,.submit-btn,.tab-panel.active) { animation:none; transition:none; } }

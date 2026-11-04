@@ -8,9 +8,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
     <script src="split-core.js"></script>
-    <script src="split-pass-config.js?v=season1-lv40-set"></script>
-    <script src="split-pass-core.js?v=reward-bundle-1"></script>
-    <script src="split-cosmetics.js?v=chess-1"></script>
+    <script src="split-cosmetics.js?v=20261102-1"></script>
     <script src="split-badges.js"></script>
     <script src="assets/vendor/confetti-1.6.0.min.js"></script>
     <script src="split-original-effects.js?v=chess-1"></script>
@@ -23,7 +21,7 @@
     <script src="split-chess-audio.js?v=chess-1"></script>
     <script src="split-chess.js?v=chess-1"></script>
     <link rel="stylesheet" href="split-homecoming.css?v=20260918-1">
-    <script src="split-extras.js?v=chess-1"></script>
+    <script src="split-extras.js?v=collection-20261103"></script>
     <link rel="stylesheet" href="split-extras.css?v=reward-fan-2">
     <link rel="stylesheet" href="split-original-effects.css?v=chess-1">
     <style>
@@ -561,7 +559,6 @@
         .sb-split .payer-btn.selected { background: #d7b15b18; color: #ead098; box-shadow: inset 0 0 0 1px #d7b15b38; }
         .sb-split .preview-text { padding: 4px 0; border: 0; border-radius: 0; background: none; text-align: left; font-weight: 400; font-size: 12px; line-height: 1.6; margin-bottom: 14px; }
         .sb-split .preview-text.has-value { background: none; }
-        .sb-split .le-xp-preview { font-size: 12px; color: var(--muted); margin-top: 5px; }
         .sb-split .submit-btn { min-height: 52px; border-radius: 8px; border: 1px solid #d7b15b40; background: #d7b15b; color: #211b10; font-size: 15px; font-weight: 650; box-shadow: none; }
         .sb-split .submit-btn:hover { transform: none; background: #e0bc70; box-shadow: none; }
         .sb-split .submit-btn:disabled { background: #29241b; color: #9e927b; border-color: #d7b15b20; opacity: 1; }
@@ -589,6 +586,9 @@
         .sb-split .record-card:hover, .sb-split .record-card:active { box-shadow: none; transform: none; background: #d7b15b03; }
         .sb-split .record-note { font-size: 15px; font-weight: 550; white-space: normal; overflow-wrap: anywhere; }
         .sb-split .record-title-row { display: block; margin-bottom: 8px; }
+        .sb-split .record-open { display: block; width: 100%; min-height: 44px; padding: 0; border: 0; background: transparent; color: inherit; text-align: left; font: inherit; cursor: pointer; }
+        .sb-split .record-open:focus-visible { outline: 2px solid var(--theme-accent, #d7b15b); outline-offset: 4px; border-radius: 4px; }
+        .sb-split .record-open-hint { display: inline-block; margin-top: 8px; color: var(--theme-muted, #aaa196); font-size: 12px; line-height: 1.4; }
         .sb-split .record-time { font-size: 12px; font-weight: 400; color: var(--muted); text-align: left; margin: 0; }
         .sb-split .record-meta-row { gap: 5px 10px; margin-bottom: 8px; }
         .sb-split .record-amounts { display: none; }
@@ -608,6 +608,13 @@
         .sb-split .record-card.settled { grid-template-columns: minmax(0,1fr) auto; opacity: 1; }
         .sb-split .record-card.settled .record-spacer { display: none; }
         .sb-split .record-card.settled .record-side { grid-column: 2; }
+        @media (max-width: 600px) {
+            .sb-split #view-unsettled .balance-mini { margin: 0 0 10px; padding: 10px 0; }
+            .sb-split #view-unsettled .settle-card { margin-bottom: 10px; gap: 8px; }
+            .sb-split #view-unsettled .record-tools { gap: 6px; }
+            .sb-split #view-unsettled .filter-result { margin: 8px 0; }
+            .sb-split #view-unsettled .month-group { padding: 14px; }
+        }
         .sb-split .settlement-heading { border: 0; border-left: 1px solid #d7b15b30; border-radius: 0; background: none; padding: 12px; margin-top: 12px; }
         .sb-split .confirm-box, .sb-split .edit-sheet { background: #211d17; border-color: #d7b15b24; border-radius: 12px; }
         .sb-split .edit-overlay { padding: 16px; padding-bottom: max(16px,env(safe-area-inset-bottom)); background: rgba(18,16,12,.68); backdrop-filter: none; }
@@ -644,9 +651,15 @@
         @media (min-width: 601px) { .sb-split .page-wrapper { padding-top: 8px; } .sb-split .balance-amount { font-size: 58px; } }
         @media (prefers-reduced-motion: reduce) { .sb-split .view.active { animation: none; } }
     </style>
-    <link rel="stylesheet" href="split-themes.css?v=chess-1">
+    <link rel="stylesheet" href="split-themes.css?v=20261102-1">
     <link rel="stylesheet" href="split-storm.css?v=storm-1">
     <link rel="stylesheet" href="split-chess.css?v=chess-1">
+    <link rel="stylesheet" href="split-polish.css?v=20261103-1">
+    <link rel="stylesheet" href="split-redesign.css?v=20261103-1">
+    <link rel="stylesheet" href="split-interactions.css?v=20261103-1">
+    <link rel="stylesheet" href="split-experience.css?v=20261103-1">
+    <link rel="stylesheet" href="split-navigation.css?v=20261103-1">
+    <script defer src="split-experience.js?v=20261103-1"></script>
 </head>
 <body class="sb-page sb-split" data-theme="default">
 
@@ -656,6 +669,7 @@
     <symbol id="icon-arrow-right" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></symbol>
     <symbol id="icon-plus" viewBox="0 0 24 24"><path d="M12 5v14"/><path d="M5 12h14"/></symbol>
     <symbol id="icon-calculator" viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 7h8M8 11h.01M12 11h.01M16 11h.01M8 15h.01M12 15h.01M16 15h.01"/></symbol>
+    <symbol id="icon-pencil" viewBox="0 0 24 24"><path d="m4 20 4-.8L19 8.2a2.1 2.1 0 0 0-3-3L5 16.2 4 20Z"/><path d="m14.5 6.7 3 3"/></symbol>
     <symbol id="icon-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M5 21a7 7 0 0 1 14 0"/></symbol>
     <symbol id="icon-list" viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13"/><path d="M3 6h.01M3 12h.01M3 18h.01"/></symbol>
     <symbol id="icon-archive" viewBox="0 0 24 24"><path d="M4 7h16"/><path d="M6 7v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V7"/><path d="M9 11h6"/><path d="M5 3h14v4H5z"/></symbol>
@@ -667,6 +681,8 @@
     <symbol id="icon-close" viewBox="0 0 24 24"><path d="M6 6l12 12"/><path d="M18 6 6 18"/></symbol>
     <symbol id="icon-sync" viewBox="0 0 24 24"><path d="M20 11a8 8 0 0 0-14.9-4"/><path d="M4 5v5h5"/><path d="M4 13a8 8 0 0 0 14.9 4"/><path d="M20 19v-5h-5"/></symbol>
     <symbol id="icon-receipt" viewBox="0 0 24 24"><path d="M6 3h12v18l-2-1.2-2 1.2-2-1.2-2 1.2-2-1.2L6 21V3Z"/><path d="M9 7h6M9 11h6M9 15h4"/></symbol>
+    <symbol id="icon-volume" viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9H4Z"/><path d="M16 9a4 4 0 0 1 0 6M19 6a8 8 0 0 1 0 12"/></symbol>
+    <symbol id="icon-volume-off" viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9H4Z"/><path d="m17 10 4 4m0-4-4 4"/></symbol>
 </svg>
 
 <div id="toast"></div>
@@ -677,7 +693,7 @@
 
 <!-- ===== 確認 Modal ===== -->
 <div class="confirm-overlay" id="confirmOverlay">
-    <div class="confirm-box">
+    <div class="confirm-box" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
         <div class="confirm-title" id="confirmTitle">確認</div>
         <div class="confirm-body" id="confirmBody"></div>
         <div class="confirm-btns">
@@ -693,17 +709,18 @@
             <strong id="editorTitle">編輯帳目</strong>
             <button class="icon-action" type="button" onclick="closeRecordEditor()" aria-label="關閉"><svg class="icon"><use href="#icon-close"></use></svg></button>
         </div>
+        <div class="experience-field-heading">消費金額 <span>各自消費</span></div>
         <div class="amount-row">
-            <div class="amount-group"><label for="edit_p1">至凱消費金額</label><input class="amount-input" id="edit_p1" type="number" inputmode="decimal" min="0" step="0.01" oninput="updateEditorPreview()"></div>
-            <div class="amount-group"><label for="edit_p2">柏致消費金額</label><input class="amount-input" id="edit_p2" type="number" inputmode="decimal" min="0" step="0.01" oninput="updateEditorPreview()"></div>
+            <div class="amount-group"><label for="edit_p1"><span class="experience-person p1" aria-hidden="true">凱</span><span>至凱</span><span class="sr-only">消費金額</span></label><div class="money-field"><span class="money-unit" aria-hidden="true">$</span><input class="amount-input" id="edit_p1" type="number" inputmode="decimal" placeholder="0" min="0" step="0.01" oninput="updateEditorPreview()"><svg class="icon money-edit-icon" aria-hidden="true"><use href="#icon-pencil"></use></svg></div></div>
+            <div class="amount-group"><label for="edit_p2"><span class="experience-person p2" aria-hidden="true">致</span><span>柏致</span><span class="sr-only">消費金額</span></label><div class="money-field"><span class="money-unit" aria-hidden="true">$</span><input class="amount-input" id="edit_p2" type="number" inputmode="decimal" placeholder="0" min="0" step="0.01" oninput="updateEditorPreview()"><svg class="icon money-edit-icon" aria-hidden="true"><use href="#icon-pencil"></use></svg></div></div>
         </div>
-        <input class="note-input" id="edit_note" type="text" maxlength="30" placeholder="備註（店名、說明…）" oninput="updateEditorPreview()">
-        <div class="input-card-title">實際先付款的人</div>
+        <div class="experience-note"><svg class="icon" aria-hidden="true"><use href="#icon-receipt"></use></svg><input class="note-input" id="edit_note" aria-label="備註" type="text" maxlength="30" placeholder="新增備註或店名" oninput="updateEditorPreview()"><span>選填</span></div>
+        <div class="experience-payer-heading">實際先付款的人</div>
         <div class="payer-row">
-            <button class="payer-btn" id="edit_btn_p1" type="button" onclick="selectEditorPayer('p1')"><svg class="icon"><use href="#icon-user"></use></svg><span>至凱付</span></button>
-            <button class="payer-btn" id="edit_btn_p2" type="button" onclick="selectEditorPayer('p2')"><svg class="icon"><use href="#icon-user"></use></svg><span>柏致付</span></button>
+            <button class="payer-btn" id="edit_btn_p1" type="button" aria-pressed="false" onclick="selectEditorPayer('p1')"><span class="experience-dot p1" aria-hidden="true"></span><span>至凱</span></button>
+            <button class="payer-btn" id="edit_btn_p2" type="button" aria-pressed="false" onclick="selectEditorPayer('p2')"><span class="experience-dot p2" aria-hidden="true"></span><span>柏致</span></button>
         </div>
-        <div class="preview-text" id="editorPreview"></div>
+        <div class="result-preview"><span class="result-preview-label">這筆帳目</span><div class="preview-text" id="editorPreview" aria-live="polite"></div></div>
         <div class="edit-readonly" id="editorReadonly" hidden>這筆帳目已結清，僅供查看。</div>
         <div class="edit-actions">
             <button class="edit-cancel" type="button" onclick="closeRecordEditor()">取消</button>
@@ -713,34 +730,45 @@
 </div>
 
 <header class="header">
-    <button class="header-back" type="button" onclick="handleBack()" aria-label="返回"><svg class="icon" aria-hidden="true"><use href="#icon-arrow-left"></use></svg></button>
+    <button class="header-back" type="button" onclick="handleBack()" aria-label="返回宿舍系統首頁"><svg class="icon" aria-hidden="true"><use href="#icon-arrow-left"></use></svg></button>
     <div><div class="header-title" id="headerTitle"><svg class="icon"><use href="#icon-ledger"></use></svg><span>宿舍帳本</span></div><div class="ledger-subtitle">共同帳務紀錄</div></div>
-    <span class="sync-pill" id="syncPill">同步中</span>
+    <div class="header-tools"><span class="sync-pill" id="syncPill">同步中</span><button class="sound-toggle" id="soundToggle" type="button" aria-label="開啟音效" aria-pressed="false" title="開啟音效"><svg class="icon" aria-hidden="true"><use href="#icon-volume-off"></use></svg></button></div>
 </header>
 
-<!-- ===== VIEW 1：輸入頁 ===== -->
-<div class="view active" id="view-input">
-<div class="page-wrapper">
-
+<main class="ledger-workspace">
+    <section class="ledger-overview" aria-label="共同帳務">
     <div class="balance-card">
-        <div class="balance-label">目前帳務</div>
+        <div class="balance-label">共同帳務</div>
         <div class="balance-amount zero" id="balanceAmount">$0</div>
         <div class="balance-desc zero" id="balanceDesc">互不相欠</div>
     </div>
 
+    <nav class="records-hub" aria-label="帳本頁面">
+        <button class="experience-entry-tab" id="nav-entry" type="button" aria-pressed="true" onclick="switchView('input')"><span>記一筆</span><svg class="icon" aria-hidden="true"><use href="#icon-arrow-right"></use></svg></button>
+        <button class="view-records-btn" id="nav-records" type="button" aria-pressed="false" onclick="switchView('unsettled')">
+            <span class="view-records-label">帳目紀錄</span>
+            <span class="record-entry-end"><span class="sr-only">未結清筆數</span><span class="view-records-badge" id="unsettled-badge">0</span><svg class="icon" aria-hidden="true"><use href="#icon-arrow-right"></use></svg></span>
+        </button>
+    </nav>
+    </section>
+
+<div class="ledger-content">
+<div class="view active" id="view-input">
+<div class="page-wrapper">
     <div class="input-card">
         <div class="input-card-header">
-            <div class="input-card-title section-kicker"><svg class="icon"><use href="#icon-receipt"></use></svg><span>新增帳目</span></div>
-            <button class="calc-toggle" id="calcToggle" type="button" onclick="toggleCalculator()"><svg class="icon"><use href="#icon-calculator"></use></svg><span>計算機</span></button>
+            <div><span class="experience-eyebrow">共同消費</span><div class="input-card-title section-kicker"><span>新增帳目</span></div></div>
+            <button class="calc-toggle" id="calcToggle" type="button" aria-expanded="false" aria-controls="calcPanel" onclick="toggleCalculator()"><svg class="icon" aria-hidden="true"><use href="#icon-calculator"></use></svg><span>計算機</span><svg class="icon calc-chevron" aria-hidden="true"><use href="#icon-chevron-down"></use></svg></button>
         </div>
+        <div class="experience-field-heading">消費金額 <span>各自消費</span></div>
         <div class="amount-row">
             <div class="amount-group">
-                <label>至凱消費金額</label>
-                <input class="amount-input" id="inp_p1" type="number" inputmode="decimal" placeholder="$0" min="0" step="0.01" oninput="updatePreview()">
+                <label for="inp_p1"><span class="experience-person p1" aria-hidden="true">凱</span><span>至凱</span><span class="sr-only">消費金額</span></label>
+                <div class="money-field"><span class="money-unit" aria-hidden="true">$</span><input class="amount-input" id="inp_p1" type="number" inputmode="decimal" placeholder="0" min="0" step="0.01" oninput="updatePreview()"><svg class="icon money-edit-icon" aria-hidden="true"><use href="#icon-pencil"></use></svg></div>
             </div>
             <div class="amount-group">
-                <label>柏致消費金額</label>
-                <input class="amount-input" id="inp_p2" type="number" inputmode="decimal" placeholder="$0" min="0" step="0.01" oninput="updatePreview()">
+                <label for="inp_p2"><span class="experience-person p2" aria-hidden="true">致</span><span>柏致</span><span class="sr-only">消費金額</span></label>
+                <div class="money-field"><span class="money-unit" aria-hidden="true">$</span><input class="amount-input" id="inp_p2" type="number" inputmode="decimal" placeholder="0" min="0" step="0.01" oninput="updatePreview()"><svg class="icon money-edit-icon" aria-hidden="true"><use href="#icon-pencil"></use></svg></div>
             </div>
         </div>
         <div class="calc-panel" id="calcPanel">
@@ -774,38 +802,29 @@
             </div>
             <div class="calc-hint">可直接輸入算式，例如 120+80÷2</div>
         </div>
-        <input class="note-input" id="inp_note" type="text" placeholder="備註（店名、說明…）" maxlength="30">
-        <div style="font-size:12px; color:var(--muted); font-weight:bold; margin-bottom:8px;">實際先付款的人</div>
+        <div class="experience-note"><svg class="icon" aria-hidden="true"><use href="#icon-receipt"></use></svg><input class="note-input" id="inp_note" type="text" aria-label="備註" placeholder="新增備註或店名" maxlength="30"><span>選填</span></div>
+        <div class="experience-payer-heading">實際先付款的人</div>
         <div class="payer-row">
-            <button class="payer-btn" id="btn_p1" type="button" onclick="selectPayer('p1')"><svg class="icon"><use href="#icon-user"></use></svg><span>至凱付</span></button>
-            <button class="payer-btn" id="btn_p2" type="button" onclick="selectPayer('p2')"><svg class="icon"><use href="#icon-user"></use></svg><span>柏致付</span></button>
+            <button class="payer-btn" id="btn_p1" type="button" aria-pressed="false" onclick="selectPayer('p1')"><span class="experience-dot p1" aria-hidden="true"></span><span>至凱</span></button>
+            <button class="payer-btn" id="btn_p2" type="button" aria-pressed="false" onclick="selectPayer('p2')"><span class="experience-dot p2" aria-hidden="true"></span><span>柏致</span></button>
         </div>
-        <div class="preview-text" id="previewText">請輸入金額並選擇付款人</div>
+        <div class="result-preview"><span class="result-preview-label">預計帳務</span><div class="preview-text" id="previewText" aria-live="polite">請輸入金額並選擇付款人</div></div>
         <button class="submit-btn" id="submitBtn" onclick="addRecord()" disabled><svg class="icon"><use href="#icon-plus"></use></svg><span>新增這筆</span></button>
     </div>
 
-    <h2 class="records-section-title">帳目紀錄</h2>
-    <button class="view-records-btn" type="button" onclick="switchView('unsettled')">
-        <span><span class="view-records-label">未結清帳目</span><span class="record-entry-desc">目前尚未結清的共同支出</span></span>
-        <span>
-            <span class="view-records-badge" id="unsettled-badge">0</span>
-            <svg class="icon" style="color:var(--muted); margin-left:4px;"><use href="#icon-arrow-right"></use></svg>
-        </span>
-    </button>
-
-    <button class="view-records-btn" type="button" onclick="switchView('settled')">
-        <span><span class="view-records-label">已結清紀錄</span><span class="record-entry-desc">查看過去已完成的帳務</span></span>
-        <svg class="icon" style="color:var(--muted);"><use href="#icon-arrow-right"></use></svg>
-    </button>
-
 </div>
 </div>
 
-<!-- ===== VIEW 2：未結清頁 ===== -->
+<section class="ledger-records" id="ledger-records" aria-label="帳目紀錄" hidden>
+    <div class="records-heading"><div><span class="experience-eyebrow">共同帳務</span><h2>帳目紀錄</h2></div></div>
+    <div class="record-status-tabs" role="group" aria-label="帳目狀態">
+        <button class="record-status-tab" id="nav-unsettled" type="button" aria-pressed="true" onclick="switchView('unsettled')">未結清</button>
+        <button class="record-status-tab" id="nav-settled" type="button" aria-pressed="false" onclick="switchView('settled')">已結清</button>
+    </div>
 <div class="view" id="view-unsettled">
 <div class="page-wrapper">
 
-    <div class="balance-mini">
+    <div class="balance-mini" aria-hidden="true">
         <div class="balance-mini-label">目前欠款</div>
         <div style="text-align:right;">
             <div class="balance-mini-amount zero" id="balanceAmountMini">$0</div>
@@ -840,7 +859,7 @@
 <div class="view" id="view-settled">
 <div class="page-wrapper">
 
-    <div style="margin: 20px 16px 0;">
+    <div class="settled-clear">
         <button class="settle-btn danger-soft" onclick="deleteSettled()"><svg class="icon"><use href="#icon-trash"></use></svg><span>清空所有已結清紀錄</span></button>
     </div>
 
@@ -857,6 +876,9 @@
 
 </div>
 </div>
+</section>
+</div>
+</main>
 
 <script>
     const firebaseConfig = {
@@ -897,72 +919,78 @@
 
     // ===== View 切換 =====
     function handleBack() {
-        if (currentView === 'unsettled' || currentView === 'settled') switchView('input');
-        else window.location.href = 'index.html';
+        window.location.href = 'index.html';
     }
 
     function icon(name, extraClass = '') {
         return `<svg class="icon${extraClass ? ` ${extraClass}` : ''}" aria-hidden="true"><use href="#icon-${name}"></use></svg>`;
     }
 
-    const viewTitles = {
-        input: { icon: 'ledger', text: '宿舍帳本' },
-        unsettled: { icon: 'list', text: '未結清' },
-        settled: { icon: 'archive', text: '已結清' },
-    };
-
-    function setHeaderTitle(view) {
-        const title = viewTitles[view] || viewTitles.input;
-        document.getElementById('headerTitle').innerHTML = `${icon(title.icon)}<span>${title.text}</span>`;
-    }
-
     function switchView(v) {
+        if (!['input', 'unsettled', 'settled'].includes(v) || v === currentView) return;
         currentView = v;
+        const records = v !== 'input';
+        document.getElementById('ledger-records').hidden = !records;
+        document.getElementById('nav-entry').setAttribute('aria-pressed', String(!records));
+        document.getElementById('nav-records').setAttribute('aria-pressed', String(records));
+        document.getElementById('nav-unsettled').setAttribute('aria-pressed', String(v === 'unsettled'));
+        document.getElementById('nav-settled').setAttribute('aria-pressed', String(v === 'settled'));
         ['input', 'unsettled', 'settled'].forEach(id => {
             const el = document.getElementById('view-' + id);
             if (el) el.classList.toggle('active', v === id);
         });
-        setHeaderTitle(v);
-        if (v === 'unsettled' || v === 'settled') renderList();
-        window.scrollTo(0, 0);
+        if (records) renderList();
+        const panel = records ? document.getElementById('view-' + v) : document.getElementById('view-input');
+        if (panel.animate && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            panel.getAnimations().forEach(animation => animation.cancel());
+            panel.animate([{ opacity: 0, transform: 'translateY(6px)' }, { opacity: 1, transform: 'translateY(0)' }], { duration: 200, easing: 'ease-out' });
+        }
     }
 
     // ===== 工具 =====
     // ===== 音效引擎 =====
     let _ac = null;
+    let _audioUnlocked = false;
+    for (const eventName of ['pointerdown', 'touchstart', 'mousedown', 'keydown']) {
+        document.addEventListener(eventName, () => { _audioUnlocked = true; }, { capture: true, passive: true });
+    }
     function audioContext() {
+        if (!_audioUnlocked || SplitExtras.isMuted()) return null;
         if (_ac) return _ac;
         const AudioApi = window.AudioContext || window.webkitAudioContext;
         if (!AudioApi) return null;
-        _ac = new AudioApi();
+        try { _ac = new AudioApi(); } catch { return null; }
         return _ac;
     }
     function _tone(freq, vol, delay, dur) {
         const ac = audioContext();
         if (!ac) return;
-        if (ac.state === 'suspended') ac.resume();
-        const osc = ac.createOscillator(), gain = ac.createGain();
-        osc.connect(gain); gain.connect(ac.destination);
-        osc.type = 'sine'; osc.frequency.value = freq;
-        const t = ac.currentTime + delay;
-        gain.gain.setValueAtTime(0, t);
-        gain.gain.linearRampToValueAtTime(vol, t + 0.018);
-        gain.gain.exponentialRampToValueAtTime(0.001, t + dur);
-        osc.start(t); osc.stop(t + dur + 0.05);
+        try {
+            if (ac.state === 'suspended') ac.resume().catch(() => {});
+            const osc = ac.createOscillator(), gain = ac.createGain();
+            osc.connect(gain); gain.connect(ac.destination);
+            osc.type = 'sine'; osc.frequency.value = freq;
+            const t = ac.currentTime + delay;
+            gain.gain.setValueAtTime(0, t);
+            gain.gain.linearRampToValueAtTime(vol, t + 0.018);
+            gain.gain.exponentialRampToValueAtTime(0.001, t + dur);
+            osc.onended = () => { osc.disconnect(); gain.disconnect(); };
+            osc.start(t); osc.stop(t + dur + 0.05);
+        } catch { /* Audio must never interrupt a ledger action. */ }
     }
     function playSound(type) {
-        if (type === 'click')   { _tone(380, 0.045, 0, 0.07); }
-        else if (type === 'open')    { _tone(440, 0.07, 0, 0.20); _tone(554, 0.05, 0.10, 0.28); }
-        else if (type === 'close')   { _tone(554, 0.06, 0, 0.14); _tone(415, 0.04, 0.09, 0.22); }
-        else if (type === 'add')     { _tone(659, 0.09, 0, 0.25); _tone(784, 0.07, 0.12, 0.32); }
-        else if (type === 'success') { _tone(523, 0.11, 0, 0.40); _tone(659, 0.09, 0.13, 0.45); _tone(784, 0.07, 0.26, 0.55); }
-        else if (type === 'remove')  { _tone(320, 0.07, 0, 0.22); }
-        else if (type === 'error')   { _tone(260, 0.09, 0, 0.18); _tone(210, 0.07, 0.15, 0.26); }
+        if (type === 'click')        { _tone(420, .018, 0, .065); }
+        else if (type === 'open')    { _tone(480, .024, 0, .13); _tone(600, .014, .065, .13); }
+        else if (type === 'close')   { _tone(440, .018, 0, .10); }
+        else if (type === 'add')     { _tone(580, .027, 0, .17); _tone(760, .019, .09, .20); }
+        else if (type === 'success') { _tone(520, .026, 0, .16); _tone(660, .018, .09, .19); }
+        else if (type === 'remove')  { _tone(330, .022, 0, .15); }
+        else if (type === 'error')   { _tone(260, .025, 0, .15); _tone(220, .018, .09, .16); }
     }
 
     // 全域按鈕點擊音
     document.addEventListener('click', e => {
-        if (e.target.closest('.submit-btn, .settle-btn, .tab-btn, .payer-btn, .view-records-btn, .confirm-cancel, .header-back, .calc-toggle, .calc-key, .calc-fill-btn'))
+        if (e.target.closest('.settle-btn, .tab-btn, .payer-btn, .view-records-btn, .experience-entry-tab, .record-status-tab, .header-back, .calc-toggle, .calc-key, .calc-fill-btn'))
             playSound('click');
     });
 
@@ -1000,8 +1028,8 @@
         button.classList.toggle('is-loading', isSubmitting);
         button.setAttribute('aria-busy', isSubmitting ? 'true' : 'false');
         button.innerHTML = isSubmitting
-            ? `${icon('sync')}<span>新增中</span>`
-            : `${icon('plus')}<span>新增這筆</span>`;
+            ? `<span>新增中</span>${icon('sync', 'submit-arrow')}`
+            : `<span>確認這筆帳目</span>${icon('arrow-right', 'submit-arrow')}`;
     }
 
     function updateSettleControls() {
@@ -1200,7 +1228,6 @@
             ? { ...afterRecord, budgetSync: { opId, before, after, createdAt: Date.now() } }
             : { ...beforeRecord, deletedAt: Date.now(), budgetSync: { opId, before, after: null, deleteAfterSync: true, createdAt: Date.now() } };
         await db.ref('split/records/' + key).set(pending);
-        SplitExtras.changed(key, beforeRecord, afterRecord);
         await reconcileRecordBudget(key, pending);
     }
 
@@ -1210,7 +1237,10 @@
         const toggle = document.getElementById('calcToggle');
         panel.classList.toggle('open');
         toggle.classList.toggle('active', panel.classList.contains('open'));
-        if (panel.classList.contains('open')) setTimeout(() => document.getElementById('calcExpr').focus(), 80);
+        toggle.setAttribute('aria-expanded', String(panel.classList.contains('open')));
+        if (panel.classList.contains('open')) setTimeout(() => {
+            if (panel.classList.contains('open')) document.getElementById('calcExpr').focus();
+        }, 80);
     }
 
     function appendCalc(value) {
@@ -1335,13 +1365,16 @@
         currentPayer = id;
         document.getElementById('btn_p1').classList.toggle('selected', id === 'p1');
         document.getElementById('btn_p2').classList.toggle('selected', id === 'p2');
+        document.getElementById('btn_p1').setAttribute('aria-pressed', String(id === 'p1'));
+        document.getElementById('btn_p2').setAttribute('aria-pressed', String(id === 'p2'));
+        document.getElementById('btn_p1').closest('.payer-row').dataset.selected = id;
         updatePreview();
     }
 
     function updatePreview() {
+        window.LedgerExperience?.syncAmounts();
         const p1 = Number(document.getElementById('inp_p1').value) || 0;
         const p2 = Number(document.getElementById('inp_p2').value) || 0;
-        SplitExtras.amountPreview(p1 + p2);
         const el = document.getElementById('previewText');
         const validation = ledgerCore.validateRecordDraft({ p1_bought: p1, p2_bought: p2, payer: currentPayer });
         document.getElementById('submitBtn').disabled = !validation.valid || !recordsLoaded || isSubmitting;
@@ -1370,6 +1403,9 @@
         currentPayer = null;
         document.getElementById('btn_p1').classList.remove('selected');
         document.getElementById('btn_p2').classList.remove('selected');
+        document.getElementById('btn_p1').setAttribute('aria-pressed', 'false');
+        document.getElementById('btn_p2').setAttribute('aria-pressed', 'false');
+        delete document.getElementById('btn_p1').closest('.payer-row').dataset.selected;
         updatePreview();
     }
 
@@ -1394,7 +1430,6 @@
                 { label: '消費金額', value: amountsLine },
                 { label: '先付款', value: payerName },
                 { label: '新增結果', value: preview },
-                { label: '通行證', value: document.querySelector('.le-xp-preview').textContent },
             ]),
             async () => {
                 if (isSubmitting) return;
@@ -1402,10 +1437,8 @@
                 updatePreview();
                 const ref = db.ref('split/records').push();
                 try {
-                    await SplitExtras.prepare(ref.key, record);
                     record.timestamp = Date.now();
                     await commitRecordChange(ref.key, null, record);
-                    SplitExtras.saved(ref.key, record);
                     resetInputForm();
                     if (SplitExtras.needsAddChime()) playSound('add');
                     SplitExtras.added();
@@ -1415,7 +1448,6 @@
                         if (current) await commitRecordChange(ref.key, current, null);
                     });
                 } catch (error) {
-                    SplitExtras.failed(ref.key);
                     console.error(error);
                     showToast('新增失敗，請檢查網路', 'var(--red)');
                 } finally {
@@ -1478,6 +1510,9 @@
         editorPayer = playerId;
         document.getElementById('edit_btn_p1').classList.toggle('selected', playerId === 'p1');
         document.getElementById('edit_btn_p2').classList.toggle('selected', playerId === 'p2');
+        document.getElementById('edit_btn_p1').setAttribute('aria-pressed', String(playerId === 'p1'));
+        document.getElementById('edit_btn_p2').setAttribute('aria-pressed', String(playerId === 'p2'));
+        document.getElementById('edit_btn_p1').closest('.payer-row').dataset.selected = playerId;
         if (!skipPreview) updateEditorPreview();
     }
 
@@ -1491,6 +1526,7 @@
     }
 
     function updateEditorPreview() {
+        window.LedgerExperience?.syncAmounts();
         if (!editingKey) return;
         const validation = editorDraft();
         const preview = document.getElementById('editorPreview');
@@ -1694,14 +1730,15 @@
             return `
             <div class="record-card${r.settled ? ' settled' : ''}" data-record-key="${safeKey}" onclick="openRecordEditor('${safeKey}')">
                 ${selectable ? `<button class="record-checkbox${isChecked ? ' checked' : ''}" type="button" onclick="event.stopPropagation();toggleSelect('${safeKey}', this)" aria-label="${isChecked ? '取消選取' : '選取'} ${safeNote}">${isChecked ? icon('check') : ''}</button>` : '<div class="record-spacer"></div>'}
-                <div class="record-body">
+                <button class="record-body record-open" type="button" onclick="event.stopPropagation();openRecordEditor('${safeKey}')" aria-label="${r.settled ? '查看' : '編輯'} ${safeNote}">
                     <div class="record-title-row">
                         <div class="record-note">${safeNote}</div>
                     </div>
                     <div class="record-amounts">${escapeHtml(amountsText || '未填消費金額')}</div>
                     <div class="record-meta-row"><span class="record-payer-tag">${icon('card')}<span>${payerName}付款${escapeHtml(syncText)}</span></span><span class="record-time">${formatTime(r.timestamp)}</span>${r.settled ? '<span class="record-time">已結清</span>' : ''}</div>
                     <div class="record-result${delta === 0 ? ' zero' : ''}">${getResultText(r)}</div>
-                </div>
+                    <span class="record-open-hint" aria-hidden="true">${r.settled ? '查看詳情' : '編輯帳目'} <span aria-hidden="true">›</span></span>
+                </button>
                 <div class="record-side">
                     <span class="record-total">$${Number((Number(r.p1_bought || 0) + Number(r.p2_bought || 0)).toFixed(2)).toLocaleString('zh-TW')}</span>
                     ${deleteBtn}
@@ -1838,10 +1875,29 @@
             miniEl.className = 'balance-mini-amount zero'; miniEl.innerText = '$0';
             miniDesc.innerText = '互不相欠';
         }
+        window.LedgerExperience?.animateBalance(bal);
         updatePreview();
     }
 
-    SplitExtras.init(db);
+    SplitExtras.init();
+    const soundToggle = document.getElementById('soundToggle');
+    function updateSoundToggle() {
+        const muted = SplitExtras.isMuted();
+        const supported = Boolean(window.AudioContext || window.webkitAudioContext);
+        const label = supported ? (muted ? '開啟音效' : '關閉音效') : '此瀏覽器不支援音效';
+        soundToggle.disabled = !supported;
+        soundToggle.setAttribute('aria-pressed', String(!muted && supported));
+        soundToggle.setAttribute('aria-label', label);
+        soundToggle.title = label;
+        soundToggle.querySelector('use').setAttribute('href', muted || !supported ? '#icon-volume-off' : '#icon-volume');
+        if (muted && _ac?.state === 'running') _ac.suspend().catch(() => {});
+    }
+    soundToggle.addEventListener('click', () => {
+        SplitExtras.setMuted(!SplitExtras.isMuted());
+        if (!SplitExtras.isMuted()) playSound('click');
+    });
+    window.addEventListener('ledger:mute-changed', updateSoundToggle);
+    updateSoundToggle();
 
     let storedBalance = null;
     db.ref('split/balance').on('value', snap => {

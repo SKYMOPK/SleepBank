@@ -1,0 +1,138 @@
+/* Presentation only: all colors inherit the currently selected ledger theme. */
+.sb-split .header {
+    border-bottom: 1px solid var(--theme-border);
+}
+.sb-split .header-title { font-weight: 650; }
+.sb-split .header-back { transition: color .2s ease, background-color .2s ease; }
+.sb-split #view-input .ledger-extras {
+    justify-content: flex-end;
+    margin: 0 2px 12px;
+}
+.sb-split #view-input .ledger-extras .le-entry {
+    flex: 0 0 auto;
+    min-height: 40px;
+    padding: 0 12px;
+    border: 1px solid var(--theme-border);
+    border-radius: 999px;
+    background: var(--theme-surface-soft);
+    color: var(--theme-text);
+    transition: border-color .2s ease, background-color .2s ease;
+}
+.sb-split #view-input .ledger-extras .le-entry svg { color: var(--theme-accent); }
+
+.sb-split #view-input .balance-card {
+    min-height: 180px;
+    padding: 24px 22px 22px;
+    border-color: var(--theme-border);
+    background: linear-gradient(145deg, rgba(255,255,255,.055), transparent 55%), var(--theme-surface-main);
+}
+.sb-split #view-input .balance-card::before {
+    display: block;
+    left: 22px;
+    right: auto;
+    top: 0;
+    width: 46px;
+    height: 2px;
+    background: var(--theme-accent);
+    opacity: .7;
+}
+.sb-split #view-input .balance-label { position: relative; font-size: 13px; color: var(--theme-muted); }
+.sb-split #view-input .balance-amount { position: relative; max-width: 100%; margin-top: 16px; font-size: 54px; font-variant-numeric: tabular-nums; line-height: 1.04; }
+.sb-split #view-input .balance-desc { position: relative; margin-top: 14px; font-size: 15px; }
+.sb-split #view-input .balance-mark {
+    position: absolute;
+    right: 22px;
+    top: 24px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    color: var(--theme-accent);
+    opacity: .32;
+    pointer-events: none;
+}
+.sb-split #view-input .balance-mark .icon { width: 20px; height: 20px; margin-right: 4px; stroke-width: 1.4; }
+.sb-split #view-input .balance-mark span { width: 10px; height: 1px; background: currentColor; }
+
+.sb-split #view-input .input-card {
+    padding: 22px;
+    border-color: var(--theme-border);
+}
+.sb-split #view-input .input-card-header { margin-bottom: 24px; }
+.sb-split #view-input .section-kicker { gap: 10px; font-size: 17px; }
+.sb-split #view-input .section-kicker .icon { display: block; width: 18px; height: 18px; color: var(--theme-accent); stroke-width: 1.6; }
+.sb-split #view-input .calc-toggle { min-height: 44px; padding: 0 10px; color: var(--theme-muted); border-radius: 8px; transition: color .2s ease, background-color .2s ease; }
+.sb-split #view-input .amount-row { gap: 12px; margin-bottom: 16px; }
+.sb-split #view-input .amount-group label { margin-bottom: 8px; font-size: 13px; }
+.sb-split #view-input .amount-input,
+.sb-split #view-input .note-input {
+    border-color: var(--theme-border);
+    background: rgba(0,0,0,.14);
+    transition: border-color .2s ease, background-color .2s ease, box-shadow .2s ease;
+}
+.sb-split #view-input .amount-input { min-height: 62px; font-size: 27px; font-variant-numeric: tabular-nums; }
+.sb-split #view-input .amount-input::placeholder { font-size: 27px; }
+.sb-split #view-input .note-input { min-height: 50px; margin-bottom: 20px; }
+.sb-split #view-input :is(.amount-input,.note-input):focus {
+    border-color: var(--theme-accent);
+    background: var(--theme-surface-soft);
+    box-shadow: 0 0 0 2px var(--theme-accent-soft);
+}
+.sb-split #view-input .payer-row { margin-top: 10px; margin-bottom: 14px; padding: 4px; }
+.sb-split #view-input .payer-btn { transition: color .2s ease, background-color .2s ease, box-shadow .2s ease; }
+.sb-split #view-input .preview-text { min-height: 24px; margin-bottom: 16px; color: var(--theme-muted); }
+.sb-split #view-input .preview-text.has-value { color: var(--theme-accent); }
+.sb-split #view-input .submit-btn { min-height: 54px; transition: filter .2s ease, transform .15s ease, background-color .2s ease; }
+.sb-split #view-input .submit-btn:not(:disabled):active { transform: scale(.985); }
+
+.sb-split #view-input .records-section-title { padding: 14px 2px 12px; font-size: 15px; }
+.sb-split #view-input .view-records-btn {
+    display: grid;
+    grid-template-columns: 40px minmax(0,1fr) auto;
+    gap: 14px;
+    min-height: 78px;
+    text-align: left;
+    transition: background-color .2s ease, border-color .2s ease;
+}
+.sb-split #view-input .record-entry-icon {
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    border: 1px solid var(--theme-border);
+    border-radius: 12px;
+    color: var(--theme-accent);
+    background: var(--theme-accent-soft);
+}
+.sb-split #view-input .record-entry-icon .icon { width: 19px; height: 19px; stroke-width: 1.6; }
+.sb-split #view-input .record-entry-copy { min-width: 0; }
+.sb-split #view-input .record-entry-end { display: flex; align-items: center; white-space: nowrap; }
+.sb-split #view-input .record-entry-desc { line-height: 1.5; }
+.sb-split #view-input .view-records-btn > .icon,
+.sb-split #view-input .record-entry-end > .icon { transition: transform .2s ease; }
+
+@media (hover: hover) and (pointer: fine) {
+    .sb-split #view-input .ledger-extras .le-entry:hover,
+    .sb-split #view-input .calc-toggle:hover,
+    .sb-split #view-input .view-records-btn:hover { background: var(--theme-accent-soft); border-color: var(--theme-accent); }
+    .sb-split #view-input .view-records-btn:hover > .icon,
+    .sb-split #view-input .view-records-btn:hover .record-entry-end > .icon { transform: translateX(3px); }
+}
+@media (prefers-reduced-motion: no-preference) {
+    .sb-split #view-input.active .balance-card { animation: ledger-arrive .45s ease-out both; }
+    .sb-split #view-input.active .input-card { animation: ledger-arrive .45s .06s ease-out both; }
+    .sb-split #view-input.active .records-section-title,
+    .sb-split #view-input.active .view-records-btn { animation: ledger-arrive .45s .12s ease-out both; }
+    @keyframes ledger-arrive {
+        from { opacity: 0; transform: translateY(8px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+}
+@media (max-width: 380px) {
+    .sb-split #view-input .balance-card,
+    .sb-split #view-input .input-card { padding-left: 18px; padding-right: 18px; }
+    .sb-split #view-input .balance-amount { font-size: 48px; }
+    .sb-split #view-input .view-records-btn { gap: 10px; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .sb-split #view-input :is(.ledger-extras .le-entry,.calc-toggle,.amount-input,.note-input,.payer-btn,.submit-btn,.view-records-btn,.view-records-btn .icon) { transition: none; }
+}

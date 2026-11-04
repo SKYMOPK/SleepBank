@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#151411">
+    <title>今天吃什麼？ | 宿舍系統</title>
+    <link rel="stylesheet" href="system-ui.css">
+    <link rel="stylesheet" href="food.css">
+    <link rel="stylesheet" href="food-experience.css?v=20261104-1">
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js" defer></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js" defer></script>
+    <script src="food-core.js" defer></script>
+    <script src="food.js" defer></script>
+</head>
+<body class="sb-page food-page">
+<svg class="symbols" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+    <symbol id="i-back" viewBox="0 0 24 24"><path d="M19 12H5m7-7-7 7 7 7"/></symbol>
+    <symbol id="i-plate" viewBox="0 0 24 24"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="4.5"/><path d="M2 5v5M4 5v5M2 8h2M3 10v9M21 5v14"/></symbol>
+    <symbol id="i-settings" viewBox="0 0 24 24"><path d="M4 7h16M4 17h16M8 4v6M16 14v6"/><circle cx="8" cy="7" r="1.5"/><circle cx="16" cy="17" r="1.5"/></symbol>
+    <symbol id="i-close" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="i-up" viewBox="0 0 24 24"><path d="m6 14 6-6 6 6"/></symbol>
+    <symbol id="i-down" viewBox="0 0 24 24"><path d="m6 10 6 6 6-6"/></symbol>
+    <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3m3 0-1 13H7L6 7m4 4v5m4-5v5"/></symbol>
+</svg>
+<div class="ambient" aria-hidden="true"></div>
+<header class="app-header">
+    <a href="index.html" class="icon-button back" aria-label="返回宿舍系統"><svg><use href="#i-back"/></svg></a>
+    <div class="header-copy"><h1>今天吃什麼？</h1><p>一起決定下一餐</p></div>
+    <button type="button" class="icon-button manage-button" id="openManage" aria-label="管理餐廳與分類" title="管理餐廳與分類"><svg aria-hidden="true"><use href="#i-settings"/></svg><span>管理</span></button>
+</header>
+<main class="app-main">
+    <div class="connection" id="connection" role="status">連線中</div>
+    <section class="category-section" aria-labelledby="categoryTitle">
+        <div class="section-line"><h2 id="categoryTitle">想吃哪一餐？</h2><button class="text-button" id="manageCategories" type="button">管理分類</button></div>
+        <div class="category-list" id="categoryList" aria-label="選擇分類"></div>
+    </section>
+    <section class="draw-section" aria-labelledby="drawTitle">
+        <div class="draw-heading"><div><p class="eyebrow">下一餐</p><h2 id="drawTitle">選一張，看看吃什麼</h2></div><span class="pool-count" id="poolCount"></span></div>
+        <p class="draw-description" id="drawDescription">選擇分類，然後開始抽籤</p>
+        <div class="card-stage" id="cardStage" aria-label="抽籤卡片"></div>
+        <p class="draw-message" id="drawMessage" role="status" aria-live="polite"></p>
+        <div class="draw-actions" id="drawActions"></div>
+    </section>
+    <section class="excluded-section" aria-labelledby="excludedTitle">
+        <div class="section-line"><div><h2 id="excludedTitle">本輪暫時排除 <span id="excludedCount">0</span></h2><p class="section-subtitle">只影響這個分類與此裝置的分頁</p></div><button class="text-button" id="resetRound" type="button">重設本輪</button></div>
+        <div id="excludedList" class="excluded-list"></div>
+    </section>
+</main>
+<div class="overlay" id="manageOverlay" hidden>
+    <section class="sheet" role="dialog" aria-modal="true" aria-labelledby="manageTitle">
+        <div class="sheet-head"><div><p class="eyebrow">共同餐廳清單</p><h2 id="manageTitle">管理餐廳</h2></div><button type="button" class="icon-button" data-close="manage" aria-label="關閉"><svg><use href="#i-close"/></svg></button></div>
+        <div class="sheet-content">
+            <div class="tabs" role="tablist" aria-label="管理項目"><button role="tab" id="restaurantsTab" aria-selected="true" type="button">餐廳</button><button role="tab" id="categoriesTab" aria-selected="false" type="button">分類</button></div>
+            <div id="restaurantManagement">
+                <div class="management-toolbar"><input id="restaurantSearch" type="search" placeholder="搜尋餐廳" aria-label="搜尋餐廳"><select id="restaurantFilter" aria-label="依分類篩選餐廳"><option value="all">全部分類</option></select></div>
+                <button type="button" class="secondary add-button" id="addRestaurant"><svg><use href="#i-plus"/></svg>新增餐廳</button>
+                <div id="restaurantList" class="manage-list"></div>
+            </div>
+            <div id="categoryManagement" hidden>
+                <p class="manage-help">隱藏後不會出現在抽籤分類，餐廳仍會保留。</p>
+                <button type="button" class="secondary add-button" id="addCategory"><svg><use href="#i-plus"/></svg>新增分類</button>
+                <div id="categoryManagementList" class="manage-list"></div>
+            </div>
+        </div>
+    </section>
+</div>
+<div class="overlay dialog-overlay" id="editorOverlay" hidden>
+    <section class="dialog" role="dialog" aria-modal="true" aria-labelledby="editorTitle">
+        <div class="dialog-head"><h2 id="editorTitle">新增餐廳</h2><button type="button" class="icon-button" data-close="editor" aria-label="關閉"><svg><use href="#i-close"/></svg></button></div>
+        <form id="editorForm">
+            <label for="editorName" id="editorNameLabel">餐廳名稱</label>
+            <input id="editorName" maxlength="40" autocomplete="off" required>
+            <fieldset id="editorCategories"><legend>所屬分類</legend><div id="editorCategoryList" class="category-checks"></div></fieldset>
+            <p id="editorError" class="form-error" role="alert"></p>
+            <div class="dialog-actions"><button type="button" class="secondary" data-close="editor">取消</button><button class="primary" type="submit" id="saveEditor">儲存</button></div>
+        </form>
+    </section>
+</div>
+<div class="overlay dialog-overlay" id="confirmOverlay" hidden>
+    <section class="dialog" role="alertdialog" aria-modal="true" aria-labelledby="confirmTitle" aria-describedby="confirmMessage">
+        <h2 id="confirmTitle">確認</h2><p id="confirmMessage"></p>
+        <div class="dialog-actions"><button class="secondary" id="cancelConfirm" type="button">取消</button><button class="danger" id="acceptConfirm" type="button">確認刪除</button></div>
+    </section>
+</div>
+<div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+</body>
+</html>

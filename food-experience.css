@@ -1,0 +1,26 @@
+/* Keep the card choreography intact while bringing the surrounding controls together. */
+body.food-page { background:var(--theme-page-bg); }
+.food-page .app-header { max-width:1032px; min-height:76px; padding:12px 24px; border-bottom:1px solid var(--theme-border); }
+.food-page .header-copy h1 { font-size:19px; }
+.food-page .header-copy p { font-size:12px; }
+.food-page .manage-button { flex:0 0 auto; min-height:44px; padding:0 14px; border:1px solid var(--theme-border); border-radius:10px; background:var(--theme-surface-soft); color:var(--theme-text); white-space:nowrap; }
+.food-page .manage-button svg { flex:none; }
+.food-page .app-main { display:grid; grid-template-columns:minmax(220px,.8fr) minmax(0,1.2fr); max-width:1032px; gap:20px 32px; padding:28px 24px 64px; align-items:start; }
+.food-page .connection { grid-column:1/-1; min-height:20px; }
+.food-page .category-section { grid-column:1; grid-row:2; }
+.food-page .category-section .section-line { margin-bottom:12px; }
+.food-page .category-list { flex-wrap:wrap; overflow:visible; padding:0; }
+.food-page .category-list button { border-radius:10px; }
+.food-page .draw-section { grid-column:2; grid-row:2 / 4; margin:0; border-radius:18px; }
+.food-page .excluded-section { grid-column:1; margin-top:12px; padding-top:20px; border-top:1px solid var(--theme-border); }
+.food-page :is(.icon-button,.text-button,.category-list button,.primary,.secondary):focus-visible { outline:2px solid var(--theme-accent); outline-offset:3px; }
+@media (max-width:720px) {
+    .food-page .app-header { min-height:68px; padding:8px 16px; }
+    .food-page .app-main { display:block; padding:8px 16px 48px; }
+    .food-page .category-section { margin-top:8px; }
+    .food-page .category-section .section-line { margin-bottom:4px; }
+    .food-page .category-list { flex-wrap:nowrap; overflow-x:auto; padding:4px 1px 10px; }
+    .food-page .draw-section { margin-top:12px; padding:20px 16px; }
+    .food-page .excluded-section { margin-top:24px; }
+}
+@media (prefers-reduced-motion:reduce) { .food-page :is(.manage-button,.category-list button) { transition:none; } }

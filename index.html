@@ -444,6 +444,7 @@
         .sb-index .feat-split::after { content: ''; position: absolute; width: 94px; height: 65px; top: 22px; right: -12px; transform: skewY(-12deg); background: repeating-linear-gradient(0deg,transparent 0 12px,#d7b15b09 12px 13px); border-bottom: 1px solid #d7b15b10; pointer-events: none; }
         .sb-index .feat-budget { grid-column: 1; margin-top: 0; }
         .sb-index .feat-grip { grid-column: 2; margin-top: 0; }
+        .sb-index .feat-food { --feature-rgb: 201,164,112; grid-column: 1 / -1; min-height: 136px; }
         .sb-index .feat-budget::after { content: ''; position: absolute; top: 12px; right: 18px; width: 48px; height: 5px; background: repeating-linear-gradient(90deg,#7fb47730 0 1px,transparent 1px 8px); }
         .sb-index .feat-grip::after { content: ''; position: absolute; top: 14px; right: 18px; width: 42px; height: 12px; border-left: 1px solid #c98a5830; border-bottom: 1px solid #c98a5830; transform: skewY(-8deg); }
         .sb-index .f-ico { width: 28px; height: 28px; margin-bottom: 18px; background: transparent; border: 0; border-radius: 0; place-items: start; }
@@ -470,6 +471,7 @@
             .sb-index .feature-grid { gap: 24px 14px; }
             .sb-index .feat-split { min-height: 160px; padding: 20px 24px; }
             .sb-index .feature-card:not(.feat-split) { min-height: 176px; padding: 20px 12px; }
+            .sb-index .feature-card.feat-food { min-height: 132px; }
             .sb-index .feat-grip { margin-top: 0; }
             .sb-index .f-name { font-size: 17px; }
             .sb-index .feat-split .f-name { font-size: 23px; }
@@ -477,6 +479,7 @@
             .home-footer { max-width: 560px; margin-top: 16px; padding-right: 12px; }
         }
     </style>
+    <link rel="stylesheet" href="home.css">
 </head>
 <body class="sb-page sb-index">
 <svg class="icon-sprite" aria-hidden="true">
@@ -491,6 +494,7 @@
     <symbol id="icon-ledger" viewBox="0 0 24 24"><path d="M7 3h11a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z"/><path d="M9 7h7M9 11h7M9 15h4M3 7h4M3 12h4M3 17h4"/></symbol>
     <symbol id="icon-dumbbell" viewBox="0 0 24 24"><path d="M6 7v10M3.5 9v6M18 7v10M20.5 9v6M6 12h12"/></symbol>
     <symbol id="icon-wallet" viewBox="0 0 24 24"><path d="M4 6.5A2.5 2.5 0 0 1 6.5 4H18a2 2 0 0 1 2 2v2H7a3 3 0 0 0 0 6h13v4a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6.5Z"/><path d="M7 8h14v6H7a3 3 0 0 1 0-6Z"/><path d="M17 11h.01"/></symbol>
+    <symbol id="icon-plate" viewBox="0 0 24 24"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="4.5"/><path d="M2 5v5M4 5v5M2 8h2M3 10v9M21 5v14"/></symbol>
     <symbol id="icon-shield-moon" viewBox="0 0 24 24"><path d="M12 3 5 6v5c0 4.7 2.8 8.2 7 10 4.2-1.8 7-5.3 7-10V6l-7-3Z"/><path d="M14.8 8.1a4.2 4.2 0 1 0 1.1 6.8 4.7 4.7 0 0 1-1.1-6.8Z"/></symbol>
     <symbol id="icon-close" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></symbol>
     <symbol id="icon-bug" viewBox="0 0 24 24"><path d="M8 9h8v8a4 4 0 0 1-8 0V9Z"/><path d="M9 9a3 3 0 0 1 6 0M4 13h4M16 13h4M5 19l3-2M19 19l-3-2M7 5l2 2M17 5l-2 2M12 9v11"/></symbol>
@@ -503,6 +507,7 @@
 
     <!-- Header -->
     <header class="header">
+        <div class="identity-mark">日常，在這裡</div>
         <h1 class="header-title">宿舍系統</h1>
         <div class="header-sub">帳務、預算與日常紀錄</div>
         <div class="time-pill">
@@ -524,21 +529,27 @@
 
     <!-- Feature section -->
     <main class="section">
+        <div class="directory-head"><h2>生活入口</h2></div>
         <nav class="feature-grid" aria-label="宿舍生活入口">
             <a href="split.html" class="feature-card feat-split">
                 <div class="f-ico" aria-hidden="true"><svg class="icon"><use href="#icon-ledger"></use></svg></div>
-                <div class="entry-heading"><div class="f-name">宿舍帳本</div><svg class="icon entry-arrow" aria-hidden="true" viewBox="0 0 24 24"><path d="M4 12h16m-6-6 6 6-6 6"/></svg></div>
-                <div class="f-sub">記錄與整理共同支出</div>
+                <div class="entry-copy"><div class="f-name">宿舍帳本</div><div class="f-sub">記錄與整理共同支出</div></div>
+                <svg class="icon entry-arrow" aria-hidden="true" viewBox="0 0 24 24"><path d="M4 12h16m-6-6 6 6-6 6"/></svg>
             </a>
             <a href="budget.html" class="feature-card feat-budget">
                 <div class="f-ico" aria-hidden="true"><svg class="icon"><use href="#icon-wallet"></use></svg></div>
-                <div class="entry-heading"><div class="f-name">每日預算</div><svg class="icon entry-arrow" aria-hidden="true" viewBox="0 0 24 24"><path d="M4 12h16m-6-6 6 6-6 6"/></svg></div>
-                <div class="f-sub">安排每天可以使用的預算</div>
+                <div class="entry-copy"><div class="f-name">每日預算</div><div class="f-sub">安排每天可以使用的預算</div></div>
+                <svg class="icon entry-arrow" aria-hidden="true" viewBox="0 0 24 24"><path d="M4 12h16m-6-6 6 6-6 6"/></svg>
             </a>
             <a href="grip.html" class="feature-card feat-grip">
                 <div class="f-ico" aria-hidden="true"><svg class="icon"><use href="#icon-dumbbell"></use></svg></div>
-                <div class="entry-heading"><div class="f-name">握力日記</div><svg class="icon entry-arrow" aria-hidden="true" viewBox="0 0 24 24"><path d="M4 12h16m-6-6 6 6-6 6"/></svg></div>
-                <div class="f-sub">留下每次訓練與進步</div>
+                <div class="entry-copy"><div class="f-name">握力日記</div><div class="f-sub">留下每次訓練與進步</div></div>
+                <svg class="icon entry-arrow" aria-hidden="true" viewBox="0 0 24 24"><path d="M4 12h16m-6-6 6 6-6 6"/></svg>
+            </a>
+            <a href="food.html" class="feature-card feat-food">
+                <div class="f-ico" aria-hidden="true"><svg class="icon"><use href="#icon-plate"></use></svg></div>
+                <div class="entry-copy"><div class="f-name">今天吃什麼？</div><div class="f-sub">一起選一間喜歡的餐廳</div></div>
+                <svg class="icon entry-arrow" aria-hidden="true" viewBox="0 0 24 24"><path d="M4 12h16m-6-6 6 6-6 6"/></svg>
             </a>
         </nav>
     </main>

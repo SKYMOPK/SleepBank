@@ -105,6 +105,7 @@ body.sb-budget { --bg:#141310; --card:#211d17; --card2:#29231b; --text:#f3eddf; 
 .sb-budget .reset-actions .btn.danger { background:#d38b8614; color:var(--red); border:1px solid #d38b8640; }
 @media (hover:hover) { .sb-budget .btn:not(:disabled):hover { filter:none; transform:none; background:#9ec496; } .sb-budget .btn.secondary:hover,.sb-budget .btn.danger:hover { background:#d7b15b08; } }
 </style>
+<link rel="stylesheet" href="budget-experience.css?v=20261104-1">
 </head>
 <body class="sb-page sb-budget">
 <div id="toast" role="status" aria-live="polite"></div>
@@ -116,8 +117,8 @@ body.sb-budget { --bg:#141310; --card:#211d17; --card2:#29231b; --text:#f3eddf; 
 <header class="header"><a class="header-back" href="index.html" aria-label="返回首頁"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5m7-7-7 7 7 7"/></svg></a><div class="header-title">每日預算</div><div class="header-sub">安排每天可以使用的預算</div><span class="sync-status" id="syncStatus" role="status">同步中</span></header>
 <div class="wrap">
     <div class="user-switch">
-        <button class="user-btn active" id="tab-p1" onclick="selectUser('p1')">至凱</button>
-        <button class="user-btn" id="tab-p2" onclick="selectUser('p2')">柏致</button>
+        <button class="user-btn active" id="tab-p1" aria-pressed="true" onclick="selectUser('p1')"><span class="person-mark p1" aria-hidden="true">凱</span>至凱</button>
+        <button class="user-btn" id="tab-p2" aria-pressed="false" onclick="selectUser('p2')"><span class="person-mark p2" aria-hidden="true">致</span>柏致</button>
     </div>
 
     <section class="hero">
@@ -139,13 +140,13 @@ body.sb-budget { --bg:#141310; --card:#211d17; --card2:#29231b; --text:#f3eddf; 
 
     <section class="panel">
         <div class="panel-row">
-            <div class="row-title">本月可用金額</div>
-            <div class="form-row"><input class="input" id="budgetInput" type="number" min="0" placeholder="本月預算"><button class="btn" id="saveBtn" onclick="saveBudget()">儲存</button></div>
+            <label class="row-title" for="budgetInput">本月可用金額</label>
+            <div class="form-row"><input class="input" id="budgetInput" type="number" inputmode="decimal" min="0" placeholder="輸入本月預算"><button class="btn" id="saveBtn" onclick="saveBudget()">儲存</button></div>
             <div class="actions"><button class="btn secondary" onclick="unlockBudget()">解鎖</button><button class="btn danger" onclick="resetMonth()">重設</button></div>
         </div>
         <div class="panel-row">
-            <div class="row-title">追加金額進金庫</div>
-            <div class="form-row"><input class="input" id="extraInput" type="number" min="0" placeholder="追加金額"><button class="btn" onclick="addVault()">追加</button></div>
+            <label class="row-title" for="extraInput">追加金額進金庫</label>
+            <div class="form-row"><input class="input" id="extraInput" type="number" inputmode="decimal" min="0" placeholder="輸入追加金額"><button class="btn" onclick="addVault()">追加</button></div>
             <div class="note">沒花完會進金庫；花超過會讓金庫變少。重設本月會清空金庫。</div>
         </div>
     </section>
@@ -168,7 +169,7 @@ function settleState(raw){ let b = raw ? {...raw} : defaultState(); const today=
 function dailyLimit(b){ return b && b.monthBudget ? Number(b.monthBudget)/daysInMonth(b.monthKey) : 0; }
 function render(){ const b=budgetData || defaultState(); const limit=dailyLimit(b); const spent=Number(b.spentToday)||0; const remain=limit-spent; const configured=Number(b.monthBudget)>0; const remainEl=document.getElementById('todayRemain'); remainEl.innerText=configured?money(remain):'尚未設定本月預算'; remainEl.closest('.hero').classList.toggle('unconfigured',!configured); document.getElementById('setupBudget').hidden=configured; remainEl.classList.toggle('negative',configured&&remain<0); document.getElementById('todaySub').innerText=configured?`今天基準 ${money(limit)}，月底金庫 ${money(b.vault)}`:`已支出 ${money(spent)}，設定預算後即可查看今日額度`; document.getElementById('dailyLimit').innerText=money(limit); document.getElementById('spentToday').innerText=money(spent); document.getElementById('vault').innerText=money(b.vault); const today=new Date(); document.getElementById('daysLeft').innerText=daysInMonth(monthKey())-today.getDate()+1; document.getElementById('budgetInput').value=b.monthBudget||''; document.getElementById('budgetInput').disabled=!!b.locked; document.getElementById('saveBtn').disabled=!!b.locked; document.getElementById('lockPill').innerText=b.locked?'預算已鎖定':configured?'預算可修改':'未設定'; const pct=limit>0?Math.max(0,Math.min(120,spent/limit*100)):0; const fill=document.getElementById('progressFill'); fill.style.width=Math.min(100,pct)+'%'; fill.className='progress-fill'+(spent>limit?' over':pct>80?' warn':''); }
 function load(){ document.getElementById('syncStatus').innerText='同步中'; db.ref('budget/'+currentUser).off(); db.ref('budget/'+currentUser).on('value', snap=>{ const settled=settleState(snap.val()); budgetData=settled; render(); document.getElementById('syncStatus').innerText='已同步'; if(JSON.stringify(settled)!==JSON.stringify(snap.val()||{})) db.ref('budget/'+currentUser).set(settled).catch(()=>{ document.getElementById('syncStatus').innerText='同步失敗'; showToast('同步失敗，請檢查連線','var(--red)'); }); },()=>{ document.getElementById('syncStatus').innerText='同步失敗'; showToast('無法讀取預算，請稍後重試','var(--red)'); }); }
-function selectUser(uid){ currentUser=uid; document.getElementById('tab-p1').classList.toggle('active',uid==='p1'); document.getElementById('tab-p2').classList.toggle('active',uid==='p2'); load(); }
+function selectUser(uid){ currentUser=uid; for(const id of ['p1','p2']){ const tab=document.getElementById('tab-'+id); tab.classList.toggle('active',uid===id); tab.setAttribute('aria-pressed',String(uid===id)); } load(); }
 function saveBudget(){ const amount=Number(document.getElementById('budgetInput').value)||0; if(amount<=0) return showToast('請輸入本月可用金額','var(--red)'); const b=settleState(budgetData); b.monthBudget=Math.round(amount*100)/100; b.locked=true; b.updatedAt=Date.now(); db.ref('budget/'+currentUser).set(b).then(()=>showToast('已設定本月預算')).catch(()=>showToast('儲存失敗，請重試','var(--red)')); }
 function unlockBudget(){ const b=settleState(budgetData); b.locked=false; db.ref('budget/'+currentUser).set(b).then(()=>showToast('已解鎖')).catch(()=>showToast('解鎖失敗，請重試','var(--red)')); }
 function resetMonth(){ document.getElementById('resetDialog').showModal(); document.getElementById('resetCancel').focus(); }
