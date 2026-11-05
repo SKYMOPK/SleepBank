@@ -53,6 +53,19 @@
         } else if (action.type === 'restaurant-delete') {
             if (!restaurant) return fail('此餐廳已不存在');
             delete data.restaurants[action.id];
+        } else if (action.type === 'meal-confirm') {
+            if (!/^[A-Za-z0-9_-]{1,100}$/.test(action.id || '')) return fail('用餐紀錄識別碼無效');
+            const existing = data.history?.[action.id];
+            if (existing) return existing.restaurantId === action.restaurantId && existing.categoryId === action.categoryId ? { data } : fail('這筆選擇已經記錄過');
+            const selected = data.restaurants[action.restaurantId];
+            const category = data.categories[action.categoryId];
+            if (!selected || selected.enabled === false || !category || category.hidden || !selected.categories?.[action.categoryId]) return fail('餐廳或分類已變更，請重新選擇');
+            if (!Number.isFinite(action.now) || action.now <= 0) return fail('用餐紀錄時間無效');
+            data.history ||= {};
+            data.history[action.id] = { restaurantId: action.restaurantId, restaurantName: selected.name, categoryId: action.categoryId, categoryName: category.name, confirmedAt: action.now };
+        } else if (action.type === 'meal-delete') {
+            if (!data.history?.[action.id]) return fail('這筆用餐紀錄已移除');
+            delete data.history[action.id];
         } else return fail('未知操作');
         return { data };
     }

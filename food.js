@@ -2,6 +2,7 @@
 (function () {
     'use strict';
     const C = window.FoodCore;
+    const D = window.FoodDiscovery;
     const $ = id => document.getElementById(id);
     const escape = value => String(value ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
     const storageKey = 'dorm-food-round-v1';
@@ -12,12 +13,13 @@
         const selected = appearance.shared?.color;
         if (['star_color', 'matcha_color', 'rain_color', 'thunder_color', 'cat_color', 'chess_color', 'dorm_color'].includes(selected)) document.body.dataset.theme = selected;
     } catch (_) { /* Default theme remains available. */ }
-    const state = { data: null, connected: false, category: '', exclusions: {}, draw: null, busy: false, checking: false, editor: null, confirm: null, timers: [], initializing: false, missing: false, error: '' };
+    const state = { data: null, connected: false, category: '', exclusions: {}, draw: null, discovery: 'recommended', busy: false, checking: false, editor: null, confirm: null, timers: [], initializing: false, missing: false, error: '' };
     let db, rootRef, connectionRef, toastTimer;
     const returnFocus = new Map();
     try {
         const saved = JSON.parse(sessionStorage.getItem(storageKey) || '{}');
         state.category = typeof saved.category === 'string' ? saved.category : '';
+        state.discovery = saved.discovery === 'frequent' ? 'frequent' : 'recommended';
         state.exclusions = saved.exclusions && typeof saved.exclusions === 'object' && !Array.isArray(saved.exclusions) ? saved.exclusions : {};
         if (saved.draw && Array.isArray(saved.draw.ids) && saved.draw.ids.length <= 3 && saved.draw.ids.length > 0 && Array.isArray(saved.draw.names) && saved.draw.ids.length === saved.draw.names.length && ['shuffling', 'waiting', 'revealing', 'result', 'complete'].includes(saved.draw.phase)) {
             state.draw = saved.draw;
@@ -27,7 +29,7 @@
         }
     } catch (_) { /* A damaged session starts a new round. */ }
     function persist() {
-        try { sessionStorage.setItem(storageKey, JSON.stringify({ category: state.category, exclusions: state.exclusions, draw: state.draw })); } catch (_) { /* The page still works without storage. */ }
+        try { sessionStorage.setItem(storageKey, JSON.stringify({ category: state.category, discovery: state.discovery, exclusions: state.exclusions, draw: state.draw })); } catch (_) { /* The page still works without storage. */ }
     }
     function later(callback, delay) {
         const timer = setTimeout(() => { state.timers = state.timers.filter(item => item !== timer); callback(); }, delay);
@@ -84,10 +86,10 @@
             if (d.phase === 'waiting') message = '選一張卡片，看看今天吃什麼';
             if (d.phase === 'revealing') { message = '正在揭曉'; actions = button('跳過動畫', 'skip'); }
             if (d.phase === 'result') {
-                message = state.checking ? '正在確認餐廳狀態' : !validSelection() || d.invalid ? '選中的餐廳已停用、刪除或不屬於此分類，請重新抽籤' : !state.connected ? '請連線後確認餐廳狀態' : `你選中了 <strong>${escape(d.names[d.selected])}</strong>`;
+                message = state.checking ? '正在記錄這次選擇' : !validSelection() || d.invalid ? '選中的餐廳已停用、刪除或不屬於此分類，請重新抽籤' : !state.connected ? '請連線後確認餐廳狀態' : `你選中了 <strong>${escape(d.names[d.selected])}</strong>`;
                 actions = state.checking ? '' : validSelection() && !d.invalid ? button('不要，換一間', 'reject') + (state.connected ? button('就吃這間', 'accept', 'primary') : '') : button('重新抽籤', 'redraw', 'primary');
             }
-            if (d.phase === 'complete') { message = `決定了，這次就吃 <strong>${escape(d.names[d.selected])}</strong>`; actions = button('開始新的一輪', 'reset', 'primary'); }
+            if (d.phase === 'complete') { message = `決定了，這次就吃 <strong>${escape(d.names[d.selected])}</strong>${d.confirmationId && state.data?.history?.[d.confirmationId] ? '<small class="meal-recorded">已記下這次選擇</small>' : ''}`; actions = button('開始新的一輪', 'reset', 'primary'); }
         }
         $('cardStage').dataset.count = String(d ? d.ids.length : 3);
         $('cardStage').classList.toggle('has-selection', Number.isInteger(d?.selected));
@@ -111,6 +113,30 @@
         $('resetRound').disabled = !state.category || (!list.length && !state.draw);
         $('excludedList').innerHTML = list.length ? list.map(item => `<div class="excluded-item"><span>${escape(state.data?.restaurants?.[item.id]?.name || item.name || '已移除的餐廳')}</span><button type="button" data-restore="${escape(item.id)}" aria-label="恢復 ${escape(item.name)}">恢復</button></div>`).join('') : '<p class="empty">目前沒有排除的餐廳</p>';
     }
+    function renderDiscovery() {
+        const result = D.discover(state.data, state.category, exclusions().map(item => item.id));
+        const frequent = state.discovery === 'frequent';
+        const items = frequent ? result.frequent : result.recommended;
+        const blocked = !state.connected || state.busy || state.checking || ['shuffling', 'revealing'].includes(state.draw?.phase);
+        $('showRecommended').setAttribute('aria-pressed', String(!frequent));
+        $('showFrequent').setAttribute('aria-pressed', String(frequent));
+        $('discoveryContext').textContent = state.data?.categories?.[state.category]?.name || '';
+        $('discoveryCaption').textContent = frequent ? '近 90 天，兩人確認過的選擇' : result.history.length ? '參考近期選擇，讓每一餐多一點變化' : '先從清單裡找靈感，記錄後會更懂你的日常';
+        let html = items.map((item, index) => `<button class="discovery-item${!frequent && index === 0 ? ' featured' : ''}" type="button" data-suggest-id="${escape(item.id)}" ${blocked || item.excluded ? 'disabled' : ''} aria-label="選擇${escape(item.name)}"><span class="discovery-mark" aria-hidden="true">${frequent ? String(index + 1).padStart(2, '0') : `<svg><use href="#i-plate"/></svg>`}</span><span class="discovery-copy"><strong>${escape(item.name)}</strong><small>${frequent ? `近 90 天選過 ${item.count} 次${item.excluded ? ' · 本輪已排除' : ''}` : escape(item.reason)}</small></span><svg class="discovery-arrow" aria-hidden="true"><use href="#i-arrow"/></svg></button>`).join('');
+        if (!items.length) {
+            const eligible = currentPool().eligible.length;
+            const text = !state.data ? '正在整理餐廳清單' : !eligible ? '這餐目前沒有可選的餐廳' : '還沒有常吃紀錄';
+            const detail = !state.data ? '連線後會顯示可選餐廳' : !eligible ? '新增餐廳，或恢復本輪排除的選擇' : '按下「就吃這間」後，常吃的店會整理在這裡';
+            html = `<div class="discovery-empty"><svg aria-hidden="true"><use href="#i-plate"/></svg><strong>${text}</strong><p>${detail}</p></div>`;
+        }
+        if ($('discoveryList').innerHTML !== html) $('discoveryList').innerHTML = html;
+        const allHistory = D.history(state.data);
+        $('mealHistoryCount').textContent = allHistory.length ? String(allHistory.length) : '';
+        const date = new Intl.DateTimeFormat('zh-TW', { timeZone: 'Asia/Taipei', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false });
+        const history = allHistory.slice(0, 30).map(entry => `<div class="meal-history-row"><span><strong>${escape(entry.restaurantName || '未命名餐廳')}</strong><small>${escape(date.format(entry.confirmedAt))} · ${escape(entry.categoryName || '餐別已移除')}</small></span><button class="icon-button" type="button" data-remove-meal="${escape(entry.id)}" aria-label="刪除${escape(entry.restaurantName)}的用餐紀錄" title="刪除用餐紀錄" ${blocked ? 'disabled' : ''}><svg aria-hidden="true"><use href="#i-trash"/></svg></button></div>`).join('') || '<p class="empty">還沒有用餐紀錄</p>';
+        const historyHtml = (allHistory.length > 30 ? '<p class="history-note">顯示最近 30 筆</p>' : '') + history;
+        if ($('mealHistoryList').innerHTML !== historyHtml) $('mealHistoryList').innerHTML = historyHtml;
+    }
     function renderManagement() {
         const cats = C.categories(state.data);
         const previous = $('restaurantFilter').value || 'all';
@@ -128,12 +154,13 @@
         }).join('') : '<p class="empty">沒有符合條件的餐廳</p>';
         $('categoryManagementList').innerHTML = cats.length ? cats.map((cat, index) => `<article class="manage-row"><div class="manage-row-heading"><div><div class="manage-name">${escape(cat.name)}</div><p class="manage-meta">${cat.hidden ? '已隱藏' : '顯示中'} · ${C.pool(state.data, cat.id).members.length} 間餐廳</p></div></div><div class="row-actions"><button type="button" data-action="move-up" data-id="${escape(cat.id)}" aria-label="${escape(cat.name)}上移" ${index === 0 ? 'disabled' : ''}><svg><use href="#i-up"></use></svg></button><button type="button" data-action="move-down" data-id="${escape(cat.id)}" aria-label="${escape(cat.name)}下移" ${index === cats.length - 1 ? 'disabled' : ''}><svg><use href="#i-down"></use></svg></button><button type="button" data-action="edit-category" data-id="${escape(cat.id)}">改名</button><button type="button" data-action="toggle-category" data-id="${escape(cat.id)}">${cat.hidden ? '顯示' : '隱藏'}</button><button type="button" data-action="delete-category" data-id="${escape(cat.id)}">刪除</button></div></article>`).join('') : '<p class="empty">還沒有分類，請新增一個分類</p>';
     }
-    function render() { renderCategories(); renderDraw(); renderExcluded(); if (!$('manageOverlay').hidden) renderManagement(); }
+    function render() { renderCategories(); renderDraw(); renderExcluded(); renderDiscovery(); if (!$('manageOverlay').hidden) renderManagement(); }
     function updateConnection() {
         const el = $('connection');
         el.className = `connection ${state.connected && !state.error ? 'online' : 'offline'}`;
         el.textContent = state.error || (state.connected ? (state.busy ? '正在同步資料' : '已連線 · 兩人共用清單') : '離線 · 無法儲存變更');
         renderDraw();
+        renderDiscovery();
     }
     function selectCategory(id) {
         if (id === state.category) return;
@@ -170,6 +197,7 @@
     reduced.addEventListener('change', handleMotionPreference);
     function resetRound() { clearTimers(); if (state.category) delete state.exclusions[state.category]; state.draw = null; persist(); render(); }
     async function drawAction(action) {
+        if (state.checking || state.busy) return;
         if (action === 'start' || action === 'redraw') beginDraw();
         else if (action === 'skip') skipAnimation();
         else if (action === 'reset') resetRound();
@@ -177,16 +205,14 @@
         else if (action === 'accept' && state.draw?.phase === 'result') {
             if (!state.connected || !validSelection()) { render(); notify('請連線並確認餐廳仍可使用'); return; }
             const draw = state.draw;
-            state.checking = true; renderDraw();
+            draw.confirmationId ||= rootRef.child('history').push().key;
+            draw.confirmedAt ||= Date.now();
+            persist();
+            state.checking = true; renderDraw(); renderDiscovery();
             try {
-                const snapshot = await rootRef.get();
-                if (state.draw !== draw) return;
-                const data = snapshot.val();
-                const restaurant = data?.restaurants?.[draw.ids[draw.selected]];
-                if (!state.connected || !data?.categories?.[draw.category] || !restaurant || restaurant.enabled === false || !restaurant.categories?.[draw.category]) {
-                    draw.invalid = true; notify('餐廳資料已變更，請重新抽籤');
-                } else { draw.phase = 'complete'; persist(); }
-            } catch (_) { notify('無法確認餐廳狀態，請檢查連線後重試'); }
+                const saved = await writeAction({ type: 'meal-confirm', id: draw.confirmationId, restaurantId: draw.ids[draw.selected], categoryId: draw.category, now: draw.confirmedAt });
+                if (saved && state.draw === draw) { draw.phase = 'complete'; persist(); }
+            } catch (_) { notify('無法記錄這次選擇，請檢查連線後重試'); }
             finally { state.checking = false; render(); }
         } else if (action === 'reject' && state.draw?.phase === 'result') {
             const d = state.draw; const list = exclusions().slice();
@@ -212,7 +238,7 @@
         $('editorCategoryList').innerHTML = C.categories(state.data).map(cat => `<label><input type="checkbox" value="${escape(cat.id)}" ${item?.categories?.[cat.id] || (!id && cat.id === state.category) ? 'checked' : ''}>${escape(cat.name)}${cat.hidden ? '（隱藏）' : ''}</label>`).join('') || '<p class="empty">請先新增分類</p>';
         $('editorError').textContent = ''; showOverlay('editorOverlay', 'editorName');
     }
-    function confirmAction(title, message, action) { state.confirm = action; $('confirmTitle').textContent = title; $('confirmMessage').textContent = message; showOverlay('confirmOverlay', 'cancelConfirm'); }
+    function confirmAction(title, message, action, label = '確認刪除', danger = true) { state.confirm = action; $('confirmTitle').textContent = title; $('confirmMessage').textContent = message; $('acceptConfirm').textContent = label; $('acceptConfirm').className = danger ? 'danger' : 'primary'; showOverlay('confirmOverlay', 'cancelConfirm'); }
     async function writeAction(action) {
         if (!state.connected || !rootRef) { notify('目前離線，無法儲存；輸入內容仍保留'); return false; }
         if (state.busy) return false;
@@ -226,7 +252,7 @@
                 return next.error ? undefined : next.data;
             }, undefined, false);
             if (!result.committed) { const message = reason || '資料已變更，請重試'; if (!$('editorOverlay').hidden) $('editorError').textContent = message; else notify(message); return false; }
-            notify('已儲存並同步'); return true;
+            notify(action.type === 'meal-confirm' ? '已記下這次用餐選擇' : action.type === 'meal-delete' ? '已刪除用餐紀錄' : '已儲存並同步'); return true;
         } catch (_) { if (!$('editorOverlay').hidden) $('editorError').textContent = '儲存失敗，請檢查連線後重試'; else notify('儲存失敗，請檢查連線後重試'); return false; }
         finally { clearTimeout(warn); state.busy = false; $('saveEditor').disabled = false; updateConnection(); }
     }
@@ -243,6 +269,30 @@
     $('categoryList').addEventListener('click', event => { const el = event.target.closest('[data-category]'); if (el) selectCategory(el.dataset.category); });
     $('cardStage').addEventListener('click', event => { const el = event.target.closest('[data-card]'); if (el) choose(Number(el.dataset.card)); });
     $('drawActions').addEventListener('click', event => { const el = event.target.closest('[data-draw-action]'); if (el) drawAction(el.dataset.drawAction); });
+    $('showRecommended').addEventListener('click', () => { state.discovery = 'recommended'; persist(); renderDiscovery(); });
+    $('showFrequent').addEventListener('click', () => { state.discovery = 'frequent'; persist(); renderDiscovery(); });
+    $('discoveryList').addEventListener('click', event => {
+        const target = event.target.closest('[data-suggest-id]');
+        if (!target || target.disabled || state.busy || state.checking) return;
+        const id = target.dataset.suggestId;
+        const category = state.category;
+        const item = currentPool().eligible.find(restaurant => restaurant.id === id);
+        if (!item) return;
+        confirmAction('這餐就吃這間？', `${item.name} · ${categoryName(category)}`, async () => {
+            if (category !== state.category || !currentPool().eligible.some(restaurant => restaurant.id === id)) { notify('餐廳或分類已變更，請重新選擇'); return; }
+            clearTimers();
+            state.draw = { category, ids: [id], names: [item.name], phase: 'result', selected: 0, revealed: [0] };
+            persist(); render();
+            await drawAction('accept');
+        }, '就吃這間', false);
+    });
+    $('mealHistoryList').addEventListener('click', event => {
+        const target = event.target.closest('[data-remove-meal]');
+        if (!target || target.disabled) return;
+        const id = target.dataset.removeMeal;
+        const entry = state.data?.history?.[id];
+        if (entry) confirmAction('刪除這筆用餐紀錄？', `「${entry.restaurantName}」將不再計入常吃與推薦，餐廳仍保留在清單中。`, () => writeAction({ type: 'meal-delete', id }));
+    });
     $('resetRound').addEventListener('click', resetRound);
     $('excludedList').addEventListener('click', event => { const el = event.target.closest('[data-restore]'); if (!el) return; state.exclusions[state.category] = exclusions().filter(item => item.id !== el.dataset.restore); persist(); render(); });
     $('openManage').addEventListener('click', () => openManagement('restaurant'));
@@ -288,6 +338,9 @@
             state.missing = !data;
             if (!data) { ensureInitialized(); return; }
             state.data = data; state.error = '';
+            const pending = state.draw;
+            const confirmed = pending?.confirmationId && data.history?.[pending.confirmationId];
+            if (confirmed && confirmed.restaurantId === pending.ids[pending.selected] && confirmed.categoryId === pending.category) pending.phase = 'complete';
             const visible = C.categories(data).filter(cat => !cat.hidden);
             if (!data.categories?.[state.category] || data.categories[state.category].hidden) {
                 if (state.category && state.draw) notify('目前分類已被刪除或隱藏，請選擇其他分類');

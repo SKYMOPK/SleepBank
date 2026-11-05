@@ -1,0 +1,55 @@
+/* Dining suggestions are a quiet list beside the existing card table. */
+.food-page .discovery-section { grid-column:1; grid-row:3; min-width:0; padding-top:8px; }
+.food-page .draw-section { grid-row:2 / 5; }
+.food-page .excluded-section { grid-row:4; }
+.food-page .discovery-heading { display:flex; align-items:baseline; justify-content:space-between; gap:12px; margin-bottom:16px; }
+.food-page .discovery-heading h2 { font-size:20px; font-weight:650; }
+.food-page #discoveryContext { color:var(--theme-muted); font-size:12px; overflow-wrap:anywhere; }
+.food-page .discovery-tabs { position:relative; display:grid; grid-template-columns:1fr 1fr; isolation:isolate; padding:4px; gap:4px; border:1px solid var(--theme-border); border-radius:12px; background:rgba(255,255,255,.025); }
+.food-page .discovery-tabs::before { content:''; position:absolute; z-index:-1; left:4px; top:4px; width:calc((100% - 12px)/2); height:calc(100% - 8px); border-radius:8px; background:var(--theme-accent-soft); box-shadow:inset 0 0 0 1px var(--theme-border); transition:transform .24s cubic-bezier(.2,.8,.2,1); }
+.food-page .discovery-tabs:has(#showFrequent[aria-pressed="true"])::before { transform:translateX(calc(100% + 4px)); }
+.food-page .discovery-tabs button { min-height:44px; padding:0 12px; color:var(--theme-muted); border:0; background:none; border-radius:8px; font-size:14px; font-weight:550; }
+.food-page .discovery-tabs button[aria-pressed="true"] { color:var(--theme-text); }
+.food-page .discovery-caption { min-height:40px; margin:12px 0 8px; color:var(--theme-muted); font-size:12px; line-height:1.6; }
+.food-page .discovery-list { min-height:168px; }
+.food-page .discovery-item { display:flex; align-items:center; gap:12px; width:100%; min-height:72px; margin:0; padding:12px 4px; border:0; border-bottom:1px solid var(--theme-border); border-radius:0; color:var(--theme-text); text-align:left; background:none; transition:background-color .2s ease,border-color .2s ease; }
+.food-page .discovery-item.featured { min-height:92px; margin-bottom:4px; padding:16px; border:1px solid var(--theme-border); border-radius:12px; background:linear-gradient(135deg,rgba(255,255,255,.025),transparent),var(--theme-surface-soft); }
+.food-page .discovery-mark { display:grid; flex:none; place-items:center; width:36px; height:36px; border-radius:10px; color:var(--theme-accent); font-size:12px; font-variant-numeric:tabular-nums; }
+.food-page .featured .discovery-mark { background:var(--theme-accent-soft); }
+.food-page .discovery-mark svg { width:22px; height:22px; }
+.food-page .discovery-copy { flex:1; min-width:0; }
+.food-page .discovery-copy strong { display:block; font-size:15px; font-weight:600; line-height:1.5; overflow-wrap:anywhere; }
+.food-page .featured .discovery-copy strong { font-size:17px; }
+.food-page .discovery-copy small { display:block; margin-top:4px; color:var(--theme-muted); font-size:12px; line-height:1.5; }
+.food-page .discovery-arrow { flex:none; width:16px; height:16px; color:var(--theme-accent); transition:transform .2s ease; }
+.food-page .discovery-item:disabled { opacity:.65; }
+.food-page .discovery-empty { display:grid; grid-template-columns:28px minmax(0,1fr); column-gap:10px; padding:24px 0; }
+.food-page .discovery-empty > svg { color:var(--theme-muted); margin-top:2px; }
+.food-page .discovery-empty strong { font-size:14px; font-weight:550; }
+.food-page .discovery-empty p { grid-column:2; margin-top:8px; color:var(--theme-muted); font-size:12px; line-height:1.7; }
+.food-page .meal-history { margin-top:12px; border-bottom:1px solid var(--theme-border); }
+.food-page .meal-history summary { display:flex; align-items:center; gap:8px; min-height:48px; color:var(--theme-muted); font-size:12px; cursor:pointer; list-style:none; }
+.food-page .meal-history summary::-webkit-details-marker { display:none; }
+.food-page .meal-history summary > svg { width:16px; height:16px; flex:none; }
+.food-page .history-chevron { margin-left:auto; transition:transform .2s ease; }
+.food-page .meal-history[open] .history-chevron { transform:rotate(180deg); }
+.food-page #mealHistoryCount { color:var(--theme-accent); font-variant-numeric:tabular-nums; }
+.food-page .meal-history-row { display:flex; align-items:center; gap:8px; min-height:64px; padding:8px 0; border-top:1px solid var(--theme-border); }
+.food-page .meal-history-row > span { flex:1; min-width:0; }
+.food-page .meal-history-row strong { display:block; font-size:13px; font-weight:550; overflow-wrap:anywhere; }
+.food-page .meal-history-row small,.food-page .history-note { display:block; color:var(--theme-muted); font-size:11px; line-height:1.6; margin-top:4px; }
+.food-page .meal-history-row .icon-button { color:var(--theme-muted); }
+.food-page .meal-history-row .icon-button svg { width:16px; height:16px; }
+.food-page .meal-recorded { display:block; margin-top:4px; color:#a9c3a1; font-size:12px; }
+.food-page :is(.discovery-tabs button,.discovery-item,.meal-history summary):focus-visible { outline:2px solid var(--theme-accent); outline-offset:3px; }
+@media (hover:hover) and (pointer:fine) {
+    .food-page .discovery-item:not(:disabled):hover { background:var(--theme-accent-soft); }
+    .food-page .discovery-item:not(:disabled):hover .discovery-arrow { transform:translateX(3px); }
+}
+@media (max-width:720px) {
+    .food-page .discovery-section { margin-top:20px; padding-top:4px; }
+    .food-page .discovery-heading { margin-bottom:12px; }
+    .food-page .discovery-list { min-height:168px; }
+    .food-page .draw-section { margin-top:28px; }
+}
+@media (prefers-reduced-motion:reduce) { .food-page .discovery-tabs::before,.food-page :is(.discovery-item,.discovery-arrow,.history-chevron) { transition:none; } }

@@ -8,10 +8,12 @@
     <link rel="stylesheet" href="system-ui.css">
     <link rel="stylesheet" href="food.css">
     <link rel="stylesheet" href="food-experience.css?v=20261104-1">
+    <link rel="stylesheet" href="food-discovery.css?v=20261105-1">
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js" defer></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js" defer></script>
-    <script src="food-core.js" defer></script>
-    <script src="food.js" defer></script>
+    <script src="food-core.js?v=20261105-1" defer></script>
+    <script src="food-discovery.js?v=20261105-1" defer></script>
+    <script src="food.js?v=20261105-1" defer></script>
 </head>
 <body class="sb-page food-page">
 <svg class="symbols" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
@@ -23,6 +25,8 @@
     <symbol id="i-up" viewBox="0 0 24 24"><path d="m6 14 6-6 6 6"/></symbol>
     <symbol id="i-down" viewBox="0 0 24 24"><path d="m6 10 6 6 6-6"/></symbol>
     <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3m3 0-1 13H7L6 7m4 4v5m4-5v5"/></symbol>
+    <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14m-5-5 5 5-5 5"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 7v5l3 2"/></symbol>
 </svg>
 <div class="ambient" aria-hidden="true"></div>
 <header class="app-header">
@@ -35,6 +39,13 @@
     <section class="category-section" aria-labelledby="categoryTitle">
         <div class="section-line"><h2 id="categoryTitle">想吃哪一餐？</h2><button class="text-button" id="manageCategories" type="button">管理分類</button></div>
         <div class="category-list" id="categoryList" aria-label="選擇分類"></div>
+    </section>
+    <section class="discovery-section" aria-labelledby="discoveryTitle">
+        <div class="discovery-heading"><h2 id="discoveryTitle">還沒想好？</h2><span id="discoveryContext"></span></div>
+        <div class="discovery-tabs" role="group" aria-label="餐廳建議"><button id="showRecommended" type="button" aria-pressed="true" aria-controls="discoveryList">推薦</button><button id="showFrequent" type="button" aria-pressed="false" aria-controls="discoveryList">常吃</button></div>
+        <p class="discovery-caption" id="discoveryCaption">換個口味，也找回熟悉的選擇</p>
+        <div class="discovery-list" id="discoveryList"></div>
+        <details class="meal-history" id="mealHistory"><summary><svg aria-hidden="true"><use href="#i-clock"/></svg><span>近期用餐紀錄</span><span id="mealHistoryCount"></span><svg class="history-chevron" aria-hidden="true"><use href="#i-down"/></svg></summary><div id="mealHistoryList"></div></details>
     </section>
     <section class="draw-section" aria-labelledby="drawTitle">
         <div class="draw-heading"><div><p class="eyebrow">下一餐</p><h2 id="drawTitle">選一張，看看吃什麼</h2></div><span class="pool-count" id="poolCount"></span></div>
