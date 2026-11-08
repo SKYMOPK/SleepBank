@@ -2,7 +2,7 @@
     'use strict';
     const base = new URL('.', document.currentScript.src);
     const duration = 3300;
-    let assets = null, woodImage = null, ambient = null, effect = null;
+    let assets = null, woodImage = null, effect = null;
     function script(path) {
         return new Promise((resolve, reject) => {
             const node = document.createElement('script'); node.src = new URL(path, base).href;
@@ -31,44 +31,14 @@
         if (document.body.style.getPropertyValue('--chess-impact') !== value) document.body.style.setProperty('--chess-impact', value);
         document.body.classList.toggle('chess-lit', Number(value) > .001);
     }
-    function cleanupAmbient() {
-        const run = ambient; ambient = null;
-        if (!run) return;
-        cancelAnimationFrame(run.frame); clearTimeout(run.timer);
-        run.events.abort(); run.scene?.dispose(); run.canvas?.remove();
-    }
-    async function mount(host) {
-        if (ambient?.host === host) return;
-        cleanupAmbient(); if (!host) return;
-        const run = { host, frame: 0, timer: 0, events: new AbortController(), previous: 0, elapsed: 0 };
-        ambient = run;
-        try {
-            await prepare(); if (ambient !== run) return;
-            const canvas = document.createElement('canvas'); canvas.className = 'chess-ambient';
-            canvas.setAttribute('aria-hidden', 'true'); host.append(canvas); run.canvas = canvas;
-            run.scene = root.ChessScene.create(root.THREE, canvas, woodImage);
-            const reduced = matchMedia('(prefers-reduced-motion: reduce)'), signal = run.events.signal;
-            function draw() { run.scene.render(run.elapsed / 1000, { reduced: reduced.matches }); }
-            function schedule() { run.timer = setTimeout(() => { run.frame = requestAnimationFrame(frame); }, 125); }
-            function frame(now) {
-                if (ambient !== run) return;
-                if (effect || root.HomecomingEffect?.playing) { run.previous = now; schedule(); return; }
-                run.elapsed += Math.min(160, now - run.previous); run.previous = now; draw();
-                schedule();
-            }
-            function resume() {
-                cancelAnimationFrame(run.frame); clearTimeout(run.timer);
-                run.previous = performance.now(); draw();
-                if (!document.hidden && !reduced.matches) schedule();
-            }
-            root.addEventListener('resize', () => { run.scene.resize(); draw(); }, { signal });
-            document.addEventListener('visibilitychange', resume, { signal });
-            root.addEventListener('pagehide', cleanupAmbient, { signal });
-            reduced.addEventListener('change', resume, { signal });
-            canvas.addEventListener('webglcontextlost', cleanupAmbient, { signal });
-            resume();
-        } catch (error) { if (ambient === run) cleanupAmbient(); console.warn('Chess background unavailable', error); }
-    }
+    const background = root.SceneBackground.create({
+        canvasClass: 'chess-ambient', interval: 125,
+        errorMessage: 'Chess background unavailable; using still image',
+        async prepare() { await prepare(); return woodImage; },
+        create: (canvas, image) => root.ChessScene.create(root.THREE, canvas, image),
+        draw: (scene, time, reduced) => scene.render(time, { reduced }),
+        paused: () => effect || root.HomecomingEffect?.playing,
+    });
     function stop(reason = 'cleanup') {
         const run = effect; effect = null;
         if (!run) return;
@@ -134,7 +104,7 @@
     }
     root.SpecialThemes = {
         ...root.SpecialThemes,
-        chess: { ambient: { mount, cleanup: cleanupAmbient }, onAdd: play, stop, prepare },
+        chess: { ambient: background, onAdd: play, stop, prepare },
     };
     root.ChessVisuals = { duration, prepare };
 })(globalThis);
