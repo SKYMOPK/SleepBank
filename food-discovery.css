@@ -13,13 +13,17 @@
 .food-page .discovery-caption { min-height:40px; margin:12px 0 8px; color:var(--theme-muted); font-size:12px; line-height:1.6; }
 .food-page .discovery-list { min-height:168px; }
 .food-page .discovery-item { display:flex; align-items:center; gap:12px; width:100%; min-height:72px; margin:0; padding:12px 4px; border:0; border-bottom:1px solid var(--theme-border); border-radius:0; color:var(--theme-text); text-align:left; background:none; transition:background-color .2s ease,border-color .2s ease; }
-.food-page .discovery-item.featured { min-height:92px; margin-bottom:4px; padding:16px; border:1px solid var(--theme-border); border-radius:12px; background:linear-gradient(135deg,rgba(255,255,255,.025),transparent),var(--theme-surface-soft); }
+.food-page .discovery-item.featured { display:grid; grid-template-columns:36px minmax(0,1fr); gap:8px 12px; min-height:156px; padding:16px; border:1px solid var(--theme-border); border-radius:12px; background:var(--theme-surface-soft); }
 .food-page .discovery-mark { display:grid; flex:none; place-items:center; width:36px; height:36px; border-radius:10px; color:var(--theme-accent); font-size:12px; font-variant-numeric:tabular-nums; }
-.food-page .featured .discovery-mark { background:var(--theme-accent-soft); }
+.food-page .featured .discovery-mark { align-self:start; margin-top:4px; background:var(--theme-accent-soft); }
 .food-page .discovery-mark svg { width:22px; height:22px; }
 .food-page .discovery-copy { flex:1; min-width:0; }
 .food-page .discovery-copy strong { display:block; font-size:15px; font-weight:600; line-height:1.5; overflow-wrap:anywhere; }
-.food-page .featured .discovery-copy strong { font-size:17px; }
+.food-page .featured .discovery-copy strong { margin-top:4px; font-size:20px; line-height:1.4; }
+.food-page .discovery-kicker { display:block; color:var(--theme-muted); font-size:12px; }
+.food-page .discovery-choose { grid-column:2; grid-row:2; justify-self:start; color:var(--theme-accent); font-size:13px; line-height:28px; }
+.food-page .featured .discovery-arrow { grid-column:2; grid-row:2; justify-self:end; }
+.food-page .discovery-alternatives { margin:12px 4px 0; color:var(--theme-muted); font-size:12px; line-height:16px; }
 .food-page .discovery-copy small { display:block; margin-top:4px; color:var(--theme-muted); font-size:12px; line-height:1.5; }
 .food-page .discovery-arrow { flex:none; width:16px; height:16px; color:var(--theme-accent); transition:transform .2s ease; }
 .food-page .discovery-item:disabled { opacity:.65; }
@@ -35,16 +39,34 @@
 .food-page .meal-history[open] .history-chevron { transform:rotate(180deg); }
 .food-page #mealHistoryCount { color:var(--theme-accent); font-variant-numeric:tabular-nums; }
 .food-page .meal-history-row { display:flex; align-items:center; gap:8px; min-height:64px; padding:8px 0; border-top:1px solid var(--theme-border); }
-.food-page .meal-history-row > span { flex:1; min-width:0; }
-.food-page .meal-history-row strong { display:block; font-size:13px; font-weight:550; overflow-wrap:anywhere; }
-.food-page .meal-history-row small,.food-page .history-note { display:block; color:var(--theme-muted); font-size:11px; line-height:1.6; margin-top:4px; }
+.food-page .history-group { margin:20px 0 8px; }
+.food-page .history-group h3 { margin:0 0 8px; font-size:13px; font-weight:550; color:var(--theme-muted); }
+.food-page .history-choice { display:flex; flex:1; align-items:center; gap:8px; min-width:0; min-height:48px; padding:4px; text-align:left; border:0; border-radius:4px; color:var(--theme-text); background:none; }
+.food-page .history-choice > span { flex:1; min-width:0; }
+.food-page .history-choice > svg { flex:none; width:16px; height:16px; color:var(--theme-muted); }
+.food-page .meal-history-row strong { display:block; font-size:14px; font-weight:550; overflow-wrap:anywhere; }
+.food-page .meal-history-row small,.food-page .history-note { display:block; color:var(--theme-muted); font-size:12px; line-height:1.6; margin-top:4px; }
 .food-page .meal-history-row .icon-button { color:var(--theme-muted); }
 .food-page .meal-history-row .icon-button svg { width:16px; height:16px; }
-.food-page .meal-recorded { display:block; margin-top:4px; color:#a9c3a1; font-size:12px; }
-.food-page :is(.discovery-tabs button,.discovery-item,.meal-history summary):focus-visible { outline:2px solid var(--theme-accent); outline-offset:3px; }
+.food-page .decision-receipt { display:flex; align-items:center; flex-direction:column; padding:24px 8px 12px; }
+.food-page .decision-heading { font-size:13px; color:var(--theme-muted); }
+.food-page .decision-receipt > strong { margin:12px 0 4px; color:var(--theme-text); font-size:24px; line-height:1.4; font-weight:600; overflow-wrap:anywhere; max-width:100%; }
+.food-page .decision-category { color:var(--theme-muted); font-size:13px; }
+.food-page .meal-recorded { display:flex; align-items:center; justify-content:center; gap:4px; margin-top:16px; color:#a9c3a1; font-size:12px; }
+.food-page .meal-recorded svg { width:16px; height:16px; }
+.food-page .draw-section[data-phase="complete"] .draw-actions { flex-direction:column; align-items:center; gap:8px; }
+.food-page .draw-section[data-phase="complete"] .undo-choice { width:auto; min-width:0; color:var(--theme-muted); }
+.food-page .draw-section[data-source="direct"] :is(.card-stage,.pool-count,.draw-description) { display:none; }
+.food-page .draw-message { scroll-margin:32px; }
+.food-page .history-dialog h2,.food-page #historyDetail { overflow-wrap:anywhere; }
+.food-page .history-dialog .dialog-head > div { min-width:0; }
+.food-page .history-dialog #historyDetail { color:var(--theme-muted); font-size:14px; line-height:1.7; }
+.food-page .history-dialog .history-note { margin-top:16px; }
+.food-page :is(.discovery-tabs button,.discovery-item,.history-choice,.meal-history summary):focus-visible { outline:2px solid var(--theme-accent); outline-offset:3px; }
 @media (hover:hover) and (pointer:fine) {
     .food-page .discovery-item:not(:disabled):hover { background:var(--theme-accent-soft); }
     .food-page .discovery-item:not(:disabled):hover .discovery-arrow { transform:translateX(3px); }
+    .food-page .history-choice:not(:disabled):hover { background:var(--theme-accent-soft); }
 }
 @media (max-width:720px) {
     .food-page .discovery-section { margin-top:20px; padding-top:4px; }
@@ -52,4 +74,7 @@
     .food-page .discovery-list { min-height:168px; }
     .food-page .draw-section { margin-top:28px; }
 }
-@media (prefers-reduced-motion:reduce) { .food-page .discovery-tabs::before,.food-page :is(.discovery-item,.discovery-arrow,.history-chevron) { transition:none; } }
+@media (prefers-reduced-motion:reduce) {
+    .food-page .discovery-tabs::before,.food-page :is(.discovery-item,.discovery-arrow,.history-chevron) { transition:none; }
+    .food-page .draw-actions button[data-draw-action] { animation:none; }
+}

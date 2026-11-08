@@ -13,8 +13,8 @@
         const selected = appearance.shared?.color;
         if (['star_color', 'matcha_color', 'rain_color', 'thunder_color', 'cat_color', 'chess_color', 'dorm_color'].includes(selected)) document.body.dataset.theme = selected;
     } catch (_) { /* Default theme remains available. */ }
-    const state = { data: null, connected: false, category: '', exclusions: {}, draw: null, discovery: 'recommended', busy: false, checking: false, editor: null, confirm: null, timers: [], initializing: false, missing: false, error: '' };
-    let db, rootRef, connectionRef, toastTimer;
+    const state = { data: null, connected: false, category: '', exclusions: {}, draw: null, discovery: 'recommended', busy: false, checking: false, editor: null, historyEntry: null, confirm: null, timers: [], initializing: false, missing: false, error: '' };
+    let db, rootRef, connectionRef, toastTimer, confirmationAudio;
     const returnFocus = new Map();
     try {
         const saved = JSON.parse(sessionStorage.getItem(storageKey) || '{}');
@@ -37,13 +37,38 @@
     }
     function clearTimers() { state.timers.forEach(clearTimeout); state.timers = []; }
     function notify(message) { clearTimeout(toastTimer); $('toast').textContent = message; $('toast').hidden = false; toastTimer = setTimeout(() => { $('toast').hidden = true; }, 3500); }
+    function soundEnabled() {
+        try { return JSON.parse(localStorage.getItem('split-appearance-v1') || '{}').muted === false; } catch (_) { return false; }
+    }
+    function prepareConfirmationSound() {
+        if (!soundEnabled() || !navigator.userActivation?.isActive) return;
+        try {
+            const AudioApi = window.AudioContext || window.webkitAudioContext;
+            if (AudioApi && !confirmationAudio) confirmationAudio = new AudioApi();
+            confirmationAudio?.resume().catch(() => {});
+        } catch (_) { /* Sound is optional. */ }
+    }
+    function finishConfirmationSound(play = false) {
+        const audio = confirmationAudio; confirmationAudio = null;
+        if (!audio) return;
+        try {
+            if (!play || !soundEnabled() || audio.state !== 'running') { audio.close().catch(() => {}); return; }
+            const oscillator = audio.createOscillator(), gain = audio.createGain();
+            oscillator.type = 'sine'; oscillator.frequency.setValueAtTime(523.25, audio.currentTime);
+            oscillator.frequency.exponentialRampToValueAtTime(659.25, audio.currentTime + .12);
+            gain.gain.setValueAtTime(0, audio.currentTime); gain.gain.linearRampToValueAtTime(.035, audio.currentTime + .015);
+            gain.gain.exponentialRampToValueAtTime(.001, audio.currentTime + .22);
+            oscillator.connect(gain); gain.connect(audio.destination); oscillator.start(); oscillator.stop(audio.currentTime + .24);
+            oscillator.onended = () => { oscillator.disconnect(); gain.disconnect(); audio.close().catch(() => {}); };
+        } catch (_) { audio.close().catch(() => {}); }
+    }
     function exclusions(id = state.category) { return Array.isArray(state.exclusions[id]) ? state.exclusions[id] : []; }
     function categoryName(id) { return state.data?.categories?.[id]?.name || '分類已移除'; }
     function currentPool() { return C.pool(state.data, state.category, exclusions().map(item => item.id)); }
     function validSelection() {
         const d = state.draw;
         const item = d && state.data?.restaurants?.[d.ids[d.selected]];
-        return Boolean(d && state.data?.categories?.[d.category] && item && item.enabled !== false && item.categories?.[d.category]);
+        return Boolean(d && !state.data?.categories?.[d.category]?.hidden && state.data?.categories?.[d.category] && item && item.enabled !== false && item.categories?.[d.category]);
     }
     function button(text, action, style = 'secondary') { return `<button type="button" class="${style}" data-draw-action="${action}">${text}</button>`; }
     function showOverlay(id, focus) {
@@ -53,7 +78,7 @@
     }
     function closeOverlay(id) {
         $(id).hidden = true;
-        if ($('manageOverlay').hidden && $('editorOverlay').hidden && $('confirmOverlay').hidden) document.body.style.overflow = '';
+        if (['manageOverlay', 'editorOverlay', 'confirmOverlay', 'historyOverlay'].every(key => $(key).hidden)) document.body.style.overflow = '';
         const previous = returnFocus.get(id); if (previous?.isConnected) previous.focus(); returnFocus.delete(id);
     }
     function drawFace(id, name, index, revealed, selected, disabled, shuffling) {
@@ -62,13 +87,14 @@
     }
     function renderCategories() {
         const visible = C.categories(state.data).filter(item => !item.hidden);
-        $('categoryList').innerHTML = visible.length ? visible.map(item => `<button type="button" data-category="${escape(item.id)}" aria-pressed="${item.id === state.category}">${escape(item.name)}</button>`).join('') : `<span class="empty">${state.data ? '目前沒有顯示中的分類，請至分類管理新增或顯示' : '正在載入分類'}</span>`;
+        $('categoryList').innerHTML = visible.length ? visible.map(item => `<button type="button" data-category="${escape(item.id)}" aria-pressed="${item.id === state.category}" ${state.busy || state.checking ? 'disabled' : ''}>${escape(item.name)}</button>`).join('') : `<span class="empty">${state.data ? '目前沒有顯示中的分類，請至分類管理新增或顯示' : '正在載入分類'}</span>`;
     }
     function renderDraw() {
         const d = state.draw;
         const p = currentPool();
         const category = state.data?.categories?.[state.category];
         $('poolCount').textContent = category ? `${p.eligible.length} 間可抽` : '';
+        $('drawTitle').textContent = d?.source === 'direct' ? d.phase === 'complete' ? '下一餐有著落了' : '確認這次選擇' : '選一張，看看吃什麼';
         $('drawDescription').textContent = category ? `從「${category.name}」的餐廳中抽出最多三間` : '先選擇一個顯示中的分類';
         let stage = '', message = '', actions = '';
         if (!d) {
@@ -89,8 +115,15 @@
                 message = state.checking ? '正在記錄這次選擇' : !validSelection() || d.invalid ? '選中的餐廳已停用、刪除或不屬於此分類，請重新抽籤' : !state.connected ? '請連線後確認餐廳狀態' : `你選中了 <strong>${escape(d.names[d.selected])}</strong>`;
                 actions = state.checking ? '' : validSelection() && !d.invalid ? button('不要，換一間', 'reject') + (state.connected ? button('就吃這間', 'accept', 'primary') : '') : button('重新抽籤', 'redraw', 'primary');
             }
-            if (d.phase === 'complete') { message = `決定了，這次就吃 <strong>${escape(d.names[d.selected])}</strong>${d.confirmationId && state.data?.history?.[d.confirmationId] ? '<small class="meal-recorded">已記下這次選擇</small>' : ''}`; actions = button('開始新的一輪', 'reset', 'primary'); }
+            if (d.phase === 'complete') {
+                const recorded = Boolean(d.confirmationId && state.data?.history?.[d.confirmationId]);
+                message = `<span class="decision-receipt"><span class="decision-heading">這餐決定了</span><strong>${escape(d.names[d.selected])}</strong><span class="decision-category">${escape(categoryName(d.category))}</span><span class="meal-recorded"><svg aria-hidden="true"><use href="#i-check"/></svg>${recorded ? '已記錄這次選擇' : '這筆紀錄已移除'}</span></span>`;
+                actions = button('開始新的一輪', 'reset', 'primary') + (recorded ? button('撤銷這次選擇', 'undo', 'text-button undo-choice') : '');
+            }
         }
+        $('drawActions').setAttribute('aria-busy', String(state.busy || state.checking));
+        document.querySelector('.draw-section').dataset.phase = d?.phase || 'idle';
+        document.querySelector('.draw-section').dataset.source = d?.source || 'cards';
         $('cardStage').dataset.count = String(d ? d.ids.length : 3);
         $('cardStage').classList.toggle('has-selection', Number.isInteger(d?.selected));
         const existing = [...$('cardStage').querySelectorAll('.draw-card')];
@@ -106,11 +139,12 @@
         });
         if ($('drawMessage').innerHTML !== message) $('drawMessage').innerHTML = message;
         if ($('drawActions').innerHTML !== actions) $('drawActions').innerHTML = actions;
+        $('drawActions').querySelectorAll('button').forEach(control => { control.disabled = state.busy || state.checking || (control.dataset.drawAction === 'undo' && !state.connected); });
     }
     function renderExcluded() {
         const list = exclusions();
         $('excludedCount').textContent = String(list.length);
-        $('resetRound').disabled = !state.category || (!list.length && !state.draw);
+        $('resetRound').disabled = state.busy || state.checking || !state.category || (!list.length && !state.draw);
         $('excludedList').innerHTML = list.length ? list.map(item => `<div class="excluded-item"><span>${escape(state.data?.restaurants?.[item.id]?.name || item.name || '已移除的餐廳')}</span><button type="button" data-restore="${escape(item.id)}" aria-label="恢復 ${escape(item.name)}">恢復</button></div>`).join('') : '<p class="empty">目前沒有排除的餐廳</p>';
     }
     function renderDiscovery() {
@@ -121,8 +155,12 @@
         $('showRecommended').setAttribute('aria-pressed', String(!frequent));
         $('showFrequent').setAttribute('aria-pressed', String(frequent));
         $('discoveryContext').textContent = state.data?.categories?.[state.category]?.name || '';
-        $('discoveryCaption').textContent = frequent ? '近 90 天，兩人確認過的選擇' : result.history.length ? '參考近期選擇，讓每一餐多一點變化' : '先從清單裡找靈感，記錄後會更懂你的日常';
-        let html = items.map((item, index) => `<button class="discovery-item${!frequent && index === 0 ? ' featured' : ''}" type="button" data-suggest-id="${escape(item.id)}" ${blocked || item.excluded ? 'disabled' : ''} aria-label="選擇${escape(item.name)}"><span class="discovery-mark" aria-hidden="true">${frequent ? String(index + 1).padStart(2, '0') : `<svg><use href="#i-plate"/></svg>`}</span><span class="discovery-copy"><strong>${escape(item.name)}</strong><small>${frequent ? `近 90 天選過 ${item.count} 次${item.excluded ? ' · 本輪已排除' : ''}` : escape(item.reason)}</small></span><svg class="discovery-arrow" aria-hidden="true"><use href="#i-arrow"/></svg></button>`).join('');
+        $('discoveryCaption').textContent = frequent ? '近 90 天，兩人確認過的選擇' : result.history.length ? '依近期選擇，找回熟悉的店，也換個口味' : '先試試這幾間，確認選擇後會累積紀錄';
+        let html = items.map((item, index) => {
+            const featured = !frequent && index === 0;
+            const detail = frequent ? `近 90 天選過 ${item.count} 次 · ${D.lastChoiceLabel(item.daysAgo)}${item.excluded ? ' · 本輪已排除' : ''}` : item.reason;
+            return `${!frequent && index === 1 ? '<p class="discovery-alternatives">也可以考慮</p>' : ''}<button class="discovery-item${featured ? ' featured' : ''}" type="button" data-suggest-id="${escape(item.id)}" ${blocked || item.excluded ? 'disabled' : ''} aria-label="選擇${escape(item.name)}"><span class="discovery-mark" aria-hidden="true">${frequent ? String(index + 1).padStart(2, '0') : `<svg><use href="#i-plate"/></svg>`}</span><span class="discovery-copy">${featured ? `<span class="discovery-kicker">${result.history.length ? '這餐推薦' : '先試試這間'}</span>` : ''}<strong>${escape(item.name)}</strong><small>${escape(detail)}</small></span>${featured ? '<span class="discovery-choose">就吃這間</span>' : ''}<svg class="discovery-arrow" aria-hidden="true"><use href="#i-arrow"/></svg></button>`;
+        }).join('');
         if (!items.length) {
             const eligible = currentPool().eligible.length;
             const text = !state.data ? '正在整理餐廳清單' : !eligible ? '這餐目前沒有可選的餐廳' : '還沒有常吃紀錄';
@@ -130,12 +168,57 @@
             html = `<div class="discovery-empty"><svg aria-hidden="true"><use href="#i-plate"/></svg><strong>${text}</strong><p>${detail}</p></div>`;
         }
         if ($('discoveryList').innerHTML !== html) $('discoveryList').innerHTML = html;
+        // Reserve the larger view in this category so switching tabs does not move the card table.
+        $('discoveryList').style.minHeight = `${Math.max(280, Math.min(5, result.frequent.length) * 72, result.recommended.length ? 156 + Math.max(0, result.recommended.length - 1) * 72 + 28 : 0)}px`;
         const allHistory = D.history(state.data);
         $('mealHistoryCount').textContent = allHistory.length ? String(allHistory.length) : '';
-        const date = new Intl.DateTimeFormat('zh-TW', { timeZone: 'Asia/Taipei', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false });
-        const history = allHistory.slice(0, 30).map(entry => `<div class="meal-history-row"><span><strong>${escape(entry.restaurantName || '未命名餐廳')}</strong><small>${escape(date.format(entry.confirmedAt))} · ${escape(entry.categoryName || '餐別已移除')}</small></span><button class="icon-button" type="button" data-remove-meal="${escape(entry.id)}" aria-label="刪除${escape(entry.restaurantName)}的用餐紀錄" title="刪除用餐紀錄" ${blocked ? 'disabled' : ''}><svg aria-hidden="true"><use href="#i-trash"/></svg></button></div>`).join('') || '<p class="empty">還沒有用餐紀錄</p>';
+        const time = new Intl.DateTimeFormat('zh-TW', { timeZone: 'Asia/Taipei', hour: '2-digit', minute: '2-digit', hour12: false });
+        const history = D.historyGroups(state.data).map(group => `<section class="history-group" aria-label="${escape(group.label)}"><h3>${escape(group.label)}</h3>${group.entries.map(entry => {
+            const available = D.choiceAvailability(state.data, entry.restaurantId, entry.categoryId, exclusions(entry.categoryId).map(item => item.id));
+            return `<div class="meal-history-row"><button class="history-choice" type="button" data-history-meal="${escape(entry.id)}" aria-label="查看${escape(entry.restaurantName)}的用餐紀錄" ${blocked ? 'disabled' : ''}><span><strong>${escape(entry.restaurantName || '未命名餐廳')}</strong><small>${escape(entry.categoryName || '餐別已移除')} · ${escape(time.format(entry.confirmedAt))}${available.available ? '' : ` · ${escape(available.reason)}`}</small></span><svg aria-hidden="true"><use href="#i-arrow"/></svg></button><button class="icon-button" type="button" data-remove-meal="${escape(entry.id)}" aria-label="刪除${escape(entry.restaurantName)}的用餐紀錄" title="刪除用餐紀錄" ${blocked ? 'disabled' : ''}><svg aria-hidden="true"><use href="#i-trash"/></svg></button></div>`;
+        }).join('')}</section>`).join('') || '<p class="empty">還沒有用餐紀錄</p>';
         const historyHtml = (allHistory.length > 30 ? '<p class="history-note">顯示最近 30 筆</p>' : '') + history;
         if ($('mealHistoryList').innerHTML !== historyHtml) $('mealHistoryList').innerHTML = historyHtml;
+        if (!$('historyOverlay').hidden) renderHistoryDetail();
+    }
+    function switchDiscovery(view) {
+        if (state.discovery === view) return;
+        state.discovery = view; persist(); renderDiscovery();
+        if (!reduced.matches) {
+            $('discoveryList').getAnimations().forEach(animation => animation.cancel());
+            $('discoveryList').animate([{ opacity: .4, transform: 'translateY(3px)' }, { opacity: 1, transform: 'none' }], { duration: 180, easing: 'cubic-bezier(.2,.8,.2,1)' });
+        }
+    }
+    function renderHistoryDetail() {
+        const entry = state.data?.history?.[state.historyEntry];
+        const availability = entry ? D.choiceAvailability(state.data, entry.restaurantId, entry.categoryId, exclusions(entry.categoryId).map(item => item.id)) : { available: false, reason: '這筆紀錄已移除' };
+        const fullDate = new Intl.DateTimeFormat('zh-TW', { timeZone: 'Asia/Taipei', dateStyle: 'long', timeStyle: 'short', hour12: false });
+        $('historyTitle').textContent = entry?.restaurantName || '紀錄已移除';
+        $('historyDetail').textContent = entry ? `${entry.categoryName} · ${fullDate.format(entry.confirmedAt)}` : '另一位使用者可能已撤銷這次選擇';
+        const currentName = entry && state.data?.restaurants?.[entry.restaurantId]?.name;
+        $('historyAvailability').textContent = !state.connected ? '連線後可再次選擇' : !availability.available ? availability.reason : currentName !== entry.restaurantName ? `目前名稱：${currentName}` : '再次選擇後，會記下一筆新的紀錄';
+        $('chooseAgain').disabled = !availability.available || !state.connected || state.busy || state.checking;
+    }
+    async function commitDirectChoice(id, category) {
+        if (state.busy || state.checking) return;
+        const availability = D.choiceAvailability(state.data, id, category, exclusions(category).map(item => item.id));
+        if (!state.connected || !availability.available) { notify(availability.reason || '請連線後重試'); return; }
+        closeOverlay('historyOverlay'); clearTimers();
+        state.category = category;
+        state.draw = { category, ids: [id], names: [state.data.restaurants[id].name], phase: 'result', source: 'direct', selected: 0, revealed: [0] };
+        persist(); render();
+        await drawAction('accept');
+        const result = $('drawMessage');
+        if (result.getBoundingClientRect().bottom > innerHeight || result.getBoundingClientRect().top < 0) result.scrollIntoView({ behavior: reduced.matches ? 'instant' : 'smooth', block: 'center' });
+    }
+    async function removeMeal(id, undo = false) {
+        if (await writeAction({ type: 'meal-delete', id })) {
+            const draw = state.draw;
+            if (draw?.confirmationId === id) {
+                draw.phase = 'result'; delete draw.confirmationId; delete draw.confirmedAt; persist(); render();
+            }
+            if (undo) notify('已撤銷這次選擇，沒有重新抽籤');
+        }
     }
     function renderManagement() {
         const cats = C.categories(state.data);
@@ -159,11 +242,12 @@
         const el = $('connection');
         el.className = `connection ${state.connected && !state.error ? 'online' : 'offline'}`;
         el.textContent = state.error || (state.connected ? (state.busy ? '正在同步資料' : '已連線 · 兩人共用清單') : '離線 · 無法儲存變更');
+        renderCategories(); renderExcluded();
         renderDraw();
         renderDiscovery();
     }
     function selectCategory(id) {
-        if (id === state.category) return;
+        if (id === state.category || state.busy || state.checking) return;
         clearTimers(); state.category = id; state.draw = null; persist(); render();
     }
     function beginDraw() {
@@ -193,9 +277,13 @@
         else if (d.phase === 'revealing') { d.phase = 'result'; d.revealed = d.ids.map((_, i) => i); }
         persist(); render();
     }
-    const handleMotionPreference = event => { if (event.matches && ['shuffling', 'revealing'].includes(state.draw?.phase)) skipAnimation(); };
+    const handleMotionPreference = event => {
+        if (!event.matches) return;
+        if (['shuffling', 'revealing'].includes(state.draw?.phase)) skipAnimation();
+        for (const element of [$('discoveryList'), $('drawMessage')]) element.getAnimations({ subtree: true }).forEach(animation => animation.cancel());
+    };
     reduced.addEventListener('change', handleMotionPreference);
-    function resetRound() { clearTimers(); if (state.category) delete state.exclusions[state.category]; state.draw = null; persist(); render(); }
+    function resetRound() { if (state.busy || state.checking) return; clearTimers(); if (state.category) delete state.exclusions[state.category]; state.draw = null; persist(); render(); }
     async function drawAction(action) {
         if (state.checking || state.busy) return;
         if (action === 'start' || action === 'redraw') beginDraw();
@@ -208,12 +296,21 @@
             draw.confirmationId ||= rootRef.child('history').push().key;
             draw.confirmedAt ||= Date.now();
             persist();
+            prepareConfirmationSound();
             state.checking = true; renderDraw(); renderDiscovery();
+            let confirmed = false;
             try {
                 const saved = await writeAction({ type: 'meal-confirm', id: draw.confirmationId, restaurantId: draw.ids[draw.selected], categoryId: draw.category, now: draw.confirmedAt });
-                if (saved && state.draw === draw) { draw.phase = 'complete'; persist(); }
+                if (saved && state.draw === draw) { draw.phase = 'complete'; confirmed = true; persist(); }
             } catch (_) { notify('無法記錄這次選擇，請檢查連線後重試'); }
-            finally { state.checking = false; render(); }
+            finally {
+                state.checking = false; render(); finishConfirmationSound(confirmed);
+                if (confirmed && !reduced.matches) $('drawMessage').querySelector('.decision-receipt')?.animate([{ opacity: .3, transform: 'translateY(6px)' }, { opacity: 1, transform: 'none' }], { duration: 320, easing: 'cubic-bezier(.2,.8,.2,1)' });
+            }
+        } else if (action === 'undo' && state.draw?.phase === 'complete') {
+            const id = state.draw.confirmationId;
+            const entry = state.data?.history?.[id];
+            if (entry) confirmAction('撤銷這次選擇？', `只移除這次「${entry.restaurantName}」的紀錄，其他選擇與餐廳清單都會保留。`, () => removeMeal(id, true), '確認撤銷', false);
         } else if (action === 'reject' && state.draw?.phase === 'result') {
             const d = state.draw; const list = exclusions().slice();
             if (!list.some(item => item.id === d.ids[d.selected])) list.push({ id: d.ids[d.selected], name: d.names[d.selected] });
@@ -252,7 +349,9 @@
                 return next.error ? undefined : next.data;
             }, undefined, false);
             if (!result.committed) { const message = reason || '資料已變更，請重試'; if (!$('editorOverlay').hidden) $('editorError').textContent = message; else notify(message); return false; }
-            notify(action.type === 'meal-confirm' ? '已記下這次用餐選擇' : action.type === 'meal-delete' ? '已刪除用餐紀錄' : '已儲存並同步'); return true;
+            if (action.type === 'meal-confirm') { clearTimeout(toastTimer); $('toast').hidden = true; }
+            else notify(action.type === 'meal-delete' ? '已刪除用餐紀錄' : '已儲存並同步');
+            return true;
         } catch (_) { if (!$('editorOverlay').hidden) $('editorError').textContent = '儲存失敗，請檢查連線後重試'; else notify('儲存失敗，請檢查連線後重試'); return false; }
         finally { clearTimeout(warn); state.busy = false; $('saveEditor').disabled = false; updateConnection(); }
     }
@@ -269,8 +368,8 @@
     $('categoryList').addEventListener('click', event => { const el = event.target.closest('[data-category]'); if (el) selectCategory(el.dataset.category); });
     $('cardStage').addEventListener('click', event => { const el = event.target.closest('[data-card]'); if (el) choose(Number(el.dataset.card)); });
     $('drawActions').addEventListener('click', event => { const el = event.target.closest('[data-draw-action]'); if (el) drawAction(el.dataset.drawAction); });
-    $('showRecommended').addEventListener('click', () => { state.discovery = 'recommended'; persist(); renderDiscovery(); });
-    $('showFrequent').addEventListener('click', () => { state.discovery = 'frequent'; persist(); renderDiscovery(); });
+    $('showRecommended').addEventListener('click', () => switchDiscovery('recommended'));
+    $('showFrequent').addEventListener('click', () => switchDiscovery('frequent'));
     $('discoveryList').addEventListener('click', event => {
         const target = event.target.closest('[data-suggest-id]');
         if (!target || target.disabled || state.busy || state.checking) return;
@@ -278,20 +377,22 @@
         const category = state.category;
         const item = currentPool().eligible.find(restaurant => restaurant.id === id);
         if (!item) return;
-        confirmAction('這餐就吃這間？', `${item.name} · ${categoryName(category)}`, async () => {
-            if (category !== state.category || !currentPool().eligible.some(restaurant => restaurant.id === id)) { notify('餐廳或分類已變更，請重新選擇'); return; }
-            clearTimers();
-            state.draw = { category, ids: [id], names: [item.name], phase: 'result', selected: 0, revealed: [0] };
-            persist(); render();
-            await drawAction('accept');
-        }, '就吃這間', false);
+        confirmAction('這餐就吃這間？', `${item.name} · ${categoryName(category)}`, () => commitDirectChoice(id, category), '就吃這間', false);
     });
     $('mealHistoryList').addEventListener('click', event => {
+        const view = event.target.closest('[data-history-meal]');
+        if (view && !view.disabled) {
+            state.historyEntry = view.dataset.historyMeal; showOverlay('historyOverlay'); renderHistoryDetail(); return;
+        }
         const target = event.target.closest('[data-remove-meal]');
         if (!target || target.disabled) return;
         const id = target.dataset.removeMeal;
         const entry = state.data?.history?.[id];
-        if (entry) confirmAction('刪除這筆用餐紀錄？', `「${entry.restaurantName}」將不再計入常吃與推薦，餐廳仍保留在清單中。`, () => writeAction({ type: 'meal-delete', id }));
+        if (entry) confirmAction('刪除這筆用餐紀錄？', `「${entry.restaurantName}」將不再計入常吃與推薦，餐廳仍保留在清單中。`, () => removeMeal(id));
+    });
+    $('chooseAgain').addEventListener('click', () => {
+        const entry = state.data?.history?.[state.historyEntry];
+        if (entry) commitDirectChoice(entry.restaurantId, entry.categoryId);
     });
     $('resetRound').addEventListener('click', resetRound);
     $('excludedList').addEventListener('click', event => { const el = event.target.closest('[data-restore]'); if (!el) return; state.exclusions[state.category] = exclusions().filter(item => item.id !== el.dataset.restore); persist(); render(); });
@@ -303,7 +404,7 @@
     $('addCategory').addEventListener('click', () => openEditor('category'));
     $('restaurantSearch').addEventListener('input', renderManagement); $('restaurantFilter').addEventListener('change', renderManagement);
     $('manageOverlay').addEventListener('click', event => { const el = event.target.closest('[data-action]'); if (el) managementAction(el.dataset.action, el.dataset.id); });
-    document.querySelectorAll('[data-close]').forEach(el => el.addEventListener('click', () => { if (!state.busy) closeOverlay(el.dataset.close === 'editor' ? 'editorOverlay' : 'manageOverlay'); }));
+    document.querySelectorAll('[data-close]').forEach(el => el.addEventListener('click', () => { if (!state.busy) closeOverlay(`${el.dataset.close}Overlay`); }));
     $('editorForm').addEventListener('submit', async event => {
         event.preventDefault(); if (!state.editor || !rootRef) { $('editorError').textContent = '尚未連線，無法儲存'; return; }
         const { kind, id } = state.editor; const newId = id || rootRef.child(kind === 'category' ? 'categories' : 'restaurants').push().key;
@@ -313,7 +414,7 @@
     $('cancelConfirm').addEventListener('click', () => closeOverlay('confirmOverlay'));
     $('acceptConfirm').addEventListener('click', async () => { if (!state.confirm) return; const action = state.confirm; state.confirm = null; closeOverlay('confirmOverlay'); await action(); });
     document.addEventListener('keydown', event => {
-        const top = ['confirmOverlay', 'editorOverlay', 'manageOverlay'].map($).find(el => !el.hidden);
+        const top = ['confirmOverlay', 'historyOverlay', 'editorOverlay', 'manageOverlay'].map($).find(el => !el.hidden);
         if (!top) return;
         if (event.key === 'Escape') { if (!state.busy) closeOverlay(top.id); return; }
         if (event.key !== 'Tab') return;
@@ -323,7 +424,12 @@
         if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
         else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
     });
-    window.addEventListener('pagehide', event => { if (event.persisted) skipAnimation(); else { clearTimers(); reduced.removeEventListener('change', handleMotionPreference); if (rootRef) rootRef.off(); if (connectionRef) connectionRef.off(); } clearTimeout(toastTimer); });
+    window.addEventListener('pagehide', event => {
+        finishConfirmationSound();
+        for (const element of [$('discoveryList'), $('drawMessage')]) element.getAnimations({ subtree: true }).forEach(animation => animation.cancel());
+        if (event.persisted) skipAnimation(); else { clearTimers(); reduced.removeEventListener('change', handleMotionPreference); if (rootRef) rootRef.off(); if (connectionRef) connectionRef.off(); }
+        clearTimeout(toastTimer);
+    });
     try {
         firebase.initializeApp({ apiKey: 'AIzaSyB567-hOy8kSYC3KNTomBty0oZmFRHN8ng', authDomain: 'accounting-system-53ed3.firebaseapp.com', databaseURL: 'https://accounting-system-53ed3-default-rtdb.firebaseio.com', projectId: 'accounting-system-53ed3', storageBucket: 'accounting-system-53ed3.firebasestorage.app', messagingSenderId: '76627672581', appId: '1:76627672581:web:5e1ead01e77cade980e66c' });
         db = firebase.database(); rootRef = db.ref('foodPicker'); connectionRef = db.ref('.info/connected');

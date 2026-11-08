@@ -8,12 +8,12 @@
     <link rel="stylesheet" href="system-ui.css">
     <link rel="stylesheet" href="food.css">
     <link rel="stylesheet" href="food-experience.css?v=20261104-1">
-    <link rel="stylesheet" href="food-discovery.css?v=20261105-1">
+    <link rel="stylesheet" href="food-discovery.css?v=20261108-1">
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js" defer></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js" defer></script>
     <script src="food-core.js?v=20261105-1" defer></script>
-    <script src="food-discovery.js?v=20261105-1" defer></script>
-    <script src="food.js?v=20261105-1" defer></script>
+    <script src="food-discovery.js?v=20261108-1" defer></script>
+    <script src="food.js?v=20261108-1" defer></script>
 </head>
 <body class="sb-page food-page">
 <svg class="symbols" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
@@ -27,6 +27,7 @@
     <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3m3 0-1 13H7L6 7m4 4v5m4-5v5"/></symbol>
     <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14m-5-5 5 5-5 5"/></symbol>
     <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 7v5l3 2"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></symbol>
 </svg>
 <div class="ambient" aria-hidden="true"></div>
 <header class="app-header">
@@ -45,7 +46,7 @@
         <div class="discovery-tabs" role="group" aria-label="餐廳建議"><button id="showRecommended" type="button" aria-pressed="true" aria-controls="discoveryList">推薦</button><button id="showFrequent" type="button" aria-pressed="false" aria-controls="discoveryList">常吃</button></div>
         <p class="discovery-caption" id="discoveryCaption">換個口味，也找回熟悉的選擇</p>
         <div class="discovery-list" id="discoveryList"></div>
-        <details class="meal-history" id="mealHistory"><summary><svg aria-hidden="true"><use href="#i-clock"/></svg><span>近期用餐紀錄</span><span id="mealHistoryCount"></span><svg class="history-chevron" aria-hidden="true"><use href="#i-down"/></svg></summary><div id="mealHistoryList"></div></details>
+        <details class="meal-history" id="mealHistory"><summary><svg aria-hidden="true"><use href="#i-clock"/></svg><span>近期用餐紀錄</span><span id="mealHistoryCount"></span><svg class="history-chevron" aria-hidden="true"><use href="#i-down"/></svg></summary><p class="history-note">兩人確認過的選擇</p><div id="mealHistoryList"></div></details>
     </section>
     <section class="draw-section" aria-labelledby="drawTitle">
         <div class="draw-heading"><div><p class="eyebrow">下一餐</p><h2 id="drawTitle">選一張，看看吃什麼</h2></div><span class="pool-count" id="poolCount"></span></div>
@@ -93,6 +94,13 @@
     <section class="dialog" role="alertdialog" aria-modal="true" aria-labelledby="confirmTitle" aria-describedby="confirmMessage">
         <h2 id="confirmTitle">確認</h2><p id="confirmMessage"></p>
         <div class="dialog-actions"><button class="secondary" id="cancelConfirm" type="button">取消</button><button class="danger" id="acceptConfirm" type="button">確認刪除</button></div>
+    </section>
+</div>
+<div class="overlay dialog-overlay" id="historyOverlay" hidden>
+    <section class="dialog history-dialog" role="dialog" aria-modal="true" aria-labelledby="historyTitle" aria-describedby="historyDetail">
+        <div class="dialog-head"><div><p class="eyebrow">過去的選擇</p><h2 id="historyTitle"></h2></div><button type="button" class="icon-button" data-close="history" aria-label="關閉紀錄"><svg aria-hidden="true"><use href="#i-close"/></svg></button></div>
+        <p id="historyDetail"></p><p id="historyAvailability" class="history-note" role="status"></p>
+        <div class="dialog-actions"><button type="button" class="secondary" data-close="history">關閉</button><button type="button" class="primary" id="chooseAgain">再吃這間</button></div>
     </section>
 </div>
 <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
