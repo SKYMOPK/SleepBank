@@ -2,7 +2,7 @@
     'use strict';
     const apiUrl = String(root.DormPushConfig?.apiUrl || '').replace(/\/$/, '');
     const protectData = Boolean(root.DormPushConfig?.protectData);
-    const key = 'dorm-push-device-v1', pendingKey = 'dorm-push-pending-v1', ackKey = 'dorm-push-acks-v1';
+    const key = 'dorm-push-device-v1', pendingKey = 'dorm-push-pending-v1', ackKey = 'dorm-push-acks-v1', cacheKey = 'dorm-push-status-cache-v1';
     const names = { p1: '至凱', p2: '柏致' };
     const read = (name, fallback) => { try { return JSON.parse(localStorage.getItem(name)) || fallback; } catch (_) { return fallback; } };
     const save = (name, value) => { localStorage.setItem(name, JSON.stringify(value)); };
@@ -65,14 +65,18 @@
         reconnect.hidden = !paired || !status?.enabled || status?.subscribedHere || Boolean(supportReason());
         reconnect.disabled = busy || root.Notification?.permission === 'denied';
     }
-    async function refresh() {
+    function clearStatusCache() { try { sessionStorage.removeItem(cacheKey); } catch (_) { /* Storage is optional. */ } }
+    async function refresh(force = false) {
         if (!apiUrl || busy) { render(); return; }
         const version = ++refreshVersion;
         try {
-            const nextConfig = await request('/config', undefined, false);
+            let cached = null;
+            try { cached = JSON.parse(sessionStorage.getItem(cacheKey)); } catch (_) { /* Storage is optional. */ }
+            if (force || !cached || cached.token !== (device?.token || '') || !Number.isFinite(cached.time) || Date.now() - cached.time < 0 || Date.now() - cached.time >= 60000) cached = null;
+            const nextConfig = cached?.config || await request('/config', undefined, false);
             let nextStatus = status;
             if (device?.token) {
-                nextStatus = await request('/status');
+                nextStatus = cached?.status || await request('/status');
                 if (!supportReason() && Notification.permission === 'granted') {
                     const worker = await registerWorker(), subscription = await worker.pushManager.getSubscription();
                     const oldKey = subscription?.options?.applicationServerKey;
@@ -82,10 +86,11 @@
             }
             if (busy || version !== refreshVersion) return;
             config = nextConfig; status = nextStatus;
+            if (!cached) { try { sessionStorage.setItem(cacheKey, JSON.stringify({ token: device?.token || '', time: Date.now(), config, status })); } catch (_) { /* Storage is optional. */ } }
             error = '';
         } catch (failure) {
             if (busy || version !== refreshVersion) return;
-            error = failure.message; if (failure.status === 401) { device = null; status = null; localStorage.removeItem(key); }
+            error = failure.message; if (failure.status === 401) { clearStatusCache(); device = null; status = null; localStorage.removeItem(key); }
         }
         render();
     }
@@ -107,6 +112,7 @@
             }
             subscription ||= await worker.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: decodeKey(config.publicKey) });
             status = { ...status, ...await request('/subscription', { subscription: subscription.toJSON() }) };
+            clearStatusCache();
         } catch (failure) { error = failure.message || '通知設定失敗，請重試'; }
         finally { busy = false; render(); }
     }
@@ -115,11 +121,12 @@
         refreshVersion++; busy = true; error = ''; render();
         try {
             status = { ...status, ...await request('/disable', {}) };
+            clearStatusCache();
             if (registration) { const subscription = await registration.pushManager.getSubscription(); await subscription?.unsubscribe(); }
         } catch (failure) { error = failure.message; }
         finally { busy = false; render(); }
     }
-    function open() { if (!dialog.open) dialog.showModal(); render(); refresh(); }
+    function open() { if (!dialog.open) dialog.showModal(); render(); refresh(true); }
     async function pair() {
         if (busy) return;
         refreshVersion++; busy = true; error = ''; render();
@@ -131,6 +138,7 @@
             let code = raw;
             try { code = new URL(raw).hash.match(/activate=([A-Za-z0-9_-]+)/)?.[1] || raw; } catch (_) { /* A plain activation code also works. */ }
             device = await request('/pair', { invitation: code, userId: selected }, false);
+            clearStatusCache();
             save(key, device); invitation = ''; dialog.querySelector('.dp-code').value = '';
             root.dispatchEvent(new Event('dorm:device-paired'));
         } catch (failure) { error = failure.message; }
@@ -164,11 +172,23 @@
                 dialog.classList.remove('dp-activation');
                 dialog.querySelector('#dp-title').textContent = '通知設定';
                 message.textContent = '正在確認這部裝置'; action.disabled = true;
-                const result = await request('/firebase-token');
                 if (!root.firebase?.auth) throw new Error('身分驗證元件載入失敗，請檢查網路');
                 const auth = root.firebase.auth();
                 await auth.setPersistence(root.firebase.auth.Auth.Persistence.LOCAL);
-                await auth.signInWithCustomToken(result.token);
+                let existing = null;
+                if (typeof auth.onAuthStateChanged === 'function' && root.crypto?.subtle) {
+                    existing = await new Promise((resolve, reject) => {
+                        let unsubscribe;
+                        unsubscribe = auth.onAuthStateChanged(user => { if (unsubscribe) unsubscribe(); resolve(user); }, reject);
+                    });
+                    const hash = new Uint8Array(await root.crypto.subtle.digest('SHA-256', new TextEncoder().encode(device.token)));
+                    const expected = 'device_' + btoa(String.fromCharCode(...hash)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+                    if (existing?.uid !== expected) existing = null;
+                }
+                if (!existing) {
+                    const result = await request('/firebase-token');
+                    await auth.signInWithCustomToken(result.token);
+                }
                 gate.remove(); if (dialog.open) dialog.close(); return;
             } catch (failure) {
                 if (failure.status === 401) { device = null; status = null; localStorage.removeItem(key); }
@@ -236,17 +256,17 @@
             if (read(pendingKey, null)) { error = '有一筆帳目正在確認，請先完成重試再解除裝置'; render(); resumePending(); return; }
             busy = true; render();
             try {
-                await request('/forget', {}); device = null; status = null; localStorage.removeItem(key);
+                await request('/forget', {}); clearStatusCache(); device = null; status = null; localStorage.removeItem(key);
                 if (protectData && root.firebase?.auth && root.firebase.apps?.[0]?.options?.projectId === 'accounting-system-53ed3') await root.firebase.auth().signOut();
                 if (protectData) location.reload();
             }
             catch (failure) { error = failure.message; }
             finally { busy = false; render(); }
         });
-        root.addEventListener('online', () => { refresh(); resumePending(); });
+        root.addEventListener('online', () => { refresh(true); resumePending(); });
         document.addEventListener('visibilitychange', () => { if (!document.hidden) { refresh(); resumePending(); } });
-        root.addEventListener('storage', event => { if (event.key === key) { device = read(key, null); refresh(); } });
-        navigator.serviceWorker?.addEventListener('message', event => { if (event.data?.type === 'dorm:subscription-changed') refresh(); });
+        root.addEventListener('storage', event => { if (event.key === key) { clearStatusCache(); device = read(key, null); refresh(true); } });
+        navigator.serviceWorker?.addEventListener('message', event => { if (event.data?.type === 'dorm:subscription-changed') refresh(true); });
         if (!supportReason()) registerWorker().catch(() => { error = '通知元件載入失敗，請檢查網路後重試'; render(); });
         refresh(); resumePending();
         if (invitation) { dialog.querySelector('.dp-code').value = invitation; open(); }
