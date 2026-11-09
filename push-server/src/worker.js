@@ -259,7 +259,7 @@ export class DormPush {
             subject: this.env.VAPID_SUBJECT, publicKey: this.env.VAPID_PUBLIC_KEY, privateKey: this.env.VAPID_PRIVATE_KEY,
         });
         if (!(await this.storage.get(`enabled:${userId}`))) return 'skipped';
-        const response = await fetch(subscription.endpoint, { ...request, redirect: 'error', signal: AbortSignal.timeout(8000) });
+        const response = await fetch(subscription.endpoint, { ...request, redirect: 'manual', signal: AbortSignal.timeout(8000) });
         if ([404, 410].includes(response.status)) return 'gone';
         return response.ok ? 'sent' : 'retry';
     }

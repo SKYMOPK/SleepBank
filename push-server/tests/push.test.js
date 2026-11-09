@@ -188,6 +188,21 @@ test('subscription endpoint cannot be stolen by another device; expired subscrip
     await f.call('/ledger/create', { id: 'record-0001', record: draft }, f.a.token); await f.deliver('expense:record-0001');
     assert.equal((await f.call('/status', undefined, f.b.token)).body.subscribedHere, false);
 });
+test('push delivery is compatible with Cloudflare and does not follow redirects', async () => {
+    const pair = await crypto.subtle.generateKey({ name: 'ECDSA', namedCurve: 'P-256' }, true, ['sign', 'verify']);
+    const publicKey = b64(await crypto.subtle.exportKey('raw', pair.publicKey));
+    const privateKey = (await crypto.subtle.exportKey('jwk', pair.privateKey)).d;
+    const storage = new Storage(); await storage.put('enabled:p1', true);
+    const server = new DormPush({ storage }, { VAPID_PUBLIC_KEY: publicKey, VAPID_PRIVATE_KEY: privateKey, VAPID_SUBJECT: 'https://example.com/' });
+    const original = globalThis.fetch;
+    try {
+        globalThis.fetch = async (_url, options) => {
+            assert.equal(options.redirect, 'manual');
+            return new Response(null, { status: 302, headers: { Location: 'https://example.com/' } });
+        };
+        assert.equal(await server.send(await subscription(), '{}', { id: 'test-event' }, 'p1'), 'retry');
+    } finally { globalThis.fetch = original; }
+});
 test('durable alarm resumes interrupted write, no delivery on failed Firebase write', async () => {
     const f = await fixture(), original = f.server.db.update.bind(f.server.db); let failing = true;
     f.server.db.update = (...args) => failing ? Promise.reject(new Error('offline')) : original(...args);
