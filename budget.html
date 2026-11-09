@@ -4,8 +4,16 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>每日預算</title>
+<meta name="theme-color" content="#141310">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="assets/icons/dorm-180.png">
+<link rel="stylesheet" href="push-ui.css">
+<script src="push-config.js"></script>
+<script src="push-client.js" defer></script>
 <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-auth-compat.js"></script>
 <style>
 :root { --bg:#191611; --card:#292216; --card2:#342B1D; --text:#F4ECD8; --muted:#A0917C; --border:rgba(214,174,105,0.2); --gold:#D0A34F; --green:#79AE6B; --red:#C86F6F; --blue:#8FAEC8; }
 * { box-sizing:border-box; margin:0; padding:0; }
@@ -176,8 +184,9 @@ function resetMonth(){ document.getElementById('resetDialog').showModal(); docum
 function closeResetDialog(){ document.getElementById('resetDialog').close(); }
 function confirmResetMonth(){ closeResetDialog(); db.ref('budget/'+currentUser).set(defaultState()).then(()=>showToast('已重設本月')).catch(()=>showToast('重設失敗，請重試','var(--red)')); }
 function addVault(){ const amount=Number(document.getElementById('extraInput').value)||0; if(amount<=0) return showToast('請輸入追加金額','var(--red)'); const b=settleState(budgetData); b.vault=Math.round(((Number(b.vault)||0)+amount)*100)/100; b.updatedAt=Date.now(); db.ref('budget/'+currentUser).set(b).then(()=>{ document.getElementById('extraInput').value=''; showToast('已追加到金庫'); }).catch(()=>showToast('追加失敗，請重試','var(--red)')); }
-db.ref('.info/connected').on('value',snap=>{ document.getElementById('syncStatus').innerText=snap.val()?'已連線':'離線'; });
-load();
+function startBudgetSubscriptions(){ db.ref('.info/connected').on('value',snap=>{ document.getElementById('syncStatus').innerText=snap.val()?'已連線':'離線'; }); load(); }
+if(window.DormPushConfig?.protectData) document.addEventListener('DOMContentLoaded',()=>window.DormPush.protect().then(startBudgetSubscriptions));
+else startBudgetSubscriptions();
 </script>
 </body>
 </html>

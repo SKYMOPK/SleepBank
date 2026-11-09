@@ -1,0 +1,30 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+    "_dormAccess": {
+      "devices": {
+        "$device": {
+          ".read": "auth != null && auth.uid === 'dorm-push-service'",
+          ".write": "auth != null && auth.uid === 'dorm-push-service'"
+        }
+      }
+    },
+    "budget": {
+      ".read": "auth != null && (auth.uid === 'dorm-push-service' || root.child('_dormAccess/devices').child(auth.uid).child('expiresAt').val() > now)",
+      ".write": "auth != null && (auth.uid === 'dorm-push-service' || root.child('_dormAccess/devices').child(auth.uid).child('expiresAt').val() > now)"
+    },
+    "split": {
+      ".read": "auth != null && (auth.uid === 'dorm-push-service' || root.child('_dormAccess/devices').child(auth.uid).child('expiresAt').val() > now)",
+      ".write": "auth != null && (auth.uid === 'dorm-push-service' || root.child('_dormAccess/devices').child(auth.uid).child('expiresAt').val() > now)"
+    },
+    "foodPicker": {
+      ".read": "auth != null && (auth.uid === 'dorm-push-service' || root.child('_dormAccess/devices').child(auth.uid).child('expiresAt').val() > now)",
+      ".write": "auth != null && (auth.uid === 'dorm-push-service' || root.child('_dormAccess/devices').child(auth.uid).child('expiresAt').val() > now)"
+    },
+    "splitPass": {
+      ".read": "auth != null && (auth.uid === 'dorm-push-service' || root.child('_dormAccess/devices').child(auth.uid).child('expiresAt').val() > now)",
+      ".write": "auth != null && (auth.uid === 'dorm-push-service' || root.child('_dormAccess/devices').child(auth.uid).child('expiresAt').val() > now)"
+    }
+  }
+}

@@ -4,9 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>宿舍帳本</title>
+    <meta name="theme-color" content="#141310">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="manifest" href="manifest.webmanifest">
+    <link rel="apple-touch-icon" href="assets/icons/dorm-180.png">
+    <link rel="stylesheet" href="push-ui.css">
+    <script src="push-config.js"></script>
+    <script src="push-client.js" defer></script>
     <link rel="icon" href="data:,">
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-auth-compat.js"></script>
     <script src="split-core.js"></script>
     <script src="split-cosmetics.js?v=20261102-1"></script>
     <script src="split-badges.js"></script>
@@ -908,6 +917,8 @@
     let lastUndoAction = null;
     let undoTimer = null;
     let recordsLoaded = false;
+    let settlementsLoaded = false;
+    let pushLinkHandled = false;
     let isSubmitting = false;
     let isConnected = false;
     const syncingBudgetKeys = new Map();
@@ -946,6 +957,31 @@
             panel.getAnimations().forEach(animation => animation.cancel());
             panel.animate([{ opacity: 0, transform: 'translateY(6px)' }, { opacity: 1, transform: 'translateY(0)' }], { duration: 200, easing: 'ease-out' });
         }
+    }
+
+    function openPushTarget() {
+        if (pushLinkHandled || !recordsLoaded || !settlementsLoaded) return;
+        const params = new URLSearchParams(location.search);
+        const recordId = params.get('record'), settlementId = params.get('settlement');
+        if (!recordId && !settlementId) return;
+        pushLinkHandled = true;
+        const entry = recordId ? [recordId, allRecords[recordId]] : Object.entries(allRecords).find(([, value]) => value.settlementId === settlementId);
+        const record = entry?.[1];
+        const kind = record ? (record.settled ? 'settled' : 'unsettled') : params.get('view') === 'settled' ? 'settled' : 'unsettled';
+        if (record && !record.deletedAt) {
+            const month = ledgerCore.monthKeyFromTimestamp(record.timestamp), token = `${kind}:${month}`;
+            initializedMonthGroups.add(token); collapsedMonths.delete(token);
+        }
+        switchView(kind); renderList();
+        if (!record || record.deletedAt || (settlementId && allSettlements[settlementId]?.undoneAt)) {
+            showToast('這筆紀錄已移除或已復原'); return;
+        }
+        requestAnimationFrame(() => {
+            const element = [...document.querySelectorAll('.record-card')].find(node => node.dataset.recordKey === entry[0]);
+            if (!element) return;
+            element.scrollIntoView({ block: 'center', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' });
+            const button = element.querySelector('.record-open'); button?.focus({ preventScroll: true });
+        });
     }
 
     // ===== 工具 =====
@@ -1222,6 +1258,10 @@
     }
 
     async function commitRecordChange(key, beforeRecord, afterRecord) {
+        if (!beforeRecord && afterRecord && window.DormPush?.configured) {
+            const result = await window.DormPush.createRecord(key, afterRecord);
+            return result.id;
+        }
         const opId = operationId('budget');
         const before = ledgerCore.budgetSnapshot(beforeRecord);
         const after = ledgerCore.budgetSnapshot(afterRecord);
@@ -1230,6 +1270,7 @@
             : { ...beforeRecord, deletedAt: Date.now(), budgetSync: { opId, before, after: null, deleteAfterSync: true, createdAt: Date.now() } };
         await db.ref('split/records/' + key).set(pending);
         await reconcileRecordBudget(key, pending);
+        return key;
     }
 
     // ===== 小計算機 =====
@@ -1439,18 +1480,19 @@
                 const ref = db.ref('split/records').push();
                 try {
                     record.timestamp = Date.now();
-                    await commitRecordChange(ref.key, null, record);
+                    const savedKey = await commitRecordChange(ref.key, null, record);
                     resetInputForm();
                     if (SplitExtras.needsAddChime()) playSound('add');
                     SplitExtras.added();
                     offerUndo('已新增帳目', async () => {
-                        const snapshot = await ref.once('value');
+                        const snapshot = await db.ref('split/records/' + savedKey).once('value');
                         const current = snapshot.val();
-                        if (current) await commitRecordChange(ref.key, current, null);
+                        if (current) await commitRecordChange(savedKey, current, null);
                     });
+                    if (window.DormPush?.configured) window.DormPush.readyEvent('expense:' + savedKey).catch(() => {});
                 } catch (error) {
                     console.error(error);
-                    showToast('新增失敗，請檢查網路', 'var(--red)');
+                    showToast(window.DormPush?.configured ? error.message : '新增失敗，請檢查網路', 'var(--red)');
                 } finally {
                     isSubmitting = false;
                     updatePreview();
@@ -1643,7 +1685,7 @@
 
     async function performSettlement(entries, mode, summary) {
         const settlementRef = db.ref('split/settlements').push();
-        const settlementId = settlementRef.key;
+        let settlementId = settlementRef.key;
         const now = Date.now();
         const recordIds = Object.fromEntries(entries.map(([key]) => [key, true]));
         const updates = {
@@ -1663,7 +1705,10 @@
             updates[`records/${key}/settlementId`] = settlementId;
         });
         try {
-            await db.ref('split').update(updates);
+            if (window.DormPush?.configured) {
+                const result = await window.DormPush.createSettlement(settlementId, entries.map(([key]) => key), mode);
+                settlementId = result.id;
+            } else await db.ref('split').update(updates);
             selectedKeys.clear();
             updateSelectionBar();
             playSound('success');
@@ -1676,9 +1721,10 @@
                 });
                 await db.ref('split').update(undoUpdates);
             });
+            if (window.DormPush?.configured) window.DormPush.readyEvent('settlement:' + settlementId).catch(() => {});
         } catch (error) {
             console.error(error);
-            showToast('結清失敗，請檢查網路', 'var(--red)');
+            showToast(window.DormPush?.configured ? error.message : '結清失敗，請檢查網路', 'var(--red)');
         }
     }
 
@@ -1901,6 +1947,7 @@
     updateSoundToggle();
 
     let storedBalance = null;
+    function startLedgerSubscriptions() {
     db.ref('split/balance').on('value', snap => {
         storedBalance = ledgerCore.roundMoney(snap.val() || 0);
     });
@@ -1926,11 +1973,14 @@
         Object.entries(allRecords).forEach(([key, record]) => {
             if (record && record.budgetSync) reconcileRecordBudget(key, record).catch(() => {});
         });
+        openPushTarget();
     });
 
     db.ref('split/settlements').on('value', snap => {
         allSettlements = snap.val() || {};
+        settlementsLoaded = true;
         if (currentView === 'settled') renderList();
+        openPushTarget();
     });
 
     db.ref('.info/connected').on('value', snap => {
@@ -1938,6 +1988,10 @@
         isConnected = connected;
         refreshSyncPill();
     });
+    }
+
+    if (window.DormPushConfig?.protectData) document.addEventListener('DOMContentLoaded', () => window.DormPush.protect().then(startLedgerSubscriptions));
+    else startLedgerSubscriptions();
 
     updatePreview();
 

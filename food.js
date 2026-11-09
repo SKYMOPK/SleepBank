@@ -438,6 +438,7 @@
             state.initializing = true;
             rootRef.transaction(current => current === null ? C.initialData() : undefined, undefined, false).catch(() => { state.error = '無法初始化餐廳資料'; updateConnection(); }).finally(() => { state.initializing = false; });
         };
+        const startFoodSubscriptions = () => {
         connectionRef.on('value', snap => { state.connected = Boolean(snap.val()); updateConnection(); ensureInitialized(); });
         rootRef.on('value', snap => {
             const data = snap.val();
@@ -454,6 +455,9 @@
             }
             persist(); render(); updateConnection();
         }, () => { state.error = '無法載入餐廳資料，請檢查連線'; updateConnection(); render(); });
+        };
+        if (window.DormPushConfig?.protectData) window.DormPush.protect().then(startFoodSubscriptions);
+        else startFoodSubscriptions();
     } catch (_) { state.error = '無法連接資料庫，請檢查網路後重新整理'; updateConnection(); }
     render();
 })();

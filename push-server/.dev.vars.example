@@ -1,0 +1,5 @@
+# Local development only. Use `wrangler secret put` for production.
+ADMIN_SECRET=replace-with-a-random-32-byte-secret
+VAPID_PUBLIC_KEY=replace-with-generated-public-key
+VAPID_PRIVATE_KEY=replace-with-generated-private-key
+FIREBASE_SERVICE_ACCOUNT=replace-with-single-line-service-account-json
