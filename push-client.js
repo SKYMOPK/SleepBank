@@ -50,7 +50,7 @@
         dialog.querySelector('.dp-device').hidden = !paired;
         dialog.querySelector('.dp-device-name').textContent = names[device?.userId] || '';
         dialog.querySelectorAll('[data-dp-user]').forEach(button => { button.setAttribute('aria-pressed', String(button.dataset.dpUser === selected)); button.disabled = busy; });
-        dialog.querySelector('.dp-pair').disabled = busy || !config?.ready;
+        dialog.querySelector('.dp-pair').disabled = busy || !config?.ready || (!supportReason() && !registration);
         dialog.querySelector('.dp-code').disabled = busy;
         dialog.querySelector('.dp-forget').disabled = busy;
         checkbox.checked = Boolean(status?.enabled);
@@ -130,6 +130,7 @@
     async function pair() {
         if (busy) return;
         refreshVersion++; busy = true; error = ''; render();
+        let subscription = null, paired = false;
         try {
             save(key + '-probe', true); localStorage.removeItem(key + '-probe');
             const pending = read(pendingKey, null);
@@ -137,12 +138,24 @@
             const raw = dialog.querySelector('.dp-code').value.trim();
             let code = raw;
             try { code = new URL(raw).hash.match(/activate=([A-Za-z0-9_-]+)/)?.[1] || raw; } catch (_) { /* A plain activation code also works. */ }
+            if (!/^[A-Za-z0-9_-]{43}$/.test(code)) throw new Error('請輸入有效的私人啟用碼或連結');
+            if (!supportReason() && registration && config?.publicKey) {
+                try {
+                    subscription = registration.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: decodeKey(config.publicKey) })
+                        .then(() => true, () => false);
+                } catch (_) { subscription = Promise.resolve(false); }
+            }
             device = await request('/pair', { invitation: code, userId: selected }, false);
             clearStatusCache();
             save(key, device); invitation = ''; dialog.querySelector('.dp-code').value = '';
+            paired = true;
             root.dispatchEvent(new Event('dorm:device-paired'));
         } catch (failure) { error = failure.message; }
-        finally { busy = false; if (!error) await refresh(); else render(); }
+        finally { busy = false; if (!error) await refresh(true); else render(); }
+        if (paired && subscription && !error && status && (status.enabled || status.notificationConfigured === false)) {
+            if (await subscription) await enable();
+            else { error = '裝置已啟用，通知尚未獲得允許；可在通知設定中調整'; render(); }
+        }
     }
     async function requireDevice() {
         if (!device?.token) { open(); throw new Error('請先設定這部裝置的使用者'); }
@@ -267,7 +280,7 @@
         document.addEventListener('visibilitychange', () => { if (!document.hidden) { refresh(); resumePending(); } });
         root.addEventListener('storage', event => { if (event.key === key) { clearStatusCache(); device = read(key, null); refresh(true); } });
         navigator.serviceWorker?.addEventListener('message', event => { if (event.data?.type === 'dorm:subscription-changed') refresh(true); });
-        if (!supportReason()) registerWorker().catch(() => { error = '通知元件載入失敗，請檢查網路後重試'; render(); });
+        if (!supportReason()) registerWorker().then(render).catch(() => { error = '通知元件載入失敗，請檢查網路後重試'; render(); });
         refresh(); resumePending();
         if (invitation) { dialog.querySelector('.dp-code').value = invitation; open(); }
         uiReadyResolve();

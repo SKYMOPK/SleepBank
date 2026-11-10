@@ -76,7 +76,8 @@ test('private pairing and administration cannot be invoked by ordinary devices',
     assert.equal((await f.call('/admin/announce', {}, f.a.token)).status, 403);
     assert.equal((await f.call('/admin/status', {}, 'private-test-only')).status, 200);
     const status = (await f.call('/status', undefined, f.a.token)).body;
-    assert.deepEqual(Object.keys(status).sort(), ['enabled', 'subscribedHere', 'userId']);
+    assert.deepEqual(Object.keys(status).sort(), ['enabled', 'notificationConfigured', 'subscribedHere', 'userId']);
+    assert.equal(status.notificationConfigured, true);
 });
 test('pairing registers device access, forgetting revokes it without affecting the other device', async () => {
     const f = await fixture(), aId = 'device_' + await hash(f.a.token), bId = 'device_' + await hash(f.b.token);
@@ -180,6 +181,15 @@ test('all toggle combinations and account-wide multi-device disable', async () =
     await f.call('/disable', { userId: 'p1' }, f.b.token);
     assert.equal((await f.storage.list({ prefix: 'sub:' })).size, 1);
     assert.equal((await f.call('/status', undefined, f.a.token)).body.enabled, true);
+});
+test('notification status distinguishes a first-time user from an explicit opt-out', async () => {
+    const f = await fixture();
+    await f.storage.delete('enabled:p1');
+    let status = (await f.call('/status', undefined, f.a.token)).body;
+    assert.equal(status.enabled, false); assert.equal(status.notificationConfigured, false);
+    await f.call('/disable', {}, f.a.token);
+    status = (await f.call('/status', undefined, f.a.token)).body;
+    assert.equal(status.enabled, false); assert.equal(status.notificationConfigured, true);
 });
 test('subscription endpoint cannot be stolen by another device; expired subscriptions removed', async () => {
     const f = await fixture(); const sub = (await f.storage.get('sub:' + await hash(f.a.token))).subscription;

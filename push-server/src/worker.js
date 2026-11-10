@@ -95,7 +95,8 @@ export class DormPush {
         }
         const device = await this.device(request);
         if (path === '/status' && request.method === 'GET') {
-            return { userId: device.userId, enabled: Boolean(await this.storage.get(`enabled:${device.userId}`)), subscribedHere: Boolean(await this.storage.get(`sub:${device.id}`)) };
+            const enabled = await this.storage.get(`enabled:${device.userId}`);
+            return { userId: device.userId, enabled: Boolean(enabled), notificationConfigured: typeof enabled === 'boolean', subscribedHere: Boolean(await this.storage.get(`sub:${device.id}`)) };
         }
         if (path === '/firebase-token' && request.method === 'GET') {
             return { token: await customToken(this.env, `device_${device.id}`), expiresAt: device.expiresAt };
