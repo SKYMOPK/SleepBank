@@ -63,6 +63,46 @@
 .food-page .history-dialog #historyDetail { color:var(--theme-muted); font-size:14px; line-height:1.7; }
 .food-page .history-dialog .history-note { margin-top:16px; }
 .food-page :is(.discovery-tabs button,.discovery-item,.history-choice,.meal-history summary):focus-visible { outline:2px solid var(--theme-accent); outline-offset:3px; }
+
+body.food-page { background: linear-gradient(145deg,#1c2826,#151817 65%); }
+.food-page .app-header { border-radius: 0 0 22px 22px; background: var(--sb-glass-solid); box-shadow: inset 0 1px #ffffff12; }
+.food-page .app-main { grid-template-columns: minmax(0,1.2fr) minmax(260px,.8fr); align-content: start; }
+.food-page .category-section { grid-column: 1; grid-row: 2; }
+.food-page .draw-section.sb-glass { grid-column: 1; grid-row: 3; border-radius: 24px; }
+.food-page .discovery-section {
+    grid-column: 2;
+    grid-row: 2 / 5;
+    padding: 20px;
+    border: 1px solid var(--sb-glass-edge);
+    border-radius: 22px;
+    background: #222926;
+}
+.food-page .excluded-section { grid-column: 1; grid-row: 4; }
+.food-page :is(.manage-button,.primary,.secondary,.category-list button) {
+    min-height: 44px;
+    border-radius: 13px;
+    transition: scale var(--sb-motion), color var(--sb-motion), background-color var(--sb-motion);
+}
+.food-page :is(.manage-button,.primary,.secondary,.category-list button):active:not(:disabled) { scale: .978; }
+.food-page .discovery-heading h2 { font-size: 18px; }
+.food-page .discovery-tabs { border-radius: 15px; }
+.food-page .discovery-tabs::before { border-radius: 10px; }
+.food-page :is(.sheet,.dialog) { background: var(--sb-glass-raised); }
+.food-page .dialog-overlay:not([hidden]) > .dialog { animation: sb-sheet-in var(--sb-sheet-motion) both; }
+@supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .food-page :is(.app-header,.sheet,.dialog) {
+        -webkit-backdrop-filter: blur(20px) saturate(120%);
+        backdrop-filter: blur(20px) saturate(120%);
+    }
+    .food-page .app-header { background: var(--sb-glass-fill); }
+}
+@media (max-width: 720px) {
+    .food-page .app-main { display: block; }
+    .food-page .discovery-section { margin-top: 18px; padding: 16px; }
+    .food-page .draw-section.sb-glass { margin-top: 8px; }
+    .food-page .dialog-overlay { align-items: flex-end; padding: 12px; }
+    .food-page :is(.sheet,.dialog) { padding-bottom: max(16px,env(safe-area-inset-bottom)); }
+}
 @media (hover:hover) and (pointer:fine) {
     .food-page .discovery-item:not(:disabled):hover { background:var(--theme-accent-soft); }
     .food-page .discovery-item:not(:disabled):hover .discovery-arrow { transform:translateX(3px); }

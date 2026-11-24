@@ -1,8 +1,104 @@
-/* Shared low-risk polish for SleepBank pages. Keep this file behavior-free. */
+/* Shared typography, material and interaction rules for SleepBank. */
 :root {
     --sb-focus: rgba(208, 163, 79, 0.78);
     --sb-line: rgba(200, 160, 100, 0.22);
     --sb-safe-bottom: max(18px, env(safe-area-inset-bottom));
+    --sb-glass-fill: rgba(33, 33, 35, .72);
+    --sb-glass-raised: rgba(39, 38, 40, .90);
+    --sb-glass-solid: #242426;
+    --sb-glass-edge: rgba(255, 255, 255, .15);
+    --sb-glass-shadow: 0 16px 42px rgba(0, 0, 0, .23);
+    --sb-motion: 190ms cubic-bezier(.2, .75, .25, 1);
+    --sb-sheet-motion: 260ms cubic-bezier(.2, .8, .25, 1);
+}
+
+.sb-page.sb-index { --sb-glass-fill: rgba(24, 25, 29, .64); }
+.sb-page.sb-budget { --sb-glass-fill: rgba(33, 43, 38, .76); --sb-glass-solid: #242e28; }
+.sb-page.sb-grip { --sb-glass-fill: rgba(43, 37, 34, .78); --sb-glass-solid: #2b2522; }
+.sb-page.food-page { --sb-glass-fill: rgba(29, 40, 39, .78); --sb-glass-solid: #212c2b; }
+.sb-page.sb-split {
+    --sb-glass-fill: var(--theme-surface-main, rgba(33, 29, 23, .7));
+    --sb-glass-raised: var(--theme-surface-raised, #28231d);
+    --sb-glass-solid: var(--theme-page-bg, #25211c);
+}
+
+.sb-page .sb-glass {
+    background: var(--sb-glass-solid);
+    border: 1px solid var(--sb-glass-edge);
+    box-shadow: var(--sb-glass-shadow), inset 0 1px rgba(255, 255, 255, .08);
+}
+
+@supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .sb-page .sb-glass {
+        background: var(--sb-glass-fill);
+        -webkit-backdrop-filter: blur(20px) saturate(125%);
+        backdrop-filter: blur(20px) saturate(125%);
+    }
+}
+
+.sb-page .sb-tab-track {
+    position: relative;
+    isolation: isolate;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 4px;
+    padding: 4px;
+    border: 1px solid var(--sb-glass-edge);
+    border-radius: 15px;
+    background: rgba(0, 0, 0, .24);
+}
+
+.sb-page .sb-tab-track::before {
+    content: '';
+    position: absolute;
+    inset: 4px auto 4px 4px;
+    width: calc((100% - 12px) / 2);
+    z-index: -1;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, .14);
+    box-shadow: inset 0 1px rgba(255, 255, 255, .12);
+    pointer-events: none;
+    transform: translateX(0);
+    transition: transform var(--sb-motion);
+}
+
+.sb-page .sb-tab-track:has(> :nth-child(2):is(.active, [aria-pressed="true"], [aria-selected="true"]))::before {
+    transform: translateX(calc(100% + 4px));
+}
+
+.sb-page .sb-tab-track > button { min-width: 0; min-height: 44px; }
+
+.sb-page :is(.sb-press, .dorm-push-entry, .dp-close) {
+    transition: scale var(--sb-motion), background-color var(--sb-motion), border-color var(--sb-motion);
+}
+.sb-page :is(.sb-press, .dorm-push-entry, .dp-close):active:not(:disabled) { scale: .978; }
+.sb-page .sb-pending { opacity: .65; cursor: progress; }
+
+.sb-page .sb-sheet {
+    max-height: calc(100dvh - 24px);
+    overscroll-behavior: contain;
+    scroll-padding-bottom: 18px;
+}
+html.sb-modal-open { overflow: hidden; scrollbar-gutter: stable; }
+.sb-page :is(.show, .open, .overlay:not([hidden])) > .sb-sheet,
+.sb-page dialog.sb-sheet[open] { animation: sb-sheet-in var(--sb-sheet-motion) both; }
+@keyframes sb-sheet-in {
+    from { opacity: .55; translate: 0 16px; }
+    to { opacity: 1; translate: 0 0; }
+}
+@keyframes sb-content-in {
+    from { opacity: .65; translate: 0 5px; }
+    to { opacity: 1; translate: 0 0; }
+}
+
+@media (max-width: 640px) {
+    .sb-page .sb-sheet-host { align-items: flex-end; padding: 12px; }
+    .sb-page .sb-sheet-host > .sb-sheet,
+    .sb-page dialog.sb-sheet[open] {
+        border-radius: 24px 24px 16px 16px;
+        padding-bottom: max(20px, env(safe-area-inset-bottom));
+    }
+    .sb-page dialog.sb-sheet[open] { margin: auto auto 12px; }
 }
 
 body.sb-page {

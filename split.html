@@ -2,7 +2,7 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>宿舍帳本</title>
     <meta name="theme-color" content="#141310">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -11,7 +11,8 @@
     <link rel="apple-touch-icon" href="assets/icons/dorm-180.png">
     <link rel="stylesheet" href="push-ui.css">
     <script src="push-config.js"></script>
-    <script src="push-client.js" defer></script>
+    <script src="system-ui.js?v=app-1" defer></script>
+    <script src="push-client.js?v=app-1" defer></script>
     <link rel="icon" href="data:,">
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
@@ -31,7 +32,7 @@
     <script src="split-chess-audio.js?v=chess-1"></script>
     <script src="split-chess.js?v=20261108-1"></script>
     <link rel="stylesheet" href="split-homecoming.css?v=20260918-1">
-    <script src="split-extras.js?v=collection-20261103"></script>
+    <script src="split-extras.js?v=app-1"></script>
     <link rel="stylesheet" href="split-extras.css?v=reward-fan-2">
     <link rel="stylesheet" href="split-original-effects.css?v=chess-1">
     <style>
@@ -669,9 +670,11 @@
     <link rel="stylesheet" href="split-interactions.css?v=20261103-1">
     <link rel="stylesheet" href="split-experience.css?v=20261103-1">
     <link rel="stylesheet" href="split-navigation.css?v=20261103-1">
+    <link rel="stylesheet" href="app-shell.css?v=1">
     <script defer src="split-experience.js?v=20261103-1"></script>
 </head>
 <body class="sb-page sb-split" data-theme="default">
+<header data-dorm-shell="split"></header>
 
 <svg aria-hidden="true" focusable="false" width="0" height="0" style="position:absolute;overflow:hidden">
     <symbol id="icon-ledger" viewBox="0 0 24 24"><path d="M7 3h10a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z"/><path d="M9 7h6M9 11h6M9 15h4"/></symbol>
@@ -702,8 +705,8 @@
 </div>
 
 <!-- ===== 確認 Modal ===== -->
-<div class="confirm-overlay" id="confirmOverlay">
-    <div class="confirm-box" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
+<div class="confirm-overlay sb-sheet-host" id="confirmOverlay">
+    <div class="confirm-box sb-sheet" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
         <div class="confirm-title" id="confirmTitle">確認</div>
         <div class="confirm-body" id="confirmBody"></div>
         <div class="confirm-btns">
@@ -713,8 +716,8 @@
     </div>
 </div>
 
-<div class="edit-overlay" id="recordEditor" aria-hidden="true">
-    <div class="edit-sheet" role="dialog" aria-modal="true" aria-labelledby="editorTitle">
+<div class="edit-overlay sb-sheet-host" id="recordEditor" aria-hidden="true">
+    <div class="edit-sheet sb-sheet" role="dialog" aria-modal="true" aria-labelledby="editorTitle">
         <div class="edit-header">
             <strong id="editorTitle">編輯帳目</strong>
             <button class="icon-action" type="button" onclick="closeRecordEditor()" aria-label="關閉"><svg class="icon"><use href="#icon-close"></use></svg></button>
@@ -726,7 +729,7 @@
         </div>
         <div class="experience-note"><svg class="icon" aria-hidden="true"><use href="#icon-receipt"></use></svg><input class="note-input" id="edit_note" aria-label="備註" type="text" maxlength="30" placeholder="新增備註或店名" oninput="updateEditorPreview()"><span>選填</span></div>
         <div class="experience-payer-heading">實際先付款的人</div>
-        <div class="payer-row">
+        <div class="payer-row sb-tab-track" role="group" aria-label="實際先付款的人">
             <button class="payer-btn" id="edit_btn_p1" type="button" aria-pressed="false" onclick="selectEditorPayer('p1')"><span class="experience-dot p1" aria-hidden="true"></span><span>至凱</span></button>
             <button class="payer-btn" id="edit_btn_p2" type="button" aria-pressed="false" onclick="selectEditorPayer('p2')"><span class="experience-dot p2" aria-hidden="true"></span><span>柏致</span></button>
         </div>
@@ -736,6 +739,7 @@
             <button class="edit-cancel" type="button" onclick="closeRecordEditor()">取消</button>
             <button class="edit-save" id="editorSaveBtn" type="button" onclick="saveRecordEdit()">儲存修改</button>
         </div>
+        <p id="ledgerEditFeedback" class="sb-write-feedback" hidden></p>
     </div>
 </div>
 
@@ -753,7 +757,7 @@
         <div class="balance-desc zero" id="balanceDesc">互不相欠</div>
     </div>
 
-    <nav class="records-hub" aria-label="帳本頁面">
+    <nav class="records-hub sb-tab-track" aria-label="帳本頁面">
         <button class="experience-entry-tab" id="nav-entry" type="button" aria-pressed="true" onclick="switchView('input')"><span>記一筆</span><svg class="icon" aria-hidden="true"><use href="#icon-arrow-right"></use></svg></button>
         <button class="view-records-btn" id="nav-records" type="button" aria-pressed="false" onclick="switchView('unsettled')">
             <span class="view-records-label">帳目紀錄</span>
@@ -814,12 +818,13 @@
         </div>
         <div class="experience-note"><svg class="icon" aria-hidden="true"><use href="#icon-receipt"></use></svg><input class="note-input" id="inp_note" type="text" aria-label="備註" placeholder="新增備註或店名" maxlength="30"><span>選填</span></div>
         <div class="experience-payer-heading">實際先付款的人</div>
-        <div class="payer-row">
+        <div class="payer-row sb-tab-track" role="group" aria-label="實際先付款的人">
             <button class="payer-btn" id="btn_p1" type="button" aria-pressed="false" onclick="selectPayer('p1')"><span class="experience-dot p1" aria-hidden="true"></span><span>至凱</span></button>
             <button class="payer-btn" id="btn_p2" type="button" aria-pressed="false" onclick="selectPayer('p2')"><span class="experience-dot p2" aria-hidden="true"></span><span>柏致</span></button>
         </div>
         <div class="result-preview"><span class="result-preview-label">預計帳務</span><div class="preview-text" id="previewText" aria-live="polite">請輸入金額並選擇付款人</div></div>
-        <button class="submit-btn" id="submitBtn" onclick="addRecord()" disabled><svg class="icon"><use href="#icon-plus"></use></svg><span>新增這筆</span></button>
+        <button class="submit-btn sb-press" id="submitBtn" onclick="addRecord()" disabled><svg class="icon"><use href="#icon-plus"></use></svg><span>新增這筆</span></button>
+        <p id="ledgerWriteFeedback" class="sb-write-feedback" hidden></p>
     </div>
 
 </div>
@@ -827,7 +832,7 @@
 
 <section class="ledger-records" id="ledger-records" aria-label="帳目紀錄" hidden>
     <div class="records-heading"><div><span class="experience-eyebrow">共同帳務</span><h2>帳目紀錄</h2></div></div>
-    <div class="record-status-tabs" role="group" aria-label="帳目狀態">
+    <div class="record-status-tabs sb-tab-track" role="group" aria-label="帳目狀態">
         <button class="record-status-tab" id="nav-unsettled" type="button" aria-pressed="true" onclick="switchView('unsettled')">未結清</button>
         <button class="record-status-tab" id="nav-settled" type="button" aria-pressed="false" onclick="switchView('settled')">已結清</button>
     </div>
@@ -912,7 +917,7 @@
     let selectedKeys = new Set();
     let currentView = 'input';
     let calcValue = 0;
-    let editingKey = null;
+    let editingKey = null, editSaving = false;
     let editorPayer = null;
     let lastUndoAction = null;
     let undoTimer = null;
@@ -1452,6 +1457,7 @@
     }
 
     function addRecord() {
+        DormUI.feedback('ledgerWriteFeedback');
         const validation = ledgerCore.validateRecordDraft({
             p1_bought: document.getElementById('inp_p1').value,
             p2_bought: document.getElementById('inp_p2').value,
@@ -1492,7 +1498,9 @@
                     if (window.DormPush?.configured) window.DormPush.readyEvent('expense:' + savedKey).catch(() => {});
                 } catch (error) {
                     console.error(error);
-                    showToast(window.DormPush?.configured ? error.message : '新增失敗，請檢查網路', 'var(--red)');
+                    const message = window.DormPush?.configured ? error.message : '新增失敗，請檢查網路';
+                    DormUI.feedback('ledgerWriteFeedback', message);
+                    showToast(message, 'var(--red)');
                 } finally {
                     isSubmitting = false;
                     updatePreview();
@@ -1511,15 +1519,20 @@
         okBtn.innerText = danger ? '刪除' : '確認';
         okBtn.onclick = () => { closeConfirm(); onOk(); };
         playSound('open');
-        document.getElementById('confirmOverlay').classList.add('show');
+        const overlay = document.getElementById('confirmOverlay');
+        overlay.classList.add('show');
+        DormUI.open(overlay, closeConfirm, '.confirm-cancel');
     }
     function closeConfirm() {
         playSound('close');
-        document.getElementById('confirmOverlay').classList.remove('show');
+        const overlay = document.getElementById('confirmOverlay');
+        overlay.classList.remove('show');
+        DormUI.finish(overlay);
     }
 
     // ===== 帳目詳情與編輯 =====
     function openRecordEditor(key) {
+        DormUI.feedback('ledgerEditFeedback');
         const record = allRecords[key];
         if (!record || record.deletedAt) return;
         editingKey = key;
@@ -1535,6 +1548,7 @@
         ['edit_btn_p1', 'edit_btn_p2'].forEach(id => { document.getElementById(id).disabled = readOnly; });
         document.getElementById('recordEditor').classList.add('show');
         document.getElementById('recordEditor').setAttribute('aria-hidden', 'false');
+        DormUI.open(document.getElementById('recordEditor'), closeRecordEditor, '.edit-cancel');
         selectEditorPayer(record.payer, true);
         updateEditorPreview();
         playSound('open');
@@ -1545,6 +1559,7 @@
         editorPayer = null;
         document.getElementById('recordEditor').classList.remove('show');
         document.getElementById('recordEditor').setAttribute('aria-hidden', 'true');
+        DormUI.finish(document.getElementById('recordEditor'));
         playSound('close');
     }
 
@@ -1582,10 +1597,12 @@
         }
         preview.className = 'preview-text has-value';
         preview.innerText = getResultText(validation.record);
-        saveButton.disabled = Boolean(allRecords[editingKey]?.settled || allRecords[editingKey]?.budgetSync);
+        saveButton.disabled = editSaving || Boolean(allRecords[editingKey]?.settled || allRecords[editingKey]?.budgetSync);
     }
 
     async function saveRecordEdit() {
+        if (editSaving) return;
+        DormUI.feedback('ledgerEditFeedback');
         const key = editingKey;
         const before = key && allRecords[key];
         if (!before || before.settled) return;
@@ -1605,19 +1622,27 @@
             },
         };
         delete after.budgetSync;
-        closeRecordEditor();
+        const saveButton = document.getElementById('editorSaveBtn');
+        editSaving = true;
+        saveButton.classList.add('sb-pending');
+        saveButton.setAttribute('aria-busy', 'true');
+        updateEditorPreview();
         try {
             await commitRecordChange(key, before, after);
+            if (editingKey === key) closeRecordEditor();
             offerUndo('帳目已更新', () => commitRecordChange(key, after, before));
         } catch (error) {
             console.error(error);
+            if (editingKey === key) DormUI.feedback('ledgerEditFeedback', '修改失敗，請檢查網路');
             showToast('修改失敗，請檢查網路', 'var(--red)');
+        } finally {
+            editSaving = false;
+            saveButton.classList.remove('sb-pending');
+            saveButton.removeAttribute('aria-busy');
+            updateEditorPreview();
         }
     }
 
-    document.addEventListener('keydown', event => {
-        if (event.key === 'Escape' && document.getElementById('recordEditor').classList.contains('show')) closeRecordEditor();
-    });
 
     // ===== 逐筆刪除（未結清）=====
     function confirmDeleteRecord(key) {
@@ -1990,6 +2015,10 @@
     });
     }
 
+    document.querySelectorAll('.money-field').forEach(field => {
+        const input = field.querySelector('input');
+        field.addEventListener('click', event => { if (event.target !== input) input.focus(); });
+    });
     if (window.DormPushConfig?.protectData) document.addEventListener('DOMContentLoaded', () => window.DormPush.protect().then(startLedgerSubscriptions));
     else startLedgerSubscriptions();
 

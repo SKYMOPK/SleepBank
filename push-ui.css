@@ -46,3 +46,7 @@
 .dorm-access-gate a { margin-top:8px; color:#bdb4a5; }
 .dorm-push-dialog[open] ~ .dorm-access-gate > div { visibility:hidden; }
 .dorm-push-dialog.dp-activation :is(.dp-setting,.dp-help,.dp-reconnect) { display:none; }
+.dorm-push-dialog.sb-sheet { background: var(--sb-glass-raised, #28231d); border-color: var(--sb-glass-edge, #ffffff26); }
+@supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .dorm-push-dialog.sb-sheet { -webkit-backdrop-filter: blur(20px) saturate(120%); backdrop-filter: blur(20px) saturate(120%); }
+}

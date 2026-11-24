@@ -104,3 +104,87 @@ body.sb-index {
     .sb-index .feature-grid .feature-card,
     .sb-index .feature-grid .entry-arrow { transition: none; }
 }
+
+.sb-index .home-tools { display: flex; align-items: center; min-height: 44px; margin-bottom: 20px; }
+.sb-index .home-tools .dorm-push-entry {
+    padding: 0 14px;
+    color: var(--home-ink);
+    border: 1px solid var(--sb-glass-edge);
+    border-radius: 24px;
+    background: #26262ee6;
+}
+.sb-index .header-title { font-size: 52px; }
+.sb-index .section { width: 100%; max-width: none; }
+.sb-index .directory-head { padding-bottom: 12px; border: 0; }
+.sb-index .feature-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+}
+.sb-index .feature-grid .feature-card {
+    grid-template-columns: minmax(0, 1fr) 18px;
+    grid-template-rows: auto 1fr;
+    align-items: start;
+    gap: 12px 4px;
+    min-height: 136px;
+    padding: 16px;
+    border: 1px solid var(--sb-glass-edge);
+    border-radius: 18px;
+    background: #202126;
+    box-shadow: inset 0 1px rgba(255,255,255,.09), 0 10px 30px #0002;
+    transition: scale var(--sb-motion), border-color var(--sb-motion), background var(--sb-motion);
+}
+.sb-index .feature-grid .feature-card .entry-arrow { grid-column: 2; grid-row: 1; align-self: center; }
+.sb-index .feature-grid .feature-card .entry-copy { grid-row: 2; grid-column: 1/-1; }
+.sb-index .feature-grid .f-ico { border-color: color-mix(in srgb, currentColor 24%, transparent); background: color-mix(in srgb, currentColor 10%, transparent); }
+.sb-index .feature-grid .f-name { font-size: 16px; }
+.sb-index .feature-grid .feat-split {
+    grid-column: 1/-1;
+    grid-template-columns: 52px minmax(0, 1fr) 24px;
+    grid-template-rows: auto;
+    align-items: center;
+    min-height: 148px;
+    padding: 24px;
+    gap: 16px;
+    border-radius: 24px;
+    border-color: #e5d1af4d;
+    background: #32302e;
+}
+.sb-index .feature-grid .feat-split .f-ico { width: 52px; height: 52px; border-radius: 15px; }
+.sb-index .feature-grid .feat-split .f-name { font-size: 25px; }
+.sb-index .feature-grid .feat-split .entry-copy { grid-column: 2; grid-row: 1; }
+.sb-index .feature-grid .feat-split .entry-arrow { grid-column: 3; }
+.sb-index .feature-grid .feat-food { grid-column: auto; }
+.sb-index .changelog-btn, .sb-index .cl-close { min-height: 44px; }
+.sb-index .feature-grid .feature-card:active { scale: .98; }
+.sb-index .cl-sheet { background: var(--sb-glass-raised); border-color: var(--sb-glass-edge); }
+@supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .sb-index .feature-grid .feature-card, .sb-index .home-tools .dorm-push-entry {
+        background: var(--sb-glass-fill);
+        -webkit-backdrop-filter: blur(19px) saturate(130%);
+        backdrop-filter: blur(19px) saturate(130%);
+    }
+    .sb-index .feature-grid .feat-split {
+        background: linear-gradient(125deg, rgba(199,178,140,.18), rgba(255,255,255,.025)), rgba(24,24,28,.59);
+    }
+}
+@media (hover: hover) and (pointer: fine) {
+    .sb-index .feature-grid .feature-card:hover { background: #303137df; border-color: #ffffff4a; }
+    .sb-index .feature-grid .feat-split:hover { background: #3d3832df; }
+}
+@media (max-width: 800px) {
+    .sb-index .header-title { font-size: 40px; }
+    .sb-index .home-tools { justify-content: flex-end; margin-bottom: 10px; }
+    .sb-index .section { max-width: 520px; margin-top: 22px; }
+    .sb-index .feature-grid .feature-card:not(.feat-split) { grid-template-columns: minmax(0, 1fr) 14px; min-height: 116px; padding: 12px; gap: 8px 2px; }
+    .sb-index .feature-grid .feat-split { min-height: 112px; padding: 16px; }
+    .sb-index .feature-grid .feat-split .f-name { font-size: 22px; }
+    .sb-index .feature-grid .feature-card:not(.feat-split) .entry-arrow { width: 14px; }
+}
+@media (max-width: 400px) {
+    .sb-index .feature-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .sb-index .feature-grid .feat-food { grid-column: 1/-1; }
+    .sb-index .feature-grid .feature-card.feat-food { grid-template-columns: 36px minmax(0, 1fr) 18px; grid-template-rows: auto; align-items: center; gap: 12px; min-height: 70px; }
+    .sb-index .feature-grid .feat-food .entry-copy { grid-column: 2; grid-row: 1; }
+    .sb-index .feature-grid .feat-food .entry-arrow { grid-column: 3; }
+}

@@ -245,7 +245,7 @@
     function init() {
         const match = location.hash.match(/^#activate=([A-Za-z0-9_-]{43})$/);
         if (match) { invitation = match[1]; history.replaceState(null, '', location.pathname + location.search); }
-        dialog = document.createElement('dialog'); dialog.className = 'dorm-push-dialog';
+        dialog = document.createElement('dialog'); dialog.className = 'dorm-push-dialog sb-sheet';
         dialog.setAttribute('aria-labelledby', 'dp-title');
         dialog.innerHTML = `<div class="dp-heading"><h2 id="dp-title">通知設定</h2><button type="button" class="dp-close" aria-label="關閉通知設定"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button></div><div class="dp-identity"><span class="dp-label">這是誰的裝置？</span><div class="dp-users" role="group" aria-label="裝置使用者"><button type="button" data-dp-user="p1" aria-pressed="true">至凱</button><button type="button" data-dp-user="p2" aria-pressed="false">柏致</button></div><input class="dp-code" type="password" autocomplete="off" placeholder="私人啟用碼或連結" aria-label="私人啟用碼或連結"><p>首次啟用後會記住，不需要每次登入。</p><button type="button" class="dp-pair">啟用這部裝置</button></div><div class="dp-device" hidden><span>此裝置：<strong class="dp-device-name"></strong></span><button type="button" class="dp-forget">解除此裝置</button></div><div class="dp-setting"><label for="dp-toggle">推播通知</label><div class="dp-switch"><input type="checkbox" role="switch" id="dp-toggle" aria-describedby="dp-help dp-status"><span aria-hidden="true"></span></div></div><p class="dp-help" id="dp-help">接收新支出、結清紀錄與重要系統通知。</p><p class="dp-status" id="dp-status" role="status" aria-live="polite"></p><button type="button" class="dp-pair dp-reconnect" hidden>重新連接此裝置</button>`;
         const scopeNote = document.createElement('p'); scopeNote.className = 'dp-help';
@@ -255,7 +255,10 @@
         const launcher = document.createElement('button'); launcher.type = 'button'; launcher.className = 'dorm-push-entry';
         launcher.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/></svg><span>通知設定</span>';
         const footer = document.querySelector('.home-footer');
-        if (footer) footer.append(launcher);
+        const homeTools = document.getElementById('dorm-notification-tools') || document.getElementById('home-notification-tools');
+        launcher.setAttribute('aria-haspopup', 'dialog');
+        if (homeTools) homeTools.append(launcher);
+        else if (footer) footer.append(launcher);
         else { const container = document.createElement('footer'); container.className = 'dorm-push-launcher'; container.append(launcher); document.body.append(container); }
         launcher.addEventListener('click', open);
         dialog.querySelector('.dp-close').addEventListener('click', () => { if (!busy) dialog.close(); });

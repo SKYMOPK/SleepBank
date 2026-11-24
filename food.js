@@ -15,7 +15,6 @@
     } catch (_) { /* Default theme remains available. */ }
     const state = { data: null, connected: false, category: '', exclusions: {}, draw: null, discovery: 'recommended', busy: false, checking: false, editor: null, historyEntry: null, confirm: null, timers: [], initializing: false, missing: false, error: '' };
     let db, rootRef, connectionRef, toastTimer, confirmationAudio;
-    const returnFocus = new Map();
     try {
         const saved = JSON.parse(sessionStorage.getItem(storageKey) || '{}');
         state.category = typeof saved.category === 'string' ? saved.category : '';
@@ -72,14 +71,13 @@
     }
     function button(text, action, style = 'secondary') { return `<button type="button" class="${style}" data-draw-action="${action}">${text}</button>`; }
     function showOverlay(id, focus) {
-        if ($(id).hidden) returnFocus.set(id, document.activeElement);
-        $(id).hidden = false; document.body.style.overflow = 'hidden';
-        requestAnimationFrame(() => (focus ? $(focus) : $(id).querySelector('button'))?.focus());
+        const host = $(id);
+        host.hidden = false;
+        window.DormUI.open(host, () => { if (!state.busy) closeOverlay(id); }, focus ? `#${focus}` : 'button');
     }
     function closeOverlay(id) {
         $(id).hidden = true;
-        if (['manageOverlay', 'editorOverlay', 'confirmOverlay', 'historyOverlay'].every(key => $(key).hidden)) document.body.style.overflow = '';
-        const previous = returnFocus.get(id); if (previous?.isConnected) previous.focus(); returnFocus.delete(id);
+        window.DormUI.finish($(id));
     }
     function drawFace(id, name, index, revealed, selected, disabled, shuffling) {
         const lengthClass = name.length > 24 || (name.length > 16 && categoryName(state.category).length > 10) ? ' very-long' : name.length > 12 ? ' long' : '';
@@ -413,17 +411,6 @@
     });
     $('cancelConfirm').addEventListener('click', () => closeOverlay('confirmOverlay'));
     $('acceptConfirm').addEventListener('click', async () => { if (!state.confirm) return; const action = state.confirm; state.confirm = null; closeOverlay('confirmOverlay'); await action(); });
-    document.addEventListener('keydown', event => {
-        const top = ['confirmOverlay', 'historyOverlay', 'editorOverlay', 'manageOverlay'].map($).find(el => !el.hidden);
-        if (!top) return;
-        if (event.key === 'Escape') { if (!state.busy) closeOverlay(top.id); return; }
-        if (event.key !== 'Tab') return;
-        const focusable = [...top.querySelectorAll('button:not(:disabled), input:not(:disabled), select:not(:disabled), [href]')].filter(el => el.getClientRects().length);
-        if (!focusable.length) { event.preventDefault(); return; }
-        const first = focusable[0], last = focusable[focusable.length - 1];
-        if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
-        else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
-    });
     window.addEventListener('pagehide', event => {
         finishConfirmationSound();
         for (const element of [$('discoveryList'), $('drawMessage')]) element.getAnimations({ subtree: true }).forEach(animation => animation.cancel());

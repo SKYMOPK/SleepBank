@@ -21,10 +21,10 @@
     }
     if (appearanceChanged) writeLocal(storageKey, preferences);
     let tab = 'color';
-    let panel, reveal, entry, previousFocus, revealId, toastTimer;
+    let panel, reveal, entry, revealId, toastTimer;
     function closeReward() {
         reveal.classList.remove('open');
-        panel.querySelector('.le-close').focus();
+        root.DormUI.finish(reveal);
     }
     const settings = () => preferences.shared;
     const has = id => !!catalog[id];
@@ -76,11 +76,12 @@
         } catch (error) { console.warn('Effect unavailable', error); }
     }
     function open() {
-        previousFocus = document.activeElement;
-        panel.classList.add('open'); document.body.style.overflow = 'hidden'; render(); panel.querySelector('.le-content').scrollTop = 0; panel.querySelector('.le-close').focus();
+        panel.classList.add('open'); render(); panel.querySelector('.le-content').scrollTop = 0;
+        root.DormUI.open(panel, close, '.le-close');
     }
     function close() {
-        panel.classList.remove('open'); document.body.style.overflow = ''; applyBackground(); previousFocus?.focus();
+        if (reveal.classList.contains('open')) closeReward();
+        panel.classList.remove('open'); applyBackground(); root.DormUI.finish(panel);
     }
     function preview(id) {
         const item = catalog[id];
@@ -168,7 +169,7 @@
         reveal.querySelector('p').textContent = item.type === 'badge' ? item.desc : '收藏永久保留，外觀可隨時更換。';
         reveal.querySelector('[data-reveal-equip]').hidden = item.type === 'badge';
         reveal.querySelector('[data-reveal-preview]').hidden = item.type === 'badge';
-        reveal.classList.add('open'); reveal.querySelector('button').focus();
+        reveal.classList.add('open'); root.DormUI.open(reveal, closeReward, 'button');
     }
     function resetBadgeTilt() {
         const art = reveal?.querySelector('.le-reveal-art');
@@ -214,10 +215,10 @@
         entry = document.createElement('div'); entry.className = 'ledger-extras';
         entry.innerHTML = `<button class="le-entry" data-open="appearance" aria-label="外觀收藏" title="外觀收藏">${icon('palette')}<span>外觀收藏</span></button>`;
         (document.querySelector('.header-tools') || document.querySelector('#view-input .page-wrapper')).prepend(entry);
-        panel = document.createElement('div'); panel.className = 'le-backdrop';
-        panel.innerHTML = `<section class="le-panel" role="dialog" aria-modal="true" aria-labelledby="le-title"><div class="le-heading"><div><span class="le-eyebrow">DORM / DAILY COLLECTION</span><h2 id="le-title">你的帳本外觀</h2></div><button class="le-close" aria-label="關閉面板">${icon('close')}</button></div><div class="le-content"></div></section>`;
-        reveal = document.createElement('div'); reveal.className = 'le-reveal';
-        reveal.innerHTML = '<section class="le-reveal-inner" role="dialog" aria-modal="true" aria-labelledby="le-reveal-title"><span class="le-eyebrow">共同收藏</span><div class="le-reveal-art"></div><h2 id="le-reveal-title"></h2><p>收藏永久保留，外觀可隨時更換。</p><div class="le-reveal-actions"><button class="le-secondary" data-reveal-close>關閉</button><button class="le-secondary" data-reveal-preview>預覽</button><button class="le-primary" data-reveal-equip>套用</button></div></section>';
+        panel = document.createElement('div'); panel.className = 'le-backdrop sb-sheet-host';
+        panel.innerHTML = `<section class="le-panel sb-sheet" role="dialog" aria-modal="true" aria-labelledby="le-title"><div class="le-heading"><div><h2 id="le-title">帳本外觀</h2></div><button class="le-close" aria-label="關閉面板">${icon('close')}</button></div><div class="le-content"></div></section>`;
+        reveal = document.createElement('div'); reveal.className = 'le-reveal sb-sheet-host';
+        reveal.innerHTML = '<section class="le-reveal-inner sb-sheet" role="dialog" aria-modal="true" aria-labelledby="le-reveal-title"><span class="le-eyebrow">共同收藏</span><div class="le-reveal-art"></div><h2 id="le-reveal-title"></h2><p>收藏永久保留，外觀可隨時更換。</p><div class="le-reveal-actions"><button class="le-secondary" data-reveal-close>關閉</button><button class="le-secondary" data-reveal-preview>預覽</button><button class="le-primary" data-reveal-equip>套用</button></div></section>';
         document.body.append(panel, reveal);
         installBadgeTilt();
         const background = document.createElement('div');
@@ -247,19 +248,8 @@
         reveal.addEventListener('click', e => {
             const b = e.target.closest('button'); if (!b) return;
             if (b.hasAttribute('data-reveal-close')) closeReward();
-            if (b.hasAttribute('data-reveal-preview')) { reveal.classList.remove('open'); preview(revealId); panel.querySelector('.le-close').focus(); }
+            if (b.hasAttribute('data-reveal-preview')) { closeReward(); preview(revealId); }
             if (b.hasAttribute('data-reveal-equip')) { equip(revealId); closeReward(); }
-        });
-        document.addEventListener('keydown', e => {
-            const target = reveal.classList.contains('open') ? reveal : panel.classList.contains('open') ? panel : null;
-            if (!target) return;
-            if (e.key === 'Escape') { if (target === reveal) { reveal.classList.remove('open'); panel.querySelector('.le-close').focus(); } else close(); }
-            if (e.key === 'Tab') {
-                const nodes = [...target.querySelectorAll('button:not(:disabled),select')].filter(el => el.getClientRects().length);
-                const first = nodes[0], last = nodes.at(-1);
-                if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
-                else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
-            }
         });
         window.addEventListener('pagehide', () => root.LedgerOriginalEffects.stop());
         applyBackground();

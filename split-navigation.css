@@ -63,3 +63,76 @@
     .sb-split .ledger-records { padding:20px; }
 }
 @media (prefers-reduced-motion:reduce) { .sb-split :is(.calc-chevron,.money-field,.records-hub .icon) { transition:none; } }
+
+.sb-split .header {
+    border-radius: 0 0 22px 22px;
+    box-shadow: inset 0 1px #ffffff12, 0 10px 28px #0002;
+    background: var(--sb-glass-raised);
+}
+.sb-split .ledger-workspace { gap: 44px; padding-top: 38px; }
+.sb-split .ledger-overview { padding-top: 0; }
+.sb-split .ledger-overview .balance-card {
+    padding: 24px;
+    border: 1px solid var(--theme-border);
+    border-radius: 24px;
+    background: var(--sb-glass-raised);
+    box-shadow: inset 0 1px #ffffff16;
+}
+.sb-split .ledger-overview .balance-amount { margin-top: 14px; font-size: 56px; overflow-wrap: anywhere; }
+.sb-split .ledger-overview .balance-desc { margin-top: 12px; }
+.sb-split .ledger-overview .records-hub {
+    grid-template-columns: repeat(2,minmax(0,1fr));
+    gap: 4px;
+    padding: 4px;
+    margin-top: 14px;
+    border: 1px solid var(--theme-border);
+    border-radius: 15px;
+    background: var(--sb-glass-raised);
+}
+.sb-split .ledger-overview .records-hub :is(.experience-entry-tab,.view-records-btn) {
+    justify-content: center;
+    min-height: 46px;
+    padding: 0 8px;
+    border: 0;
+    border-radius: 10px;
+}
+.sb-split .ledger-overview .records-hub [aria-pressed="true"]::after,
+.sb-split .record-status-tab[aria-pressed="true"]::after { display: none; }
+.sb-split .record-status-tabs { display: grid; gap: 4px; margin: 18px 0; border: 1px solid var(--theme-border); }
+.sb-split .record-status-tab { padding: 0 10px; border-radius: 10px; }
+.sb-split .ledger-content #view-input.active .input-card,
+.sb-split .ledger-content .ledger-records { border-radius: 24px; padding: 26px; }
+.sb-split .ledger-content #view-input.active .input-card { animation: sb-content-in var(--sb-motion) both; }
+.sb-split .ledger-content .ledger-records:not([hidden]) > .view.active { animation: sb-content-in var(--sb-motion) both; }
+.sb-split #view-input .input-card-header { margin-bottom: 22px; }
+.sb-split :is(#view-input,.edit-sheet) .money-field { min-height: 50px; border-radius: 13px; background: #0003; }
+.sb-split #view-input :is(.calc-toggle,.submit-btn) { border-radius: 14px; }
+.sb-split :is(.edit-sheet,.confirm-box) { border-radius: 22px; background: var(--sb-glass-raised); }
+.sb-split .le-panel { background: var(--sb-glass-raised); }
+@supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .sb-split .header, .sb-split .ledger-overview .balance-card {
+        background: var(--sb-glass-fill);
+        -webkit-backdrop-filter: blur(20px) saturate(120%);
+        backdrop-filter: blur(20px) saturate(120%);
+    }
+    .sb-split :is(.edit-sheet,.confirm-box,.le-panel) {
+        -webkit-backdrop-filter: blur(18px) saturate(120%);
+        backdrop-filter: blur(18px) saturate(120%);
+    }
+}
+@media (max-width: 720px) {
+    .sb-split .ledger-workspace { padding: 18px 14px 48px; }
+    .sb-split .ledger-overview { padding-inline: 0; }
+    .sb-split .ledger-overview .balance-card { padding: 16px 20px; }
+    .sb-split .ledger-overview .balance-amount { margin-top: 8px; font-size: 44px; }
+    .sb-split .ledger-overview .balance-desc { margin-top: 6px; }
+    .sb-split .ledger-content { margin-top: 14px; }
+    .sb-split .ledger-content #view-input.active .input-card,
+    .sb-split .ledger-content .ledger-records { padding: 18px; }
+    .sb-split #view-input .input-card-header { margin-bottom: 16px; }
+    .sb-split #view-input .amount-group { min-height: 62px; }
+    .sb-split #view-input .experience-note { min-height: 50px; }
+    .sb-split #view-input .experience-note .note-input { min-height: 48px; }
+    .sb-split :is(.edit-overlay,.confirm-overlay) { align-items: flex-end; }
+    .sb-split :is(.edit-sheet,.confirm-box) { padding-bottom: max(20px, env(safe-area-inset-bottom)); }
+}

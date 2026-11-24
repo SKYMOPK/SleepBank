@@ -2,7 +2,7 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>握力日記</title>
     <meta name="theme-color" content="#141310">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -10,7 +10,8 @@
     <link rel="apple-touch-icon" href="assets/icons/dorm-180.png">
     <link rel="stylesheet" href="push-ui.css">
     <script src="push-config.js" defer></script>
-    <script src="push-client.js" defer></script>
+    <script src="system-ui.js?v=app-1" defer></script>
+    <script src="push-client.js?v=app-1" defer></script>
     <!--
     ╔══════════════════════════════════════════╗
     ║           握力日記  CHANGELOG            ║
@@ -924,8 +925,10 @@
     @media (hover:hover) { .sb-grip .user-card:hover { transform:none; background:#d7b15b06; border-color:var(--border); box-shadow:none; } .sb-grip .submit-btn:hover:not(:disabled) { transform:none; box-shadow:none; background:#dfaa80; } }
     </style>
     <link rel="stylesheet" href="grip-experience.css?v=20261104-1">
+    <link rel="stylesheet" href="app-shell.css?v=1">
 </head>
 <body class="sb-page sb-grip">
+<header data-dorm-shell="grip"></header>
 
 <!-- ── User Selection Screen ── -->
 <div id="user-select">
@@ -935,7 +938,7 @@
         <div class="logo-title">握力日記</div>
         <div class="logo-sub">記錄每次訓練與進步</div>
     </div>
-    <div class="user-cards">
+    <div class="user-cards" role="group" aria-label="選擇訓練紀錄">
         <button class="user-card" onclick="selectUser('p1')">
             <div class="av" aria-hidden="true">凱</div>
             <div class="name">至凱</div>
@@ -955,6 +958,11 @@
             <div class="header-title"> 握力日記</div>
         </div>
         <button class="user-chip" id="user-chip" onclick="switchUser()">— · 切換</button>
+    </div>
+
+    <div class="tab-bar sb-tab-track" id="tab-bar" role="group" aria-label="握力日記頁面">
+        <button class="tab-btn active" id="tab-record" aria-pressed="true" onclick="switchTab('record')"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h4"/></svg>記錄</button>
+        <button class="tab-btn" id="tab-stats" aria-pressed="false" onclick="switchTab('stats')"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4v16h16M8 15l4-5 4 2 4-6"/></svg>統計</button>
     </div>
 
     <!-- Tab panel: 記錄 -->
@@ -991,7 +999,8 @@
                            placeholder="0" min="1" max="200" step="0.5" inputmode="decimal"><span>kg</span></div>
                 </div>
             </div>
-            <button class="submit-btn" id="submit-btn" onclick="submitToday()" style="width:100%; padding:14px 26px;">記錄</button>
+            <button class="submit-btn sb-press" id="submit-btn" onclick="submitToday()" style="width:100%; padding:14px 26px;">記錄</button>
+            <p id="gripWriteFeedback" class="sb-write-feedback" hidden></p>
             <div class="recorded-line" id="recorded-line" style="display:none">
                 <span style="color:var(--green)">✓</span> 今天已記錄
                 <button onclick="openEditModal()" style="margin-left:8px;background:none;border:none;color:var(--text2);font-size:12px;cursor:pointer;text-decoration:underline;padding:0">修改</button>
@@ -1100,17 +1109,11 @@
     </div>
 </div>
 
-<!-- Tab bar -->
-<div class="tab-bar" id="tab-bar">
-    <button class="tab-btn active" id="tab-record" onclick="switchTab('record')"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h4"/></svg>記錄</button>
-    <button class="tab-btn" id="tab-stats" onclick="switchTab('stats')"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4v16h16M8 15l4-5 4 2 4-6"/></svg>統計</button>
-</div>
-
 <div id="toast" role="status" aria-live="polite"></div>
 
 <!-- Edit Modal -->
-<div class="modal-overlay" id="edit-modal" onclick="closeEditModal(event)">
-    <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="grip-edit-title">
+<div class="modal-overlay sb-sheet-host" id="edit-modal" onclick="closeEditModal(event)">
+    <div class="modal-box sb-sheet" role="dialog" aria-modal="true" aria-labelledby="grip-edit-title">
         <div class="modal-title" id="grip-edit-title">修改紀錄</div>
         <div class="modal-sub" id="edit-modal-sub"></div>
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:14px;">
@@ -1129,12 +1132,13 @@
             <button class="modal-btn modal-btn-cancel" onclick="closeEditModal()">取消</button>
             <button class="modal-btn modal-btn-confirm" onclick="confirmEdit()">確認</button>
         </div>
+        <p id="gripEditFeedback" class="sb-write-feedback" hidden></p>
     </div>
 </div>
 
 <!-- Chart Modal -->
-<div class="chart-modal" id="chart-modal" onclick="closeChartModal(event)">
-    <div class="chart-modal-box" role="dialog" aria-modal="true" aria-labelledby="grip-chart-title">
+<div class="chart-modal sb-sheet-host" id="chart-modal" onclick="closeChartModal(event)">
+    <div class="chart-modal-box sb-sheet" role="dialog" aria-modal="true" aria-labelledby="grip-chart-title">
         <div class="chart-modal-head">
             <div class="chart-modal-title" id="grip-chart-title">握力趨勢</div>
             <button class="chart-close-btn" onclick="closeChartModal()">關閉</button>
@@ -1220,9 +1224,12 @@ function switchTab(tab) {
     document.getElementById('panel-stats').classList.toggle('active', tab === 'stats');
     document.getElementById('tab-record').classList.toggle('active', tab === 'record');
     document.getElementById('tab-stats').classList.toggle('active', tab === 'stats');
+    document.getElementById('tab-record').setAttribute('aria-pressed', String(tab === 'record'));
+    document.getElementById('tab-stats').setAttribute('aria-pressed', String(tab === 'stats'));
 }
 
 function switchUser() {
+    if (gripWritePending) return;
     if (dbListener) { db.ref(`grip/${ME}/records`).off('value', dbListener); dbListener = null; }
     records = {};
     ME = null;
@@ -1230,6 +1237,8 @@ function switchUser() {
     document.getElementById('user-select').style.display = 'flex';
     document.getElementById('app').style.display = 'none';
     document.getElementById('tab-bar').classList.remove('visible');
+    document.getElementById('grip-input-l').value = '';
+    document.getElementById('grip-input-r').value = '';
     switchTab('record');
 }
 
@@ -1402,8 +1411,8 @@ function render() {
         btn.disabled = true;
         recLine.style.display = 'flex';
     } else {
-        inputL.value = '';
-        inputR.value = '';
+        if (inputL.disabled) inputL.value = '';
+        if (inputR.disabled) inputR.value = '';
         inputL.disabled = false;
         inputR.disabled = false;
         btn.disabled = false;
@@ -1694,6 +1703,7 @@ let editingDate = null;
 function openEditModal() { openEditModalDate(todayStr()); }
 
 function openEditModalDate(date) {
+    DormUI.feedback('gripEditFeedback');
     const raw = records[date];
     let l = 0, r = 0;
     if (raw !== null && typeof raw === 'object') {
@@ -1707,16 +1717,42 @@ function openEditModalDate(date) {
     document.getElementById('edit-modal-input-l').value = l || '';
     document.getElementById('edit-modal-input-r').value = r || '';
     document.getElementById('edit-modal').classList.add('show');
+    DormUI.open(document.getElementById('edit-modal'), closeEditModal, '.modal-btn-cancel');
     document.getElementById('edit-modal-input-r').focus();
 }
 
 function closeEditModal(e) {
     if (e && e.target !== document.getElementById('edit-modal')) return;
     document.getElementById('edit-modal').classList.remove('show');
+    DormUI.finish(document.getElementById('edit-modal'));
     editingDate = null;
 }
 
+let gripWritePending = false;
+async function saveGripRecord(date, values, button, done) {
+    if (gripWritePending) return;
+    const feedbackId = button.id === 'submit-btn' ? 'gripWriteFeedback' : 'gripEditFeedback';
+    DormUI.feedback(feedbackId);
+    gripWritePending = true;
+    button.setAttribute('aria-busy', 'true');
+    button.classList.add('sb-pending');
+    const owner = ME;
+    try {
+        await db.ref(`grip/${owner}/records/${date}`).set(values);
+        if (ME === owner) done();
+    } catch {
+        sfxError();
+        if (ME === owner && button.getClientRects().length) DormUI.feedback(feedbackId, '儲存失敗，請重試');
+        showToast('儲存失敗，請重試');
+    } finally {
+        gripWritePending = false;
+        button.removeAttribute('aria-busy');
+        button.classList.remove('sb-pending');
+    }
+}
+
 function confirmEdit() {
+    if (gripWritePending) return;
     const rawL = document.getElementById('edit-modal-input-l').value;
     const rawR = document.getElementById('edit-modal-input-r').value;
     const l = parseFloat(rawL), r = parseFloat(rawR);
@@ -1728,13 +1764,17 @@ function confirmEdit() {
     const finalR = rawR ? Math.round(r * 10) / 10 : 0;
     if (finalL === 0 && finalR === 0) { showToast(' 請至少輸入一手的握力值'); return; }
     const date = editingDate || todayStr();
-    db.ref(`grip/${ME}/records/${date}`).set({ l: finalL, r: finalR })
-        .then(() => { sfxRecord(); showToast(' 紀錄已更新！'); document.getElementById('edit-modal').classList.remove('show'); editingDate = null; })
-        .catch(() => { sfxError(); showToast(' 儲存失敗，請重試'); });
+    const button = document.querySelector('#edit-modal .modal-btn-confirm');
+    return saveGripRecord(date, { l: finalL, r: finalR }, button, () => {
+        sfxRecord();
+        showToast('紀錄已更新');
+        if (editingDate === date) closeEditModal();
+    });
 }
 
 // ── Submit ────────────────────────────────────────────────────────────
 function submitToday() {
+    if (gripWritePending) return;
     const rawL = document.getElementById('grip-input-l').value;
     const rawR = document.getElementById('grip-input-r').value;
     const l = parseFloat(rawL), r = parseFloat(rawR);
@@ -1746,9 +1786,10 @@ function submitToday() {
     const finalL = rawL ? Math.round(l * 10) / 10 : 0;
     const finalR = rawR ? Math.round(r * 10) / 10 : 0;
 
-    db.ref(`grip/${ME}/records/${todayStr()}`).set({ l: finalL, r: finalR })
-        .then(() => { sfxRecord(); showToast(' 今日握力已記錄！'); })
-        .catch(() => { sfxError(); showToast(' 儲存失敗，請重試'); });
+    return saveGripRecord(todayStr(), { l: finalL, r: finalR }, document.getElementById('submit-btn'), () => {
+        sfxRecord();
+        showToast('今日握力已記錄');
+    });
 }
 
 // ── Accordion ─────────────────────────────────────────────────────────
@@ -1763,11 +1804,13 @@ function toggleRecords() {
 function openChartModal() {
     document.getElementById('chart-modal').classList.add('show');
     renderChartModal(_sortedCache);
+    DormUI.open(document.getElementById('chart-modal'), closeChartModal, '.chart-close-btn');
 }
 
 function closeChartModal(e) {
     if (e && e.target !== document.getElementById('chart-modal')) return;
     document.getElementById('chart-modal').classList.remove('show');
+    DormUI.finish(document.getElementById('chart-modal'));
     document.getElementById('chart-tt').style.display = 'none';
     _chartTtActiveDate = null;
 }

@@ -41,3 +41,38 @@ body.sb-budget { background:#141513; color:#f1eee5; }
 }
 @media (max-width:380px) { .sb-budget .hero { padding:20px; } .sb-budget .hero-value { font-size:48px; } .sb-budget .panel { padding:0 16px; } .sb-budget .form-row { gap:8px; } }
 @media (prefers-reduced-motion:reduce) { .sb-budget .progress-fill,.sb-budget .hero-value,.sb-budget .user-btn { transition:none; } }
+
+body.sb-budget { background: linear-gradient(155deg,#1f2823,#161715 56%); }
+.sb-budget .header { border-radius: 0 0 22px 22px; box-shadow: inset 0 1px #ffffff10; }
+.sb-budget .wrap { grid-template-rows: auto auto; gap: 24px; padding-top: 24px; }
+.sb-budget .user-switch { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); min-width: 238px; border-radius: 15px; }
+.sb-budget .user-switch .user-btn { justify-content: center; border-radius: 10px; }
+.sb-budget .user-switch .user-btn.active { color: #f0f6ee; background: transparent; }
+.sb-budget .hero { border-radius: 24px; padding: 26px; background: var(--sb-glass-solid); box-shadow: var(--sb-glass-shadow), inset 0 1px #ffffff19; }
+.sb-budget .hero-value { overflow-wrap: anywhere; }
+.sb-budget .stats { padding: 14px 0 0; border-top: 1px solid #ffffff1b; }
+.sb-budget .stat-val { overflow-wrap: anywhere; }
+.sb-budget .panel { border-radius: 20px; background: #272925; }
+.sb-budget .budget-management-title { margin: 20px 0 0; font-size: 17px; font-weight: 650; }
+.sb-budget .panel .panel-row { padding: 18px 0; }
+.sb-budget :is(.input,.btn) { border-radius: 13px; }
+.sb-budget .btn { transition: scale var(--sb-motion), background-color var(--sb-motion); }
+.sb-budget .btn:active:not(:disabled) { scale: .978; }
+.sb-budget #resetDialog.sb-sheet { border-radius: 22px; background: var(--sb-glass-raised); }
+@supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .sb-budget :is(.header,.hero,#resetDialog.sb-sheet) {
+        -webkit-backdrop-filter: blur(20px) saturate(122%);
+        backdrop-filter: blur(20px) saturate(122%);
+    }
+    .sb-budget :is(.header,.hero) { background: var(--sb-glass-fill); }
+}
+@media (max-width: 720px) {
+    .sb-budget .wrap { padding-top: 16px; }
+    .sb-budget .user-switch { margin-bottom: 14px; }
+    .sb-budget .hero { padding: 20px; }
+    .sb-budget .hero-value { font-size: 46px; }
+    .sb-budget .panel { margin-top: 18px; }
+}
+@media (max-width: 640px) {
+    .sb-budget #resetDialog.sb-sheet { margin: auto auto 12px; }
+}

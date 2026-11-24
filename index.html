@@ -2,7 +2,7 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>宿舍系統</title>
     <meta name="theme-color" content="#141310">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -11,7 +11,8 @@
     <link rel="apple-touch-icon" href="assets/icons/dorm-180.png">
     <link rel="stylesheet" href="push-ui.css">
     <script src="push-config.js" defer></script>
-    <script src="push-client.js" defer></script>
+    <script src="system-ui.js?v=app-1" defer></script>
+    <script src="push-client.js?v=app-1" defer></script>
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
     <style>
@@ -488,8 +489,10 @@
         }
     </style>
     <link rel="stylesheet" href="home.css">
+    <link rel="stylesheet" href="app-shell.css?v=1">
 </head>
 <body class="sb-page sb-index">
+<header data-dorm-shell="index"></header>
 <svg class="icon-sprite" aria-hidden="true">
     <symbol id="icon-home" viewBox="0 0 24 24"><path d="m3 10 9-7 9 7"/><path d="M5 9v11h14V9"/><path d="M9 20v-6h6v6"/><path d="M8.5 9.5h.01M15.5 9.5h.01"/></symbol>
     <symbol id="icon-clipboard" viewBox="0 0 24 24"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4.5V3h6v1.5M9 9h6M9 13h6M9 17h4"/></symbol>
@@ -515,7 +518,6 @@
 
     <!-- Header -->
     <header class="header">
-        <div class="identity-mark">日常，在這裡</div>
         <h1 class="header-title">宿舍系統</h1>
         <div class="header-sub">帳務、預算與日常紀錄</div>
         <div class="time-pill">
@@ -566,11 +568,11 @@
     </footer>
 
     <!-- Changelog bottom sheet -->
-    <div class="cl-overlay" id="cl-overlay">
-        <div class="cl-sheet">
+        <div class="cl-overlay sb-sheet-host" id="cl-overlay">
+        <div class="cl-sheet sb-sheet" role="dialog" aria-modal="true" aria-labelledby="cl-title">
             <div class="cl-handle"></div>
             <div class="cl-header">
-                <div class="cl-title"><svg class="icon" aria-hidden="true"><use href="#icon-clipboard"></use></svg>更新記錄</div>
+                <div class="cl-title" id="cl-title"><svg class="icon" aria-hidden="true"><use href="#icon-clipboard"></use></svg>更新記錄</div>
                 <button class="cl-close" onclick="closeChangelog()" aria-label="關閉更新記錄"><svg class="icon" aria-hidden="true"><use href="#icon-close"></use></svg></button>
             </div>
             <div class="cl-scroll" id="cl-scroll"></div>
@@ -776,14 +778,18 @@
         }
 
         function openChangelog() {
-            document.getElementById('cl-overlay').classList.add('open');
+            const overlay = document.getElementById('cl-overlay');
+            overlay.classList.add('open');
             localStorage.setItem(CL_KEY, LATEST_VER);
             document.getElementById('cl-dot').classList.remove('show');
             renderChangelog();
+            DormUI.open(overlay, closeChangelog, '.cl-close');
         }
 
         function closeChangelog() {
-            document.getElementById('cl-overlay').classList.remove('open');
+            const overlay = document.getElementById('cl-overlay');
+            overlay.classList.remove('open');
+            DormUI.finish(overlay);
         }
 
         function renderChangelog() {
