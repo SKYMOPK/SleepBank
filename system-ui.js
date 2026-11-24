@@ -63,7 +63,7 @@
     const links = pages.map(([id, label, path]) =>
         `<a href="${id}.html"${mount.dataset.dormShell === id ? ' aria-current="page"' : ''}>${icon(path)}<span>${label}</span></a>`
     ).join('');
-    mount.innerHTML = `<div class="sb-app-rail"><div class="sb-app-bar">
+    if (!mount.hasChildNodes()) mount.innerHTML = `<div class="sb-app-rail"><div class="sb-app-bar">
         <a class="sb-brand" href="index.html" aria-label="宿舍系統首頁"><img src="assets/icons/dorm-180.png" alt="" width="30" height="30"><span>宿舍系統</span></a>
         <nav class="sb-app-nav sb-desktop-nav" aria-label="宿舍導覽">${links}</nav>
         <div id="dorm-notification-tools"></div>

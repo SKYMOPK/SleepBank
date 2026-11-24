@@ -11,7 +11,7 @@
     <link rel="apple-touch-icon" href="assets/icons/dorm-180.png">
     <link rel="stylesheet" href="push-ui.css">
     <script src="push-config.js"></script>
-    <script src="system-ui.js?v=app-1" defer></script>
+    <script src="system-ui.js?v=app-2" defer></script>
     <script src="push-client.js?v=app-1" defer></script>
     <link rel="icon" href="data:,">
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
@@ -673,8 +673,27 @@
     <link rel="stylesheet" href="app-shell.css?v=1">
     <script defer src="split-experience.js?v=20261103-1"></script>
 </head>
-<body class="sb-page sb-split" data-theme="default">
-<header data-dorm-shell="split"></header>
+<body class="sb-page sb-split sb-app-ready" data-theme="default">
+<header data-dorm-shell="split">
+    <div class="sb-app-rail"><div class="sb-app-bar">
+        <a class="sb-brand" href="index.html" aria-label="宿舍系統首頁"><img src="assets/icons/dorm-180.png" alt="" width="30" height="30"><span>宿舍系統</span></a>
+        <nav class="sb-app-nav sb-desktop-nav" aria-label="宿舍導覽">
+            <a href="index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5M5 9v11h14V9M10 20v-6h4v6"/></svg><span>首頁</span></a>
+            <a href="split.html" aria-current="page"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4h13v16H6zM9.5 8h6M9.5 12h6M9.5 16h4M4 8h3m-3 4h3m-3 4h3"/></svg><span>帳本</span></a>
+            <a href="budget.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 8H6a2 2 0 0 1 0-4h12a2 2 0 0 1 2 2v2Zm0 0h1v11H6a2 2 0 0 1-2-2V6m17 5h-5a2.5 2.5 0 1 0 0 5h5m-5-2.5h.01"/></svg><span>預算</span></a>
+            <a href="grip.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 7v10M3 9v6m15-8v10m3-8v6M6 12h12"/></svg><span>握力</span></a>
+            <a href="food.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5a7 7 0 1 0 0 14 7 7 0 0 0 0-14Zm0 3a4 4 0 1 0 0 8 4 4 0 0 0 0-8ZM2 5v4l1 1v9m1-14v4l-1 1m19-5-1 4v3h1m0-7v14"/></svg><span>餐廳</span></a>
+        </nav>
+        <div id="dorm-notification-tools"></div>
+    </div></div>
+    <nav class="sb-app-nav sb-mobile-nav" aria-label="宿舍導覽">
+        <a href="index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5M5 9v11h14V9M10 20v-6h4v6"/></svg><span>首頁</span></a>
+        <a href="split.html" aria-current="page"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4h13v16H6zM9.5 8h6M9.5 12h6M9.5 16h4M4 8h3m-3 4h3m-3 4h3"/></svg><span>帳本</span></a>
+        <a href="budget.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 8H6a2 2 0 0 1 0-4h12a2 2 0 0 1 2 2v2Zm0 0h1v11H6a2 2 0 0 1-2-2V6m17 5h-5a2.5 2.5 0 1 0 0 5h5m-5-2.5h.01"/></svg><span>預算</span></a>
+        <a href="grip.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 7v10M3 9v6m15-8v10m3-8v6M6 12h12"/></svg><span>握力</span></a>
+        <a href="food.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5a7 7 0 1 0 0 14 7 7 0 0 0 0-14Zm0 3a4 4 0 1 0 0 8 4 4 0 0 0 0-8ZM2 5v4l1 1v9m1-14v4l-1 1m19-5-1 4v3h1m0-7v14"/></svg><span>餐廳</span></a>
+    </nav>
+</header>
 
 <svg aria-hidden="true" focusable="false" width="0" height="0" style="position:absolute;overflow:hidden">
     <symbol id="icon-ledger" viewBox="0 0 24 24"><path d="M7 3h10a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z"/><path d="M9 7h6M9 11h6M9 15h4"/></symbol>
